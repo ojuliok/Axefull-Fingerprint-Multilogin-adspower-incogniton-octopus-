@@ -1,0 +1,1322 @@
+.googleContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    background: #0f0f13; /* Dark mode background like Google Calendar */
+    color: #e2e8f0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    overflow: hidden;
+}
+
+.googleHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 8px 16px;
+    border-bottom: 1px solid #27272a;
+    background: #0f0f13;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hamburgerBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.hamburgerBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.logoTitle {
+    font-size: 20px;
+    font-weight: 500;
+    color: #e4e4e7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logoIcon {
+    width: 32px;
+    height: 32px;
+    background: #8b5cf6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.headerMiddle {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.todayBtn {
+    background: transparent;
+    border: 1px solid #3f3f46;
+    color: #e4e4e7;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.todayBtn:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.navArrows {
+    display: flex;
+    gap: 4px;
+}
+
+.navArrowBtn {
+    background: transparent;
+    border: none;
+    color: #e4e4e7;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.navArrowBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.currentDateTitle {
+    font-size: 20px;
+    font-weight: 400;
+    color: #e4e4e7;
+    min-width: 150px;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.iconBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.iconBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.viewSelector {
+    background: transparent;
+    border: 1px solid #3f3f46;
+    color: #e4e4e7;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    outline: none;
+}
+
+.viewSelector:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.googleBody {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.googleSidebar {
+    width: 256px;
+    min-width: 256px;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px 48px 12px; /* Increased bottom padding to allow scrolling past pomodoro */
+    overflow-y: auto;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.googleSidebar.collapsed {
+    margin-left: -256px;
+}
+
+.createBtnContainer {
+    padding-bottom: 24px;
+    padding-left: 8px;
+}
+
+.createBtn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    border-radius: 24px;
+    padding: 10px 16px 10px 10px;
+    color: #e4e4e7;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+
+.createBtn:hover {
+    background: #27272a;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.createBtnIcon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.miniCalendar {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    padding: 16px 12px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+}
+
+.miniCalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #e4e4e7;
+    text-transform: capitalize;
+}
+
+.miniCalGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+    font-size: 11px;
+}
+
+.miniCalDayHeader {
+    font-weight: 600;
+    color: #a1a1aa;
+    padding: 4px 0;
+}
+
+.miniCalDayCell {
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin: auto;
+    transition: all 0.2s;
+    color: #e4e4e7;
+    font-size: 11px;
+}
+
+.miniCalDayCell:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.miniCalDayCell.outside {
+    color: #52525b;
+}
+
+.miniCalDayCell.today {
+    background: #8b5cf6;
+    color: white;
+    font-weight: 600;
+}
+
+.miniCalDayCell.selected {
+    border: 1.5px dashed #c084fc;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.createBtnInline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #8b5cf6;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.createBtnInline:hover {
+    background: #7c3aed;
+}
+
+.createBtnInline:active {
+    transform: scale(0.98);
+}
+
+
+.calendarsSection {
+    margin-top: 16px;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #a1a1aa;
+    cursor: pointer;
+}
+
+.sectionTitle:hover {
+    color: #e4e4e7;
+}
+
+.spaceItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #e4e4e7;
+    font-size: 13px;
+    position: relative;
+}
+
+.spaceItem:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.spaceItemLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.spaceItemLeft span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spaceOptionsBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    padding: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spaceItem:hover .spaceOptionsBtn {
+    opacity: 1;
+}
+
+.spaceOptionsBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e4e4e7;
+}
+
+.spaceCheckbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid;
+}
+
+.googleMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #14141c;
+    border-top-left-radius: 16px;
+    box-shadow: -1px 0 10px rgba(0,0,0,0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+.tasksListContainer {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tasksListHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #27272a;
+    margin-bottom: 16px;
+}
+
+.allTasksComplete {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #a1a1aa;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.allTasksComplete img {
+    width: 180px;
+    opacity: 0.8;
+    margin-bottom: 24px;
+}
+
+/* Context Menus */
+.contextMenu {
+    position: fixed;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 4px;
+    padding: 4px 0;
+    min-width: 160px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+}
+
+.contextMenuItem {
+    padding: 8px 16px;
+    color: #e4e4e7;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.contextMenuItem:hover { background: rgba(255,255,255,0.06); }
+.contextMenuItem.danger { color: #ef4444; }
+
+.contextMenuDivider {
+    height: 1px;
+    background: #3f3f46;
+    margin: 4px 0;
+}
+
+/* Task Item in List Mode */
+.taskListItem {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #27272a;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.taskListItem:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.taskListItemContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-left: 16px;
+}
+
+.taskListItemTitle {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.subtaskProgressBarWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.subtaskProgressText {
+    font-size: 11px;
+    color: #a1a1aa;
+    font-weight: 500;
+}
+
+.subtaskProgressTrack {
+    flex: 1;
+    max-width: 150px;
+    height: 4px;
+    background: #3f3f46;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.subtaskProgressFill {
+    height: 100%;
+    background: #10b981;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.taskQuickActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-right: 16px;
+}
+
+.taskListItem:hover .taskQuickActions {
+    opacity: 1;
+}
+
+.quickActionBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quickActionBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e4e4e7;
+}
+
+.taskListItemTitle.done {
+    text-decoration: line-through;
+    color: #71717a;
+}
+
+/* Pomodoro Sidebar Styles */
+.pomodoroSidebarSection {
+    margin-top: 24px;
+    margin-bottom: 24px; /* Added bottom margin to allow scrolling completely past the Pomodoro */
+    padding: 16px 12px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pomodoroSidebarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e4e4e7;
+}
+
+.pomodoroSidebarTimer {
+    font-size: 32px;
+    font-weight: 700;
+    color: #8b5cf6;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+}
+
+.pomodoroSidebarModes {
+    display: flex;
+    gap: 6px;
+}
+
+.pomodoroSidebarModeBtn {
+    flex: 1;
+    font-size: 11px;
+    padding: 6px 4px;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 6px;
+    color: #e4e4e7;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.pomodoroSidebarModeBtn:hover {
+    background: #3f3f46;
+}
+
+.pomodoroSidebarModeBtn.active {
+    background: rgba(139, 92, 246, 0.15);
+    color: #c084fc;
+    border-color: #8b5cf6;
+}
+
+.pomodoroSidebarControls {
+    display: flex;
+    gap: 8px;
+}
+
+.pomodoroSidebarControlBtn {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.pomodoroSidebarControlBtn.play {
+    background: #10b981;
+    color: white;
+}
+
+.pomodoroSidebarControlBtn.play:hover {
+    background: #059669;
+}
+
+.pomodoroSidebarControlBtn.pause {
+    background: #ef4444;
+    color: white;
+}
+
+.pomodoroSidebarControlBtn.pause:hover {
+    background: #dc2626;
+}
+
+.pomodoroSidebarControlBtn.reset {
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    color: #e4e4e7;
+}
+
+.pomodoroSidebarControlBtn.reset:hover {
+    background: #3f3f46;
+}
+
+/* ── Kanban Tabs and Subheaders ── */
+.kanbanSubHeader {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 24px 8px 24px;
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.breadcrumb {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.breadcrumbActive {
+    color: var(--text-secondary);
+}
+
+.kanbanProjectHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.kanbanProjectTitle {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.editProjectHeaderBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.editProjectHeaderBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e4e4e7;
+}
+
+.kanbanTabs {
+    display: flex;
+    gap: 8px;
+}
+
+.kanbanTab {
+    background: transparent;
+    border: 1px solid transparent !important;
+    border-bottom: none !important;
+    border-radius: 6px 6px 0 0 !important;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px !important;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    height: auto !important;
+}
+
+.kanbanTab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.kanbanTabActive {
+    color: var(--brand-primary-light) !important;
+    background: var(--bg-secondary) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 2px solid var(--brand-primary) !important;
+    font-weight: 600;
+}
+
+.dueTasksContainer {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dueTasksTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+/* Todoist Redesign Sleek Header */
+.todoistHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: #09090b;
+}
+
+.todoistHeaderTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f4f4f5;
+    letter-spacing: -0.01em;
+}
+
+.searchWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 240px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0 10px;
+    transition: all 0.2s ease;
+}
+
+.searchWrapper:focus-within {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+    width: 280px;
+}
+
+.searchIcon {
+    color: #a1a1aa;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .todoistHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+        height: auto;
+        gap: 12px;
+    }
+    .searchWrapper {
+        width: 100%;
+    }
+    .searchWrapper:focus-within {
+        width: 100%;
+    }
+    .kanbanTabs {
+        overflow-x: auto;
+        padding-bottom: 4px;
+        width: 100%;
+    }
+    .kanbanTabs::-webkit-scrollbar {
+        height: 2px;
+    }
+}
+
+.searchInput {
+    background: transparent;
+    border: none;
+    color: #f4f4f5;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    padding: 6px 0;
+}
+
+.searchInput::placeholder {
+    color: #71717a;
+}
+
+/* Empty State / Center Glow Button */
+.emptyTasksWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 48px auto auto auto; /* Centered horizontally, pushed to top center */
+    padding: 24px 20px;
+    max-width: 480px;
+    text-align: center;
+}
+
+.centerGlowBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #7c3aed;
+    color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.centerGlowBtn:hover {
+    background: #8b5cf6;
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
+    transform: translateY(-1px);
+}
+
+.centerGlowBtn:active {
+    transform: translateY(0);
+}
+
+/* Inline Creation Card */
+.inlineCreationCard {
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 600px;
+    margin: 8px auto;
+}
+
+.inlineInputTitle {
+    background: transparent;
+    border: none;
+    color: #f4f4f5;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+}
+
+.inlineInputTitle::placeholder {
+    color: #71717a;
+}
+
+.inlineCardActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+}
+
+.inlineInputDate {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color: #e4e4e7;
+    font-size: 12px;
+    padding: 4px 8px;
+    outline: none;
+    cursor: pointer;
+}
+
+.inlineInputDate::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.inlineCancelBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.inlineCancelBtn:hover {
+    color: #f4f4f5;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.inlineAddBtn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.inlineAddBtn:hover:not(:disabled) {
+    background: #8b5cf6;
+}
+
+.inlineAddBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Tasks list elements & Checkbox adjustments */
+.tasksListWrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 12px 24px;
+}
+
+.checkboxCircle {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.taskListItem:hover .checkboxCircle {
+    color: #a78bfa;
+    transform: scale(1.1);
+}
+
+.taskListDateBadge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #a78bfa;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 12px;
+}
+
+/* Completed Tasks Section */
+.completedSectionWrapper {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 20px;
+}
+
+.completedHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #71717a;
+    cursor: pointer;
+    user-select: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    width: fit-content;
+    transition: all 0.2s;
+}
+
+.completedHeader:hover {
+    color: #a1a1aa;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.collapseChevron {
+    transition: transform 0.2s ease;
+}
+
+.collapseChevron.expanded {
+    transform: rotate(90deg);
+}
+
+.completedList {
+    margin-top: 8px;
+    opacity: 0.8;
+}
+
+.checkboxChecked {
+    color: #10b981;
+    transition: transform 0.2s ease;
+}
+
+.taskListItem:hover .checkboxChecked {
+    transform: scale(1.1);
+}
+
+/* Calendar Date Navigation and Mode Toggle */
+.calendarNav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.calendarDateTitle {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e4e4e7;
+    text-transform: capitalize;
+    min-width: 180px;
+    text-align: center;
+}
+
+.viewToggle {
+    display: flex;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.toggleBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggleBtn:hover {
+    color: #e4e4e7;
+}
+
+.toggleActive {
+    background: rgba(139, 92, 246, 0.15);
+    color: #c084fc;
+    font-weight: 600;
+}
+
+/* Prompt Modal Styles */
+.promptOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(9, 9, 11, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.promptContent {
+    background: rgba(20, 20, 28, 0.85);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    width: 380px;
+    max-width: 90vw;
+    padding: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(139, 92, 246, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: scaleUp 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.promptTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f4f4f5;
+    margin: 0;
+}
+
+.promptForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.promptInput {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #f4f4f5;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.promptInput:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.promptActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.promptCancelBtn {
+    background: transparent;
+    border: 1px solid #27272a;
+    color: #a1a1aa;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.promptCancelBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f4f4f5;
+}
+
+.promptSubmitBtn {
+    background: #8b5cf6;
+    border: none;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.25);
+}
+
+.promptSubmitBtn:hover:not(:disabled) {
+    background: #7c3aed;
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+}
+
+.promptSubmitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .todoistHeader {
+        padding: 8px 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+        height: auto;
+    }
+
+    .todoistHeaderTitle {
+        font-size: 16px;
+    }
+
+    .headerRight {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .searchWrapper {
+        width: 100%;
+        max-width: none;
+    }
+
+    .googleSidebar {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        background: #14141c;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    }
+
+    .sidebarOverlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(2px);
+        z-index: 90;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .googleMain {
+        border-top-left-radius: 0;
+    }
+
+    .tasksListContainer {
+        padding: 16px 12px;
+    }
+
+    /* Subheader horizontal scrolling */
+    .tasksListHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .spaceHeaderTitleWrapper {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .spaceTabs {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        gap: 16px;
+    }
+
+    .spaceTabs::-webkit-scrollbar {
+        height: 2px;
+    }
+    .spaceTabs::-webkit-scrollbar-thumb {
+        background: #3f3f46;
+    }
+
+    .calendarNav {
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .viewToggle {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .calendarDateTitle {
+        font-size: 13px;
+        min-width: 140px;
+    }
+}

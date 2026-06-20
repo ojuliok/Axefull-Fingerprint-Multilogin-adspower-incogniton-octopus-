@@ -1,0 +1,1868 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Axe VAULT BROWSER — Design System
+   ============================================ */
+
+/* ---- CSS Variables ---- */
+:root {
+  /* Brand Colors */
+  --brand-primary: #8B5CF6;
+  --brand-primary-light: #A78BFA;
+  --brand-primary-dark: #6D28D9;
+  --brand-secondary: #3B82F6;
+  --brand-secondary-light: #60A5FA;
+  --brand-accent: #EC4899;
+  --brand-accent-light: #F472B6;
+
+  /* Semantic Colors */
+  --success: #10B981;
+  --success-light: rgba(16, 185, 129, 0.15);
+  --warning: #F59E0B;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --danger: #EF4444;
+  --danger-light: rgba(239, 68, 68, 0.15);
+  --info: #3B82F6;
+  --info-light: rgba(59, 130, 246, 0.15);
+
+  /* Dark Theme */
+  --bg-primary: #09090B;
+  --bg-secondary: #0F0F14;
+  --bg-tertiary: #18181F;
+  --bg-card: #141419;
+  --bg-card-hover: #1C1C24;
+  --bg-elevated: #20202A;
+  --bg-input: #0F0F14;
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Surface with glassmorphism */
+  --glass-bg: rgba(20, 20, 25, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* Text */
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-disabled: #475569;
+  --text-inverse: #0F172A;
+
+  /* Borders */
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --border-focus: rgba(139, 92, 246, 0.5);
+  --border-error: var(--danger);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.25);
+  --shadow-glow-sm: 0 0 12px rgba(139, 92, 246, 0.15);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Sidebar */
+  --sidebar-width: 250px;
+  --sidebar-collapsed: 72px;
+  --header-height: 64px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-index */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background gradient */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 15% 10%, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 90%, rgba(59, 130, 246, 0.04) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+a { color: var(--brand-secondary-light); text-decoration: none; }
+a:hover { color: var(--brand-primary); }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+  outline: none;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+/* ---- Animations ---- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(108, 92, 231, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(108, 92, 231, 0.5); }
+}
+
+/* ---- Utility Classes ---- */
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-fade-in-scale { animation: fadeInScale 0.3s ease-out forwards; }
+.animate-slide-left { animation: slideInLeft 0.3s ease-out forwards; }
+.animate-slide-right { animation: slideInRight 0.3s ease-out forwards; }
+
+/* Glass card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--brand-primary-light), var(--brand-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ==========================================================================
+   AXE VAULT — PREMIUM GLOBAL BUTTON SYSTEM & OVERRIDES
+   ========================================================================== */
+
+/* 1. Base Reset & Animations for ALL Buttons */
+button,
+.btn,
+[class*="btn-"],
+[class*="Btn-"],
+[class$="btn"],
+[class$="Btn"],
+[class*="button"],
+[class*="Button"] {
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s ease;
+}
+
+/* Hover effect: Subtle elevation & scale, premium glow */
+button:not(:disabled):hover,
+.btn:not(:disabled):hover,
+[class*="btn-"]:not(:disabled):hover,
+[class*="Btn-"]:not(:disabled):hover,
+[class$="btn"]:not(:disabled):hover,
+[class$="Btn"]:not(:disabled):hover,
+[class*="button"]:not(:disabled):hover,
+[class*="Button"]:not(:disabled):hover {
+  transform: translateY(-1.5px) scale(1.02);
+}
+
+/* Active click effect: Tactile push down and scale reduction */
+button:not(:disabled):active,
+.btn:not(:disabled):active,
+[class*="btn-"]:not(:disabled):active,
+[class*="Btn-"]:not(:disabled):active,
+[class$="btn"]:not(:disabled):active,
+[class$="Btn"]:not(:disabled):active,
+[class*="button"]:not(:disabled):active,
+[class*="Button"]:not(:disabled):active {
+  transform: translateY(1px) scale(0.96) !important;
+}
+
+/* Disabled state reset */
+button:disabled,
+.btn:disabled,
+[class*="Btn"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 2. Sizing & Rectangular Shape Standardization for Action/Standard Buttons */
+.btn,
+[class*="primaryBtn"],
+[class*="secondaryBtn"],
+[class*="saveBtn"],
+[class*="cancelBtn"],
+[class*="testAllBtn"],
+[class*="workspaceActionBtn"],
+[class*="previewActionBtn"],
+[class*="repositionBtn"],
+[class*="presetBtn"],
+[class*="lightboxDownloadBtn"],
+[class*="browserPlayBtn"],
+[class*="addPropertyBtn"],
+[class*="deletePropBtn"],
+[class*="newCanvasBtn"],
+[class*="pomodoroBtn"],
+[class*="bulkStartBtn"],
+[class*="bulkDeleteBtn"],
+[class*="bulkActionBtn"],
+[class*="bulkCancelBtn"],
+[class*="bulkStopBtn"],
+[class*="trashRestoreAllBtn"],
+[class*="trashEmptyBtn"],
+[class*="pickerSaveBtn"],
+[class*="tagAddBtn"],
+[class*="notesSaveBtn"],
+.commentInputWrapper button,
+.addSubtaskWrapper button {
+  font-size: 13px !important; /* Standardize font size */
+  font-weight: 600 !important;
+  border-radius: 6px !important; /* Sleek rectangular shape: minor style */
+  padding: 6px 14px !important; /* Compact, balanced padding */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
+
+/* 3. Style variations override for standard buttons to maintain design guidelines */
+
+/* PRIMARY BUTTONS: Sleek gradient with premium violet glow */
+.btn-primary,
+[class*="primaryBtn"],
+[class*="saveBtn"],
+[class*="repositionBtnSave"],
+[class*="pickerSaveBtn"],
+[class*="notesSaveBtn"],
+[class*="bulkStartBtn"],
+[class*="trashRestoreAllBtn"],
+.commentInputWrapper button {
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark)) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
+}
+
+.btn-primary:not(:disabled):hover,
+[class*="primaryBtn"]:not(:disabled):hover,
+[class*="saveBtn"]:not(:disabled):hover,
+[class*="repositionBtnSave"]:not(:disabled):hover,
+[class*="pickerSaveBtn"]:not(:disabled):hover,
+[class*="notesSaveBtn"]:not(:disabled):hover,
+[class*="bulkStartBtn"]:not(:disabled):hover,
+[class*="trashRestoreAllBtn"]:not(:disabled):hover,
+.commentInputWrapper button:not(:disabled):hover {
+  background: linear-gradient(135deg, var(--brand-primary-light), var(--brand-primary)) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35), 0 0 0 1px rgba(139, 92, 246, 0.2) !important;
+}
+
+/* SECONDARY BUTTONS: Dark transparent backdrop, subtle outline */
+.btn-secondary,
+[class*="secondaryBtn"],
+[class*="cancelBtn"],
+[class*="repositionBtnCancel"],
+[class*="bulkCancelBtn"],
+[class*="bulkActionBtn"],
+.addSubtaskWrapper button {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-default) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn-secondary:not(:disabled):hover,
+[class*="secondaryBtn"]:not(:disabled):hover,
+[class*="cancelBtn"]:not(:disabled):hover,
+[class*="repositionBtnCancel"]:not(:disabled):hover,
+[class*="bulkCancelBtn"]:not(:disabled):hover,
+[class*="bulkActionBtn"]:not(:disabled):hover,
+.addSubtaskWrapper button:not(:disabled):hover {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--border-hover) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* DANGER BUTTONS: Crimson gradient with red glow shadow */
+.btn-danger,
+[class*="btn-danger"],
+[class*="dangerBtn"],
+[class*="deleteBtn"],
+[class*="trashEmptyBtn"],
+[class*="bulkDeleteBtn"],
+[class*="deletePropBtn"] {
+  background: linear-gradient(135deg, var(--danger), #c0392b) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15) !important;
+}
+
+.btn-danger:not(:disabled):hover,
+[class*="btn-danger"]:not(:disabled):hover,
+[class*="dangerBtn"]:not(:disabled):hover,
+[class*="deleteBtn"]:not(:disabled):hover,
+[class*="trashEmptyBtn"]:not(:disabled):hover,
+[class*="bulkDeleteBtn"]:not(:disabled):hover,
+[class*="deletePropBtn"]:not(:disabled):hover {
+  background: linear-gradient(135deg, #ff6b6b, var(--danger)) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* ACCENT / INFO / THEMED BUTTONS */
+[class*="testAllBtn"],
+[class*="newCanvasBtn"] {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border: 1px solid rgba(139, 92, 246, 0.25) !important;
+  color: var(--brand-primary-light) !important;
+}
+
+[class*="testAllBtn"]:not(:disabled):hover,
+[class*="newCanvasBtn"]:not(:disabled):hover {
+  background: rgba(139, 92, 246, 0.16) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.btn-sm { padding: 4px 10px !important; font-size: 11px !important; border-radius: 4px !important; height: auto !important; }
+.btn-lg { padding: 10px 20px !important; font-size: 15px !important; border-radius: 8px !important; height: auto !important; }
+.btn-icon { padding: 6px !important; border-radius: 6px !important; width: auto !important; height: auto !important; }
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-warning { background: var(--warning-light); color: var(--warning); }
+.badge-danger { background: var(--danger-light); color: var(--danger); }
+.badge-info { background: var(--info-light); color: var(--info); }
+.badge-primary { background: rgba(108, 92, 231, 0.15); color: var(--brand-primary-light); }
+
+/* Tag */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+/* Score bar */
+.score-bar {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+}
+.score-high { background: linear-gradient(90deg, var(--success), #55efc4); }
+.score-medium { background: linear-gradient(90deg, var(--warning), #ffeaa7); }
+.score-low { background: linear-gradient(90deg, var(--danger), #fab1a0); }
+
+/* Stat card */
+.stat-card {
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  transition: all var(--transition-normal);
+}
+.stat-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Input group */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.input-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Status dot */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-active { background: var(--success); box-shadow: 0 0 6px var(--success); }
+.status-paused { background: var(--warning); }
+.status-archived { background: var(--text-tertiary); }
+.status-blocked { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+.status-offline { background: var(--text-disabled); }
+
+/* Avatar */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: white;
+  flex-shrink: 0;
+}
+.avatar-sm { width: 32px; height: 32px; font-size: 0.75rem; }
+.avatar-lg { width: 56px; height: 56px; font-size: 1.25rem; }
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+.empty-state svg { margin-bottom: var(--space-md); opacity: 0.4; }
+.empty-state h3 { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-card-hover) 50%, var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+.modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  max-width: 560px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-toast);
+  animation: slideInRight 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+}
+
+/* Page Transitions */
+.page-content {
+  animation: fadeIn 0.3s ease-out;
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+    --header-height: 56px;
+  }
+}
+
+/* ============================================
+   LIGHT MODE — [data-theme="light"]
+   ============================================ */
+
+[data-theme="light"] {
+  --bg-primary:    #f8fafc;
+  --bg-secondary:  #f1f5f9;
+  --bg-tertiary:   #e8edf4;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-elevated:   #ffffff;
+  --bg-input:      #f1f5f9;
+  --bg-overlay:    rgba(15, 23, 42, 0.5);
+
+  --glass-bg:     rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.07);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary:  #64748b;
+  --text-disabled:  #94a3b8;
+
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-hover:   rgba(0, 0, 0, 0.18);
+  --border-focus:   rgba(124, 58, 237, 0.5);
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+  --shadow-lg: 0 10px 24px rgba(0,0,0,0.14);
+  --shadow-xl: 0 20px 48px rgba(0,0,0,0.18);
+  --shadow-glow:    0 0 24px rgba(124, 58, 237, 0.18);
+  --shadow-glow-sm: 0 0 12px rgba(124, 58, 237, 0.12);
+}
+
+[data-theme="light"] body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(139,92,246,0.04) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.03) 0%, transparent 40%);
+}
+
+/* Scrollbar light */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+}
+
+/* Main layout surfaces */
+[data-theme="light"] main {
+  background: #f8fafc;
+}
+
+/* Dashboard content area & General Pages */
+[data-theme="light"] .bg-\[\#09090b\],
+[data-theme="light"] .bg-dark-950,
+[data-theme="light"] .bg-\[\#0f172a\],
+[data-theme="light"] [class*="page"],
+[data-theme="light"] [class*="body"],
+[data-theme="light"] [class*="rightPanel"],
+[data-theme="light"] [class*="leftPanel"],
+[data-theme="light"] [class*="historyPanel"],
+[data-theme="light"] [class*="metaSection"] {
+  background-color: transparent !important;
+}
+
+/* Headers & Titles overrides for light mode */
+[data-theme="light"] [class*="title"],
+[data-theme="light"] [class*="appTitle"],
+[data-theme="light"] [class*="detailFileName"],
+[data-theme="light"] [class*="historyName"] {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="subtitle"],
+[data-theme="light"] [class*="appSubtitle"],
+[data-theme="light"] [class*="detailFileMeta"],
+[data-theme="light"] [class*="historyMeta"],
+[data-theme="light"] [class*="emptyState"],
+[data-theme="light"] [class*="emptyTitle"],
+[data-theme="light"] [class*="emptySub"] {
+  color: #64748b !important;
+}
+
+/* Tailwind direct dark classes used in BulkVideoPage */
+[data-theme="light"] .text-slate-100,
+[data-theme="light"] .text-slate-200 { color: #0f172a !important; }
+[data-theme="light"] .text-slate-300,
+[data-theme="light"] .text-slate-400 { color: #475569 !important; }
+
+[data-theme="light"] .bg-slate-900,
+[data-theme="light"] .bg-slate-900\/30,
+[data-theme="light"] .bg-slate-900\/40,
+[data-theme="light"] .bg-slate-900\/50,
+[data-theme="light"] .bg-slate-900\/80 {
+  background-color: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+[data-theme="light"] .bg-slate-950,
+[data-theme="light"] .bg-slate-950\/90 {
+  background-color: #f8fafc !important;
+}
+
+
+/* Profile cards in light mode */
+[data-theme="light"] [class*="profileCard"] {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.07) !important;
+}
+
+[data-theme="light"] [class*="profileCard"]:hover {
+  background: #f8fafc !important;
+  border-color: rgba(124,58,237,0.25) !important;
+}
+
+[data-theme="light"] [class*="profileName"] {
+  color: #0f172a !important;
+}
+
+[class*="cardActive"][data-theme="light"],
+[data-theme="light"] [class*="cardActive"] {
+  background: rgba(124,58,237,0.06) !important;
+  border-color: rgba(124,58,237,0.3) !important;
+}
+
+/* Toolbar */
+[data-theme="light"] [class*="toolbar"] {
+  background: rgba(255,255,255,0.9) !important;
+  border-bottom-color: rgba(0,0,0,0.06) !important;
+}
+
+/* Sidebar (inner dashboard sidebar) */
+[data-theme="light"] [class*="sidebar"]:not(aside) {
+  background: rgba(0,0,0,0.015) !important;
+  border-right-color: rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] [class*="sidebarItem"] {
+  color: #475569 !important;
+}
+[data-theme="light"] [class*="sidebarItemActive"] {
+  background: rgba(124,58,237,0.08) !important;
+  color: #0f172a !important;
+}
+
+/* Context menus / dropdowns */
+[data-theme="light"] [class*="contextMenu"],
+[data-theme="light"] [class*="dropdown"] {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14) !important;
+}
+
+[data-theme="light"] [class*="contextMenu"] button,
+[data-theme="light"] [class*="dropdown"] button,
+[data-theme="light"] [class*="menuItem"],
+[data-theme="light"] [class*="menuItemWithSub"] {
+  color: #334155 !important;
+}
+
+[data-theme="light"] [class*="contextMenu"] button:hover,
+[data-theme="light"] [class*="dropdown"] button:hover,
+[data-theme="light"] [class*="menuItem"]:hover {
+  background: rgba(0,0,0,0.04) !important;
+  color: #0f172a !important;
+}
+
+/* Stats bar */
+[data-theme="light"] [class*="statsBar"] {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] [class*="statChip"] {
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] [class*="statValue"] { color: #0f172a !important; }
+[data-theme="light"] [class*="statLabel"] { color: #64748b !important; }
+
+/* Bulk action bar */
+[data-theme="light"] [class*="bulkActionBar"] {
+  background: #1e1b2e !important;
+}
+
+/* Modals */
+[data-theme="light"] [class*="modal"]:not([class*="overlay"]) {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+[data-theme="light"] [class*="overlay"] {
+  background: rgba(15,23,42,0.5) !important;
+}
+
+[data-theme="light"] [class*="header"] {
+  border-bottom-color: rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] [class*="footer"] {
+  border-top-color: rgba(0,0,0,0.06) !important;
+  background: rgba(0,0,0,0.01) !important;
+}
+
+[data-theme="light"] [class*="tabs"] {
+  background: rgba(0,0,0,0.01) !important;
+  border-bottom-color: rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] [class*="tab"]:not([class*="tabActive"]) {
+  color: #64748b !important;
+}
+
+[data-theme="light"] [class*="tabActive"] {
+  color: #0f172a !important;
+}
+
+/* Form fields inside modals */
+[data-theme="light"] [class*="inputField"],
+[data-theme="light"] [class*="tagInput"],
+[data-theme="light"] [class*="noteTitleInput"] {
+  background: #f1f5f9 !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="inputField"]:focus,
+[data-theme="light"] [class*="tagInput"]:focus {
+  border-color: rgba(124,58,237,0.45) !important;
+  background: #ffffff !important;
+}
+
+[data-theme="light"] [class*="fingerprintCard"],
+[data-theme="light"] [class*="noteItem"],
+[data-theme="light"] [class*="tagsContainer"],
+[data-theme="light"] [class*="toggleWrapper"] {
+  background: rgba(0,0,0,0.025) !important;
+  border-color: rgba(0,0,0,0.07) !important;
+}
+
+[data-theme="light"] [class*="fingerprintCard"] p { color: #334155 !important; }
+[data-theme="light"] [class*="fingerprintCard"] span { color: #64748b !important; }
+
+/* Notes section on cards */
+[data-theme="light"] [class*="notesSection"] {
+  background: rgba(0,0,0,0.025) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] [class*="notesContent"] { color: #475569 !important; }
+
+/* Status pill */
+[data-theme="light"] [class*="statusPill"] {
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+}
+[data-theme="light"] [class*="statusText"] { color: #64748b !important; }
+
+/* Folder/category badges */
+[data-theme="light"] [class*="folderBadge"] {
+  background: rgba(124,58,237,0.08) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] [class*="categoryBadge"] {
+  background: rgba(0,0,0,0.05) !important;
+  color: #475569 !important;
+}
+
+/* Tags */
+[data-theme="light"] [class*="tag"]:not([class*="tagChip"]):not([class*="tagInput"]):not([class*="tagAdd"]):not([class*="tagsList"]):not([class*="tagsContainer"]) {
+  background: rgba(0,0,0,0.04) !important;
+  color: #64748b !important;
+  border-color: rgba(0,0,0,0.06) !important;
+}
+
+/* Trash banner */
+[data-theme="light"] [class*="trashBanner"] {
+  background: rgba(239,68,68,0.05) !important;
+  border-color: rgba(239,68,68,0.15) !important;
+}
+
+/* ProxiesPage & SettingsPage */
+[data-theme="light"] [class*="tableRow"] {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.07) !important;
+}
+[data-theme="light"] [class*="tableRow"]:hover {
+  background: #f8fafc !important;
+}
+[data-theme="light"] [class*="tableHead"] { color: #64748b !important; }
+[data-theme="light"] [class*="host"],
+[data-theme="light"] [class*="profileName"] { color: #334155 !important; }
+[data-theme="light"] [class*="port"] { color: #94a3b8 !important; }
+
+[data-theme="light"] [class*="card"] {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.07) !important;
+}
+
+[data-theme="light"] [class*="navItem"]:not([class*="navItemActive"]) { color: #64748b !important; }
+[data-theme="light"] [class*="navItemActive"] {
+  background: rgba(124,58,237,0.08) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="settingLabel"] { color: #1e293b !important; }
+[data-theme="light"] [class*="settingHint"]  { color: #64748b !important; }
+[data-theme="light"] [class*="sectionTitle"] { color: #0f172a !important; }
+[data-theme="light"] [class*="sectionDesc"]  { color: #64748b !important; }
+[data-theme="light"] [class*="aboutValue"]   { color: #334155 !important; }
+[data-theme="light"] [class*="accountEmail"] { color: #0f172a !important; }
+[data-theme="light"] [class*="planName"]     { color: #0f172a !important; }
+[data-theme="light"] [class*="planDetail"]   { color: #64748b !important; }
+
+[data-theme="light"] [class*="editModal"] {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+/* Input inside proxy edit modal (light) */
+[data-theme="light"] [class*="editField"] input,
+[data-theme="light"] [class*="editField"] select {
+  background: #f1f5f9 !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #0f172a !important;
+}
+
+/* Extensions & Automation modals */
+[data-theme="light"] [class*="ExtensionsModal"],
+[data-theme="light"] [class*="AutomationModal"] {
+  background: #ffffff !important;
+}
+
+/* DadosClean */
+[data-theme="light"] [class*="dropZone"] {
+  background: #f8fafc !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+
+/* Icon buttons in toolbars */
+[data-theme="light"] [class*="iconBtn"] {
+  color: #475569 !important;
+}
+[data-theme="light"] [class*="iconBtn"]:hover {
+  color: #0f172a !important;
+  background: rgba(0,0,0,0.05) !important;
+}
+
+/* Select elements */
+[data-theme="light"] select option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+/* ── Mini Sidebar (light mode) ──────────────────────────────────────────── */
+[data-theme="light"] [class*="miniItem"] {
+  color: #64748b !important;
+}
+
+[data-theme="light"] [class*="miniItem"]:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="miniItemActive"] {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] [class*="miniItemActive"]:hover {
+  background: rgba(124, 58, 237, 0.16) !important;
+  color: #6d28d9 !important;
+}
+
+[data-theme="light"] [class*="miniItemDanger"] {
+  color: #dc2626 !important;
+}
+
+[data-theme="light"] [class*="miniItemDanger"]:hover {
+  background: rgba(220, 38, 38, 0.08) !important;
+}
+
+[data-theme="light"] [class*="miniItemDangerActive"] {
+  background: rgba(220, 38, 38, 0.1) !important;
+  color: #dc2626 !important;
+}
+
+[data-theme="light"] [class*="miniExpandBtn"] {
+  color: #64748b !important;
+}
+
+[data-theme="light"] [class*="miniExpandBtn"]:hover {
+  background: rgba(124, 58, 237, 0.08) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] [class*="miniSectionLabel"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="miniDivider"] {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="miniTooltipFixed"] {
+  background: rgba(15, 23, 42, 0.95) !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Sidebar light mode */
+[data-theme="light"] [class*="sidebar"]:not([class*="sidebarClosed"]) {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-right-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+/* ── Toolbar action buttons text (light mode) ───────────────────────────── */
+[data-theme="light"] [class*="toolbar"] .text-slate-300,
+[data-theme="light"] [class*="toolbar"] .text-slate-200 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] [class*="toolbar"] .bg-white\/5,
+[data-theme="light"] [class*="toolbar"] .bg-white\/10 {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] [class*="toolbar"] .border-white\/5,
+[data-theme="light"] [class*="toolbar"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+/* View mode toggle icons */
+[data-theme="light"] [class*="toolbar"] .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* ── Search input text ───────────────────────────────────────────────────── */
+[data-theme="light"] [class*="toolbarSearchInput"] {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="searchContainer"] {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="searchExpanded"] {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(124, 58, 237, 0.35) !important;
+}
+
+/* ── Folder / rename inputs ──────────────────────────────────────────────── */
+[data-theme="light"] [class*="folderInput"],
+[data-theme="light"] [class*="renameInput"] {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="folderInputWrapper"] {
+  background: rgba(124, 58, 237, 0.06) !important;
+  border-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+/* ── Profile card "Iniciar" button text ─────────────────────────────────── */
+[data-theme="light"] [class*="cardActions"] .text-slate-200,
+[data-theme="light"] [class*="cardListActions"] .text-slate-200 {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] [class*="cardActions"] .bg-white\/5,
+[data-theme="light"] [class*="cardListActions"] .bg-white\/5 {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] [class*="cardActions"] .border-white\/10,
+[data-theme="light"] [class*="cardListActions"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ============================================
+   CANVAS — Light Mode
+   ============================================ */
+
+/* Page container */
+[data-theme="light"] [class*="pageContainer"] {
+  background: #f8fafc !important;
+}
+
+/* Submenu sidebar */
+[data-theme="light"] [class*="submenu"]:not([class*="submenuCollapsed"]) {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-right-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+[data-theme="light"] [class*="submenuTitle"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="submenuToggle"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="submenuToggle"]:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #64748b !important;
+}
+
+[data-theme="light"] [class*="newCanvasBtn"] {
+  background: rgba(124, 58, 237, 0.05) !important;
+  border-color: rgba(124, 58, 237, 0.2) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] [class*="newCanvasBtn"]:hover {
+  background: rgba(124, 58, 237, 0.1) !important;
+  border-color: rgba(124, 58, 237, 0.35) !important;
+}
+
+/* Canvas list items */
+[data-theme="light"] [class*="canvasItem"]:not([class*="canvasItemAction"]):not([class*="canvasItemIcon"]):not([class*="canvasItemName"]):not([class*="canvasItemDate"]):not([class*="canvasItemActions"]):hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] [class*="canvasItem"].active,
+[data-theme="light"] [class*="canvasItem"][class*="active"] {
+  background: rgba(124, 58, 237, 0.08) !important;
+}
+
+[data-theme="light"] [class*="canvasItemName"] {
+  color: #475569 !important;
+}
+
+[data-theme="light"] [class*="canvasItem"].active [class*="canvasItemName"],
+[data-theme="light"] [class*="canvasItem"][class*="active"] [class*="canvasItemName"] {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="canvasItemIcon"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="canvasItem"].active [class*="canvasItemIcon"],
+[data-theme="light"] [class*="canvasItem"][class*="active"] [class*="canvasItemIcon"] {
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] [class*="canvasItemDate"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="canvasItemAction"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="canvasItemAction"]:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: #475569 !important;
+}
+
+/* Rename input */
+[data-theme="light"] [class*="renameInput"] {
+  color: #0f172a !important;
+  background: rgba(124, 58, 237, 0.06) !important;
+  border-color: rgba(124, 58, 237, 0.3) !important;
+}
+
+/* Footer */
+[data-theme="light"] [class*="submenuFooter"] {
+  border-top-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] [class*="canvasCount"] {
+  color: #94a3b8 !important;
+}
+
+/* Canvas area background */
+[data-theme="light"] [class*="canvasContainer"] {
+  background-color: #f0f1f5 !important;
+}
+
+[data-theme="light"] [class*="dotGrid"] {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px) !important;
+}
+
+/* Canvas nodes in light mode */
+[data-theme="light"] [class*="nodeCard"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="nodeCard"]:hover {
+  border-color: rgba(0, 0, 0, 0.18) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] [class*="nodeCard"][class*="selected"] {
+  border-color: rgba(124, 58, 237, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15), 0 4px 18px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] [class*="textContent"] {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] [class*="textContent"]::placeholder {
+  color: rgba(100, 116, 139, 0.5) !important;
+}
+
+[data-theme="light"] [class*="documentName"] {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] [class*="documentType"] {
+  color: #94a3b8 !important;
+}
+
+/* Toolbars in light mode */
+[data-theme="light"] [class*="nodeToolbar"],
+[data-theme="light"] [class*="floatingToolbar"],
+[data-theme="light"] [class*="zoomControls"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] [class*="nodeToolbar"] button,
+[data-theme="light"] [class*="floatingToolbar"] button,
+[data-theme="light"] [class*="zoomControls"] button {
+  color: #64748b !important;
+}
+
+[data-theme="light"] [class*="nodeToolbar"] button:hover,
+[data-theme="light"] [class*="zoomControls"] button:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: #1e293b !important;
+}
+
+[data-theme="light"] [class*="floatingToolbar"] button:hover {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] [class*="zoomLevel"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="toolbarDivider"] {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Expand button */
+[data-theme="light"] [class*="expandBtn"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #64748b !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] [class*="expandBtn"]:hover {
+  background: rgba(124, 58, 237, 0.08) !important;
+  color: #7c3aed !important;
+  border-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+/* Empty state */
+[data-theme="light"] [class*="emptyState"] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] [class*="emptyState"] h3 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] [class*="emptyStateIcon"] {
+  background: rgba(124, 58, 237, 0.08) !important;
+  color: #7c3aed !important;
+}
+
+/* Context menu */
+[data-theme="light"] [class*="contextMenu"]:not([class*="contextMenuItem"]):not([class*="contextMenuDivider"]) {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14) !important;
+}
+
+[data-theme="light"] [class*="contextMenuItem"] {
+  color: #475569 !important;
+}
+
+[data-theme="light"] [class*="contextMenuItem"]:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="contextMenuDivider"] {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Drop overlay */
+[data-theme="light"] [class*="dropOverlay"] {
+  background: rgba(124, 58, 237, 0.04) !important;
+  border-color: rgba(124, 58, 237, 0.3) !important;
+}
+
+[data-theme="light"] [class*="dropOverlay"] p {
+  color: #7c3aed !important;
+}
+
+/* ── Free Text Node (light mode) ── */
+[data-theme="light"] [class*="freeTextNode"]:hover {
+  outline-color: rgba(124, 58, 237, 0.15) !important;
+}
+
+[data-theme="light"] [class*="freeTextNode"][class*="selected"] {
+  outline-color: rgba(124, 58, 237, 0.4) !important;
+}
+
+[data-theme="light"] [class*="freeTextContent"] {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] [class*="freeTextContent"]:empty::before {
+  color: rgba(100, 116, 139, 0.4) !important;
+}
+
+/* ── Format Bar (light mode) ── */
+[data-theme="light"] [class*="formatBar"] {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] [class*="formatBtn"] {
+  color: #64748b !important;
+}
+
+[data-theme="light"] [class*="formatBtn"]:hover {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #7c3aed !important;
+}
+
+[data-theme="light"] [class*="formatDivider"] {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="textColorLabel"] {
+  color: #94a3b8 !important;
+}
+
+/* ── Right-Click Context Menu (light mode) ── */
+[data-theme="light"] [class*="canvasContextMenu"] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14) !important;
+}
+
+[data-theme="light"] [class*="ctxMenuItem"] {
+  color: #475569 !important;
+}
+
+[data-theme="light"] [class*="ctxMenuItem"]:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] [class*="ctxMenuDivider"] {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ============================================
+   CUSTOM THEMES — DEFINITIONS
+   ============================================ */
+
+/* ── 1. Retro Vintage Theme ── */
+[data-theme="retro-vintage"] {
+  --brand-primary: #DFA05D;
+  --brand-primary-light: #F6D3A8;
+  --brand-primary-dark: #AC7337;
+  --brand-secondary: #658761;
+  --brand-secondary-light: #8CA988;
+  --brand-accent: #AC5045;
+  --brand-accent-light: #C97970;
+
+  --success: #658761;
+  --success-light: rgba(101, 135, 97, 0.15);
+  --warning: #DFA05D;
+  --warning-light: rgba(223, 160, 93, 0.15);
+  --danger: #AC5045;
+  --danger-light: rgba(172, 80, 69, 0.15);
+
+  --bg-primary: #12100E;
+  --bg-secondary: #1C1916;
+  --bg-tertiary: #27231E;
+  --bg-card: #1C1916;
+  --bg-card-hover: #27231E;
+  --bg-elevated: #332F28;
+  --bg-input: #1C1916;
+  --bg-overlay: rgba(18, 16, 14, 0.8);
+
+  --glass-bg: rgba(28, 25, 22, 0.8);
+  --glass-border: rgba(223, 160, 93, 0.15);
+
+  --text-primary: #E7E5E4;
+  --text-secondary: #A8A29E;
+  --text-tertiary: #78716C;
+  --text-disabled: #57534E;
+  --text-inverse: #1C1916;
+
+  --border-default: rgba(223, 160, 93, 0.25);
+  --border-hover: rgba(223, 160, 93, 0.45);
+  --border-focus: rgba(223, 160, 93, 0.85);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+/* ── 2. Cyber Retro Theme ── */
+[data-theme="cyber-retro"] {
+  --brand-primary: #4b607f;
+  --brand-primary-light: #7186A6;
+  --brand-primary-dark: #2C3A50;
+  --brand-secondary: #e8d8c9;
+  --brand-secondary-light: #F4E8DE;
+  --brand-accent: #f3701e;
+  --brand-accent-light: #FA9A5E;
+
+  --success: #3DA0AB;
+  --success-light: rgba(61, 160, 171, 0.15);
+  --warning: #f3701e;
+  --warning-light: rgba(243, 112, 30, 0.15);
+  --danger: #AC5045;
+  --danger-light: rgba(172, 80, 69, 0.15);
+
+  --bg-primary: #15181C;
+  --bg-secondary: #1D2128;
+  --bg-tertiary: #272C35;
+  --bg-card: #1D2128;
+  --bg-card-hover: #272C35;
+  --bg-elevated: #323A46;
+  --bg-input: #15181C;
+  --bg-overlay: rgba(21, 24, 28, 0.8);
+
+  --glass-bg: rgba(29, 33, 40, 0.85);
+  --glass-border: rgba(75, 96, 127, 0.3);
+
+  --text-primary: #e8d8c9;
+  --text-secondary: #BCAE9F;
+  --text-tertiary: #8F8274;
+  --text-disabled: #61574D;
+  --text-inverse: #15181C;
+
+  --border-default: rgba(75, 96, 127, 0.3);
+  --border-hover: rgba(75, 96, 127, 0.5);
+  --border-focus: rgba(243, 112, 30, 0.85);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+/* ── 3. Luxury Supreme Theme ── */
+[data-theme="luxury-supreme"] {
+  --brand-primary: #a67d43;
+  --brand-primary-light: #C29F6C;
+  --brand-primary-dark: #7B5C2C;
+  --brand-secondary: #ad0013;
+  --brand-secondary-light: #D53F50;
+  --brand-accent: #a67d43;
+  --brand-accent-light: #C29F6C;
+
+  --success: #10B981;
+  --success-light: rgba(16, 185, 129, 0.15);
+  --warning: #a67d43;
+  --warning-light: rgba(166, 125, 67, 0.15);
+  --danger: #ad0013;
+  --danger-light: rgba(173, 0, 19, 0.15);
+
+  --bg-primary: #0A0A0A;
+  --bg-secondary: #121312;
+  --bg-tertiary: #1C1D1C;
+  --bg-card: #121312;
+  --bg-card-hover: #1C1D1C;
+  --bg-elevated: #282928;
+  --bg-input: #0A0A0A;
+  --bg-overlay: rgba(10, 10, 10, 0.9);
+
+  --glass-bg: rgba(18, 19, 18, 0.9);
+  --glass-border: rgba(166, 125, 67, 0.2);
+
+  --text-primary: #E2E8F0;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-disabled: #475569;
+  --text-inverse: #0A0A0A;
+
+  --border-default: rgba(166, 125, 67, 0.2);
+  --border-hover: rgba(166, 125, 67, 0.45);
+  --border-focus: rgba(166, 125, 67, 0.85);
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 10px;
+}
+
+/* ── 4. Cool Tech Theme ── */
+[data-theme="cool-tech"] {
+  --brand-primary: #00FF43;
+  --brand-primary-light: #66FF8E;
+  --brand-primary-dark: #009928;
+  --brand-secondary: #484C51;
+  --brand-secondary-light: #6D7278;
+  --brand-accent: #00FF43;
+  --brand-accent-light: #66FF8E;
+
+  --success: #00FF43;
+  --success-light: rgba(0, 255, 67, 0.15);
+  --warning: #F59E0B;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --danger: #EF4444;
+  --danger-light: rgba(239, 68, 68, 0.15);
+
+  --bg-primary: #08090A;
+  --bg-secondary: #0E0F10;
+  --bg-tertiary: #16181A;
+  --bg-card: #0E0F10;
+  --bg-card-hover: #16181A;
+  --bg-elevated: #222528;
+  --bg-input: #08090A;
+  --bg-overlay: rgba(8, 9, 10, 0.85);
+
+  --glass-bg: rgba(14, 15, 16, 0.85);
+  --glass-border: rgba(0, 255, 67, 0.15);
+
+  --text-primary: #C2C4C8;
+  --text-secondary: #8E9196;
+  --text-tertiary: #5E6165;
+  --text-disabled: #3F4144;
+  --text-inverse: #08090A;
+
+  --border-default: rgba(72, 76, 81, 0.45);
+  --border-hover: rgba(0, 255, 67, 0.5);
+  --border-focus: rgba(0, 255, 67, 0.9);
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+/* ── 5. Pool Vibe Theme ── */
+[data-theme="pool-vibe"] {
+  --brand-primary: #3DA0AB;
+  --brand-primary-light: #63BFC9;
+  --brand-primary-dark: #266E76;
+  --brand-secondary: #DD664E;
+  --brand-secondary-light: #E98976;
+  --brand-accent: #DD664E;
+  --brand-accent-light: #E98976;
+
+  --success: #3DA0AB;
+  --success-light: rgba(61, 160, 171, 0.15);
+  --warning: #F2E8D1;
+  --warning-light: rgba(242, 232, 209, 0.15);
+  --danger: #DD664E;
+  --danger-light: rgba(221, 102, 78, 0.15);
+
+  --bg-primary: #EBF2F3;
+  --bg-secondary: #D7E5E7;
+  --bg-tertiary: #C2D8DB;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F2F7F8;
+  --bg-elevated: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --bg-overlay: rgba(22, 44, 48, 0.5);
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(61, 160, 171, 0.2);
+
+  --text-primary: #1A3033;
+  --text-secondary: #3B5A5F;
+  --text-tertiary: #678388;
+  --text-disabled: #92ABB0;
+  --text-inverse: #FFFFFF;
+
+  --border-default: rgba(61, 160, 171, 0.2);
+  --border-hover: rgba(61, 160, 171, 0.45);
+  --border-focus: rgba(61, 160, 171, 0.8);
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 36px;
+}
+
+/* ============================================
+   GLOBAL BODY & COMPONENT MATCHES FOR THEMES
+   ============================================ */
+
+[data-theme="retro-vintage"] body,
+[data-theme="cyber-retro"] body,
+[data-theme="luxury-supreme"] body,
+[data-theme="cool-tech"] body,
+[data-theme="pool-vibe"] body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="retro-vintage"] body::before,
+[data-theme="cyber-retro"] body::before,
+[data-theme="luxury-supreme"] body::before,
+[data-theme="cool-tech"] body::before,
+[data-theme="pool-vibe"] body::before {
+  display: none !important;
+}
+
+[data-theme="retro-vintage"] main,
+[data-theme="cyber-retro"] main,
+[data-theme="luxury-supreme"] main,
+[data-theme="cool-tech"] main,
+[data-theme="pool-vibe"] main {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-default) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Card overrides */
+[data-theme="retro-vintage"] [class*="card"],
+[data-theme="cyber-retro"] [class*="card"],
+[data-theme="luxury-supreme"] [class*="card"],
+[data-theme="cool-tech"] [class*="card"],
+[data-theme="pool-vibe"] [class*="card"] {
+  background: var(--bg-card) !important;
+  border-color: var(--border-default) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+/* Text overrides */
+[data-theme="retro-vintage"] .text-slate-100,
+[data-theme="retro-vintage"] .text-slate-200,
+[data-theme="cyber-retro"] .text-slate-100,
+[data-theme="cyber-retro"] .text-slate-200,
+[data-theme="luxury-supreme"] .text-slate-100,
+[data-theme="luxury-supreme"] .text-slate-200,
+[data-theme="cool-tech"] .text-slate-100,
+[data-theme="cool-tech"] .text-slate-200,
+[data-theme="pool-vibe"] .text-slate-100,
+[data-theme="pool-vibe"] .text-slate-200 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="retro-vintage"] .text-slate-300,
+[data-theme="retro-vintage"] .text-slate-400,
+[data-theme="cyber-retro"] .text-slate-300,
+[data-theme="cyber-retro"] .text-slate-400,
+[data-theme="luxury-supreme"] .text-slate-300,
+[data-theme="luxury-supreme"] .text-slate-400,
+[data-theme="cool-tech"] .text-slate-300,
+[data-theme="cool-tech"] .text-slate-400,
+[data-theme="pool-vibe"] .text-slate-300,
+[data-theme="pool-vibe"] .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+/* Background overrides */
+[data-theme="retro-vintage"] .bg-slate-900,
+[data-theme="cyber-retro"] .bg-slate-900,
+[data-theme="luxury-supreme"] .bg-slate-900,
+[data-theme="cool-tech"] .bg-slate-900,
+[data-theme="pool-vibe"] .bg-slate-900 {
+  background-color: var(--bg-card) !important;
+}
+
+[data-theme="retro-vintage"] .bg-slate-950,
+[data-theme="cyber-retro"] .bg-slate-950,
+[data-theme="luxury-supreme"] .bg-slate-950,
+[data-theme="cool-tech"] .bg-slate-950,
+[data-theme="pool-vibe"] .bg-slate-950 {
+  background-color: var(--bg-primary) !important;
+}
+
+/* Additional specific overrides */
+[data-theme="retro-vintage"] [class*="navItemActive"],
+[data-theme="cyber-retro"] [class*="navItemActive"],
+[data-theme="luxury-supreme"] [class*="navItemActive"],
+[data-theme="cool-tech"] [class*="navItemActive"],
+[data-theme="pool-vibe"] [class*="navItemActive"] {
+  background: var(--brand-primary-light) !important;
+  color: var(--text-inverse) !important;
+}
+
+[data-theme="retro-vintage"] [class*="navItemActive"] svg,
+[data-theme="cyber-retro"] [class*="navItemActive"] svg,
+[data-theme="luxury-supreme"] [class*="navItemActive"] svg,
+[data-theme="cool-tech"] [class*="navItemActive"] svg,
+[data-theme="pool-vibe"] [class*="navItemActive"] svg {
+  color: var(--text-inverse) !important;
+}
+
+/* ============================================
+   BUTTON STYLES OVERRIDES
+   ============================================ */
+
+/* ── 1. Retro Striped Button Style ── */
+[data-button-style="retro-striped"] .btn-primary,
+[data-button-style="retro-striped"] [class*="upgradeBtn"],
+[data-button-style="retro-striped"] [class*="inviteBtn"],
+[data-button-style="retro-striped"] [class*="teamCreateBtn"],
+[data-button-style="retro-striped"] button[class*="btn-primary"],
+[data-button-style="retro-striped"] button[class*="primaryBtn"] {
+  background: repeating-linear-gradient(45deg, #4f46e5, #4f46e5 10px, #4338ca 10px, #4338ca 20px) !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.6) !important;
+  transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+[data-button-style="retro-striped"] .btn-primary:hover,
+[data-button-style="retro-striped"] [class*="upgradeBtn"]:hover,
+[data-button-style="retro-striped"] button[class*="btn-primary"]:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-button-style="retro-striped"] .btn-primary:active,
+[data-button-style="retro-striped"] [class*="upgradeBtn"]:active,
+[data-button-style="retro-striped"] button[class*="btn-primary"]:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── 2. Gold Gradient Capsule Button Style ── */
+[data-button-style="gold-gradient"] .btn-primary,
+[data-button-style="gold-gradient"] [class*="upgradeBtn"],
+[data-button-style="gold-gradient"] [class*="inviteBtn"],
+[data-button-style="gold-gradient"] [class*="teamCreateBtn"],
+[data-button-style="gold-gradient"] button[class*="btn-primary"],
+[data-button-style="gold-gradient"] button[class*="primaryBtn"] {
+  background: linear-gradient(to bottom, #f6d3a8 0%, #d5a26a 50%, #a67d43 100%) !important;
+  border: 1px solid #c29f6c !important;
+  border-radius: 9999px !important;
+  color: #1e1201 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 10px rgba(166, 125, 67, 0.25) !important;
+  text-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-button-style="gold-gradient"] .btn-primary:hover,
+[data-button-style="gold-gradient"] [class*="upgradeBtn"]:hover,
+[data-button-style="gold-gradient"] button[class*="btn-primary"]:hover {
+  background: linear-gradient(to bottom, #fae2c6 0%, #dfb37c 50%, #b88d4d 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 14px rgba(166, 125, 67, 0.35) !important;
+}
+
+/* ── 3. Cyber Neon Outline Button Style ── */
+[data-button-style="cyber-neon"] .btn-primary,
+[data-button-style="cyber-neon"] [class*="upgradeBtn"],
+[data-button-style="cyber-neon"] [class*="inviteBtn"],
+[data-button-style="cyber-neon"] [class*="teamCreateBtn"],
+[data-button-style="cyber-neon"] button[class*="btn-primary"],
+[data-button-style="cyber-neon"] button[class*="primaryBtn"] {
+  background: rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid #00FF43 !important;
+  border-radius: 2px !important;
+  color: #00FF43 !important;
+  box-shadow: 0 0 8px rgba(0, 255, 67, 0.3), inset 0 0 4px rgba(0, 255, 67, 0.15) !important;
+  text-shadow: 0 0 3px rgba(0, 255, 67, 0.5) !important;
+  outline: 3px double rgba(0, 255, 67, 0.15) !important;
+  outline-offset: -3px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.15s ease !important;
+}
+
+[data-button-style="cyber-neon"] .btn-primary:hover,
+[data-button-style="cyber-neon"] [class*="upgradeBtn"]:hover,
+[data-button-style="cyber-neon"] button[class*="btn-primary"]:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 67, 0.55), inset 0 0 8px rgba(0, 255, 67, 0.3) !important;
+  text-shadow: 0 0 5px rgba(0, 255, 67, 0.8) !important;
+  color: #ffffff !important;
+}
+
+/* ── 4. Glossy Glass Capsule Button Style ── */
+[data-button-style="glossy-pill"] .btn-primary,
+[data-button-style="glossy-pill"] [class*="upgradeBtn"],
+[data-button-style="glossy-pill"] [class*="inviteBtn"],
+[data-button-style="glossy-pill"] [class*="teamCreateBtn"],
+[data-button-style="glossy-pill"] button[class*="btn-primary"],
+[data-button-style="glossy-pill"] button[class*="primaryBtn"] {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 50%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.15) 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  border-radius: 9999px !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4) !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-button-style="glossy-pill"] .btn-primary:hover,
+[data-button-style="glossy-pill"] [class*="upgradeBtn"]:hover,
+[data-button-style="glossy-pill"] button[class*="btn-primary"]:hover {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── 5. Glowing Glass Card Button Style ── */
+[data-button-style="glass-card"] .btn-primary,
+[data-button-style="glass-card"] [class*="upgradeBtn"],
+[data-button-style="glass-card"] [class*="inviteBtn"],
+[data-button-style="glass-card"] [class*="teamCreateBtn"],
+[data-button-style="glass-card"] button[class*="btn-primary"],
+[data-button-style="glass-card"] button[class*="primaryBtn"] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 8px rgba(255, 255, 255, 0.1) !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-button-style="glass-card"] .btn-primary:hover,
+[data-button-style="glass-card"] [class*="upgradeBtn"]:hover,
+[data-button-style="glass-card"] button[class*="btn-primary"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+
+

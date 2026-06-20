@@ -1,0 +1,206 @@
+.datePickerContainer {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.datePickerTrigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 36px;
+    user-select: none;
+    position: relative;
+}
+
+.datePickerTrigger:hover {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.05);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
+}
+
+.calendarIcon {
+    color: #a1a1aa;
+    flex-shrink: 0;
+}
+
+.dateText {
+    color: #f4f4f5;
+    font-weight: 500;
+}
+
+.placeholderText {
+    color: #71717a;
+}
+
+.clearBtn {
+    background: transparent;
+    border: none;
+    color: #71717a;
+    padding: 2px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    transition: all 0.15s;
+}
+
+.clearBtn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+/* Calendar Dropdown Card */
+.calendarDropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 2000;
+    width: 280px;
+    background: rgba(18, 18, 26, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calendarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.monthTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e4e4e7;
+    text-transform: capitalize;
+}
+
+.navBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #a1a1aa;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.navBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f4f4f5;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.weekdaysGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #71717a;
+    padding-bottom: 4px;
+}
+
+.daysGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.dayCell {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: auto;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dayCell:hover {
+    background: rgba(139, 92, 246, 0.15);
+    color: #c084fc;
+}
+
+.outsideDay {
+    color: #3f3f46;
+}
+
+.outsideDay:hover {
+    color: #a78bfa;
+}
+
+.todayDay {
+    border: 1px solid #8b5cf6;
+    color: #c084fc;
+    font-weight: 600;
+}
+
+.selectedDay {
+    background: #8b5cf6 !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.5);
+}
+
+.calendarFooter {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+.footerBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.footerBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #c084fc;
+}

@@ -1,0 +1,183 @@
+import React from 'react';
+import { Plus, Trash2, FolderOpen, Maximize2, Minimize2, X } from 'lucide-react';
+import { CanvasInfo } from '../canvasStorage';
+import { DynamicIcon } from '../CanvasIcons';
+import styles from '../CanvasHome.module.css';
+
+interface CanvasPreviewModalProps {
+  previewCanvas: CanvasInfo;
+  previewLayout: 'center' | 'side';
+  setActivePreviewId: (id: string | null) => void;
+  setPreviewLayout: (layout: 'center' | 'side' | ((prev: 'center' | 'side') => 'center' | 'side')) => void;
+  openEmojiPicker: (e: React.MouseEvent, id: string) => void;
+  onRenameCanvas: (id: string, name: string) => void;
+  onUpdateCanvasInfo: (id: string, updates: Partial<CanvasInfo>) => void;
+  onSelectCanvas: (id: string) => void;
+  handleAddProperty: () => void;
+  handleUpdatePropertyKey: (oldKey: string, newKey: string) => void;
+  handleUpdatePropertyValue: (key: string, value: string) => void;
+  handleDeleteProperty: (key: string) => void;
+  handleUpdateNotes: (notes: string) => void;
+}
+
+export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
+  previewCanvas,
+  previewLayout,
+  setActivePreviewId,
+  setPreviewLayout,
+  openEmojiPicker,
+  onRenameCanvas,
+  onUpdateCanvasInfo,
+  onSelectCanvas,
+  handleAddProperty,
+  handleUpdatePropertyKey,
+  handleUpdatePropertyValue,
+  handleDeleteProperty,
+  handleUpdateNotes,
+}) => {
+  const properties = previewCanvas.properties || {};
+  const notes = previewCanvas.notes || '';
+  const icon = previewCanvas.icon || '📋';
+
+  return (
+    <div className={`${styles.previewModalContainer} ${previewLayout === 'side' ? styles.previewLayoutSide : styles.previewLayoutCenter}`}>
+      <div className={styles.previewBackdrop} onClick={() => setActivePreviewId(null)} />
+      <div className={styles.previewPanel}>
+        {/* Header */}
+        <div className={styles.previewHeader}>
+          <div className={styles.previewTitleArea}>
+            <span className={styles.previewEmoji} onClick={(e) => openEmojiPicker(e, previewCanvas.id)}>
+              <DynamicIcon name={icon} size={22} />
+            </span>
+            <input
+              className={styles.previewTitleInput}
+              value={previewCanvas.name}
+              onChange={(e) => onRenameCanvas(previewCanvas.id, e.target.value)}
+              placeholder="Sem nome"
+            />
+          </div>
+          
+          <div className={styles.previewActions}>
+            <button 
+              className={styles.previewActionBtnPrimary}
+              onClick={() => {
+                onSelectCanvas(previewCanvas.id);
+                setActivePreviewId(null);
+              }}
+              title="Abrir tela cheia"
+            >
+              <FolderOpen size={14} />
+              <span>Abrir Editor</span>
+            </button>
+
+            <button
+              className={styles.previewActionBtn}
+              onClick={() => setPreviewLayout(prev => prev === 'center' ? 'side' : 'center')}
+              title={previewLayout === 'center' ? 'Lateralizar painel' : 'Centralizar painel'}
+            >
+              {previewLayout === 'center' ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
+            </button>
+
+            <button
+              className={styles.previewCloseBtn}
+              onClick={() => setActivePreviewId(null)}
+              title="Fechar"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.previewBody}>
+          {/* Description */}
+          <div className={styles.previewSection}>
+            <div className={styles.sectionTitle}>Descrição</div>
+            <textarea
+              className={styles.previewDescTextarea}
+              value={previewCanvas.description || ''}
+              onChange={(e) => onUpdateCanvasInfo(previewCanvas.id, { description: e.target.value })}
+              placeholder="Adicionar descrição..."
+              rows={2}
+            />
+          </div>
+
+          {/* Properties Table */}
+          <div className={styles.previewSection}>
+            <div className={styles.sectionHeaderRow}>
+              <div className={styles.sectionTitle}>Propriedades</div>
+              <button className={styles.addPropertyBtn} onClick={handleAddProperty}>
+                <Plus size={12} />
+                <span>Adicionar propriedade</span>
+              </button>
+            </div>
+
+            <div className={styles.propertiesTableContainer}>
+              {Object.keys(properties).length === 0 ? (
+                <div className={styles.propertiesEmptyState} onClick={handleAddProperty}>
+                  Clique para adicionar metadados e propriedades personalizadas.
+                </div>
+              ) : (
+                <table className={styles.propertiesTable}>
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Valor</th>
+                      <th style={{ width: '40px' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(properties).map(([key, val]) => (
+                      <tr key={key}>
+                        <td className={styles.propKeyCell}>
+                          <input
+                            className={styles.propKeyInput}
+                            defaultValue={key}
+                            onBlur={(e) => handleUpdatePropertyKey(key, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            placeholder="Nome da propriedade"
+                          />
+                        </td>
+                        <td className={styles.propValCell}>
+                          <input
+                            className={styles.propValInput}
+                            value={val}
+                            onChange={(e) => handleUpdatePropertyValue(key, e.target.value)}
+                            placeholder="Valor"
+                          />
+                        </td>
+                        <td className={styles.propActionCell}>
+                          <button
+                            className={styles.deletePropBtn}
+                            onClick={() => handleDeleteProperty(key)}
+                            title="Remover propriedade"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* Notes Section */}
+          <div className={styles.previewSection} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div className={styles.sectionTitle}>Notas / Registro de Informações</div>
+            <textarea
+              className={styles.previewNotesTextarea}
+              value={notes}
+              onChange={(e) => handleUpdateNotes(e.target.value)}
+              placeholder="Escreva anotações, atas de reunião, links importantes..."
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

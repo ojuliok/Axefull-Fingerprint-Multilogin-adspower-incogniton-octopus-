@@ -1,0 +1,107 @@
+{
+  "name": "axefull-fingerprint",
+  "version": "1.0.0",
+  "private": true,
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node"
+  },
+  "description": "Monorepo Root for W3 MultiLogin",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "dev": "npm run copy-scripts && concurrently \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:renderer\"",
+    "dev:main": "tsc -p tsconfig.main.json --watch",
+    "dev:preload": "tsc -p tsconfig.preload.json --watch",
+    "dev:renderer": "vite",
+    "copy-scripts": "npx mkdirp dist/main/fingerprint/inject-scripts && npx copyfiles -f src/main/fingerprint/inject-scripts/*.js dist/main/fingerprint/inject-scripts && npx mkdirp dist/main/ai && npx copyfiles -f src/main/ai/*.py dist/main/ai",
+    "build": "npm run build:main && npm run copy-scripts && npm run build:preload && npm run build:renderer",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build:preload": "tsc -p tsconfig.preload.json",
+    "build:renderer": "vite build",
+    "start": "electron .",
+    "electron:dev": "cross-env NODE_ENV=development electron .",
+    "start:dev": "npm run build:main && npm run build:preload && concurrently \"npm run dev:main\" \"npm run dev:preload\" \"cross-env NODE_ENV=development npx electron .\" \"npm run dev:renderer\"",
+    "package": "electron-builder",
+    "dist": "npm run build && electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
+    "@supabase/supabase-js": "^2.107.0",
+    "adm-zip": "^0.5.17",
+    "date-fns": "^4.4.0",
+    "firebase": "^12.12.1",
+    "fluent-ffmpeg": "^2.1.3",
+    "jsonwebtoken": "^9.0.3",
+    "keytar": "^7.9.0",
+    "lucide-react": "^0.344.0",
+    "playwright": "^1.41.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sql.js": "^1.10.0",
+    "uuid": "^9.0.0",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@types/sql.js": "^1.4.9",
+    "@types/uuid": "^9.0.7",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "concurrently": "^8.2.2",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^10.1.0",
+    "electron": "^28.1.3",
+    "electron-builder": "^24.9.1",
+    "mkdirp": "^3.0.1",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.9.3",
+    "vite": "^5.0.12"
+  },
+  "build": {
+    "appId": "com.fingerprint.browser",
+    "productName": "Axe Agent",
+    "protocols": {
+      "name": "axeagent",
+      "schemes": [
+        "axeagent"
+      ]
+    },
+    "directories": {
+      "output": "C:/Users/FAGNER/fingerprint-release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "**/node_modules/@ffmpeg-installer/**",
+      "**/node_modules/@ffprobe-installer/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "certificateFile": "certs/self_signed.pfx",
+      "certificatePassword": "axefull123"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "include": "installer.nsh"
+    }
+  }
+}

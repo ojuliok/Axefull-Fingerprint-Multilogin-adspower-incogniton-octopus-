@@ -1,0 +1,419 @@
+.modalOverlay {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    pointer-events: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modalContent {
+    background: rgba(20, 20, 28, 0.85);
+    backdrop-filter: blur(24px);
+    width: 460px;
+    max-width: 95vw;
+    height: 650px;
+    max-height: 85vh;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(139, 92, 246, 0.1);
+    pointer-events: auto;
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalHeader {
+    padding: 20px 24px;
+    border-bottom: 1px solid #27272a;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.titleInput {
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid transparent;
+    color: #f4f4f5;
+    font-size: 22px;
+    font-weight: 700;
+    width: 100%;
+    outline: none;
+    margin-bottom: 0px;
+    padding: 4px 0;
+    transition: all 0.2s ease;
+}
+
+.titleInput:focus {
+    border-bottom-color: #8b5cf6;
+}
+
+.headerActions {
+    display: flex;
+    gap: 8px;
+}
+
+.iconBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.iconBtn:hover {
+    background: #27272a;
+    color: #e2e8f0;
+}
+
+.metaRow {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #a1a1aa;
+}
+
+.select {
+    background: #18181b;
+    border: 1px solid #27272a;
+    color: #f4f4f5;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.select:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: #202024;
+}
+
+.select:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.modalBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sectionTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.textarea {
+    width: 100%;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    color: #e2e8f0;
+    padding: 12px;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.textarea:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.textarea:focus {
+    border-color: #8b5cf6;
+    background: #14141c;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.pomodoroSection {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.timerDisplay {
+    font-size: 32px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #8b5cf6;
+}
+
+.pomodoroActions {
+    display: flex;
+    gap: 8px;
+}
+
+.pomodoroBtn {
+    background: #27272a;
+    border: none;
+    color: #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.pomodoroBtn:hover {
+    background: #3f3f46;
+}
+
+.pomodoroBtn.active {
+    background: #ef4444;
+    color: white;
+}
+
+.pomodoroBtn.active:hover {
+    background: #dc2626;
+}
+
+.commentsSection {
+    margin-top: auto;
+}
+
+.commentList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.commentItem {
+    background: #18181b;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #27272a;
+}
+
+.commentHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #a1a1aa;
+}
+
+.commentAuthor {
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.commentContent {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.commentInputWrapper {
+    display: flex;
+    gap: 8px;
+}
+
+.commentInputWrapper input {
+    flex: 1;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #e2e8f0;
+    font-size: 13px;
+    outline: none;
+}
+
+.commentInputWrapper button {
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.commentInputWrapper button:hover {
+    background: #7c3aed;
+}
+
+.subtaskList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.subtaskItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #18181b;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #27272a;
+}
+
+.subtaskTitle {
+    flex: 1;
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.subtaskTitle.completed {
+    text-decoration: line-through;
+    color: #a1a1aa;
+}
+
+.subtaskCheckbox {
+    cursor: pointer;
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subtaskCheckbox.checked {
+    color: #10b981;
+}
+
+.addSubtaskWrapper {
+    display: flex;
+    gap: 8px;
+}
+
+.addSubtaskWrapper input {
+    flex: 1;
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #e2e8f0;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.addSubtaskWrapper input:focus {
+    border-color: #8b5cf6;
+}
+
+.addSubtaskWrapper button {
+    background: #27272a;
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 0 16px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.addSubtaskWrapper button:hover {
+    background: #3f3f46;
+    color: #ffffff;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #27272a;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.infoField {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .modalOverlay {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        top: 0;
+        justify-content: center;
+        align-items: flex-end;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(2px);
+        pointer-events: auto; /* To capture background clicks */
+    }
+
+    .modalContent {
+        width: 100%;
+        max-width: 100vw;
+        height: 85vh;
+        max-height: 85vh;
+        border-radius: 24px 24px 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .infoGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}

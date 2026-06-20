@@ -1,0 +1,164 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #0f172a;
+    color: #f1f5f9;
+    padding: 24px 32px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.backBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(to right, #a78bfa, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 4px 0 0 0;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 24px;
+}
+
+.loading, .empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #64748b;
+    font-size: 16px;
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    padding-left: 24px;
+}
+
+.timelineItem {
+    position: relative;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.timelineItem:hover {
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(4px);
+}
+
+.timelineLine {
+    position: absolute;
+    left: -24px;
+    top: 32px;
+    bottom: -32px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.timelineItem:last-child .timelineLine {
+    display: none;
+}
+
+.timelineIcon {
+    position: absolute;
+    left: -33px;
+    top: 16px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #0f172a;
+    border: 2px solid #8b5cf6;
+    color: #8b5cf6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.timelineContent {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.logHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logAction {
+    font-weight: 600;
+    font-size: 15px;
+    color: #f1f5f9;
+}
+
+.logTime {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.logDetails {
+    font-size: 13px;
+    color: #94a3b8;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    line-height: 1.5;
+}
+
+.logHash {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #10b981;
+    margin-top: 4px;
+    font-family: monospace;
+}

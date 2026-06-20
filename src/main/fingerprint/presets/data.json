@@ -1,0 +1,205 @@
+{
+    "userAgents": {
+        "windows": [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        ],
+        "macos": [
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15"
+        ],
+        "linux": [
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0",
+            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+        ]
+    },
+    "platforms": {
+        "windows": "Win32",
+        "macos": "MacIntel",
+        "linux": "Linux x86_64"
+    },
+    "vendors": {
+        "chrome": "Google Inc.",
+        "firefox": "",
+        "safari": "Apple Computer, Inc.",
+        "edge": "Google Inc."
+    },
+    "webglRenderers": {
+        "windows": [
+            "ANGLE (NVIDIA, NVIDIA GeForce GTX 1060 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce GTX 1070 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Ti Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 2060 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 2070 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Ti Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 3080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 4060 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (AMD, AMD Radeon RX 580 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (AMD, AMD Radeon RX 5700 XT Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (AMD, AMD Radeon RX 6600 XT Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (AMD, AMD Radeon RX 6700 XT Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (AMD, AMD Radeon RX 7800 XT Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (Intel, Intel(R) UHD Graphics 630 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (Intel, Intel(R) UHD Graphics 770 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "ANGLE (Intel, Intel(R) Arc(TM) A770 Graphics Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        ],
+        "macos": [
+            "Apple M1",
+            "Apple M1 Pro",
+            "Apple M1 Max",
+            "Apple M2",
+            "Apple M2 Pro",
+            "Apple M2 Max",
+            "Apple M3",
+            "Apple M3 Pro",
+            "Apple M3 Max",
+            "Apple M4",
+            "AMD Radeon Pro 5500M OpenGL Engine",
+            "Intel Iris Plus Graphics 640 OpenGL Engine",
+            "Intel(R) Iris(R) Plus Graphics OpenGL Engine"
+        ],
+        "linux": [
+            "ANGLE (NVIDIA, NVIDIA GeForce GTX 1060 OpenGL, OpenGL 4.5)",
+            "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 OpenGL, OpenGL 4.6)",
+            "ANGLE (AMD, AMD Radeon RX 580 OpenGL, OpenGL 4.6)",
+            "ANGLE (Intel, Intel(R) UHD Graphics 630 OpenGL, OpenGL 4.6)",
+            "Mesa Intel(R) UHD Graphics 630 (CFL GT2)",
+            "Mesa Intel(R) Xe Graphics (TGL GT2)",
+            "AMD Radeon RX 580 (RADV POLARIS10)",
+            "NVIDIA GeForce RTX 3060/PCIe/SSE2"
+        ]
+    },
+    "webglVendors": {
+        "nvidia": "Google Inc. (NVIDIA)",
+        "amd": "Google Inc. (AMD)",
+        "intel": "Google Inc. (Intel)",
+        "apple": "Apple"
+    },
+    "resolutions": [
+        { "width": 1920, "height": 1080, "weight": 35 },
+        { "width": 2560, "height": 1440, "weight": 20 },
+        { "width": 1366, "height": 768, "weight": 15 },
+        { "width": 1536, "height": 864, "weight": 10 },
+        { "width": 1440, "height": 900, "weight": 5 },
+        { "width": 1680, "height": 1050, "weight": 5 },
+        { "width": 3840, "height": 2160, "weight": 5 },
+        { "width": 2560, "height": 1080, "weight": 3 },
+        { "width": 3440, "height": 1440, "weight": 2 }
+    ],
+    "viewports": [
+        { "width": 1920, "height": 1040 },
+        { "width": 1920, "height": 969 },
+        { "width": 1536, "height": 824 },
+        { "width": 1440, "height": 860 },
+        { "width": 1366, "height": 728 },
+        { "width": 2560, "height": 1400 },
+        { "width": 2560, "height": 1329 },
+        { "width": 1280, "height": 720 }
+    ],
+    "hardwareConcurrencies": [4, 6, 8, 10, 12, 16, 20, 24],
+    "deviceMemories": [4, 8, 16, 32],
+    "colorDepths": [24, 30, 32],
+    "pixelRatios": [1, 1.25, 1.5, 2],
+    "geoProfiles": {
+        "BR": {
+            "timezones": ["America/Sao_Paulo", "America/Fortaleza", "America/Manaus", "America/Recife", "America/Bahia"],
+            "languages": [
+                { "primary": "pt-BR", "list": "pt-BR,pt,en-US,en" },
+                { "primary": "pt-BR", "list": "pt-BR,pt,en" }
+            ],
+            "coords": { "lat": [-23.5505, -22.9068, -15.7801, -3.1190, -12.9714], "lon": [-46.6333, -43.1729, -47.9292, -60.0217, -38.5124] }
+        },
+        "US": {
+            "timezones": ["America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles"],
+            "languages": [
+                { "primary": "en-US", "list": "en-US,en" },
+                { "primary": "en-US", "list": "en-US,en,es" }
+            ],
+            "coords": { "lat": [40.7128, 41.8781, 34.0522, 29.7604, 47.6062], "lon": [-74.0060, -87.6298, -118.2437, -95.3698, -122.3321] }
+        },
+        "GB": {
+            "timezones": ["Europe/London"],
+            "languages": [
+                { "primary": "en-GB", "list": "en-GB,en" },
+                { "primary": "en-GB", "list": "en-GB,en-US,en" }
+            ],
+            "coords": { "lat": [51.5074, 52.4862, 53.4808, 55.9533], "lon": [-0.1278, -1.8904, -2.2426, -3.1883] }
+        },
+        "DE": {
+            "timezones": ["Europe/Berlin"],
+            "languages": [
+                { "primary": "de-DE", "list": "de-DE,de,en-US,en" },
+                { "primary": "de-DE", "list": "de-DE,de,en" }
+            ],
+            "coords": { "lat": [52.5200, 48.1351, 50.1109, 53.5511], "lon": [13.4050, 11.5820, 8.6821, 9.9937] }
+        },
+        "FR": {
+            "timezones": ["Europe/Paris"],
+            "languages": [
+                { "primary": "fr-FR", "list": "fr-FR,fr,en-US,en" },
+                { "primary": "fr-FR", "list": "fr-FR,fr,en" }
+            ],
+            "coords": { "lat": [48.8566, 43.2965, 45.7640, 43.6047], "lon": [2.3522, 5.3698, 4.8357, 1.4442] }
+        },
+        "JP": {
+            "timezones": ["Asia/Tokyo"],
+            "languages": [
+                { "primary": "ja-JP", "list": "ja-JP,ja,en-US,en" },
+                { "primary": "ja", "list": "ja,en" }
+            ],
+            "coords": { "lat": [35.6762, 34.6937, 35.0116, 43.0618], "lon": [139.6503, 135.5023, 135.7681, 141.3545] }
+        },
+        "AU": {
+            "timezones": ["Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane"],
+            "languages": [
+                { "primary": "en-AU", "list": "en-AU,en" }
+            ],
+            "coords": { "lat": [-33.8688, -37.8136, -27.4698], "lon": [151.2093, 144.9631, 153.0251] }
+        },
+        "CA": {
+            "timezones": ["America/Toronto", "America/Vancouver", "America/Edmonton"],
+            "languages": [
+                { "primary": "en-CA", "list": "en-CA,en,fr" },
+                { "primary": "fr-CA", "list": "fr-CA,fr,en" }
+            ],
+            "coords": { "lat": [43.6532, 49.2827, 45.5017, 51.0447], "lon": [-79.3832, -123.1207, -73.5673, -114.0719] }
+        },
+        "ES": {
+            "timezones": ["Europe/Madrid"],
+            "languages": [
+                { "primary": "es-ES", "list": "es-ES,es,en" }
+            ],
+            "coords": { "lat": [40.4168, 41.3851, 37.3891], "lon": [-3.7038, 2.1734, -5.9845] }
+        },
+        "IT": {
+            "timezones": ["Europe/Rome"],
+            "languages": [
+                { "primary": "it-IT", "list": "it-IT,it,en" }
+            ],
+            "coords": { "lat": [41.9028, 45.4642, 43.7696], "lon": [12.4964, 9.1900, 11.2558] }
+        }
+    }
+}
