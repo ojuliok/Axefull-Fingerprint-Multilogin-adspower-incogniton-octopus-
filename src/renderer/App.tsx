@@ -9,6 +9,7 @@ import SettingsPage from './pages/SettingsPage';
 import CanvasPage from './pages/CanvasPage';
 import TasksView from './components/Tasks/TasksView';
 import LoginPage from './pages/LoginPage';
+import SalesPage from './pages/SalesPage';
 import DownloadPage from './pages/DownloadPage';
 import NavegadorMobile from './pages/NavegadorMobile';
 import Sidebar from './components/Layout/Sidebar';
@@ -27,6 +28,7 @@ function AppShell() {
     const { state } = useAuth();
     const { theme, layout } = useTheme();
     const [currentView, setCurrentView] = useState<ViewType>(isWebMode() ? 'canvas' : 'profiles');
+    const [unauthView, setUnauthView] = useState<'sales' | 'login' | 'register'>('sales');
     const [showExtensions, setShowExtensions] = useState(false);
     const [showProxiesModal, setShowProxiesModal] = useState(false);
     const [runningProfiles, setRunningProfiles] = useState<Array<{ id: string; name: string }>>([]);
@@ -64,8 +66,25 @@ function AppShell() {
         }
     }, [state]);
 
-    if (state === 'loading' || state === 'offline' || state === 'unauthenticated') {
+    if (state === 'loading' || state === 'offline') {
         return <LoginPage />;
+    }
+
+    if (state === 'unauthenticated') {
+        if (unauthView === 'sales') {
+            return (
+                <SalesPage 
+                    onLogin={() => setUnauthView('login')} 
+                    onRegister={() => setUnauthView('register')} 
+                />
+            );
+        }
+        return (
+            <LoginPage 
+                initialMode={unauthView === 'login' ? 'login' : 'register'} 
+                onBack={() => setUnauthView('sales')} 
+            />
+        );
     }
 
     const renderContent = () => {

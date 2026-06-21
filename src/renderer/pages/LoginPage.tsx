@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Fingerprint, Eye, EyeOff, Loader2, WifiOff, RefreshCw, ArrowLeft, Phone } from 'lucide-react';
 
-type FormMode = 'login' | 'register' | 'forgot-password';
+export type FormMode = 'login' | 'register' | 'forgot-password';
 
 function OfflineScreen({ onRetry }: { onRetry: () => void }) {
     return (
@@ -313,9 +313,14 @@ function AuthForm({ mode, onChangeMode }: FormProps) {
     );
 }
 
-export default function LoginPage() {
+export interface LoginPageProps {
+    initialMode?: FormMode;
+    onBack?: () => void;
+}
+
+export default function LoginPage({ initialMode = 'login', onBack }: LoginPageProps) {
     const { state, retryConnection } = useAuth();
-    const [mode, setMode] = useState<FormMode>('login');
+    const [mode, setMode] = useState<FormMode>(initialMode);
 
     const getTitle = () => {
         switch (mode) {
@@ -372,7 +377,16 @@ export default function LoginPage() {
             </div>
 
             {/* Right panel — form */}
-            <div className="flex-1 flex items-center justify-center p-8">
+            <div className="flex-1 flex items-center justify-center p-8 relative">
+                {onBack && (
+                    <button 
+                        onClick={onBack} 
+                        className="absolute top-8 left-8 flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+                    >
+                        <ArrowLeft size={16} /> Voltar para a página principal
+                    </button>
+                )}
+                
                 <div className="w-full max-w-sm">
                     {/* Mobile logo */}
                     <div className="flex lg:hidden items-center gap-2 justify-center mb-8">

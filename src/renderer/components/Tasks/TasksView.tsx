@@ -6,6 +6,7 @@ import styles from './TasksView.module.css';
 import { TaskData, TaskSpace, getTasksData, createTask, updateTask, getTasksSpaces, createSpace, deleteSpace, updateSpace } from './tasksStorage';
 import TaskDetailModal from './TaskDetailModal';
 import TasksCalendarTimeline from './TasksCalendarTimeline';
+import TasksCalendarMonthView from './TasksCalendarMonthView';
 import TasksKanbanView from './TasksKanbanView';
 import CustomDatePicker from './CustomDatePicker';
 
@@ -15,7 +16,7 @@ const TasksView: React.FC = () => {
     const [activeSpaceId, setActiveSpaceId] = useState<string>('all');
     
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [calendarViewMode, setCalendarViewMode] = useState<'day' | 'week'>('week');
+    const [calendarViewMode, setCalendarViewMode] = useState<'day' | 'week' | 'month'>('month');
     
     // Sub-header tabs inside tasks view (Board, List, Timeline, Due tasks)
     const [activeTab, setActiveTab] = useState<'board' | 'list' | 'timeline' | 'due'>('list');
@@ -163,13 +164,38 @@ const TasksView: React.FC = () => {
         });
     };
 
+    const handleCreateTaskFromCalendar = (date: Date, hour?: number) => {
+        setPromptDialog({
+            isOpen: true,
+            title: hour !== undefined ? `Nova tarefa para ${format(date, 'dd/MM/yyyy')} às ${hour}h` : `Nova tarefa para ${format(date, 'dd/MM/yyyy')}`,
+            placeholder: 'Digite o nome da tarefa...',
+            defaultValue: '',
+            onSubmit: (title) => {
+                const targetSpace = activeSpaceId === 'all' ? (spaces[0]?.id || 'default') : activeSpaceId;
+                const newTask = createTask(title, targetSpace, date.getTime(), 'todo');
+                
+                if (hour !== undefined) {
+                    const startTime = `${hour.toString().padStart(2, '0')}:00`;
+                    const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                    newTask.startTime = startTime;
+                    newTask.endTime = endTime;
+                    import('./tasksStorage').then(m => m.updateTask(newTask.id, { startTime, endTime }));
+                }
+                
+                setTasks(prev => [...prev, newTask]);
+            }
+        });
+    };
+
     const handleNext = () => {
         if (calendarViewMode === 'day') setCurrentDate(addDays(currentDate, 1));
-        else setCurrentDate(addWeeks(currentDate, 1));
+        else if (calendarViewMode === 'week') setCurrentDate(addWeeks(currentDate, 1));
+        else if (calendarViewMode === 'month') setCurrentDate(addMonths(currentDate, 1));
     };
     const handlePrev = () => {
         if (calendarViewMode === 'day') setCurrentDate(subDays(currentDate, 1));
-        else setCurrentDate(subWeeks(currentDate, 1));
+        else if (calendarViewMode === 'week') setCurrentDate(subWeeks(currentDate, 1));
+        else if (calendarViewMode === 'month') setCurrentDate(subMonths(currentDate, 1));
     };
     const goToday = () => setCurrentDate(new Date());
 
@@ -435,6 +461,12 @@ const TasksView: React.FC = () => {
                                         >
                                             Semana
                                         </button>
+                                        <button 
+                                            className={`${styles.toggleBtn} ${calendarViewMode === 'month' ? styles.toggleActive : ''}`} 
+                                            onClick={() => setCalendarViewMode('month')}
+                                        >
+                                            Mês
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -675,13 +707,22 @@ const TasksView: React.FC = () => {
                         </div>
                     )}
 
-                    {activeTab === 'timeline' && (
+                    {activeTab === 'timeline' && calendarViewMode !== 'month' && (
                         <TasksCalendarTimeline 
                             tasks={filteredTasks} 
                             currentDate={currentDate} 
-                            viewMode={calendarViewMode} 
+                            viewMode={calendarViewMode as 'week' | 'day'} 
                             onTaskClick={setSelectedTask}
                             onUpdateTask={handleUpdateTaskTime}
+                            onCreateTask={handleCreateTaskFromCalendar}
+                        />
+                    )}
+                    {activeTab === 'timeline' && calendarViewMode === 'month' && (
+                        <TasksCalendarMonthView
+                            tasks={filteredTasks}
+                            currentDate={currentDate}
+                            onTaskClick={setSelectedTask}
+                            onCreateTask={(date) => handleCreateTaskFromCalendar(date)}
                         />
                     )}
 
