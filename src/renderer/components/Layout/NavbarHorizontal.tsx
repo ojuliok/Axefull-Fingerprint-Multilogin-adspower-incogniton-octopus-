@@ -64,7 +64,17 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                     return (
                         <button
                             key={item.id}
-                            onClick={() => onViewChange(item.id as ViewType)}
+                            onClick={() => {
+                                if (isActive) {
+                                    if (item.id === 'canvas') {
+                                        window.dispatchEvent(new CustomEvent('toggle-canvas-sidebar'));
+                                    } else if (item.id === 'tasks') {
+                                        window.dispatchEvent(new CustomEvent('toggle-tasks-sidebar'));
+                                    }
+                                } else {
+                                    onViewChange(item.id as ViewType);
+                                }
+                            }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
                                 ${isActive 
                                     ? (isLight ? 'bg-black/[0.04] text-violet-600 shadow-sm' : 'bg-white/[0.05] text-violet-400') 

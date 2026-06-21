@@ -27,7 +27,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentView, o
                     <button
                         key={item.id}
                         className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive ? (isLight ? 'text-black' : 'text-white') : 'text-zinc-500'}`}
-                        onClick={() => onViewChange(item.id)}
+                        onClick={() => {
+                            if (isActive) {
+                                // Toggle the sidebar for the current view
+                                if (item.id === 'canvas') {
+                                    window.dispatchEvent(new CustomEvent('toggle-canvas-sidebar'));
+                                } else if (item.id === 'tasks') {
+                                    window.dispatchEvent(new CustomEvent('toggle-tasks-sidebar'));
+                                }
+                                // Can add similar events for other views if needed
+                            } else {
+                                onViewChange(item.id);
+                            }
+                        }}
                     >
                         <Icon size={22} className={isActive ? item.colorClass : ''} />
                         <span className="text-[10px] font-medium">{item.label}</span>

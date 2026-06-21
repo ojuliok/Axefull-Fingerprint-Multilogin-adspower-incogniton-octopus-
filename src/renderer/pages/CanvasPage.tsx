@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+const isMobileViewport = () => window.innerWidth <= 768;
 import {
     Plus, MoreHorizontal, Trash2, Edit3,
     Copy, Download, Upload, ChevronRight, ChevronDown,
@@ -40,6 +42,7 @@ const CanvasPage: React.FC = () => {
     
     // Sidebar Opening Mode States
     const [menuMode, setMenuMode] = useState<'expanded' | 'hover' | 'collapsed'>(() => {
+        if (window.innerWidth <= 768) return 'collapsed';
         const saved = localStorage.getItem('axe_canvas_menu_mode');
         return (saved as any) || 'expanded';
     });
@@ -86,6 +89,15 @@ const CanvasPage: React.FC = () => {
     useEffect(() => {
         localStorage.setItem('axe_canvas_menu_mode', menuMode);
     }, [menuMode]);
+
+    // Listen for toggle-canvas-sidebar event from MobileBottomNav
+    useEffect(() => {
+        const handleToggle = () => {
+            setMenuMode(prev => prev === 'expanded' ? 'collapsed' : 'expanded');
+        };
+        window.addEventListener('toggle-canvas-sidebar', handleToggle);
+        return () => window.removeEventListener('toggle-canvas-sidebar', handleToggle);
+    }, []);
 
     // Focus rename input
     useEffect(() => {
@@ -237,6 +249,10 @@ const CanvasPage: React.FC = () => {
         setRenamingId(null);
         setViewState('canvas');
         setIsHovered(false);
+        // Auto-close sidebar on mobile after navigation
+        if (isMobileViewport()) {
+            setMenuMode('collapsed');
+        }
     }, []);
 
     const handleGoHome = useCallback(() => {
@@ -244,6 +260,10 @@ const CanvasPage: React.FC = () => {
         setActiveCanvasData(null);
         setViewState('home');
         setIsHovered(false);
+        // Auto-close sidebar on mobile after navigation
+        if (isMobileViewport()) {
+            setMenuMode('collapsed');
+        }
     }, []);
 
     const handleSectionDragStart = (e: React.DragEvent, section: 'favorites' | 'spaces') => {
@@ -628,7 +648,7 @@ const CanvasPage: React.FC = () => {
                             onClick={(e) => handleOpenSidebarEmojiPicker(e, canvas.id)}
                             title="Alterar ícone"
                         >
-                            <DynamicIcon name={canvas.icon || (isFolder ? 'Folder' : canvas.type === 'space' ? 'Box' : canvas.type === 'page' ? 'FileText' : canvas.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={14} />
+                            <DynamicIcon name={canvas.icon || (isFolder ? 'Folder' : canvas.type === 'space' ? 'Folder' : canvas.type === 'page' ? 'FileText' : canvas.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={14} />
                         </span>
 
                         {isSidebarExpanded && (
@@ -849,7 +869,7 @@ const CanvasPage: React.FC = () => {
                                         >
                                             <div className={`${styles.canvasItem} ${activeCanvasId === canvas.id ? styles.active : ''}`} style={{ paddingLeft: '20px' }} title={canvas.name}>
                                                 <span className={styles.canvasItemIcon}>
-                                                    <DynamicIcon name={canvas.icon || (canvas.type === 'folder' ? 'Folder' : canvas.type === 'page' ? 'FileText' : canvas.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={14} />
+                                                    <DynamicIcon name={canvas.icon || (canvas.type === 'folder' || canvas.type === 'space' ? 'Folder' : canvas.type === 'page' ? 'FileText' : canvas.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={14} />
                                                 </span>
                                                 {isSidebarExpanded && <span className={styles.canvasItemName}>{canvas.name}</span>}
                                             </div>
@@ -1232,7 +1252,7 @@ const CanvasPage: React.FC = () => {
                     page: { title: 'Criar Nova Página', desc: 'Documento rico para notas, atas e textos estruturados.', icon: <FileText size={32} color="#3B82F6" />, color: '#3B82F6', placeholder: 'Ex: Planejamento Anual' },
                     table: { title: 'Criar Novo CRM', desc: 'Tabela inteligente para gerenciar leads, tarefas ou inventário.', icon: <KanbanSquare size={32} color="#10B981" />, color: '#10B981', placeholder: 'Ex: Pipeline de Vendas' },
                     folder: { title: 'Criar Nova Pasta', desc: 'Organize seus arquivos e projetos para fácil acesso.', icon: <FolderPlus size={32} color="#6B7280" />, color: '#6B7280', placeholder: 'Ex: Projetos 2026' },
-                    space: { title: 'Criar Novo Espaço', desc: 'Um novo ambiente de trabalho isolado para uma equipe.', icon: <Box size={32} color="#F59E0B" />, color: '#F59E0B', placeholder: 'Ex: Equipe de Produto' }
+                    space: { title: 'Criar Novo Espaço', desc: 'Um novo ambiente de trabalho isolado para uma equipe.', icon: <Folder size={32} color="#F59E0B" />, color: '#F59E0B', placeholder: 'Ex: Equipe de Produto' }
                 }[showCreateModal.type];
                 
                 return (

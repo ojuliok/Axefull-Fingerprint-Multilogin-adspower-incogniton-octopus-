@@ -18,6 +18,7 @@ interface CanvasPreviewModalProps {
   handleUpdatePropertyValue: (key: string, value: string) => void;
   handleDeleteProperty: (key: string) => void;
   handleUpdateNotes: (notes: string) => void;
+  canvasList?: CanvasInfo[];
 }
 
 export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
@@ -34,10 +35,14 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
   handleUpdatePropertyValue,
   handleDeleteProperty,
   handleUpdateNotes,
+  canvasList = [],
 }) => {
   const properties = previewCanvas.properties || {};
   const notes = previewCanvas.notes || '';
-  const icon = previewCanvas.icon || '📋';
+  const icon = previewCanvas.icon || (previewCanvas.type === 'space' || previewCanvas.type === 'folder' ? 'Folder' : '📋');
+  
+  const isContainer = previewCanvas.type === 'space' || previewCanvas.type === 'folder';
+  const children = canvasList.filter((c) => c.parentId === previewCanvas.id && !c.isDeleted);
 
   return (
     <div className={`${styles.previewModalContainer} ${previewLayout === 'side' ? styles.previewLayoutSide : styles.previewLayoutCenter}`}>
@@ -176,6 +181,37 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
               placeholder="Escreva anotações, atas de reunião, links importantes..."
             />
           </div>
+          
+          {/* Container Contents */}
+          {isContainer && (
+            <div className={styles.previewSection} style={{ marginTop: '16px' }}>
+              <div className={styles.sectionTitle}>Conteúdo</div>
+              {children.length === 0 ? (
+                <div className={styles.propertiesEmptyState}>
+                  Esta pasta está vazia.
+                </div>
+              ) : (
+                <div className={styles.containerChildrenList} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                  {children.map((child) => (
+                    <div 
+                      key={child.id} 
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'rgba(0,0,0,0.02)', borderRadius: '6px', cursor: 'pointer', border: '1px solid rgba(0,0,0,0.05)' }}
+                      onClick={() => {
+                        onSelectCanvas(child.id);
+                        setActivePreviewId(null);
+                      }}
+                    >
+                      <DynamicIcon name={child.icon || (child.type === 'space' || child.type === 'folder' ? 'Folder' : child.type === 'page' ? 'FileText' : child.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={16} />
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#3f3f46' }}>{child.name}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#a1a1aa', textTransform: 'capitalize', background: 'white', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                        {child.type}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -126,7 +126,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                             onDragOver={(e) => handleDragOver(e, item.id)}
                             onDrop={handleDrop}
                             onDragEnd={handleDragEnd}
-                            onClick={() => onViewChange(item.id)}
+                            onClick={() => {
+                                if (isActive) {
+                                    if (item.id === 'canvas') {
+                                        window.dispatchEvent(new CustomEvent('toggle-canvas-sidebar'));
+                                    } else if (item.id === 'tasks') {
+                                        window.dispatchEvent(new CustomEvent('toggle-tasks-sidebar'));
+                                    }
+                                } else {
+                                    onViewChange(item.id);
+                                }
+                            }}
                             className={`
                                 flex rounded-lg transition-all relative group
                                 ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-3' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}

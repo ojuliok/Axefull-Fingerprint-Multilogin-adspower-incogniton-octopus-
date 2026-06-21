@@ -16,7 +16,6 @@ import { CanvasNode, CanvasData, Stroke, CanvasConnection, debouncedSaveCanvasDa
 import { Profile } from '../../types';
 import { ProfileAIScore } from '../AI/ProfileAIScore';
 import { LinearPageRenderer } from './LinearPageRenderer';
-import { CanvasMinimap } from './CanvasMinimap';
 import styles from './InfiniteCanvas.module.css';
 
 // ── Curated Emojis and Icons Catalog ──
@@ -5582,8 +5581,6 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     </div>
                 </div>
             )}
-
-            <CanvasMinimap nodes={nodes} viewport={viewport} setViewport={setViewport} containerRef={containerRef} />
         </div>
 
     );

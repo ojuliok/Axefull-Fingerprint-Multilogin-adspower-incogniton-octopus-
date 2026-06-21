@@ -1,0 +1,300 @@
+.spacesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.folderCard {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 180px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.folderCard:hover {
+    transform: translateY(-4px);
+}
+
+.folderTab {
+    width: 45%;
+    height: 28px;
+    background: #f4f4f5;
+    border-radius: 12px 12px 0 0;
+    border: 1px solid #e4e4e7;
+    border-bottom: none;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    transition: background 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+}
+
+.folderTab::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    border-bottom-left-radius: 12px;
+    box-shadow: -8px 8px 0 0 #f4f4f5;
+    transition: box-shadow 0.3s ease;
+}
+
+.folderCard:hover .folderTab {
+    background: #ffffff;
+}
+.folderCard:hover .folderTab::after {
+    box-shadow: -8px 8px 0 0 #ffffff;
+}
+
+.folderBody {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 0 16px 16px 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.folderCard:hover .folderBody {
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+    border-color: #d4d4d8;
+}
+
+.folderCoverGradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.05;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.folderCard:hover .folderCoverGradient {
+    opacity: 0.12;
+}
+
+.folderHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.folderIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #f4f4f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.folderCard:hover .folderIcon {
+    transform: scale(1.05);
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.folderName {
+    font-size: 16px;
+    font-weight: 600;
+    color: #18181b;
+    margin: 12px 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folderDescription {
+    font-size: 13px;
+    color: #71717a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+}
+
+.folderFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #f4f4f5;
+}
+
+.folderMeta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #a1a1aa;
+    font-weight: 500;
+}
+
+.folderMoreBtn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.folderCard:hover .folderMoreBtn {
+    opacity: 1;
+}
+
+.folderMoreBtn:hover {
+    background: #f4f4f5;
+    color: #18181b;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #18181b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Criar Espaço Card Styling */
+.createFolderCard {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 180px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.createFolderCard:hover {
+    transform: translateY(-4px);
+}
+
+.createFolderTab {
+    width: 45%;
+    height: 28px;
+    background: rgba(244, 244, 245, 0.5);
+    border-radius: 12px 12px 0 0;
+    border: 1px dashed #d4d4d8;
+    border-bottom: none;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    transition: background 0.3s ease;
+}
+
+.createFolderTab::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    border-bottom-left-radius: 12px;
+    box-shadow: -8px 8px 0 0 rgba(244, 244, 245, 0.5);
+    transition: box-shadow 0.3s ease;
+}
+
+.createFolderCard:hover .createFolderTab {
+    background: rgba(228, 228, 231, 0.8);
+    border-color: #a1a1aa;
+}
+.createFolderCard:hover .createFolderTab::after {
+    box-shadow: -8px 8px 0 0 rgba(228, 228, 231, 0.8);
+}
+
+.createFolderBody {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px dashed #d4d4d8;
+    border-radius: 0 16px 16px 16px;
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.createFolderCard:hover .createFolderBody {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #a1a1aa;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+}
+
+.createFolderIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #f4f4f5;
+    color: #71717a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.createFolderCard:hover .createFolderIcon {
+    transform: scale(1.05);
+    background: #e4e4e7;
+    color: #18181b;
+}
+
+.createFolderName {
+    font-size: 16px;
+    font-weight: 600;
+    color: #3f3f46;
+    margin: 0 0 4px 0;
+}
+
+.createFolderCard:hover .createFolderName {
+    color: #18181b;
+}
+
+.createFolderDescription {
+    font-size: 13px;
+    color: #a1a1aa;
+    text-align: center;
+    margin: 0;
+}

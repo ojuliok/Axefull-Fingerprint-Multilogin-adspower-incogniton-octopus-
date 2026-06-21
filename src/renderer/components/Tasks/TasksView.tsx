@@ -20,7 +20,7 @@ const TasksView: React.FC = () => {
     // Sub-header tabs inside tasks view (Board, List, Timeline, Due tasks)
     const [activeTab, setActiveTab] = useState<'board' | 'list' | 'timeline' | 'due'>('list');
     
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth > 768);
     const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     const [contextMenu, setContextMenu] = useState<{ type: 'task' | 'space', id: string, x: number, y: number } | null>(null);
 
@@ -109,6 +109,15 @@ const TasksView: React.FC = () => {
         const handleGlobalClick = () => setContextMenu(null);
         window.addEventListener('click', handleGlobalClick);
         return () => window.removeEventListener('click', handleGlobalClick);
+    }, []);
+
+    // Listen for toggle-tasks-sidebar event from MobileBottomNav
+    useEffect(() => {
+        const handleToggle = () => {
+            setIsSidebarOpen(prev => !prev);
+        };
+        window.addEventListener('toggle-tasks-sidebar', handleToggle);
+        return () => window.removeEventListener('toggle-tasks-sidebar', handleToggle);
     }, []);
 
     const filteredTasks = (activeSpaceId === 'all' 
@@ -226,7 +235,10 @@ const TasksView: React.FC = () => {
                         
                         <div 
                             className={styles.spaceItem}
-                            onClick={() => setActiveSpaceId('all')}
+                            onClick={() => {
+                                setActiveSpaceId('all');
+                                if (window.innerWidth <= 768) setIsSidebarOpen(false);
+                            }}
                             style={activeSpaceId === 'all' ? { background: 'rgba(139, 92, 246, 0.15)', color: '#c084fc' } : {}}
                         >
                             <Grid size={18} color="#a1a1aa" />
@@ -237,7 +249,10 @@ const TasksView: React.FC = () => {
                             <div 
                                 key={space.id} 
                                 className={styles.spaceItem}
-                                onClick={() => setActiveSpaceId(space.id)}
+                                onClick={() => {
+                                    setActiveSpaceId(space.id);
+                                    if (window.innerWidth <= 768) setIsSidebarOpen(false);
+                                }}
                                 onDoubleClick={(e) => {
                                     e.stopPropagation();
                                     setPromptDialog({

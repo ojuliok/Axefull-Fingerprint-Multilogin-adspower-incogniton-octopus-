@@ -33,7 +33,8 @@ import {
   KanbanSquare,
   FolderPlus,
   Eye,
-  EyeOff
+  EyeOff,
+  Box
 } from 'lucide-react';
 import { CanvasInfo, getCanvasData } from './canvasStorage';
 import { CANVAS_ICONS, DynamicIcon } from './CanvasIcons';
@@ -41,6 +42,7 @@ import { CanvasPreviewModal } from './Home/CanvasPreviewModal';
 import { CanvasTableView } from './Home/CanvasTableView';
 import { CanvasGridView } from './Home/CanvasGridView';
 import { CanvasListView } from './Home/CanvasListView';
+import { CanvasSpacesGrid } from './Home/CanvasSpacesGrid';
 import styles from './CanvasHome.module.css';
 
 // ─── Props ───────────────────────────────────────────
@@ -48,7 +50,7 @@ interface CanvasHomeProps {
   canvasList: CanvasInfo[];
   onSelectCanvas: (id: string) => void;
   onCreateCanvas: () => void;
-  onCreateItem?: (type: 'canvas' | 'page' | 'folder' | 'table') => void;
+  onCreateItem?: (type: 'canvas' | 'page' | 'folder' | 'table' | 'space') => void;
   onDeleteCanvas: (id: string) => void;
   onRenameCanvas: (id: string, name: string) => void;
   onDuplicateCanvas: (id: string) => void;
@@ -151,6 +153,9 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }, [canvasList, search, activeSpaceId]);
 
+  const spaces = useMemo(() => filteredCanvases.filter(c => c.type === 'space'), [filteredCanvases]);
+  const otherItems = useMemo(() => filteredCanvases.filter(c => c.type !== 'space'), [filteredCanvases]);
+
   // ── Focus rename input ──
   useEffect(() => {
     if (renamingId && renameInputRef.current) {
@@ -168,12 +173,13 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   }, [editingDescId]);
 
   const handleItemClick = useCallback((id: string) => {
-    if (previewOnClick) {
+    const item = canvasList.find(c => c.id === id);
+    if (previewOnClick || (item && (item.type === 'space' || item.type === 'folder'))) {
       setActivePreviewId(id);
     } else {
       onSelectCanvas(id);
     }
-  }, [previewOnClick, onSelectCanvas]);
+  }, [previewOnClick, onSelectCanvas, canvasList]);
 
   // ── Favorites ──
   const toggleFavorite = useCallback((e: React.MouseEvent, id: string) => {
@@ -459,6 +465,11 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           {/* Unified Toolbar: Create + Search + View */}
           <div className={styles.contentToolbar}>
             <div className={styles.createActions}>
+              <button className={styles.minimalCreateBtn} onClick={() => onCreateItem && onCreateItem('space')}>
+                <Plus size={14} />
+                <Box size={14} className={styles.iconYellow} />
+                <span className={styles.createLabel}>Espaço</span>
+              </button>
               <button className={styles.minimalCreateBtn} onClick={() => onCreateItem && onCreateItem('canvas')}>
                 <Plus size={14} />
                 <LayoutDashboard size={14} className={styles.iconPurple} />
@@ -541,87 +552,118 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
       {/* Content */}
       <div className={styles.content}>
-        {filteredCanvases.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>
-              <FileText size={32} />
-            </div>
-            <h3 className={styles.emptyTitle}>
-              {search ? 'Nenhum canvas encontrado' : 'Nenhum canvas ainda'}
-            </h3>
-            <p className={styles.emptySubtitle}>
-              {search
-                ? `Não encontramos canvas com "${search}". Tente outro termo.`
-                : 'Crie seu primeiro canvas para começar a organizar suas ideias.'}
-            </p>
-            {!search && (
-              <button className={styles.emptyButton} onClick={onCreateCanvas}>
-                <Plus size={18} />
-                Criar primeiro Canvas
-              </button>
-            )}
-          </div>
-        ) : viewMode === 'grid' ? (
-          <CanvasGridView
-            filteredCanvases={filteredCanvases}
+        {!activeSpaceId && (
+          <CanvasSpacesGrid
+            spaces={spaces}
             renamingId={renamingId}
             renameValue={renameValue}
             setRenameValue={setRenameValue}
             commitRename={commitRename}
             startRename={startRename}
-            setActivePreviewId={handleItemClick}
-            handleContextMenu={handleContextMenu}
+            setActivePreviewId={setActivePreviewId}
             onSelectCanvas={onSelectCanvas}
+            handleContextMenu={handleContextMenu}
             openEmojiPicker={openEmojiPicker}
             getChildCount={getChildCount}
-            getNodeCount={getNodeCount}
-            formatDate={formatDate}
-            repositioningId={repositioningId}
-            tempPosition={tempPosition}
-            handleRepositionStart={handleRepositionStart}
-            startReposition={startReposition}
-            saveReposition={saveReposition}
-            cancelReposition={cancelReposition}
-            triggerCoverUpload={triggerCoverUpload}
-            favorites={favorites}
-            toggleFavorite={toggleFavorite}
             editingDescId={editingDescId}
             descValue={descValue}
             setDescValue={setDescValue}
             commitDescEdit={commitDescEdit}
             startDescEdit={startDescEdit}
+            onCreateSpace={() => onCreateItem && onCreateItem('space')}
           />
-        ) : viewMode === 'list' ? (
-          <CanvasListView
-            filteredCanvases={filteredCanvases}
-            renamingId={renamingId}
-            renameValue={renameValue}
-            setRenameValue={setRenameValue}
-            commitRename={commitRename}
-            startRename={startRename}
-            setActivePreviewId={handleItemClick}
-            handleContextMenu={handleContextMenu}
-            onSelectCanvas={onSelectCanvas}
-            openEmojiPicker={openEmojiPicker}
-            favorites={favorites}
-            toggleFavorite={toggleFavorite}
-          />
-        ) : (
-          <CanvasTableView 
-            filteredCanvases={filteredCanvases}
-            renamingId={renamingId}
-            renameValue={renameValue}
-            setRenameValue={setRenameValue}
-            commitRename={commitRename}
-            startRename={startRename}
-            setActivePreviewId={handleItemClick}
-            handleContextMenu={handleContextMenu}
-            onSelectCanvas={onSelectCanvas}
-            openEmojiPicker={openEmojiPicker}
+        )}
+
+        {otherItems.length === 0 && spaces.length === 0 ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <FileText size={32} />
+            </div>
+            <h3 className={styles.emptyTitle}>
+              {search ? 'Nenhum item encontrado' : 'Nenhum item ainda'}
+            </h3>
+            <p className={styles.emptySubtitle}>
+              {search
+                ? `Não encontramos nada com "${search}". Tente outro termo.`
+                : 'Crie seu primeiro espaço ou canvas para começar.'}
+            </p>
+            {!search && (
+              <button className={styles.emptyButton} onClick={() => onCreateItem && onCreateItem('space')}>
+                <Plus size={18} />
+                Criar primeiro Espaço
+              </button>
+            )}
+          </div>
+        ) : otherItems.length > 0 && (
+          <>
+            {spaces.length > 0 && !activeSpaceId && (
+              <h2 className={styles.sectionTitle} style={{ marginTop: '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: '#18181b' }}>
+                <FileText size={18} /> Outros Arquivos
+              </h2>
+            )}
+            {viewMode === 'grid' ? (
+              <CanvasGridView
+                filteredCanvases={otherItems}
+                renamingId={renamingId}
+                renameValue={renameValue}
+                setRenameValue={setRenameValue}
+                commitRename={commitRename}
+                startRename={startRename}
+                setActivePreviewId={handleItemClick}
+                handleContextMenu={handleContextMenu}
+                onSelectCanvas={onSelectCanvas}
+                openEmojiPicker={openEmojiPicker}
+                getChildCount={getChildCount}
+                getNodeCount={getNodeCount}
+                formatDate={formatDate}
+                repositioningId={repositioningId}
+                tempPosition={tempPosition}
+                handleRepositionStart={handleRepositionStart}
+                startReposition={startReposition}
+                saveReposition={saveReposition}
+                cancelReposition={cancelReposition}
+                triggerCoverUpload={triggerCoverUpload}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
+                editingDescId={editingDescId}
+                descValue={descValue}
+                setDescValue={setDescValue}
+                commitDescEdit={commitDescEdit}
+                startDescEdit={startDescEdit}
+              />
+            ) : viewMode === 'list' ? (
+              <CanvasListView
+                filteredCanvases={otherItems}
+                renamingId={renamingId}
+                renameValue={renameValue}
+                setRenameValue={setRenameValue}
+                commitRename={commitRename}
+                startRename={startRename}
+                setActivePreviewId={handleItemClick}
+                handleContextMenu={handleContextMenu}
+                onSelectCanvas={onSelectCanvas}
+                openEmojiPicker={openEmojiPicker}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
+              />
+            ) : (
+              <CanvasTableView 
+                filteredCanvases={otherItems}
+                renamingId={renamingId}
+                renameValue={renameValue}
+                setRenameValue={setRenameValue}
+                commitRename={commitRename}
+                startRename={startRename}
+                setActivePreviewId={handleItemClick}
+                handleContextMenu={handleContextMenu}
+                onSelectCanvas={onSelectCanvas}
+                openEmojiPicker={openEmojiPicker}
             getChildCount={getChildCount}
             getNodeCount={getNodeCount}
             formatDate={formatDate}
           />
+            )}
+          </>
         )}
       </div>
       </>
@@ -731,6 +773,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           handleUpdatePropertyValue={handleUpdatePropertyValue}
           handleDeleteProperty={handleDeleteProperty}
           handleUpdateNotes={handleUpdateNotes}
+          canvasList={canvasList}
         />
       )}
 
