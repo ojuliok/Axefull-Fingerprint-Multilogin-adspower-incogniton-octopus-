@@ -38,19 +38,34 @@ export function getBrowserDataPath(): string {
 let saveTimeout: NodeJS.Timeout | null = null;
 
 /**
- * Save database to disk
+ * Save database to disk atomically to prevent corruption
  */
 export function saveDatabase(immediate: boolean = false): void {
     if (!db || !dbPath) return;
+
+    const performSave = () => {
+        if (!db || !dbPath) return;
+        try {
+            const data = db.export();
+            const buffer = Buffer.from(data);
+            const tempPath = dbPath + '.tmp';
+            
+            // Write to a temporary file first
+            fs.writeFileSync(tempPath, buffer);
+            
+            // Atomically rename the temp file to the final destination
+            fs.renameSync(tempPath, dbPath);
+        } catch (err) {
+            console.error('[Database] Failed to save database atomically:', err);
+        }
+    };
 
     if (immediate) {
         if (saveTimeout) {
             clearTimeout(saveTimeout);
             saveTimeout = null;
         }
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        fs.writeFileSync(dbPath, buffer);
+        performSave();
         return;
     }
 
@@ -58,11 +73,7 @@ export function saveDatabase(immediate: boolean = false): void {
 
     saveTimeout = setTimeout(() => {
         saveTimeout = null;
-        if (db && dbPath) {
-            const data = db.export();
-            const buffer = Buffer.from(data);
-            fs.writeFileSync(dbPath, buffer);
-        }
+        performSave();
     }, 500);
 }
 
@@ -337,6 +348,11 @@ export function insert<T extends Record<string, unknown>>(
     stmt.run(values);
     stmt.free();
     saveDatabase();
+    
+    // Sync with Supabase
+    if (data.id) {
+        pushToSupabase('insert', table, data.id as string, data);
+    }
 }
 
 /**
@@ -359,6 +375,9 @@ export function update<T extends Record<string, unknown>>(
     stmt.run([...values, id]);
     stmt.free();
     saveDatabase();
+    
+    // Sync with Supabase
+    pushToSupabase('update', table, id, data);
 }
 
 /**
@@ -371,6 +390,9 @@ export function remove(table: string, id: string): void {
     stmt.run([id]);
     stmt.free();
     saveDatabase();
+    
+    // Sync with Supabase
+    pushToSupabase('remove', table, id);
 }
 
 /**

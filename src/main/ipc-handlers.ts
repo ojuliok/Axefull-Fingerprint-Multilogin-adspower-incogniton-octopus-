@@ -975,7 +975,7 @@ export function registerDataHandlers(): void {
 }
 
 // ============== AI Engine Handlers ==============
-import * as aiBridge from './ai/python-bridge';
+import * as aiBridge from './ai/score-engine';
 import { extractProfileFeatures } from './ai/feature-extractor';
 import { getRecentLogs } from './ai/audit-logger';
 

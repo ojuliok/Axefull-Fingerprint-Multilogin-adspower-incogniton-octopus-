@@ -22,7 +22,6 @@ import {
 } from './ipc-handlers';
 import { registerBulkVideoHandlers } from './ipc/bulkVideoHandlers';
 import { closeAllProfiles } from './browser/browser-engine';
-import { initPythonEngine } from './ai/python-bridge';
 import { startSupabaseListener, stopSupabaseListener } from './supabase-listener';
 import { startLocalApiServer, stopLocalApiServer } from './local-api/local-api-server';
 
@@ -210,9 +209,6 @@ async function init(): Promise<void> {
     // Start local REST API server on port 54345
     startLocalApiServer();
 
-    // Start AI Python Bridge
-    initPythonEngine();
-
     console.log('[Main] Initialization complete. Interface aberta.');
 }
 
@@ -234,13 +230,25 @@ app.on('activate', () => {
 });
 
 // Marcar que está realmente encerrando antes de quit
-app.on('before-quit', async () => {
+let isActuallyQuitting = false;
+app.on('before-quit', async (event) => {
+    if (isActuallyQuitting) return;
+    
+    event.preventDefault(); // Evita que o app feche antes do encerramento assíncrono
+    isActuallyQuitting = true;
     isQuitting = true;
+
     console.log('[Main] Shutting down...');
-    stopSupabaseListener();
-    stopLocalApiServer();
-    await closeAllProfiles();
-    closeDatabase();
+    try {
+        stopSupabaseListener();
+        stopLocalApiServer();
+        await closeAllProfiles();
+        closeDatabase();
+    } catch (err) {
+        console.error('[Main] Error during shutdown:', err);
+    } finally {
+        app.quit(); // Agora sim, encerra o app
+    }
 });
 
 // Handle uncaught exceptions
