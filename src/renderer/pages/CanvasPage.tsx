@@ -90,6 +90,30 @@ const CanvasPage: React.FC = () => {
         localStorage.setItem('axe_canvas_menu_mode', menuMode);
     }, [menuMode]);
 
+    // Auto-expand parents when active canvas changes
+    useEffect(() => {
+        if (activeCanvasId && canvasList.length > 0) {
+            setExpandedFolders(prev => {
+                const next = new Set(prev);
+                let currentId = activeCanvasId;
+                let canvas = canvasList.find(c => c.id === currentId);
+                let added = false;
+                
+                // Traverse up the parent chain
+                while (canvas && canvas.parentId) {
+                    if (!next.has(canvas.parentId)) {
+                        next.add(canvas.parentId);
+                        added = true;
+                    }
+                    currentId = canvas.parentId;
+                    canvas = canvasList.find(c => c.id === currentId);
+                }
+                
+                return added ? next : prev;
+            });
+        }
+    }, [activeCanvasId, canvasList]);
+
     // Listen for toggle-canvas-sidebar event from MobileBottomNav
     useEffect(() => {
         const handleToggle = () => {
