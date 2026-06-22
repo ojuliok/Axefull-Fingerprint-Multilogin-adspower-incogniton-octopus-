@@ -43,6 +43,7 @@ import { CanvasTableView } from './Home/CanvasTableView';
 import { CanvasGridView } from './Home/CanvasGridView';
 import { CanvasListView } from './Home/CanvasListView';
 import { CanvasSpacesGrid } from './Home/CanvasSpacesGrid';
+import { useToast } from '../../context/ToastContext';
 import styles from './CanvasHome.module.css';
 
 // ─── Props ───────────────────────────────────────────
@@ -96,6 +97,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   activeSpaceId,
   onMoveCanvasItem,
 }) => {
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list'); // Default to list since it's the standard for Workspace view
   const [activeTab, setActiveTab] = useState('Conteúdo');
@@ -511,6 +513,11 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
                     const next = !previewOnClick;
                     setPreviewOnClick(next);
                     localStorage.setItem('axe_canvas_preview_onclick', JSON.stringify(next));
+                    if (next) {
+                      toast.info('Modo de Pré-visualização Ativado', 'Ao clicar em um item, você verá os detalhes e seu conteúdo antes de abrir o editor.');
+                    } else {
+                      toast.info('Modo de Pré-visualização Desativado', 'Ao clicar em um item, o editor principal será aberto diretamente.');
+                    }
                   }}
                   title={previewOnClick ? "Desativar prévia ao clicar (Abre o editor direto)" : "Ativar prévia ao clicar"}
                   style={{ marginRight: '16px' }}

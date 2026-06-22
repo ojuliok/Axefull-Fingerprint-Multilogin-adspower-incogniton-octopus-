@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Trash2, FolderOpen, Maximize2, Minimize2, X } from 'lucide-react';
-import { CanvasInfo } from '../canvasStorage';
+import { CanvasInfo, getCanvasData } from '../canvasStorage';
 import { DynamicIcon } from '../CanvasIcons';
 import styles from '../CanvasHome.module.css';
 
@@ -44,7 +44,23 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
   const icon = previewCanvas.icon || (previewCanvas.type === 'space' || previewCanvas.type === 'folder' ? 'Folder' : '📋');
   
   const isContainer = previewCanvas.type === 'space' || previewCanvas.type === 'folder';
+  const isPage = previewCanvas.type === 'page';
+  const isCanvas = previewCanvas.type === 'canvas';
   const children = canvasList.filter((c) => c.parentId === previewCanvas.id && !c.isDeleted);
+  
+  // Convert old blocks to HTML (copy from CanvasRichText)
+  const getPagePreviewHTML = (notesStr: string) => {
+    if (!notesStr || !notesStr.trim().startsWith('[')) return notesStr;
+    try {
+        const blocks = JSON.parse(notesStr);
+        if (!Array.isArray(blocks)) return notesStr;
+        return blocks.map(block => `<p>${block.content || ''}</p>`).join('');
+    } catch (e) {
+        return notesStr;
+    }
+  };
+
+  const canvasData = isCanvas ? getCanvasData(previewCanvas.id) : null;
 
   return (
     <div className={`${styles.previewModalContainer} ${previewLayout === 'side' ? styles.previewLayoutSide : styles.previewLayoutCenter}`}>
@@ -107,6 +123,59 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
               rows={2}
             />
           </div>
+
+          {/* Real Content Preview */}
+          {(isPage || isCanvas) && (
+            <div className={styles.previewSection} style={{ marginBottom: '16px' }}>
+              <div className={styles.sectionTitle} style={{ marginBottom: '8px' }}>
+                Pré-visualização de Conteúdo
+              </div>
+              <div 
+                style={{ 
+                  width: '100%', 
+                  height: '150px', 
+                  border: '1px solid rgba(0,0,0,0.1)', 
+                  borderRadius: '8px', 
+                  background: isCanvas ? '#f8fafc' : '#ffffff',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  pointerEvents: 'none'
+                }}
+              >
+                {isPage && (
+                  <div 
+                    style={{ padding: '12px', fontSize: '12px', color: '#52525b', opacity: 0.8, transform: 'scale(0.8)', transformOrigin: 'top left', width: '125%', height: '125%' }}
+                    dangerouslySetInnerHTML={{ __html: getPagePreviewHTML(notes) || '<em style="color:#a1a1aa">Página vazia</em>' }}
+                  />
+                )}
+                {isCanvas && canvasData && (
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {canvasData.nodes.length === 0 ? (
+                      <em style={{ color: '#a1a1aa', fontSize: '12px' }}>Canvas vazio</em>
+                    ) : (
+                      <div style={{ position: 'relative', width: '100%', height: '100%', transform: 'scale(0.3)', transformOrigin: 'center' }}>
+                        {canvasData.nodes.map(n => (
+                          <div 
+                            key={n.id} 
+                            style={{ 
+                              position: 'absolute', 
+                              left: n.x, 
+                              top: n.y, 
+                              width: Math.max(n.width, 20), 
+                              height: Math.max(n.height, 20), 
+                              background: n.color || '#e2e8f0',
+                              border: '2px solid rgba(0,0,0,0.1)',
+                              borderRadius: '4px'
+                            }} 
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Properties Table */}
           <div className={styles.previewSection}>
