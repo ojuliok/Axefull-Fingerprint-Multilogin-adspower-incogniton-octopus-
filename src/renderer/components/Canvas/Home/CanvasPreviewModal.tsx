@@ -19,6 +19,7 @@ interface CanvasPreviewModalProps {
   handleDeleteProperty: (key: string) => void;
   handleUpdateNotes: (notes: string) => void;
   canvasList?: CanvasInfo[];
+  onMoveCanvasItem?: (sourceId: string, targetId: string, position: 'before' | 'after') => void;
 }
 
 export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
@@ -36,6 +37,7 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
   handleDeleteProperty,
   handleUpdateNotes,
   canvasList = [],
+  onMoveCanvasItem,
 }) => {
   const properties = previewCanvas.properties || {};
   const notes = previewCanvas.notes || '';
@@ -171,6 +173,60 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
             </div>
           </div>
 
+          {/* Container Contents */}
+          {isContainer && (
+            <div className={styles.previewSection} style={{ marginTop: '0', marginBottom: '16px', background: 'rgba(244,244,245,0.4)', border: '1px solid #d4d4d8', borderRadius: '12px', padding: '16px' }}>
+              <div className={styles.sectionTitle} style={{ color: '#18181b', fontWeight: 600, borderBottom: '1px solid #e4e4e7', paddingBottom: '8px', marginBottom: '12px' }}>Conteúdo</div>
+              {children.length === 0 ? (
+                <div className={styles.propertiesEmptyState}>
+                  Esta pasta está vazia.
+                </div>
+              ) : (
+                <div className={styles.containerChildrenList} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {children.map((child) => (
+                    <div 
+                      key={child.id} 
+                      draggable={!!onMoveCanvasItem}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', child.id);
+                        e.currentTarget.style.opacity = '0.5';
+                      }}
+                      onDragEnd={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.style.borderTop = '2px solid #8B5CF6';
+                      }}
+                      onDragLeave={(e) => {
+                        e.currentTarget.style.borderTop = '1px solid rgba(0,0,0,0.05)';
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.style.borderTop = '1px solid rgba(0,0,0,0.05)';
+                        const sourceId = e.dataTransfer.getData('text/plain');
+                        if (sourceId && sourceId !== child.id && onMoveCanvasItem) {
+                          onMoveCanvasItem(sourceId, child.id, 'before');
+                        }
+                      }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#ffffff', borderRadius: '6px', cursor: 'grab', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}
+                      onClick={() => {
+                        onSelectCanvas(child.id);
+                        setActivePreviewId(null);
+                      }}
+                    >
+                      <DynamicIcon name={child.icon || (child.type === 'space' || child.type === 'folder' ? 'Folder' : child.type === 'page' ? 'FileText' : child.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={16} />
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#3f3f46' }}>{child.name}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#a1a1aa', textTransform: 'capitalize', background: '#f4f4f5', padding: '2px 6px', borderRadius: '4px' }}>
+                        {child.type}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Notes Section */}
           <div className={styles.previewSection} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div className={styles.sectionTitle}>Notas / Registro de Informações</div>
@@ -181,37 +237,6 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
               placeholder="Escreva anotações, atas de reunião, links importantes..."
             />
           </div>
-          
-          {/* Container Contents */}
-          {isContainer && (
-            <div className={styles.previewSection} style={{ marginTop: '16px' }}>
-              <div className={styles.sectionTitle}>Conteúdo</div>
-              {children.length === 0 ? (
-                <div className={styles.propertiesEmptyState}>
-                  Esta pasta está vazia.
-                </div>
-              ) : (
-                <div className={styles.containerChildrenList} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-                  {children.map((child) => (
-                    <div 
-                      key={child.id} 
-                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'rgba(0,0,0,0.02)', borderRadius: '6px', cursor: 'pointer', border: '1px solid rgba(0,0,0,0.05)' }}
-                      onClick={() => {
-                        onSelectCanvas(child.id);
-                        setActivePreviewId(null);
-                      }}
-                    >
-                      <DynamicIcon name={child.icon || (child.type === 'space' || child.type === 'folder' ? 'Folder' : child.type === 'page' ? 'FileText' : child.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={16} />
-                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#3f3f46' }}>{child.name}</span>
-                      <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#a1a1aa', textTransform: 'capitalize', background: 'white', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.05)' }}>
-                        {child.type}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

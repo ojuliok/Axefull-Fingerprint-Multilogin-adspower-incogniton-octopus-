@@ -1027,6 +1027,10 @@ const CanvasPage: React.FC = () => {
                         onRenameCanvas={(id, name) => { renameCanvas(id, name); setCanvasList(getCanvasList()); }}
                         onDuplicateCanvas={handleDuplicate}
                         onUpdateCanvasInfo={handleUpdateCanvasInfo}
+                        onMoveCanvasItem={(sourceId, targetId, position) => {
+                            moveCanvasItem(sourceId, targetId, position);
+                            setCanvasList(getCanvasList());
+                        }}
                     />
                 ) : activeCanvasId ? (
                     activeCanvasType === 'space' ? (
@@ -1043,6 +1047,10 @@ const CanvasPage: React.FC = () => {
                             onRenameCanvas={(id, name) => { renameCanvas(id, name); setCanvasList(getCanvasList()); }}
                             onDuplicateCanvas={handleDuplicate}
                             onUpdateCanvasInfo={handleUpdateCanvasInfo}
+                            onMoveCanvasItem={(sourceId, targetId, position) => {
+                                moveCanvasItem(sourceId, targetId, position);
+                                setCanvasList(getCanvasList());
+                            }}
                         />
                     ) : activeCanvasType === 'table' ? (
                         <CRMCanvasView key={activeCanvasId} boardId={activeCanvasId} />

@@ -56,6 +56,7 @@ interface CanvasHomeProps {
   onDuplicateCanvas: (id: string) => void;
   onUpdateCanvasInfo: (id: string, updates: Partial<CanvasInfo>) => void;
   activeSpaceId?: string;
+  onMoveCanvasItem?: (sourceId: string, targetId: string, position: 'before' | 'after' | 'inside') => void;
 }
 
 // ─── View Types ──────────────────────────────────────
@@ -93,6 +94,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   onDuplicateCanvas,
   onUpdateCanvasInfo,
   activeSpaceId,
+  onMoveCanvasItem,
 }) => {
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list'); // Default to list since it's the standard for Workspace view
@@ -774,6 +776,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           handleDeleteProperty={handleDeleteProperty}
           handleUpdateNotes={handleUpdateNotes}
           canvasList={canvasList}
+          onMoveCanvasItem={onMoveCanvasItem}
         />
       )}
 
