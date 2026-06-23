@@ -17,7 +17,7 @@ import SalesPage from './pages/SalesPage';
 import DownloadPage from './pages/DownloadPage';
 import NavegadorMobile from './pages/NavegadorMobile';
 
-import { LayoutManager } from './components/layout/LayoutManager';
+import { LayoutManager } from './components/Layout/LayoutManager';
 import { isWebMode } from './utils/env';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
