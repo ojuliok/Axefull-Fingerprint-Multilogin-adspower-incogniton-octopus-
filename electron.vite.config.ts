@@ -37,7 +37,7 @@ export default defineConfig({
         base: './',
         envDir: path.resolve(__dirname),
         build: {
-            outDir: '../../dist/renderer',
+            outDir: 'dist/renderer',
             emptyOutDir: true,
         },
         resolve: {
