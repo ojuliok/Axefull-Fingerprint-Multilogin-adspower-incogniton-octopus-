@@ -49,7 +49,7 @@
     background: transparent;
     border: none;
     border-bottom: 1.5px solid transparent;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     font-size: 22px;
     font-weight: 700;
     width: 100%;
@@ -71,7 +71,7 @@
 .iconBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     cursor: pointer;
     padding: 6px;
     border-radius: 6px;
@@ -97,13 +97,13 @@
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: #a1a1aa;
+    color: var(--text-disabled);
 }
 
 .select {
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     padding: 8px 12px;
     border-radius: 8px;
     font-size: 13px;
@@ -143,7 +143,7 @@
 
 .textarea {
     width: 100%;
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
     border-radius: 8px;
     color: #e2e8f0;
@@ -166,7 +166,7 @@
 }
 
 .pomodoroSection {
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
     border-radius: 8px;
     padding: 16px;
@@ -202,7 +202,7 @@
 }
 
 .pomodoroBtn:hover {
-    background: #3f3f46;
+    background: var(--text-secondary);
 }
 
 .pomodoroBtn.active {
@@ -226,7 +226,7 @@
 }
 
 .commentItem {
-    background: #18181b;
+    background: var(--text-primary);
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #27272a;
@@ -237,7 +237,7 @@
     justify-content: space-between;
     margin-bottom: 6px;
     font-size: 12px;
-    color: #a1a1aa;
+    color: var(--text-disabled);
 }
 
 .commentAuthor {
@@ -257,7 +257,7 @@
 
 .commentInputWrapper input {
     flex: 1;
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
     border-radius: 6px;
     padding: 8px 12px;
@@ -292,7 +292,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #18181b;
+    background: var(--text-primary);
     padding: 8px 12px;
     border-radius: 6px;
     border: 1px solid #27272a;
@@ -306,12 +306,12 @@
 
 .subtaskTitle.completed {
     text-decoration: line-through;
-    color: #a1a1aa;
+    color: var(--text-disabled);
 }
 
 .subtaskCheckbox {
     cursor: pointer;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -328,7 +328,7 @@
 
 .addSubtaskWrapper input {
     flex: 1;
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
     border-radius: 8px;
     padding: 8px 12px;
@@ -355,8 +355,8 @@
 }
 
 .addSubtaskWrapper button:hover {
-    background: #3f3f46;
-    color: #ffffff;
+    background: var(--text-secondary);
+    color: var(--bg-card);
 }
 
 .infoGrid {

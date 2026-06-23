@@ -17,7 +17,7 @@
   max-width: 96vw;
   height: 640px;
   max-height: 94vh;
-  background: #09090b;
+  background: var(--bg-primary);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 20px;
   box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.7);
@@ -79,7 +79,7 @@
 
 .profileMetaId {
   font-size: 10px;
-  color: #475569;
+  color: var(--text-disabled);
   font-family: monospace;
 }
 
@@ -95,7 +95,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #334155;
+  color: var(--text-secondary);
   padding: 8px 8px 4px;
 }
 
@@ -107,7 +107,7 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-tertiary);
   transition: all 0.15s;
   width: 100%;
   text-align: left;
@@ -126,7 +126,7 @@
 }
 
 .tabItemDanger {
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .tabItemDanger:hover {
@@ -146,7 +146,7 @@
   padding: 1px 6px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.06);
-  color: #475569;
+  color: var(--text-disabled);
 }
 
 .tabItemActive .tabBadge {
@@ -168,7 +168,7 @@
   border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-tertiary);
   width: 100%;
   transition: all 0.15s;
 }
@@ -198,19 +198,19 @@
 .headerTitle {
   font-size: 16px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   margin: 0;
 }
 
 .headerSub {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 2px 0 0;
   font-weight: 500;
 }
 
 .closeBtn {
-  color: #475569;
+  color: var(--text-disabled);
   padding: 6px;
   border-radius: 8px;
   transition: all 0.15s;
@@ -218,7 +218,7 @@
 
 .closeBtn:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #f1f5f9;
+  color: var(--bg-secondary);
 }
 
 .content {
@@ -241,7 +241,7 @@
   border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-tertiary);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.07);
   transition: all 0.15s;
@@ -290,7 +290,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #475569;
+  color: var(--text-disabled);
 }
 
 .input {
@@ -298,7 +298,7 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 10px;
   padding: 10px 14px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 13px;
   outline: none;
   width: 100%;
@@ -313,7 +313,7 @@
 }
 
 .input::placeholder {
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 /* Tags */
@@ -361,7 +361,7 @@
 
 .tagsEmpty {
   font-size: 11px;
-  color: #334155;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
@@ -376,7 +376,7 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 8px;
   padding: 7px 10px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 12px;
   outline: none;
   transition: border-color 0.15s;
@@ -387,7 +387,7 @@
 }
 
 .tagInput::placeholder {
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .tagAddBtn {
@@ -442,7 +442,7 @@
 }
 
 .noteRemoveBtn {
-  color: #475569;
+  color: var(--text-disabled);
   padding: 2px;
   border-radius: 4px;
   transition: all 0.15s;
@@ -507,7 +507,7 @@
   font-weight: 500;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -530,7 +530,7 @@
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-disabled);
   border: 1px dashed rgba(255, 255, 255, 0.08);
   width: 100%;
   transition: all 0.15s;
@@ -538,7 +538,7 @@
 
 .addNoteBtn:hover {
   border-color: rgba(255, 255, 255, 0.14);
-  color: #64748b;
+  color: var(--text-tertiary);
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -562,7 +562,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #475569;
+  color: var(--text-disabled);
   margin-bottom: 4px;
 }
 
@@ -583,7 +583,7 @@
   font-weight: 600;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #64748b;
+  color: var(--text-tertiary);
   transition: all 0.15s;
   margin-top: 4px;
 }
@@ -622,7 +622,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -659,7 +659,7 @@
 
 .proxyToggleSub {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 0;
 }
 
@@ -740,7 +740,7 @@
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #475569;
+  color: var(--text-disabled);
 }
 
 .searchInput {
@@ -760,7 +760,7 @@
 }
 
 .searchInput::placeholder {
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .actionBtn {
@@ -851,7 +851,7 @@
   justify-content: center;
   gap: 8px;
   height: 140px;
-  color: #475569;
+  color: var(--text-disabled);
   font-size: 13px;
 }
 
@@ -874,7 +874,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #475569;
+  color: var(--text-disabled);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -904,7 +904,7 @@
 }
 
 .mono { font-family: monospace; }
-.dim { color: #475569 !important; }
+.dim { color: var(--text-disabled) !important; }
 .bright { color: #e2e8f0 !important; }
 .small { font-size: 10px !important; }
 .noWrap { white-space: nowrap; }
@@ -934,7 +934,7 @@
 
 .tableHint {
   font-size: 10px;
-  color: #334155;
+  color: var(--text-secondary);
   line-height: 1.5;
   flex-shrink: 0;
 }
@@ -963,7 +963,7 @@
   outline: none;
 }
 
-.bmInput::placeholder { color: #334155; }
+.bmInput::placeholder { color: var(--text-secondary); }
 
 .bookmarkList {
   padding: 4px 0;
@@ -987,7 +987,7 @@
 }
 
 .bmGlobe {
-  color: #475569;
+  color: var(--text-disabled);
   flex-shrink: 0;
 }
 
@@ -1006,7 +1006,7 @@
 
 .bmUrl {
   font-size: 10px;
-  color: #475569;
+  color: var(--text-disabled);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1034,7 +1034,7 @@
 
 .clearDesc {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 0;
 }
 
@@ -1087,7 +1087,7 @@
 
 .clearSubLabel {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-disabled);
   margin-top: 2px;
 }
 

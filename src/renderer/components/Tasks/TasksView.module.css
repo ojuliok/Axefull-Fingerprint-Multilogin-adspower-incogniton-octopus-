@@ -28,7 +28,7 @@
 .hamburgerBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -46,7 +46,7 @@
 .logoTitle {
     font-size: 20px;
     font-weight: 500;
-    color: #e4e4e7;
+    color: var(--border-default);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -71,8 +71,8 @@
 
 .todayBtn {
     background: transparent;
-    border: 1px solid #3f3f46;
-    color: #e4e4e7;
+    border: 1px solid var(--text-secondary);
+    color: var(--border-default);
     padding: 6px 14px;
     border-radius: 4px;
     font-size: 14px;
@@ -93,7 +93,7 @@
 .navArrowBtn {
     background: transparent;
     border: none;
-    color: #e4e4e7;
+    color: var(--border-default);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -111,7 +111,7 @@
 .currentDateTitle {
     font-size: 20px;
     font-weight: 400;
-    color: #e4e4e7;
+    color: var(--border-default);
     min-width: 150px;
 }
 
@@ -124,7 +124,7 @@
 .iconBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -141,8 +141,8 @@
 
 .viewSelector {
     background: transparent;
-    border: 1px solid #3f3f46;
-    color: #e4e4e7;
+    border: 1px solid var(--text-secondary);
+    color: var(--border-default);
     padding: 6px 12px;
     border-radius: 4px;
     font-size: 14px;
@@ -187,11 +187,11 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #18181b;
-    border: 1px solid #3f3f46;
+    background: var(--text-primary);
+    border: 1px solid var(--text-secondary);
     border-radius: 24px;
     padding: 10px 16px 10px 10px;
-    color: #e4e4e7;
+    color: var(--border-default);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -217,7 +217,7 @@
     margin-top: 24px;
     margin-bottom: 24px;
     padding: 16px 12px;
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
     border-radius: 12px;
 }
@@ -229,7 +229,7 @@
     font-size: 13px;
     font-weight: 600;
     margin-bottom: 12px;
-    color: #e4e4e7;
+    color: var(--border-default);
     text-transform: capitalize;
 }
 
@@ -243,7 +243,7 @@
 
 .miniCalDayHeader {
     font-weight: 600;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     padding: 4px 0;
 }
 
@@ -257,7 +257,7 @@
     height: 24px;
     margin: auto;
     transition: all 0.2s;
-    color: #e4e4e7;
+    color: var(--border-default);
     font-size: 11px;
 }
 
@@ -315,12 +315,12 @@
     padding: 8px;
     font-size: 13px;
     font-weight: 500;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     cursor: pointer;
 }
 
 .sectionTitle:hover {
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .spaceItem {
@@ -330,7 +330,7 @@
     padding: 8px;
     border-radius: 4px;
     cursor: pointer;
-    color: #e4e4e7;
+    color: var(--border-default);
     font-size: 13px;
     position: relative;
 }
@@ -356,7 +356,7 @@
 .spaceOptionsBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     padding: 2px;
     border-radius: 4px;
     cursor: pointer;
@@ -373,7 +373,7 @@
 
 .spaceOptionsBtn:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .spaceCheckbox {
@@ -419,7 +419,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     text-align: center;
     margin-bottom: 24px;
 }
@@ -434,7 +434,7 @@
 .contextMenu {
     position: fixed;
     background: #27272a;
-    border: 1px solid #3f3f46;
+    border: 1px solid var(--text-secondary);
     border-radius: 4px;
     padding: 4px 0;
     min-width: 160px;
@@ -446,7 +446,7 @@
 
 .contextMenuItem {
     padding: 8px 16px;
-    color: #e4e4e7;
+    color: var(--border-default);
     font-size: 13px;
     cursor: pointer;
     transition: background 0.1s ease;
@@ -459,7 +459,7 @@
 
 .contextMenuDivider {
     height: 1px;
-    background: #3f3f46;
+    background: var(--text-secondary);
     margin: 4px 0;
 }
 
@@ -498,7 +498,7 @@
 
 .subtaskProgressText {
     font-size: 11px;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     font-weight: 500;
 }
 
@@ -506,7 +506,7 @@
     flex: 1;
     max-width: 150px;
     height: 4px;
-    background: #3f3f46;
+    background: var(--text-secondary);
     border-radius: 2px;
     overflow: hidden;
 }
@@ -534,7 +534,7 @@
 .quickActionBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     width: 28px;
     height: 28px;
     border-radius: 4px;
@@ -547,12 +547,12 @@
 
 .quickActionBtn:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .taskListItemTitle.done {
     text-decoration: line-through;
-    color: #71717a;
+    color: var(--text-tertiary);
 }
 
 /* Pomodoro Sidebar Styles */
@@ -560,7 +560,7 @@
     margin-top: 24px;
     margin-bottom: 24px; /* Added bottom margin to allow scrolling completely past the Pomodoro */
     padding: 16px 12px;
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
     border-radius: 12px;
     display: flex;
@@ -574,7 +574,7 @@
     justify-content: space-between;
     font-size: 12px;
     font-weight: 600;
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .pomodoroSidebarTimer {
@@ -596,9 +596,9 @@
     font-size: 11px;
     padding: 6px 4px;
     background: #27272a;
-    border: 1px solid #3f3f46;
+    border: 1px solid var(--text-secondary);
     border-radius: 6px;
-    color: #e4e4e7;
+    color: var(--border-default);
     cursor: pointer;
     text-align: center;
     transition: all 0.2s;
@@ -606,7 +606,7 @@
 }
 
 .pomodoroSidebarModeBtn:hover {
-    background: #3f3f46;
+    background: var(--text-secondary);
 }
 
 .pomodoroSidebarModeBtn.active {
@@ -655,12 +655,12 @@
 
 .pomodoroSidebarControlBtn.reset {
     background: #27272a;
-    border: 1px solid #3f3f46;
-    color: #e4e4e7;
+    border: 1px solid var(--text-secondary);
+    color: var(--border-default);
 }
 
 .pomodoroSidebarControlBtn.reset:hover {
-    background: #3f3f46;
+    background: var(--text-secondary);
 }
 
 /* ── Kanban Tabs and Subheaders ── */
@@ -705,7 +705,7 @@
 .editProjectHeaderBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     padding: 4px;
     border-radius: 4px;
     cursor: pointer;
@@ -717,7 +717,7 @@
 
 .editProjectHeaderBtn:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .kanbanTabs {
@@ -774,13 +774,13 @@
     height: 56px;
     padding: 0 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background: #09090b;
+    background: var(--bg-primary);
 }
 
 .todoistHeaderTitle {
     font-size: 16px;
     font-weight: 600;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     letter-spacing: -0.01em;
 }
 
@@ -804,7 +804,7 @@
 }
 
 .searchIcon {
-    color: #a1a1aa;
+    color: var(--text-disabled);
     margin-right: 8px;
     flex-shrink: 0;
 }
@@ -836,7 +836,7 @@
 .searchInput {
     background: transparent;
     border: none;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     font-size: 13px;
     width: 100%;
     outline: none;
@@ -844,7 +844,7 @@
 }
 
 .searchInput::placeholder {
-    color: #71717a;
+    color: var(--text-tertiary);
 }
 
 /* Empty State / Center Glow Button */
@@ -865,7 +865,7 @@
     justify-content: center;
     gap: 8px;
     background: #7c3aed;
-    color: #ffffff;
+    color: var(--bg-card);
     border: none;
     border-radius: 20px;
     padding: 10px 20px;
@@ -888,7 +888,7 @@
 
 /* Inline Creation Card */
 .inlineCreationCard {
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 16px;
@@ -904,7 +904,7 @@
 .inlineInputTitle {
     background: transparent;
     border: none;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     font-size: 14px;
     outline: none;
     width: 100%;
@@ -912,7 +912,7 @@
 }
 
 .inlineInputTitle::placeholder {
-    color: #71717a;
+    color: var(--text-tertiary);
 }
 
 .inlineCardActions {
@@ -927,7 +927,7 @@
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 6px;
-    color: #e4e4e7;
+    color: var(--border-default);
     font-size: 12px;
     padding: 4px 8px;
     outline: none;
@@ -942,7 +942,7 @@
 .inlineCancelBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     font-size: 13px;
     font-weight: 500;
     padding: 6px 12px;
@@ -952,7 +952,7 @@
 }
 
 .inlineCancelBtn:hover {
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     background: rgba(255, 255, 255, 0.05);
 }
 
@@ -1020,7 +1020,7 @@
     gap: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #71717a;
+    color: var(--text-tertiary);
     cursor: pointer;
     user-select: none;
     padding: 8px 12px;
@@ -1030,7 +1030,7 @@
 }
 
 .completedHeader:hover {
-    color: #a1a1aa;
+    color: var(--text-disabled);
     background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1066,7 +1066,7 @@
 .calendarDateTitle {
     font-size: 14px;
     font-weight: 500;
-    color: #e4e4e7;
+    color: var(--border-default);
     text-transform: capitalize;
     min-width: 180px;
     text-align: center;
@@ -1083,7 +1083,7 @@
 .toggleBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     font-size: 12px;
     font-weight: 500;
     padding: 4px 12px;
@@ -1093,7 +1093,7 @@
 }
 
 .toggleBtn:hover {
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .toggleActive {
@@ -1152,7 +1152,7 @@
 .promptTitle {
     font-size: 16px;
     font-weight: 600;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     margin: 0;
 }
 
@@ -1163,11 +1163,11 @@
 }
 
 .promptInput {
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid #27272a;
     border-radius: 8px;
     padding: 10px 14px;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     font-size: 14px;
     outline: none;
     transition: all 0.2s ease;
@@ -1188,7 +1188,7 @@
 .promptCancelBtn {
     background: transparent;
     border: 1px solid #27272a;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     font-size: 13px;
     font-weight: 500;
     padding: 8px 16px;
@@ -1199,7 +1199,7 @@
 
 .promptCancelBtn:hover {
     background: rgba(255, 255, 255, 0.05);
-    color: #f4f4f5;
+    color: var(--bg-secondary);
 }
 
 .promptSubmitBtn {
@@ -1301,7 +1301,7 @@
         height: 2px;
     }
     .spaceTabs::-webkit-scrollbar-thumb {
-        background: #3f3f46;
+        background: var(--text-secondary);
     }
 
     .calendarNav {

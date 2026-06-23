@@ -3,6 +3,7 @@ import { Settings, User, CreditCard, Palette, Database, Info, LogOut, Download, 
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useTheme, Theme, Layout, ButtonStyle } from '../context/ThemeContext';
+import { useSecurity } from '../context/SecurityContext';
 import styles from './SettingsPage.module.css';
 import { AITimelinePage } from './AITimelinePage';
 
@@ -43,6 +44,11 @@ const SettingsPage: React.FC = () => {
     const [inviteEmail, setInviteEmail] = useState('');
     const [teamError, setTeamError] = useState<string | null>(null);
     const [teamAction, setTeamAction] = useState(false);
+
+    // Security state
+    const { pin, secondPassword, timeoutMinutes, accessLogs, setPin, setSecondPassword, setTimeoutMinutes } = useSecurity();
+    const [pinInput, setPinInput] = useState(pin || '');
+    const [passInput, setPassInput] = useState(secondPassword || '');
 
     useEffect(() => {
         window.api.app.info().then(res => {
@@ -157,6 +163,7 @@ const SettingsPage: React.FC = () => {
         { id: 'team',       label: 'Equipe',          icon: Users },
         { id: 'appearance', label: 'Aparência',       icon: Palette },
         { id: 'data',       label: 'Dados',           icon: Database },
+        { id: 'security',   label: 'Segurança',       icon: Shield },
         { id: 'aitimeline', label: 'Auditoria de IA', icon: Activity },
         { id: 'support',    label: 'Suporte e Ajuda', icon: LifeBuoy },
         { id: 'about',      label: 'Sobre',           icon: Info },
@@ -806,6 +813,130 @@ const SettingsPage: React.FC = () => {
                 {activeSection === 'aitimeline' && (
                     <section className={styles.section} style={{ maxWidth: '100%' }}>
                         <AITimelinePage />
+                    </section>
+                )}
+
+                {activeSection === 'security' && (
+                    <section className={styles.section}>
+                        <h2 className={styles.sectionTitle}>Segurança</h2>
+                        <p className={styles.sectionDesc}>Proteja o acesso ao aplicativo e veja o histórico de sessões.</p>
+
+                        <div className={styles.card}>
+                            <p className={styles.settingLabel} style={{ fontSize: '14px', marginBottom: '12px' }}>Autenticação de Acesso</p>
+                            
+                            <div className={styles.settingRow}>
+                                <div>
+                                    <p className={styles.settingLabel}>PIN de Segurança</p>
+                                    <p className={styles.settingHint}>Código numérico para bloqueio de tela</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="password" 
+                                        maxLength={4}
+                                        value={pinInput}
+                                        onChange={e => setPinInput(e.target.value.replace(/\D/g, ''))}
+                                        placeholder="0000"
+                                        className="w-24 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-center tracking-widest focus:outline-none focus:border-violet-500"
+                                    />
+                                    <button 
+                                        onClick={() => {
+                                            setPin(pinInput || null);
+                                            toast.success(pinInput ? 'PIN salvo com sucesso' : 'PIN removido');
+                                        }}
+                                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm transition-colors"
+                                    >
+                                        Salvar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className={styles.settingDivider} />
+
+                            <div className={styles.settingRow}>
+                                <div>
+                                    <p className={styles.settingLabel}>Senha Secundária</p>
+                                    <p className={styles.settingHint}>Senha alternativa para desbloqueio</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="password" 
+                                        value={passInput}
+                                        onChange={e => setPassInput(e.target.value)}
+                                        placeholder="Sua senha secreta"
+                                        className="w-40 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
+                                    />
+                                    <button 
+                                        onClick={() => {
+                                            setSecondPassword(passInput || null);
+                                            toast.success(passInput ? 'Senha salva com sucesso' : 'Senha removida');
+                                        }}
+                                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm transition-colors"
+                                    >
+                                        Salvar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className={styles.settingDivider} />
+
+                            <div className={styles.settingRow}>
+                                <div>
+                                    <p className={styles.settingLabel}>Tempo para bloqueio automático</p>
+                                    <p className={styles.settingHint}>Bloqueia a tela após inatividade</p>
+                                </div>
+                                <select 
+                                    value={timeoutMinutes}
+                                    onChange={e => {
+                                        setTimeoutMinutes(parseInt(e.target.value, 10));
+                                        toast.success('Tempo de bloqueio atualizado');
+                                    }}
+                                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-violet-500"
+                                >
+                                    <option value="0" className="bg-[#18181b]">Nunca</option>
+                                    <option value="1" className="bg-[#18181b]">1 minuto</option>
+                                    <option value="5" className="bg-[#18181b]">5 minutos</option>
+                                    <option value="15" className="bg-[#18181b]">15 minutos</option>
+                                    <option value="30" className="bg-[#18181b]">30 minutos</option>
+                                    <option value="60" className="bg-[#18181b]">1 hora</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className={styles.card}>
+                            <p className={styles.settingLabel} style={{ fontSize: '14px', marginBottom: '12px' }}>Histórico de Acessos</p>
+                            <p className={styles.settingHint} style={{ marginBottom: '16px' }}>Registro dos últimos desbloqueios e acessos ao aplicativo.</p>
+                            
+                            {accessLogs.length === 0 ? (
+                                <div className="text-center py-6 border border-dashed border-white/10 rounded-xl">
+                                    <p className="text-slate-500 text-sm">Nenhum acesso registrado ainda.</p>
+                                </div>
+                            ) : (
+                                <div className="overflow-hidden border border-white/10 rounded-xl">
+                                    <table className="w-full text-left text-sm text-slate-300">
+                                        <thead className="bg-white/5 text-xs text-slate-400">
+                                            <tr>
+                                                <th className="px-4 py-3 font-medium">Data / Hora</th>
+                                                <th className="px-4 py-3 font-medium">Endereço IP</th>
+                                                <th className="px-4 py-3 font-medium">Dispositivo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {accessLogs.slice(0, 10).map(log => (
+                                                <tr key={log.id} className="hover:bg-white/5 transition-colors">
+                                                    <td className="px-4 py-3 whitespace-nowrap">
+                                                        {new Date(log.timestamp).toLocaleString()}
+                                                    </td>
+                                                    <td className="px-4 py-3 font-mono text-xs">{log.ip}</td>
+                                                    <td className="px-4 py-3 truncate max-w-[200px]" title={log.device}>
+                                                        {log.device}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
                     </section>
                 )}
             </div>

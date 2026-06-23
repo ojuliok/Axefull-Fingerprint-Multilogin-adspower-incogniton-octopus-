@@ -17,7 +17,7 @@
   width: 100%;
   max-width: 520px;
   max-height: 78vh;
-  background: #09090b;
+  background: var(--bg-primary);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
@@ -38,13 +38,13 @@
 .headerTitle h2 {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--bg-primary);
   margin: 0;
 }
 
 .headerTitle p {
   font-size: 0.6875rem;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 700;
@@ -52,7 +52,7 @@
 }
 
 .closeBtn {
-  color: #64748b;
+  color: var(--text-tertiary);
   padding: 10px;
   border-radius: 12px;
   transition: all 0.2s;
@@ -79,7 +79,7 @@
   padding: 10px 14px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-disabled);
   transition: all 0.2s;
   background: transparent;
   border-bottom: 2px solid transparent;
@@ -92,7 +92,7 @@
 }
 
 .tabActive {
-  color: #f1f5f9 !important;
+  color: var(--bg-secondary) !important;
   border-bottom-color: #7c3aed !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -119,7 +119,7 @@
 .fieldGroup label {
   font-size: 0.6875rem;
   font-weight: 700;
-  color: #475569;
+  color: var(--text-disabled);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -129,7 +129,7 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   padding: 10px 14px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 0.875rem;
   transition: all 0.2s;
   width: 100%;
@@ -187,7 +187,7 @@
 }
 
 .removeNoteBtn {
-  color: #475569;
+  color: var(--text-disabled);
   padding: 4px;
   border-radius: 6px;
   transition: all 0.2s;
@@ -233,7 +233,7 @@
   border-radius: 12px;
   font-weight: 700;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-tertiary);
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.2s;
@@ -241,7 +241,7 @@
 
 .cancelBtn:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #f1f5f9;
+  color: var(--bg-secondary);
 }
 
 .saveBtn {
@@ -291,7 +291,7 @@
   display: block;
   font-size: 0.625rem;
   font-weight: 700;
-  color: #475569;
+  color: var(--text-disabled);
   text-transform: uppercase;
   margin-bottom: 4px;
 }
@@ -338,12 +338,12 @@
 .toggleText h4 {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
 }
 
 .toggleText p {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 .switch {
@@ -458,7 +458,7 @@ input:checked + .slider:before {
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 8px 14px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 0.8125rem;
   transition: all 0.2s;
 }

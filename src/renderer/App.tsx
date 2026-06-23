@@ -21,6 +21,10 @@ import ExtensionsModal from './components/Extensions/ExtensionsModal';
 import ProxiesModal from './components/Proxies/ProxiesModal';
 import GlobalTaskWidget from './components/GlobalTaskWidget';
 import { isWebMode } from './utils/env';
+import { PomodoroProvider } from './context/PomodoroContext';
+import FloatingPomodoro from './components/FloatingPomodoro';
+import { SecurityProvider } from './context/SecurityContext';
+import { LockScreen } from './components/Security/LockScreen';
 
 export type ViewType = 'profiles' | 'settings' | 'dadosclean' | 'canvas' | 'tasks' | 'download' | 'navegador';
 
@@ -207,6 +211,8 @@ function AppShell() {
             )}
 
             <GlobalTaskWidget />
+            <FloatingPomodoro />
+            <LockScreen />
         </div>
     );
 }
@@ -215,9 +221,13 @@ const App: React.FC = () => {
     return (
         <ThemeProvider>
             <AuthProvider>
-                <ToastProvider>
-                    <AppShell />
-                </ToastProvider>
+                <SecurityProvider>
+                    <ToastProvider>
+                        <PomodoroProvider>
+                            <AppShell />
+                        </PomodoroProvider>
+                    </ToastProvider>
+                </SecurityProvider>
             </AuthProvider>
         </ThemeProvider>
     );

@@ -16,7 +16,7 @@
   width: 100%;
   max-width: 700px;
   max-height: 80vh;
-  background: #09090b;
+  background: var(--bg-primary);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
   box-shadow: 0 30px 60px -10px rgba(0,0,0,0.7);
@@ -51,13 +51,13 @@
   flex-shrink: 0;
 }
 
-.title { font-size: 14px; font-weight: 700; color: #f1f5f9; margin: 0; }
-.subtitle { font-size: 11px; color: #475569; margin: 2px 0 0; }
+.title { font-size: 14px; font-weight: 700; color: var(--bg-secondary); margin: 0; }
+.subtitle { font-size: 11px; color: var(--text-disabled); margin: 2px 0 0; }
 
 .closeBtn {
   width: 30px; height: 30px;
   border-radius: 8px;
-  color: #64748b;
+  color: var(--text-tertiary);
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s;
 }
@@ -86,7 +86,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #475569;
+  color: var(--text-disabled);
   padding: 2px 6px 8px;
 }
 
@@ -99,8 +99,8 @@
   padding: 40px 20px;
   text-align: center;
 }
-.emptyState p { font-size: 13px; font-weight: 600; color: #475569; margin: 0; }
-.emptyState span { font-size: 11px; color: #334155; line-height: 1.5; }
+.emptyState p { font-size: 13px; font-weight: 600; color: var(--text-disabled); margin: 0; }
+.emptyState span { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
 .emptyIcon { color: #1e293b; margin-bottom: 4px; }
 
 .templateCard {
@@ -136,18 +136,18 @@
 }
 .tagBadge {
   display: flex; align-items: center; gap: 2px;
-  font-size: 9px; color: #475569; padding: 2px 5px;
+  font-size: 9px; color: var(--text-disabled); padding: 2px 5px;
   border-radius: 4px; background: rgba(255,255,255,0.03);
 }
-.metaDate { font-size: 9px; color: #334155; margin-left: auto; }
+.metaDate { font-size: 9px; color: var(--text-secondary); margin-left: auto; }
 
-.templateDesc { font-size: 10px; color: #334155; margin: 4px 0 0; line-height: 1.4; }
+.templateDesc { font-size: 10px; color: var(--text-secondary); margin: 4px 0 0; line-height: 1.4; }
 
 .templateActions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .chevron { color: #7c3aed; }
 .deleteBtn {
   width: 22px; height: 22px; border-radius: 6px;
-  color: #475569;
+  color: var(--text-disabled);
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s; flex-shrink: 0;
 }
@@ -168,19 +168,19 @@
   justify-content: center; gap: 6px;
   height: 100%; text-align: center;
 }
-.emptyConfig p { font-size: 12px; font-weight: 600; color: #334155; margin: 0; }
+.emptyConfig p { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 0; }
 .emptyConfig span { font-size: 10px; color: #1e293b; }
 
 .field { display: flex; flex-direction: column; gap: 6px; }
-.fieldLabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; }
-.fieldHint { font-size: 10px; color: #334155; margin: 2px 0 0; }
+.fieldLabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-disabled); }
+.fieldHint { font-size: 10px; color: var(--text-secondary); margin: 2px 0 0; }
 
 .input {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 9px;
   padding: 9px 12px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 12px;
   width: 100%;
   transition: border-color 0.15s;
@@ -203,7 +203,7 @@
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 9px;
   padding: 7px 12px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 13px; font-weight: 600;
   text-align: center;
 }
@@ -218,7 +218,7 @@
 }
 .previewLabel { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #6d28d9; margin: 0 0 4px; }
 .previewName { font-size: 13px; font-weight: 700; color: #e2e8f0; margin: 0 0 2px; }
-.previewDetail { font-size: 11px; color: #64748b; margin: 0; }
+.previewDetail { font-size: 11px; color: var(--text-tertiary); margin: 0; }
 
 .createBtn {
   display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -233,4 +233,4 @@
 .createBtn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .createBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-.empty { font-size: 12px; color: #334155; padding: 20px; text-align: center; }
+.empty { font-size: 12px; color: var(--text-secondary); padding: 20px; text-align: center; }

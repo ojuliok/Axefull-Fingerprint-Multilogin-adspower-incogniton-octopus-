@@ -100,3 +100,21 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     details TEXT,
     integrity_hash TEXT NOT NULL
 );
+
+-- 8. User Security Settings
+CREATE TABLE IF NOT EXISTS user_security_settings (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    pin_hash TEXT,
+    password_hash TEXT,
+    lock_timeout_minutes INTEGER DEFAULT 5,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 9. User Access Logs
+CREATE TABLE IF NOT EXISTS user_access_logs (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    ip_address TEXT,
+    device_info TEXT,
+    accessed_at TIMESTAMPTZ DEFAULT NOW()
+);

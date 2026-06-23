@@ -6,7 +6,7 @@
 .container {
   width: 100%;
   height: 100%;
-  background: #ffffff; /* Tema Claro */
+  background: var(--bg-card); /* Tema Claro */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -19,8 +19,11 @@
   display: flex;
   flex-direction: column;
   padding: 24px 36px 0;
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 10;
   flex-shrink: 0;
 }
 
@@ -307,7 +310,7 @@
 .searchInput:focus {
   border-color: #a78bfa;
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.08);
-  background: #ffffff;
+  background: var(--bg-card);
 }
 
 @media (max-width: 768px) {
@@ -356,7 +359,7 @@
 }
 
 .viewToggleActive {
-  background: #ffffff;
+  background: var(--bg-card);
   color: #4f46e5;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
@@ -465,7 +468,7 @@
   flex-direction: column;
   height: 220px;
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid #e5e7eb;
   cursor: pointer;
   overflow: hidden;
@@ -541,7 +544,7 @@
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
@@ -684,7 +687,7 @@
   align-items: center;
   gap: 16px;
   padding: 14px 20px;
-  background: #ffffff;
+  background: var(--bg-card);
   border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -897,7 +900,7 @@
 
 .tableMoreBtn:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: #a1a1aa;
+  color: var(--text-disabled);
 }
 
 /* ── Context Menu ── */
@@ -1166,7 +1169,7 @@
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
-  color: #e4e4e7;
+  color: var(--border-default);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -1197,7 +1200,7 @@
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #a1a1aa;
+  color: var(--text-disabled);
   font-size: 11px;
 }
 
@@ -1239,7 +1242,7 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
-  color: #a1a1aa;
+  color: var(--text-disabled);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -1248,7 +1251,7 @@
 
 .repositionBtnCancel:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: #e4e4e7;
+  color: var(--border-default);
 }
 
 /* ── Preview Modal / Side Drawer (Novo) ── */
@@ -1278,7 +1281,7 @@
 
 .previewPanel {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-card);
   display: flex;
   flex-direction: column;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
@@ -1310,7 +1313,7 @@
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid #f3f4f6;
-  background: #ffffff;
+  background: var(--bg-card);
   flex-shrink: 0;
 }
 
@@ -1617,7 +1620,7 @@
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   color: #374151;
-  background: #ffffff;
+  background: var(--bg-card);
   outline: none;
   font-size: 13.5px;
   font-family: inherit;
@@ -1672,7 +1675,7 @@
 }
 
 .whimsicalButtonsHeader:hover {
-  color: #ffffff;
+  color: var(--bg-card);
   background-color: #111827;
 }
 

@@ -390,7 +390,7 @@
 
 .documentInfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .documentName { font-size: 13px; font-weight: 600; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.documentType { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+.documentType { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* ── Embed / Browser Node ── */
 .embedContainer {
@@ -398,7 +398,7 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-    background: #0f172a;
+    background: var(--text-primary);
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -457,7 +457,7 @@
     border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     background: rgba(15, 23, 42, 0.4);
-    color: #64748b;
+    color: var(--text-tertiary);
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -495,7 +495,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #09090b 0%, #111116 100%);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #111116 100%);
     padding: 24px;
     text-align: center;
 }
@@ -533,7 +533,7 @@
 
 .browserCoverUrl {
     font-size: 12px;
-    color: #71717a;
+    color: var(--text-tertiary);
     word-break: break-all;
     max-height: 36px;
     overflow: hidden;
@@ -575,7 +575,7 @@
 
 .browserCoverHint {
     font-size: 10px;
-    color: #475569;
+    color: var(--text-disabled);
     margin-top: 2px;
 }
 
@@ -639,7 +639,7 @@
 
 .linkCardUrl {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -696,7 +696,7 @@
 .pasteLinkCloseBtn {
     background: transparent;
     border: none;
-    color: #475569;
+    color: var(--text-disabled);
     cursor: pointer;
     width: 24px;
     height: 24px;
@@ -714,7 +714,7 @@
 
 .pasteLinkSub {
     font-size: 12px;
-    color: #71717a;
+    color: var(--text-tertiary);
     background: rgba(9, 9, 11, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.03);
     padding: 8px 12px;
@@ -782,7 +782,7 @@
 .pasteLinkOptionName {
     font-size: 13.5px;
     font-weight: 600;
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .pasteLinkOptionDesc {
@@ -805,7 +805,7 @@
     width: 100%;
     height: 100%;
     border: none;
-    background: #ffffff;
+    background: var(--bg-card);
 }
 
 /* ── Node Toolbar ── */
@@ -965,7 +965,7 @@
 
 /* ── Text Color Picker ── */
 .textColorSection { display: flex; align-items: center; gap: 6px; padding-left: 4px; }
-.textColorLabel { color: #64748b; display: flex; align-items: center; flex-shrink: 0; }
+.textColorLabel { color: var(--text-tertiary); display: flex; align-items: center; flex-shrink: 0; }
 .textColorPicker { display: flex; align-items: center; gap: 3px; }
 
 .textColorDot {
@@ -979,7 +979,7 @@
 /* ── Central Dock (Grouped Toolbars) ── */
 .canvasDock {
     position: absolute;
-    top: 20px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1037,13 +1037,13 @@
     align-items: center;
 }
 .dockPopover {
-    position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(-12px);
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(12px);
     display: flex; gap: 4px; padding: 6px;
     background: rgba(20, 20, 28, 0.95); backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6); z-index: 60;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.6); z-index: 60;
     opacity: 0; visibility: hidden; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-top: 8px;
+    margin-bottom: 8px;
 }
 @media (max-width: 768px) {
     .dockPopover {
@@ -1198,8 +1198,8 @@
 /* ── zoomControls (Floating bottom-left zoom controls) ── */
 .zoomControls {
     position: absolute;
-    bottom: 24px;
-    left: 20px;
+    top: 130px;
+    right: 16px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -1253,7 +1253,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     display: flex; flex-direction: column; padding: 12px;
-    color: #f1f5f9; overflow: hidden;
+    color: var(--bg-secondary); overflow: hidden;
 }
 .checklistHeader {
     display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;
@@ -1283,10 +1283,10 @@
     font-size: 13px; line-height: 1.4; resize: none; overflow: hidden; outline: none;
 }
 .checklistItem.checked textarea {
-    text-decoration: line-through; color: #64748b;
+    text-decoration: line-through; color: var(--text-tertiary);
 }
 .deleteChecklistItemBtn {
-    background: transparent; border: none; color: #64748b; cursor: pointer;
+    background: transparent; border: none; color: var(--text-tertiary); cursor: pointer;
     padding: 4px; border-radius: 4px; transition: all 0.15s ease;
     opacity: 0; pointer-events: none;
 }
@@ -1382,7 +1382,7 @@
     text-align: center; pointer-events: none; z-index: 2; opacity: 0.4;
 }
 .emptyHint svg { margin-bottom: 12px; opacity: 0.5; }
-.emptyHint p { font-size: 14px; color: #64748b; line-height: 1.5; }
+.emptyHint p { font-size: 14px; color: var(--text-tertiary); line-height: 1.5; }
 .emptyHint p strong { color: #94a3b8; }
 
 /* ── Drop Zone Overlay ── */
@@ -1400,7 +1400,7 @@
 .fontSizeDisplay {
     font-size: 10px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-tertiary);
     padding: 0 6px;
     user-select: none;
     min-width: 32px;
@@ -1511,7 +1511,7 @@
     width: 8px;
     height: 8px;
     background: #8b5cf6;
-    border: 1.5px solid #ffffff;
+    border: 1.5px solid var(--bg-card);
     border-radius: 50%;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     transition: transform 0.12s ease, background 0.12s ease;
@@ -1561,7 +1561,7 @@
     flex: 1;
     border: none;
     background: transparent;
-    color: #64748b;
+    color: var(--text-tertiary);
     font-size: 11px;
     font-weight: 700;
     padding: 6px;
@@ -1647,7 +1647,7 @@
 .noResults {
     grid-column: span 6;
     font-size: 11px;
-    color: #475569;
+    color: var(--text-disabled);
     text-align: center;
     padding-top: 20px;
 }
@@ -1753,7 +1753,7 @@
 .ctxMenuHeader {
     font-size: 10px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 6px 12px 4px;
@@ -1951,7 +1951,7 @@
 
 .funnelCardDesc {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-tertiary);
     line-height: 1.4;
 }
 
@@ -1977,7 +1977,7 @@
 
 .funnelArrow {
     font-size: 10px;
-    color: #475569;
+    color: var(--text-disabled);
 }
 
 /* ── Profile Picker Tags ── */
@@ -2005,7 +2005,7 @@
 .profileCountBadge {
     font-size: 10px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-tertiary);
     margin-left: auto;
 }
 
@@ -2013,7 +2013,7 @@
 .toolbarGroupLabel {
     font-size: 8px;
     font-weight: 800;
-    color: #475569;
+    color: var(--text-disabled);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     writing-mode: vertical-lr;
@@ -2085,7 +2085,7 @@
 .cardNodeTitle {
     font-size: 13px;
     font-weight: 600;
-    color: #f8fafc;
+    color: var(--bg-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2109,7 +2109,7 @@
     align-items: center;
     justify-content: space-between;
     font-size: 10px;
-    color: #64748b;
+    color: var(--text-tertiary);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding-top: 6px;
     margin-top: auto;
@@ -2132,7 +2132,7 @@
 
 .cardNodeBtn:hover {
     background: rgba(139, 92, 246, 0.25);
-    color: #ffffff;
+    color: var(--bg-card);
 }
 
 .cardNodeBadge {
@@ -2325,7 +2325,7 @@
     border: none;
     font-size: 24px;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--bg-primary);
     width: 100%;
     outline: none;
     padding: 4px 0;
@@ -2340,7 +2340,7 @@
 .cardSectionTitle {
     font-size: 11px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 8px;
@@ -2377,7 +2377,7 @@
 
 .editorToolbarBtn:hover {
     background: rgba(255, 255, 255, 0.06);
-    color: #f8fafc;
+    color: var(--bg-primary);
 }
 
 /* ── Rich Notepad Editor ── */
@@ -2418,7 +2418,7 @@
     width: 15px;
     height: 15px;
     border-radius: 4px;
-    border: 1px solid #475569;
+    border: 1px solid var(--text-disabled);
     background: transparent;
     cursor: pointer;
     appearance: none;
@@ -2450,12 +2450,12 @@
 }
 
 .checklistInput:focus {
-    color: #f8fafc;
+    color: var(--bg-primary);
 }
 
 .checklistInputChecked {
     text-decoration: line-through;
-    color: #64748b !important;
+    color: var(--text-tertiary) !important;
 }
 
 .addChecklistItemBtn {
@@ -2564,12 +2564,12 @@
 .commentAuthor {
     font-size: 11px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--bg-secondary);
 }
 
 .commentTime {
     font-size: 9px;
-    color: #475569;
+    color: var(--text-disabled);
 }
 
 .commentText {
@@ -2583,7 +2583,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #475569;
+    color: var(--text-disabled);
     font-size: 11px;
     gap: 8px;
     height: 100%;
@@ -2660,14 +2660,14 @@
 }
 
 .colorBubbleSelected {
-    border: 1.5px solid #ffffff;
+    border: 1.5px solid var(--bg-card);
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
 }
 
 /* ── Standard Control Buttons ── */
 .modeToggleBtn {
     background: rgba(255, 255, 255, 0.03);
-    color: #64748b;
+    color: var(--text-tertiary);
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 6px 10px;
     border-radius: 6px;
@@ -2699,7 +2699,7 @@
 .cardModalClose {
     background: transparent;
     border: none;
-    color: #64748b;
+    color: var(--text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -2932,7 +2932,7 @@
     flex-shrink: 0;
     width: 16px;
     height: 16px;
-    color: #64748b;
+    color: var(--text-tertiary);
     transition: color 0.12s;
 }
 
@@ -2986,7 +2986,7 @@
 .layerActions button {
     background: transparent;
     border: none;
-    color: #64748b;
+    color: var(--text-tertiary);
     cursor: pointer;
     border-radius: 3px;
     padding: 2px;
@@ -3045,9 +3045,9 @@
     width: 20px;
     height: 20px;
     background: #ef4444;
-    border: 2px solid #09090b;
+    border: 2px solid var(--bg-primary);
     border-radius: 50%;
-    color: #ffffff;
+    color: var(--bg-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3083,7 +3083,7 @@
     padding: 6px 12px;
     font-size: 10px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }

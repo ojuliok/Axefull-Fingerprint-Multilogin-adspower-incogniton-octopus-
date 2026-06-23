@@ -18,7 +18,7 @@ import {
 import InfiniteCanvas from '../components/Canvas/InfiniteCanvas';
 import CanvasHome from '../components/Canvas/CanvasHome';
 import CanvasRichText from '../components/Canvas/CanvasRichText';
-import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES } from '../components/Canvas/CanvasIcons';
+import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES, getDefaultIconForType } from '../components/Canvas/CanvasIcons';
 import { CRMCanvasView } from './MarketingPage';
 
 import styles from './CanvasPage.module.css';
@@ -672,7 +672,7 @@ const CanvasPage: React.FC = () => {
                             onClick={(e) => handleOpenSidebarEmojiPicker(e, canvas.id)}
                             title="Alterar ícone"
                         >
-                            <DynamicIcon name={canvas.icon || (isFolder ? 'Folder' : canvas.type === 'space' ? 'Folder' : canvas.type === 'page' ? 'FileText' : canvas.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={14} />
+                            <DynamicIcon name={canvas.icon || getDefaultIconForType(canvas.type)} size={14} />
                         </span>
 
                         {isSidebarExpanded && (
@@ -893,7 +893,7 @@ const CanvasPage: React.FC = () => {
                                         >
                                             <div className={`${styles.canvasItem} ${activeCanvasId === canvas.id ? styles.active : ''}`} style={{ paddingLeft: '20px' }} title={canvas.name}>
                                                 <span className={styles.canvasItemIcon}>
-                                                    <DynamicIcon name={canvas.icon || (canvas.type === 'folder' || canvas.type === 'space' ? 'Folder' : canvas.type === 'page' ? 'FileText' : canvas.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={14} />
+                                                    <DynamicIcon name={canvas.icon || getDefaultIconForType(canvas.type)} size={14} />
                                                 </span>
                                                 {isSidebarExpanded && <span className={styles.canvasItemName}>{canvas.name}</span>}
                                             </div>
@@ -1057,7 +1057,7 @@ const CanvasPage: React.FC = () => {
                         }}
                     />
                 ) : activeCanvasId ? (
-                    activeCanvasType === 'space' ? (
+                    (activeCanvasType === 'space' || activeCanvasType === 'folder') ? (
                         <CanvasHome
                             activeSpaceId={activeCanvasId}
                             canvasList={canvasList}

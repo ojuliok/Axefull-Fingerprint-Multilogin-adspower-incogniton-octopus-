@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { MoreHorizontal, FolderOpen, ArrowDown, ArrowUp } from 'lucide-react';
 import { CanvasInfo } from '../canvasStorage';
-import { DynamicIcon } from '../CanvasIcons';
+import { DynamicIcon, getDefaultIconForType } from '../CanvasIcons';
 import styles from '../CanvasHome.module.css';
 
 interface CanvasTableViewProps {
@@ -126,7 +126,8 @@ export const CanvasTableView: React.FC<CanvasTableViewProps> = ({
           {sortedCanvases.map((canvas) => {
             const childCount = getChildCount(canvas.id);
             const nodeCount = getNodeCount(canvas.id);
-            const icon = canvas.icon || '📋';
+            const isContainer = canvas.type === 'folder' || canvas.type === 'space';
+            const icon = canvas.icon || getDefaultIconForType(canvas.type);
 
             return (
               <tr

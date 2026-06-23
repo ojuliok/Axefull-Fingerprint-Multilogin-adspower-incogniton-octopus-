@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { CanvasInfo, getCanvasData } from './canvasStorage';
 import { CANVAS_ICONS, DynamicIcon } from './CanvasIcons';
+import NeuralBackground from './NeuralBackground';
 import { CanvasPreviewModal } from './Home/CanvasPreviewModal';
 import { CanvasTableView } from './Home/CanvasTableView';
 import { CanvasGridView } from './Home/CanvasGridView';
@@ -159,6 +160,8 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
   const spaces = useMemo(() => filteredCanvases.filter(c => c.type === 'space'), [filteredCanvases]);
   const otherItems = useMemo(() => filteredCanvases.filter(c => c.type !== 'space'), [filteredCanvases]);
+  const folders = useMemo(() => otherItems.filter(c => c.type === 'folder'), [otherItems]);
+  const regularItems = useMemo(() => otherItems.filter(c => c.type !== 'folder'), [otherItems]);
 
   // ── Focus rename input ──
   useEffect(() => {
@@ -178,7 +181,9 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
   const handleItemClick = useCallback((id: string) => {
     const item = canvasList.find(c => c.id === id);
-    if (previewOnClick || (item && (item.type === 'space' || item.type === 'folder'))) {
+    if (item && (item.type === 'space' || item.type === 'folder')) {
+      onSelectCanvas(id);
+    } else if (previewOnClick) {
       setActivePreviewId(id);
     } else {
       onSelectCanvas(id);
@@ -398,9 +403,81 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
     [contextMenu, canvasList, startRename, onDuplicateCanvas, onDeleteCanvas, triggerCoverUpload]
   );
 
+  const renderItemList = (items: CanvasInfo[]) => {
+    if (viewMode === 'grid') {
+      return (
+        <CanvasGridView
+          filteredCanvases={items}
+          renamingId={renamingId}
+          renameValue={renameValue}
+          setRenameValue={setRenameValue}
+          commitRename={commitRename}
+          startRename={startRename}
+          setActivePreviewId={handleItemClick}
+          handleContextMenu={handleContextMenu}
+          onSelectCanvas={onSelectCanvas}
+          openEmojiPicker={openEmojiPicker}
+          getChildCount={getChildCount}
+          getNodeCount={getNodeCount}
+          formatDate={formatDate}
+          repositioningId={repositioningId}
+          tempPosition={tempPosition}
+          handleRepositionStart={handleRepositionStart}
+          startReposition={startReposition}
+          saveReposition={saveReposition}
+          cancelReposition={cancelReposition}
+          triggerCoverUpload={triggerCoverUpload}
+          favorites={favorites}
+          toggleFavorite={toggleFavorite}
+          editingDescId={editingDescId}
+          descValue={descValue}
+          setDescValue={setDescValue}
+          commitDescEdit={commitDescEdit}
+          startDescEdit={startDescEdit}
+        />
+      );
+    } else if (viewMode === 'list') {
+      return (
+        <CanvasListView
+          filteredCanvases={items}
+          renamingId={renamingId}
+          renameValue={renameValue}
+          setRenameValue={setRenameValue}
+          commitRename={commitRename}
+          startRename={startRename}
+          setActivePreviewId={handleItemClick}
+          handleContextMenu={handleContextMenu}
+          onSelectCanvas={onSelectCanvas}
+          openEmojiPicker={openEmojiPicker}
+          favorites={favorites}
+          toggleFavorite={toggleFavorite}
+        />
+      );
+    } else {
+      return (
+        <CanvasTableView 
+          filteredCanvases={items}
+          renamingId={renamingId}
+          renameValue={renameValue}
+          setRenameValue={setRenameValue}
+          commitRename={commitRename}
+          startRename={startRename}
+          setActivePreviewId={handleItemClick}
+          handleContextMenu={handleContextMenu}
+          onSelectCanvas={onSelectCanvas}
+          openEmojiPicker={openEmojiPicker}
+          getChildCount={getChildCount}
+          getNodeCount={getNodeCount}
+          formatDate={formatDate}
+        />
+      );
+    }
+  };
+
   // ─── Render ────────────────────────────────────────
   return (
-    <div className={styles.container}>
+    <div className={styles.container} style={{ position: 'relative' }}>
+      <NeuralBackground color={activeSpace?.color} />
       {/* Workspace Header */}
       <div className={styles.workspaceHeader}>
         <div className={styles.workspaceHeaderTop}>
@@ -560,7 +637,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           </div>
 
       {/* Content */}
-      <div className={styles.content}>
+      <div className={styles.content} style={{ position: 'relative', zIndex: 1 }}>
         {!activeSpaceId && (
           <CanvasSpacesGrid
             spaces={spaces}
@@ -583,7 +660,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           />
         )}
 
-        {otherItems.length === 0 && spaces.length === 0 ? (
+        {otherItems.length === 0 && spaces.length === 0 && folders.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>
               <FileText size={32} />
@@ -594,83 +671,39 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
             <p className={styles.emptySubtitle}>
               {search
                 ? `Não encontramos nada com "${search}". Tente outro termo.`
-                : 'Crie seu primeiro espaço ou canvas para começar.'}
+                : activeSpaceId ? 'Crie sua primeira pasta ou objeto para começar.' : 'Crie seu primeiro espaço ou canvas para começar.'}
             </p>
             {!search && (
-              <button className={styles.emptyButton} onClick={() => onCreateItem && onCreateItem('space')}>
+              <button className={styles.emptyButton} onClick={() => onCreateItem && onCreateItem(activeSpaceId ? 'folder' : 'space')}>
                 <Plus size={18} />
-                Criar primeiro Espaço
+                {activeSpaceId ? 'Criar primeira Pasta' : 'Criar primeiro Espaço'}
+              </button>
+            )}
+            {/* Highlight Criar Objeto when inside a folder/space */}
+            {!search && activeSpaceId && (
+              <button className={styles.workspaceActionBtn} style={{ marginTop: '12px', justifyContent: 'center', padding: '10px 16px', background: 'transparent', border: '1px solid #e5e7eb', color: '#6b7280', fontSize: '14px' }} onClick={() => onCreateItem && onCreateItem('page')}>
+                <Plus size={16} /> Criar Objeto
               </button>
             )}
           </div>
-        ) : otherItems.length > 0 && (
+        ) : (folders.length > 0 || regularItems.length > 0) && (
           <>
-            {spaces.length > 0 && !activeSpaceId && (
-              <h2 className={styles.sectionTitle} style={{ marginTop: '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: '#18181b' }}>
-                <FileText size={18} /> Outros Arquivos
-              </h2>
+            {folders.length > 0 && (
+              <>
+                <h2 className={styles.sectionTitle} style={{ marginTop: activeSpaceId ? '0px' : '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: '#18181b' }}>
+                  <FolderOpen size={18} /> Pastas
+                </h2>
+                {renderItemList(folders)}
+              </>
             )}
-            {viewMode === 'grid' ? (
-              <CanvasGridView
-                filteredCanvases={otherItems}
-                renamingId={renamingId}
-                renameValue={renameValue}
-                setRenameValue={setRenameValue}
-                commitRename={commitRename}
-                startRename={startRename}
-                setActivePreviewId={handleItemClick}
-                handleContextMenu={handleContextMenu}
-                onSelectCanvas={onSelectCanvas}
-                openEmojiPicker={openEmojiPicker}
-                getChildCount={getChildCount}
-                getNodeCount={getNodeCount}
-                formatDate={formatDate}
-                repositioningId={repositioningId}
-                tempPosition={tempPosition}
-                handleRepositionStart={handleRepositionStart}
-                startReposition={startReposition}
-                saveReposition={saveReposition}
-                cancelReposition={cancelReposition}
-                triggerCoverUpload={triggerCoverUpload}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
-                editingDescId={editingDescId}
-                descValue={descValue}
-                setDescValue={setDescValue}
-                commitDescEdit={commitDescEdit}
-                startDescEdit={startDescEdit}
-              />
-            ) : viewMode === 'list' ? (
-              <CanvasListView
-                filteredCanvases={otherItems}
-                renamingId={renamingId}
-                renameValue={renameValue}
-                setRenameValue={setRenameValue}
-                commitRename={commitRename}
-                startRename={startRename}
-                setActivePreviewId={handleItemClick}
-                handleContextMenu={handleContextMenu}
-                onSelectCanvas={onSelectCanvas}
-                openEmojiPicker={openEmojiPicker}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
-              />
-            ) : (
-              <CanvasTableView 
-                filteredCanvases={otherItems}
-                renamingId={renamingId}
-                renameValue={renameValue}
-                setRenameValue={setRenameValue}
-                commitRename={commitRename}
-                startRename={startRename}
-                setActivePreviewId={handleItemClick}
-                handleContextMenu={handleContextMenu}
-                onSelectCanvas={onSelectCanvas}
-                openEmojiPicker={openEmojiPicker}
-            getChildCount={getChildCount}
-            getNodeCount={getNodeCount}
-            formatDate={formatDate}
-          />
+            
+            {regularItems.length > 0 && (
+              <>
+                <h2 className={styles.sectionTitle} style={{ marginTop: '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: '#18181b' }}>
+                  <FileText size={18} /> {folders.length > 0 || activeSpaceId ? 'Conteúdo' : 'Outros Arquivos'}
+                </h2>
+                {renderItemList(regularItems)}
+              </>
             )}
           </>
         )}

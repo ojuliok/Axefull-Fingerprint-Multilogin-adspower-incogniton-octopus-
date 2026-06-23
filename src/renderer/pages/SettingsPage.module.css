@@ -1,7 +1,7 @@
 .page {
   display: flex;
   height: 100%;
-  background: #09090b;
+  background: var(--bg-primary);
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -31,7 +31,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #475569;
+  color: var(--text-disabled);
 }
 
 .navItem {
@@ -42,7 +42,7 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   background: none;
   border: none;
@@ -71,13 +71,13 @@
 .sectionTitle {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   margin: 0 0 4px;
 }
 
 .sectionDesc {
   font-size: 0.8rem;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 0 0 20px;
 }
 
@@ -123,7 +123,7 @@
   text-transform: uppercase;
 }
 
-.accountLimit { font-size: 11px; color: #475569; }
+.accountLimit { font-size: 11px; color: var(--text-disabled); }
 
 .dangerZone {
   margin-top: 24px;
@@ -174,7 +174,7 @@
   text-transform: capitalize;
 }
 
-.planDetail { font-size: 12px; color: #475569; margin: 0; }
+.planDetail { font-size: 12px; color: var(--text-disabled); margin: 0; }
 
 .planBadgeLarge {
   margin-left: auto;
@@ -220,7 +220,7 @@
 .settingDivider { height: 1px; background: rgba(255,255,255,0.04); margin: 16px 0; }
 
 .settingLabel { font-size: 13px; font-weight: 600; color: #cbd5e1; margin: 0 0 4px; }
-.settingHint  { font-size: 11px; color: #475569; margin: 0; }
+.settingHint  { font-size: 11px; color: var(--text-disabled); margin: 0; }
 
 .sizeGroup { display: flex; gap: 6px; flex-shrink: 0; }
 
@@ -231,7 +231,7 @@
   font-weight: 600;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.06);
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -277,7 +277,7 @@
 .dirPath {
   font-size: 11px;
   font-family: monospace;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 4px 0 0;
   word-break: break-all;
 }
@@ -292,12 +292,12 @@
   border-radius: 8px;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.06);
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.copyBtn:hover { color: #f1f5f9; }
+.copyBtn:hover { color: var(--bg-secondary); }
 
 .exportBtn {
   display: flex;
@@ -330,7 +330,7 @@
   gap: 4px;
 }
 
-.aboutLabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; }
+.aboutLabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-disabled); }
 .aboutValue { font-size: 13px; font-weight: 600; color: #94a3b8; font-family: monospace; }
 
 .aboutBrand { text-align: center; }
@@ -374,12 +374,12 @@
 
 .supportHint {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 0;
 }
 
 .supportArrow {
-  color: #475569;
+  color: var(--text-disabled);
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -402,7 +402,7 @@
   align-items: center;
   gap: 10px;
   padding: 24px;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 13px;
 }
 
@@ -445,7 +445,7 @@
 
 .teamEmptyHint {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 0 0 20px;
 }
 
@@ -470,7 +470,7 @@
 }
 
 .teamInput:focus { border-color: rgba(139,92,246,0.5); }
-.teamInput::placeholder { color: #475569; }
+.teamInput::placeholder { color: var(--text-disabled); }
 
 .teamCreateBtn {
   display: flex;
@@ -521,7 +521,7 @@
 
 .teamMeta {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 0;
 }
 
@@ -530,7 +530,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 0 0 14px;
 }
 
@@ -613,7 +613,7 @@
   border-radius: 8px;
   background: transparent;
   border: 1px solid transparent;
-  color: #475569;
+  color: var(--text-disabled);
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.15s;
@@ -762,7 +762,7 @@
 
 .layoutDesc {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin: 0;
   line-height: 1.4;
 }

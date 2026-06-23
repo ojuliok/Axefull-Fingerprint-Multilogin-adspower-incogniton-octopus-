@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Trash2, FolderOpen, Maximize2, Minimize2, X } from 'lucide-react';
 import { CanvasInfo, getCanvasData } from '../canvasStorage';
-import { DynamicIcon } from '../CanvasIcons';
+import { DynamicIcon, getDefaultIconForType } from '../CanvasIcons';
 import styles from '../CanvasHome.module.css';
 
 interface CanvasPreviewModalProps {
@@ -41,7 +41,7 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
 }) => {
   const properties = previewCanvas.properties || {};
   const notes = previewCanvas.notes || '';
-  const icon = previewCanvas.icon || (previewCanvas.type === 'space' || previewCanvas.type === 'folder' ? 'Folder' : '📋');
+  const icon = previewCanvas.icon || getDefaultIconForType(previewCanvas.type);
   
   const isContainer = previewCanvas.type === 'space' || previewCanvas.type === 'folder';
   const isPage = previewCanvas.type === 'page';
@@ -284,7 +284,7 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
                         setActivePreviewId(null);
                       }}
                     >
-                      <DynamicIcon name={child.icon || (child.type === 'space' || child.type === 'folder' ? 'Folder' : child.type === 'page' ? 'FileText' : child.type === 'table' ? 'KanbanSquare' : 'LayoutDashboard')} size={16} />
+                      <DynamicIcon name={child.icon || getDefaultIconForType(child.type)} size={16} />
                       <span style={{ fontSize: '13px', fontWeight: 500, color: '#3f3f46' }}>{child.name}</span>
                       <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#a1a1aa', textTransform: 'capitalize', background: '#f4f4f5', padding: '2px 6px', borderRadius: '4px' }}>
                         {child.type}

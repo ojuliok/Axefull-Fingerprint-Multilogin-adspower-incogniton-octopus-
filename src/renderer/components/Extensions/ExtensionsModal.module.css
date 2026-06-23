@@ -16,7 +16,7 @@
 }
 
 .modal {
-  background: #0f172a;
+  background: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 20px;
   width: 540px;
@@ -43,13 +43,13 @@
 .title {
   font-size: 16px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   margin: 0;
 }
 
 .subtitle {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 3px 0 0;
 }
 
@@ -60,14 +60,14 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  color: #475569;
+  color: var(--text-disabled);
   transition: all 0.15s;
   flex-shrink: 0;
 }
 
 .closeBtn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: #f1f5f9;
+  color: var(--bg-secondary);
 }
 
 .notice {
@@ -165,13 +165,13 @@
 
 .extMeta {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-disabled);
   margin-top: 2px;
 }
 
 .extDesc {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-tertiary);
   margin-top: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -186,7 +186,7 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  color: #475569;
+  color: var(--text-disabled);
   transition: all 0.15s;
   flex-shrink: 0;
 }
@@ -212,7 +212,7 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-tertiary);
   border: 1px solid rgba(255, 255, 255, 0.06);
   transition: all 0.2s;
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { MoreHorizontal, Layers, Folder, Plus } from 'lucide-react';
 import { CanvasInfo } from '../canvasStorage';
-import { DynamicIcon } from '../CanvasIcons';
+import { DynamicIcon, getDefaultIconForType } from '../CanvasIcons';
 import styles from './CanvasSpaces.module.css';
 
 interface CanvasSpacesGridProps {
@@ -41,7 +41,7 @@ export const CanvasSpacesGrid: React.FC<CanvasSpacesGridProps> = ({
       <div className={styles.spacesGrid}>
         {spaces.map((space) => {
           const childCount = getChildCount(space.id);
-          const icon = space.icon || 'Folder';
+          const icon = space.icon || getDefaultIconForType(space.type);
           
           // Generate a background color based on coverPosition or fallback to default
           const hasColor = space.color && space.color.trim() !== '';

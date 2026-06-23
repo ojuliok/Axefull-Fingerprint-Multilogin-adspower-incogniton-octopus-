@@ -42,6 +42,21 @@ export const ICON_CATEGORIES = [
 
 export const CANVAS_ICONS = ICON_CATEGORIES.flatMap(cat => cat.icons);
 
+export const getDefaultIconForType = (type?: string) => {
+    switch (type) {
+        case 'space':
+        case 'folder':
+            return 'Folder';
+        case 'page':
+            return 'FileText';
+        case 'table':
+            return 'KanbanSquare';
+        case 'canvas':
+        default:
+            return 'LayoutDashboard';
+    }
+};
+
 interface DynamicIconProps {
     name?: string;
     size?: number;

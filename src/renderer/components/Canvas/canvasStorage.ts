@@ -227,7 +227,40 @@ export function moveCanvasItem(id: string, targetId: string, position: 'before' 
     const itemIndex = list.findIndex(c => c.id === id);
     if (itemIndex === -1) return;
 
+    // Função auxiliar para evitar dependência circular (um item não pode entrar dentro de seu próprio filho/descendente)
+    const isDescendant = (potentialParentId: string | undefined, ancestorId: string) => {
+        let currentId = potentialParentId;
+        while (currentId) {
+            if (currentId === ancestorId) return true;
+            const currentItem = list.find(c => c.id === currentId);
+            if (!currentItem) break;
+            currentId = currentItem.parentId;
+        }
+        return false;
+    };
+
+    const targetItem = list.find(c => c.id === targetId);
+    if (!targetItem) return;
+
+    let newParentId: string | undefined;
+    if (position === 'inside') {
+        newParentId = targetId;
+    } else {
+        newParentId = targetItem.parentId;
+    }
+
     const item = list[itemIndex];
+
+    // Espaços NUNCA devem ter um parentId. Eles devem ficar sempre na raiz.
+    if (item.type === 'space' && newParentId !== undefined) {
+        return; // Impede que o espaço entre dentro de uma pasta/canvas ou herde parentId
+    }
+
+    // Impede dependência circular: não podemos mover um item para dentro dele mesmo ou de um descendente
+    if (newParentId !== undefined && isDescendant(newParentId, id)) {
+        return;
+    }
+
     list.splice(itemIndex, 1); // remove from current position
 
     if (position === 'inside') {
@@ -238,19 +271,19 @@ export function moveCanvasItem(id: string, targetId: string, position: 'before' 
             list.splice(firstChildIndex, 0, item);
         } else {
             // Target has no children yet, just put it right after the target folder
-            const targetIndex = list.findIndex(c => c.id === targetId);
-            list.splice(targetIndex !== -1 ? targetIndex + 1 : 0, 0, item);
+            const newTargetIndex = list.findIndex(c => c.id === targetId);
+            list.splice(newTargetIndex !== -1 ? newTargetIndex + 1 : 0, item);
         }
     } else {
-        const targetIndex = list.findIndex(c => c.id === targetId);
-        if (targetIndex !== -1) {
+        const newTargetIndex = list.findIndex(c => c.id === targetId);
+        if (newTargetIndex !== -1) {
             // Inherit the parentId from the sibling we're dropping next to
-            item.parentId = list[targetIndex].parentId;
+            item.parentId = list[newTargetIndex].parentId;
             
             if (position === 'before') {
-                list.splice(targetIndex, 0, item);
+                list.splice(newTargetIndex, 0, item);
             } else {
-                list.splice(targetIndex + 1, 0, item);
+                list.splice(newTargetIndex + 1, 0, item);
             }
         } else {
             list.push(item);

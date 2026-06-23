@@ -17,7 +17,7 @@
   max-width: 95vw;
   height: 80vh;
   max-height: 800px;
-  background: #09090b;
+  background: var(--bg-primary);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 24px 60px rgba(0,0,0,0.7);
@@ -65,13 +65,13 @@
 .title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   margin: 0;
 }
 
 .subtitle {
   font-size: 0.75rem;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 2px 0 0;
 }
 
@@ -109,12 +109,12 @@
   border-radius: 10px;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.06);
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.refreshBtn:hover { color: #f1f5f9; background: rgba(255,255,255,0.06); }
+.refreshBtn:hover { color: var(--bg-secondary); background: rgba(255,255,255,0.06); }
 
 .body {
   flex: 1;
@@ -130,7 +130,7 @@
   height: 100%;
   min-height: 300px;
   text-align: center;
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 0.875rem;
 }
 
@@ -148,7 +148,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #475569;
+  color: var(--text-disabled);
 }
 
 .tableRow {
@@ -215,9 +215,9 @@
 }
 
 .host { color: #94a3b8; }
-.port { color: #475569; }
+.port { color: var(--text-disabled); }
 
-.cellUser { font-size: 12px; color: #64748b; }
+.cellUser { font-size: 12px; color: var(--text-tertiary); }
 
 .cellStatus {
   display: flex;
@@ -226,7 +226,7 @@
   gap: 5px;
 }
 
-.statusIdle { color: #475569; }
+.statusIdle { color: var(--text-disabled); }
 
 .statusTesting {
   display: flex;
@@ -268,12 +268,12 @@
   border-radius: 7px;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.05);
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.actionBtn:hover { color: #f1f5f9; background: rgba(255,255,255,0.07); }
+.actionBtn:hover { color: var(--bg-secondary); background: rgba(255,255,255,0.07); }
 .actionBtn:disabled { opacity: 0.4; cursor: default; }
 
 .actionDanger:hover { color: #f87171; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
@@ -308,7 +308,7 @@
 .editHeader h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   margin: 0;
 }
 
@@ -321,7 +321,7 @@
   border-radius: 8px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
-  color: #64748b;
+  color: var(--text-tertiary);
   cursor: pointer;
 }
 
@@ -346,7 +346,7 @@
 .editField label {
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -357,7 +357,7 @@
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s;
@@ -384,14 +384,14 @@
   border-radius: 10px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
-  color: #64748b;
+  color: var(--text-tertiary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.cancelBtn:hover { color: #f1f5f9; }
+.cancelBtn:hover { color: var(--bg-secondary); }
 
 .saveBtn {
   display: flex;
@@ -427,20 +427,20 @@
   padding: 11px 16px;
   font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-disabled);
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   transition: all 0.15s;
 }
 .tabBtn:hover { color: #94a3b8; }
-.tabBtnActive { color: #f1f5f9 !important; border-bottom-color: #7c3aed !important; }
+.tabBtnActive { color: var(--bg-secondary) !important; border-bottom-color: #7c3aed !important; }
 
 .tabCount {
   font-size: 10px;
   padding: 1px 6px;
   border-radius: 10px;
   background: rgba(255,255,255,0.05);
-  color: #475569;
+  color: var(--text-disabled);
   font-weight: 700;
 }
 
@@ -466,7 +466,7 @@
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 7px;
-  color: #64748b;
+  color: var(--text-tertiary);
   padding: 4px 8px;
   cursor: pointer;
   max-width: 130px;
@@ -475,14 +475,14 @@
 /* ── Bulk Import ── */
 .importHint {
   font-size: 11px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 0 0 8px;
 }
 
 .importExample {
   display: block;
   font-size: 10px;
-  color: #334155;
+  color: var(--text-secondary);
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.05);
   border-radius: 8px;
@@ -497,7 +497,7 @@
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 10px;
   padding: 10px 12px;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   font-size: 12px;
   font-family: monospace;
   resize: vertical;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Star, FolderOpen, MoreHorizontal } from 'lucide-react';
 import { CanvasInfo } from '../canvasStorage';
-import { DynamicIcon } from '../CanvasIcons';
+import { DynamicIcon, getDefaultIconForType } from '../CanvasIcons';
 import styles from '../CanvasHome.module.css';
 
 interface CanvasListViewProps {
@@ -36,7 +36,7 @@ export const CanvasListView: React.FC<CanvasListViewProps> = ({
   return (
     <div className={styles.list}>
       {filteredCanvases.map((canvas) => {
-        const icon = canvas.icon || '📋';
+        const icon = canvas.icon || getDefaultIconForType(canvas.type);
 
         return (
           <div

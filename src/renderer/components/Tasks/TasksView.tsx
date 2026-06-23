@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu as MenuIcon, ChevronLeft, ChevronRight, Plus, Search, Settings, Grid, CheckCircle2, Circle, MoreVertical, Calendar as CalendarIcon, List as ListIcon, Maximize2, Minimize2, Play, Pause, RotateCcw, Edit, PlayCircle, Trash2 } from 'lucide-react';
+import { Menu as MenuIcon, ChevronLeft, ChevronRight, Plus, Search, Settings, Grid, CheckCircle2, Circle, MoreVertical, Calendar as CalendarIcon, List as ListIcon, Maximize2, Minimize2, Play, Pause, RotateCcw, Edit, PlayCircle, Trash2, Pin } from 'lucide-react';
 import { format, addMonths, subMonths, addDays, addWeeks, subWeeks, subDays, isSameDay, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import styles from './TasksView.module.css';
@@ -9,6 +9,7 @@ import TasksCalendarTimeline from './TasksCalendarTimeline';
 import TasksCalendarMonthView from './TasksCalendarMonthView';
 import TasksKanbanView from './TasksKanbanView';
 import CustomDatePicker from './CustomDatePicker';
+import { usePomodoro } from '../../context/PomodoroContext';
 
 const TasksView: React.FC = () => {
     const [tasks, setTasks] = useState<TaskData[]>([]);
@@ -54,48 +55,11 @@ const TasksView: React.FC = () => {
 
     const miniCalDays = getMiniCalDays();
 
-    const [pomodoroMode, setPomodoroMode] = useState<'work' | 'short' | 'long'>('work');
-    const [pomodoroSeconds, setPomodoroSeconds] = useState(25 * 60);
-    const [isPomodoroRunning, setIsPomodoroRunning] = useState(false);
-
-    const getSecondsForMode = (mode: 'work' | 'short' | 'long') => {
-        if (mode === 'work') return 25 * 60;
-        if (mode === 'short') return 5 * 60;
-        return 15 * 60;
-    };
-
-    const handleModeChange = (mode: 'work' | 'short' | 'long') => {
-        setPomodoroMode(mode);
-        setIsPomodoroRunning(false);
-        setPomodoroSeconds(getSecondsForMode(mode));
-    };
-
-    const formatPomodoroTime = (seconds: number) => {
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
-
-    useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
-        if (isPomodoroRunning) {
-            interval = setInterval(() => {
-                setPomodoroSeconds(prev => {
-                    if (prev <= 1) {
-                        setIsPomodoroRunning(false);
-                        alert(pomodoroMode === 'work' ? 'Hora de descansar!' : 'Hora de focar!');
-                        return getSecondsForMode(pomodoroMode);
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        } else {
-            if (interval) clearInterval(interval);
-        }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [isPomodoroRunning, pomodoroMode]);
+    const { 
+        pomodoroMode, pomodoroSeconds, isPomodoroRunning, setIsPomodoroRunning, setPomodoroMode,
+        activeTask, setActiveTask, handleModeChange, getSecondsForMode, formatPomodoroTime,
+        isFloating, setIsFloating
+    } = usePomodoro();
 
     useEffect(() => {
         setTasks(getTasksData());
@@ -347,56 +311,86 @@ const TasksView: React.FC = () => {
                     </div>
 
                     {/* Pomodoro Timer */}
-                    <div className={styles.pomodoroSidebarSection}>
-                        <div className={styles.pomodoroSidebarHeader}>
-                            <span>⏱️ Pomodoro</span>
-                            <span style={{ fontSize: '11px', color: '#a1a1aa' }}>
-                                {pomodoroMode === 'work' ? 'Foco' : pomodoroMode === 'short' ? 'Pausa Curta' : 'Pausa Longa'}
-                            </span>
+                    {!isFloating && (
+                        <div 
+                            className={styles.pomodoroSidebarSection}
+                            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                try {
+                                    const task = JSON.parse(e.dataTransfer.getData('application/json'));
+                                    if (task && task.id) {
+                                        setActiveTask(task);
+                                        setIsPomodoroRunning(true);
+                                        setPomodoroMode('work');
+                                    }
+                                } catch (err) {}
+                            }}
+                        >
+                            <div className={styles.pomodoroSidebarHeader}>
+                                <span>⏱️ Pomodoro</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '11px', color: '#a1a1aa' }}>
+                                        {pomodoroMode === 'work' ? 'Foco' : pomodoroMode === 'short' ? 'Pausa Curta' : 'Pausa Longa'}
+                                    </span>
+                                    <button 
+                                        title="Fixar (Flutuante)"
+                                        onClick={() => setIsFloating(true)}
+                                        style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: 0 }}
+                                    >
+                                        <Pin size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className={styles.pomodoroSidebarTimer}>
+                                {formatPomodoroTime(pomodoroSeconds)}
+                            </div>
+                            {activeTask && (
+                                <div style={{ marginBottom: '12px', fontSize: '12px', color: '#c084fc', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {activeTask.title}
+                                </div>
+                            )}
+                            <div className={styles.pomodoroSidebarModes}>
+                                <button 
+                                    className={`${styles.pomodoroSidebarModeBtn} ${pomodoroMode === 'work' ? styles.active : ''}`}
+                                    onClick={() => handleModeChange('work')}
+                                >
+                                    25 Min
+                                </button>
+                                <button 
+                                    className={`${styles.pomodoroSidebarModeBtn} ${pomodoroMode === 'short' ? styles.active : ''}`}
+                                    onClick={() => handleModeChange('short')}
+                                >
+                                    5 Min
+                                </button>
+                                <button 
+                                    className={`${styles.pomodoroSidebarModeBtn} ${pomodoroMode === 'long' ? styles.active : ''}`}
+                                    onClick={() => handleModeChange('long')}
+                                >
+                                    15 Min
+                                </button>
+                            </div>
+                            <div className={styles.pomodoroSidebarControls}>
+                                <button 
+                                    className={`${styles.pomodoroSidebarControlBtn} ${isPomodoroRunning ? styles.pause : styles.play}`}
+                                    onClick={() => setIsPomodoroRunning(!isPomodoroRunning)}
+                                >
+                                    {isPomodoroRunning ? <Pause size={12} /> : <Play size={12} />}
+                                    {isPomodoroRunning ? 'Pausar' : 'Iniciar'}
+                                </button>
+                                <button 
+                                    className={`${styles.pomodoroSidebarControlBtn} ${styles.reset}`}
+                                    onClick={() => {
+                                        setIsPomodoroRunning(false);
+                                        setPomodoroSeconds(getSecondsForMode(pomodoroMode));
+                                    }}
+                                >
+                                    <RotateCcw size={12} />
+                                    Reiniciar
+                                </button>
+                            </div>
                         </div>
-                        <div className={styles.pomodoroSidebarTimer}>
-                            {formatPomodoroTime(pomodoroSeconds)}
-                        </div>
-                        <div className={styles.pomodoroSidebarModes}>
-                            <button 
-                                className={`${styles.pomodoroSidebarModeBtn} ${pomodoroMode === 'work' ? styles.active : ''}`}
-                                onClick={() => handleModeChange('work')}
-                            >
-                                25 Min
-                            </button>
-                            <button 
-                                className={`${styles.pomodoroSidebarModeBtn} ${pomodoroMode === 'short' ? styles.active : ''}`}
-                                onClick={() => handleModeChange('short')}
-                            >
-                                5 Min
-                            </button>
-                            <button 
-                                className={`${styles.pomodoroSidebarModeBtn} ${pomodoroMode === 'long' ? styles.active : ''}`}
-                                onClick={() => handleModeChange('long')}
-                            >
-                                15 Min
-                            </button>
-                        </div>
-                        <div className={styles.pomodoroSidebarControls}>
-                            <button 
-                                className={`${styles.pomodoroSidebarControlBtn} ${isPomodoroRunning ? styles.pause : styles.play}`}
-                                onClick={() => setIsPomodoroRunning(!isPomodoroRunning)}
-                            >
-                                {isPomodoroRunning ? <Pause size={12} /> : <Play size={12} />}
-                                {isPomodoroRunning ? 'Pausar' : 'Iniciar'}
-                            </button>
-                            <button 
-                                className={`${styles.pomodoroSidebarControlBtn} ${styles.reset}`}
-                                onClick={() => {
-                                    setIsPomodoroRunning(false);
-                                    setPomodoroSeconds(getSecondsForMode(pomodoroMode));
-                                }}
-                            >
-                                <RotateCcw size={12} />
-                                Reiniciar
-                            </button>
-                        </div>
-                    </div>
+                    )}
                 </aside>
 
                 <main className={styles.googleMain}>
@@ -576,6 +570,8 @@ const TasksView: React.FC = () => {
                                             <div 
                                                 key={task.id} 
                                                 className={styles.taskListItem}
+                                                draggable={true}
+                                                onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(task)); }}
                                                 onClick={() => setSelectedTask(task)}
                                                 onContextMenu={(e) => { e.preventDefault(); setContextMenu({ type: 'task', id: task.id, x: e.clientX, y: e.clientY }); }}
                                             >
@@ -600,6 +596,7 @@ const TasksView: React.FC = () => {
                                                         title="Focar nesta tarefa (Pomodoro)"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            setActiveTask(task);
                                                             setIsPomodoroRunning(true);
                                                             setPomodoroMode('work');
                                                         }}
@@ -689,6 +686,8 @@ const TasksView: React.FC = () => {
                                                         <div 
                                                             key={task.id} 
                                                             className={styles.taskListItem}
+                                                            draggable={true}
+                                                            onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(task)); }}
                                                             onClick={() => setSelectedTask(task)}
                                                             onContextMenu={(e) => { e.preventDefault(); setContextMenu({ type: 'task', id: task.id, x: e.clientX, y: e.clientY }); }}
                                                         >
@@ -744,6 +743,8 @@ const TasksView: React.FC = () => {
                                             <div 
                                                 key={task.id} 
                                                 className={styles.taskListItem}
+                                                draggable={true}
+                                                onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(task)); }}
                                                 onClick={() => setSelectedTask(task)}
                                                 onContextMenu={(e) => { e.preventDefault(); setContextMenu({ type: 'task', id: task.id, x: e.clientX, y: e.clientY }); }}
                                             >

@@ -2516,10 +2516,20 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     // ── Minimapa Data Calculation ──
 
     const getMinimapData = () => {
-        let minX = -400;
-        let maxX = 1200;
-        let minY = -300;
-        let maxY = 900;
+        const container = containerRef.current;
+        const viewW = container ? container.clientWidth : 800;
+        const viewH = container ? container.clientHeight : 600;
+
+        const zoom = viewport?.zoom || 1;
+        const cx1 = -viewport.x / zoom;
+        const cy1 = -viewport.y / zoom;
+        const cx2 = cx1 + viewW / zoom;
+        const cy2 = cy1 + viewH / zoom;
+
+        let minX = cx1;
+        let maxX = cx2;
+        let minY = cy1;
+        let maxY = cy2;
 
         const validNodes = (nodes || []).filter(n => 
             n &&
@@ -2532,11 +2542,21 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         if (validNodes.length > 0) {
             const xs = validNodes.map(n => n.x);
             const ys = validNodes.map(n => n.y);
-            minX = Math.min(...xs) - 200;
-            maxX = Math.max(...validNodes.map(n => n.x + n.width)) + 200;
-            minY = Math.min(...ys) - 200;
-            maxY = Math.max(...validNodes.map(n => n.y + n.height)) + 200;
+            minX = Math.min(minX, ...xs);
+            maxX = Math.max(maxX, ...validNodes.map(n => n.x + n.width));
+            minY = Math.min(minY, ...ys);
+            maxY = Math.max(maxY, ...validNodes.map(n => n.y + n.height));
         }
+
+        // Apply a safe padding ratio so the viewport box is never exactly flush with the edges
+        // 10% padding of the bounds or at least 200px
+        const padX = Math.max(200, (maxX - minX) * 0.1);
+        const padY = Math.max(200, (maxY - minY) * 0.1);
+
+        minX -= padX;
+        maxX += padX;
+        minY -= padY;
+        maxY += padY;
 
         const mapW = 160;
         const mapH = 100;
@@ -2551,16 +2571,6 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         const offsetX = (mapW - boundsW * scale) / 2;
         const offsetY = (mapH - boundsH * scale) / 2;
 
-        const container = containerRef.current;
-        const viewW = container ? container.clientWidth : 800;
-        const viewH = container ? container.clientHeight : 600;
-
-        const zoom = viewport?.zoom || 1;
-        const cx1 = -viewport.x / zoom;
-        const cy1 = -viewport.y / zoom;
-        const cx2 = cx1 + viewW / zoom;
-        const cy2 = cy1 + viewH / zoom;
-
         let rx = (cx1 - minX) * scale + offsetX;
         let ry = (cy1 - minY) * scale + offsetY;
         let rw = (cx2 - cx1) * scale;
@@ -2573,8 +2583,8 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
 
         return {
             minX, minY, scale, offsetX, offsetY,
-            rx: Math.max(0, Math.min(mapW, rx)),
-            ry: Math.max(0, Math.min(mapH, ry)),
+            rx: Math.max(0, Math.min(mapW - 8, rx)),
+            ry: Math.max(0, Math.min(mapH - 8, ry)),
             rw: Math.max(8, Math.min(mapW, rw)),
             rh: Math.max(8, Math.min(mapH, rh)),
         };

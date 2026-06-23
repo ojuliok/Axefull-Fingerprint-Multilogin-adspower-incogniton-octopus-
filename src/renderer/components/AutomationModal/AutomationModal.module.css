@@ -10,7 +10,7 @@
 }
 
 .modal {
-  background: #0f172a;
+  background: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 20px;
   width: 580px;
@@ -36,13 +36,13 @@
 .title {
   font-size: 16px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--bg-secondary);
   margin: 0;
 }
 
 .subtitle {
   font-size: 12px;
-  color: #475569;
+  color: var(--text-disabled);
   margin: 3px 0 0;
 }
 
@@ -53,14 +53,14 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  color: #475569;
+  color: var(--text-disabled);
   transition: all 0.15s;
   flex-shrink: 0;
 }
 
 .closeBtn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: #f1f5f9;
+  color: var(--bg-secondary);
 }
 
 .body {
@@ -84,7 +84,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #475569;
+  color: var(--text-disabled);
 }
 
 .urlRow {
@@ -112,7 +112,7 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  color: #475569;
+  color: var(--text-disabled);
   transition: all 0.15s;
   flex-shrink: 0;
 }
@@ -137,7 +137,7 @@
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-disabled);
   transition: all 0.15s;
 }
 
@@ -181,7 +181,7 @@
   font-size: 12px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.06);
-  color: #64748b;
+  color: var(--text-tertiary);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.15s;
 }
@@ -193,7 +193,7 @@
 
 .hint {
   font-size: 12px;
-  color: #334155;
+  color: var(--text-secondary);
   margin: 0;
   text-align: center;
 }

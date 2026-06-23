@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: #09090b;
+    background: var(--bg-primary);
     overflow: hidden;
     animation: fadeIn 0.25s ease;
 }
@@ -45,14 +45,14 @@
 .appTitle {
     font-size: 20px;
     font-weight: 700;
-    color: #f1f5f9;
+    color: var(--bg-secondary);
     letter-spacing: -0.3px;
     line-height: 1.2;
 }
 
 .appSubtitle {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-tertiary);
     font-weight: 500;
     margin-top: 1px;
 }
@@ -81,7 +81,7 @@
     border-radius: 7px;
     border: none;
     background: transparent;
-    color: #64748b;
+    color: var(--text-tertiary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -160,7 +160,7 @@
 
 .dropSub {
     font-size: 11px;
-    color: #475569;
+    color: var(--text-disabled);
     line-height: 1.5;
 }
 
@@ -187,7 +187,7 @@
 .fileListTitle {
     font-size: 11px;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-disabled);
     text-transform: uppercase;
     letter-spacing: 0.07em;
 }
@@ -264,7 +264,7 @@
 
 .fileMeta {
     font-size: 11px;
-    color: #475569;
+    color: var(--text-disabled);
     margin-top: 1px;
 }
 
@@ -278,7 +278,7 @@
     border-radius: 50%;
 }
 
-.statusPending  { background: #475569; }
+.statusPending  { background: var(--text-disabled); }
 .statusLoading  { background: #f59e0b; animation: pulse 1s infinite; }
 .statusDone     { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.5); }
 .statusError    { background: #ef4444; }
@@ -294,7 +294,7 @@
     border-radius: 5px;
     background: none;
     border: none;
-    color: #475569;
+    color: var(--text-disabled);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -323,7 +323,7 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    color: #334155;
+    color: var(--text-secondary);
     text-align: center;
     padding: 40px;
 }
@@ -340,8 +340,8 @@
     margin-bottom: 4px;
 }
 
-.emptyTitle { font-size: 15px; font-weight: 600; color: #475569; }
-.emptySub   { font-size: 12px; color: #334155; }
+.emptyTitle { font-size: 15px; font-weight: 600; color: var(--text-disabled); }
+.emptySub   { font-size: 12px; color: var(--text-secondary); }
 
 /* ─── Detail Panel ─────────────────────────────────────────────────────────────── */
 
@@ -370,12 +370,12 @@
 .detailFileName {
     font-size: 14px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--bg-secondary);
 }
 
 .detailFileMeta {
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-tertiary);
     margin-top: 2px;
 }
 
@@ -461,7 +461,7 @@
 .metaSectionTitle {
     font-size: 11px;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-disabled);
     text-transform: uppercase;
     letter-spacing: 0.07em;
     margin-bottom: 12px;
@@ -554,7 +554,7 @@
     justify-content: center;
     gap: 10px;
     padding: 40px;
-    color: #475569;
+    color: var(--text-disabled);
     font-size: 13px;
 }
 
@@ -656,7 +656,7 @@
 .historyTitle {
     font-size: 14px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--bg-secondary);
 }
 
 .historyList {
@@ -699,7 +699,7 @@
 
 .historyInfo { flex: 1; min-width: 0; }
 .historyName { font-size: 13px; font-weight: 600; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.historyMeta { font-size: 11px; color: #475569; margin-top: 2px; }
+.historyMeta { font-size: 11px; color: var(--text-disabled); margin-top: 2px; }
 
 .historyBadge {
     display: inline-flex;
@@ -732,7 +732,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    color: #334155;
+    color: var(--text-secondary);
     text-align: center;
 }
 
@@ -749,7 +749,7 @@
 
 .bottomStats {
     font-size: 12px;
-    color: #475569;
+    color: var(--text-disabled);
 }
 
 .bottomRight {

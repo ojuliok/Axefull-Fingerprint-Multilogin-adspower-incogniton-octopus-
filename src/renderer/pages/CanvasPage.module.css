@@ -7,7 +7,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #09090b;
+    background: var(--bg-primary);
 }
 
 /* ── Minimalist Sidebar ── */
@@ -18,7 +18,7 @@
     min-width: 56px;
     display: flex;
     flex-direction: column;
-    background: #18181b; /* ClickUp style dark background */
+    background: var(--text-primary); /* ClickUp style dark background */
     border-right: 1px solid rgba(255, 255, 255, 0.04);
     transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
@@ -39,9 +39,9 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #a1a1aa;
+    color: var(--text-disabled);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,7 +51,7 @@
 }
 .sidebarExpandFloat:hover {
     background: #27272a;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     transform: scale(1.05);
 }
 
@@ -111,7 +111,7 @@
         left: 16px;
         width: 40px;
         height: 40px;
-        background: #18181b;
+        background: var(--text-primary);
         color: #fff;
         border-radius: 10px;
     }
@@ -181,7 +181,7 @@
 .sidebarSectionTitle {
     font-size: 11px;
     font-weight: 600;
-    color: #71717a;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     user-select: none;
@@ -213,12 +213,12 @@
     border-radius: 4px;
     border: none;
     background: transparent;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 .filterBtn:hover {
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     background: rgba(255, 255, 255, 0.08);
 }
 .filterBtn.active {
@@ -228,7 +228,7 @@
 
 
 .sectionAddBtn {
-    color: #a1a1aa;
+    color: var(--text-disabled);
     background: transparent;
     border: none;
     border-radius: 4px;
@@ -248,7 +248,7 @@
 
 .sectionAddBtn:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .sidebarList {
@@ -272,7 +272,7 @@
 
 .sidebarEmpty {
     font-size: 11px;
-    color: #475569;
+    color: var(--text-disabled);
     text-align: center;
     padding: 20px 8px;
     white-space: nowrap;
@@ -288,7 +288,7 @@
     border-radius: 6px;
     border: none;
     background: transparent;
-    color: #d4d4d8;
+    color: var(--border-hover);
     font-size: 13px;
     font-weight: 400;
     cursor: pointer;
@@ -304,7 +304,7 @@
 
 .sidebarBtn:hover {
     background: rgba(255, 255, 255, 0.06);
-    color: #f4f4f5;
+    color: var(--bg-secondary);
 }
 
 .sidebarBtn:active {
@@ -364,7 +364,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #a1a1aa;
+    color: var(--text-disabled);
 }
 
 .treeNode {
@@ -375,7 +375,7 @@
 }
 
 .folderToggle:hover {
-    color: #e4e4e7;
+    color: var(--border-default);
 }
 
 .canvasItem {
@@ -426,7 +426,7 @@
     flex: 1;
     font-size: 13px;
     font-weight: 400;
-    color: #d4d4d8;
+    color: var(--border-hover);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -440,7 +440,7 @@
 
 .canvasItemCount {
     font-size: 11px;
-    color: #71717a;
+    color: var(--text-tertiary);
     padding: 0 4px;
 }
 
@@ -511,7 +511,7 @@
 
 
 .breadcrumbSeparator {
-    color: #334155;
+    color: var(--text-secondary);
     font-size: 12px;
 }
 
@@ -522,7 +522,7 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    background: #09090b;
+    background: var(--bg-primary);
 }
 
 .exploreHeader {
@@ -577,13 +577,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #d4d4d8;
+    color: var(--border-hover);
 }
 
 .exploreCardTitle {
     font-size: 15px;
     font-weight: 500;
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -591,7 +591,7 @@
 
 .exploreCardMeta {
     font-size: 12px;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -697,13 +697,13 @@
     border-radius: 6px;
     border: none;
     background: transparent;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .headerBtn:hover {
-    color: #f4f4f5;
+    color: var(--bg-secondary);
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -721,7 +721,7 @@
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: #475569;
+    color: var(--text-disabled);
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -756,7 +756,7 @@
     justify-content: center;
     border: none;
     background: transparent;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     cursor: pointer;
     border-radius: 4px;
     transition: all 0.15s ease;
@@ -822,7 +822,7 @@
     padding: 8px 16px;
     border: none;
     background: transparent;
-    color: #e4e4e7;
+    color: var(--border-default);
     font-size: 13px;
     cursor: pointer;
     text-align: left;
@@ -830,7 +830,7 @@
 }
 
 .createMenuItem:hover {
-    background: #3f3f46;
+    background: var(--text-secondary);
 }
 
 .createMenuDivider {
@@ -894,7 +894,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #71717a;
+    color: var(--text-tertiary);
     margin-bottom: 8px;
     padding: 0 4px;
 }
@@ -919,7 +919,7 @@
     transition: all 0.12s ease;
     user-select: none;
     line-height: 1;
-    color: #d4d4d8;
+    color: var(--border-hover);
 }
 
 .emojiBtn:hover {
@@ -947,7 +947,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #71717a;
+    color: var(--text-tertiary);
     margin-bottom: 8px;
 }
 
@@ -992,7 +992,7 @@
 
 .modalContent {
     width: 400px;
-    background: #18181b;
+    background: var(--text-primary);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
@@ -1019,7 +1019,7 @@
 .modalCloseBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     cursor: pointer;
     transition: color 0.15s;
     display: flex;
@@ -1039,7 +1039,7 @@
 
 .modalLabel {
     font-size: 12px;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     margin-bottom: 8px;
     font-weight: 500;
 }
@@ -1072,7 +1072,7 @@
 .secondaryBtn {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #d4d4d8;
+    color: var(--border-hover);
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 13px;
@@ -1088,7 +1088,7 @@
 .cancelBtn {
     background: transparent;
     border: none;
-    color: #a1a1aa;
+    color: var(--text-disabled);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -1130,7 +1130,7 @@
 
 /* Premium Modal Overrides */
 .modalContentPremium {
-  background: #18181b; /* Fundo escuro sólido/levemente translúcido */
+  background: var(--text-primary); /* Fundo escuro sólido/levemente translúcido */
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   width: 480px;
@@ -1185,14 +1185,14 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #f4f4f5;
+  color: var(--bg-secondary);
   margin-bottom: 4px;
 }
 
 .modalHeaderText p {
   margin: 0;
   font-size: 13px;
-  color: #a1a1aa;
+  color: var(--text-disabled);
   line-height: 1.4;
 }
 
