@@ -36,7 +36,7 @@ export const FloatingBulkActions: React.FC<FloatingBulkActionsProps> = ({
                 <span className="text-sm font-medium text-slate-200">selecionados</span>
                 <button 
                     onClick={onClearSelection}
-                    className="p-1 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    className="p-1 hover:bg-theme-border rounded-lg text-theme-text-muted hover:text-theme-text transition-colors"
                     title="Limpar seleção"
                 >
                     <X size={14} />
@@ -50,19 +50,23 @@ export const FloatingBulkActions: React.FC<FloatingBulkActionsProps> = ({
                 <button onClick={onStop} className="flex items-center gap-2 px-3 py-1.5 hover:bg-amber-500/10 text-slate-300 hover:text-amber-400 rounded-lg transition-colors text-sm font-medium" title="Parar">
                     <StopCircle size={15} /> Parar
                 </button>
-                <button onClick={onClone} className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition-colors text-sm font-medium" title="Clonar">
-                    <Copy size={15} /> Clonar
+                <button onClick={onClone} className="flex items-center gap-2 px-3 py-1.5 hover:bg-theme-border text-theme-text-muted hover:text-theme-text rounded-lg transition-colors text-sm font-medium" title="Clonar">
+                    <Copy size={16} />
+                    <span>Clonar</span>
                 </button>
-                <button onClick={onFingerprint} className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition-colors text-sm font-medium" title="Nova Fingerprint">
-                    <Fingerprint size={15} /> Fingerprint
+                <button onClick={onFingerprint} className="flex items-center gap-2 px-3 py-1.5 hover:bg-theme-border text-theme-text-muted hover:text-theme-text rounded-lg transition-colors text-sm font-medium" title="Nova Fingerprint">
+                    <Fingerprint size={16} />
+                    <span>Nova FP</span>
                 </button>
-                <button onClick={onMoveToFolder} className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition-colors text-sm font-medium" title="Mover para Pasta">
-                    <FolderIcon size={15} /> Mover
+                <button onClick={onMoveToFolder} className="flex items-center gap-2 px-3 py-1.5 hover:bg-theme-border text-theme-text-muted hover:text-theme-text rounded-lg transition-colors text-sm font-medium" title="Mover para Pasta">
+                    <FolderInput size={16} />
+                    <span>Mover</span>
                 </button>
-                <button onClick={onExport} className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition-colors text-sm font-medium" title="Exportar">
-                    <Download size={15} /> Exportar
+                <button onClick={onExport} className="flex items-center gap-2 px-3 py-1.5 hover:bg-theme-border text-theme-text-muted hover:text-theme-text rounded-lg transition-colors text-sm font-medium" title="Exportar">
+                    <Download size={16} />
+                    <span>Exportar</span>
                 </button>
-                <div className="w-px h-6 bg-white/10 mx-1" />
+                <div className="w-px h-6 bg-theme-border mx-1" />
                 <button onClick={onDelete} className="flex items-center gap-2 px-3 py-1.5 hover:bg-red-500/10 text-slate-300 hover:text-red-400 rounded-lg transition-colors text-sm font-medium" title="Excluir">
                     <Trash2 size={15} /> Excluir
                 </button>

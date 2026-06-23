@@ -84,8 +84,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
 
     return (
         <aside className={`
-            flex flex-col relative z-20 transition-all duration-300 bg-transparent shrink-0
-            ${isSplitPanel ? 'w-[220px] border-r border-theme-border' : 'w-[64px]'}
+            flex flex-col relative z-20 transition-all duration-300 backdrop-blur-xl bg-theme-surface/60 shrink-0
+            ${isSplitPanel ? 'w-[220px] border-r border-theme-border/50 shadow-xl' : 'w-[64px] border-r border-theme-border/30'}
         `}>
             {/* Logo Area */}
             <div className={`h-14 flex items-center shrink-0 border-b border-transparent ${isSplitPanel ? 'px-4 gap-3' : 'justify-center'}`}>
@@ -138,9 +138,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                                 ${isActive ? 'bg-theme-card shadow-sm text-theme-text' : 'text-theme-text-muted hover:bg-theme-border'}
                             `}
                         >
-                            {/* Destaque lateral moderno para item ativo */}
+                            {/* Destaque lateral moderno para item ativo com glow premium */}
                             {isActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-blue-500 rounded-r-md" />
+                                <>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-primary)]/10 to-transparent rounded-lg pointer-events-none" />
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-[var(--brand-primary)] rounded-r-md shadow-[0_0_10px_var(--brand-primary)]" />
+                                </>
                             )}
 
                             <div className="relative flex items-center justify-center shrink-0">
@@ -188,7 +191,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                             `}
                         >
                             {isActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-blue-500 rounded-r-md" />
+                                <>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-primary)]/10 to-transparent rounded-lg pointer-events-none" />
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-[var(--brand-primary)] rounded-r-md shadow-[0_0_10px_var(--brand-primary)]" />
+                                </>
                             )}
                             <IconComponent 
                                 size={isSplitPanel ? 16 : 18} 
@@ -228,7 +234,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                     `}
                 >
                     {currentView === 'settings' && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-blue-500 rounded-r-md" />
+                        <>
+                            <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-primary)]/10 to-transparent rounded-lg pointer-events-none" />
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-[var(--brand-primary)] rounded-r-md shadow-[0_0_10px_var(--brand-primary)]" />
+                        </>
                     )}
                     <Settings 
                         size={isSplitPanel ? 16 : 18} 

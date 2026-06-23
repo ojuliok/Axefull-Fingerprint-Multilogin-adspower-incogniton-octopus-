@@ -21,20 +21,20 @@
 }
 
 .modalContent {
-    background: rgba(20, 20, 28, 0.85);
-    backdrop-filter: blur(24px);
+    background: var(--glass-bg);
+    backdrop-filter: blur(32px);
     width: 460px;
     max-width: 95vw;
     height: 650px;
     max-height: 85vh;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(139, 92, 246, 0.1);
+    box-shadow: var(--glass-shadow), 0 0 40px rgba(139, 92, 246, 0.1);
     pointer-events: auto;
-    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modalHeader {

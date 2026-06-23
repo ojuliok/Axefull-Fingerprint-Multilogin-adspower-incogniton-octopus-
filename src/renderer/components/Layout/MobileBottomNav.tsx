@@ -12,13 +12,13 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentView, o
     const { theme } = useTheme();
 
     const ITEMS = [
-        { id: 'navegador' as ViewType, label: 'Navegador', icon: Globe, colorClass: 'text-indigo-500' },
-        { id: 'canvas' as ViewType, label: 'Tela', icon: Monitor, colorClass: 'text-amber-500' },
-        { id: 'tasks' as ViewType, label: 'Tarefas', icon: CheckSquare, colorClass: 'text-blue-500' }
+        { id: 'navegador', label: 'Navegador', icon: Globe, colorClass: 'text-indigo-500' },
+        { id: 'canvas', label: 'Tela', icon: Monitor, colorClass: 'text-amber-500' },
+        { id: 'tasks', label: 'Tarefas', icon: CheckSquare, colorClass: 'text-blue-500' }
     ];
 
     return (
-        <div className="md:hidden flex items-center justify-around w-full h-[64px] border-t shrink-0 z-50 pb-safe bg-theme-base border-theme-border">
+        <div className="md:hidden flex items-center justify-around w-full h-[64px] border-t shrink-0 z-50 pb-safe backdrop-blur-xl bg-theme-surface/80 border-theme-border/50">
             {ITEMS.map(item => {
                 const isActive = currentView === item.id;
                 const Icon = item.icon;

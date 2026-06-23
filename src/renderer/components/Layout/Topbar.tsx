@@ -15,11 +15,10 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     const isLight = theme === 'light';
-    const bgClass = 'bg-transparent';
     const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'Axe';
 
     return (
-        <header className={`h-14 flex items-center justify-between px-4 shrink-0 transition-colors duration-300 ${bgClass}`}>
+        <header className={`h-14 flex items-center justify-between px-4 shrink-0 transition-colors duration-300 backdrop-blur-md bg-theme-surface/50 border-b border-theme-border/30 z-20`}>
             {/* Left side: Workspace / Branding */}
             <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-transparent transition-colors cursor-pointer hover:bg-theme-border">
@@ -37,7 +36,7 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
                     <input 
                         type="text" 
                         placeholder="Pesquisar..." 
-                        className="w-full h-9 pl-9 pr-12 rounded-lg border border-theme-border outline-none text-sm transition-all placeholder:text-theme-text-faint bg-theme-surface focus:bg-theme-base focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 text-theme-text"
+                        className="w-full h-9 pl-9 pr-12 rounded-lg border border-theme-border/50 outline-none text-sm transition-all placeholder:text-theme-text-faint bg-theme-base/50 backdrop-blur-sm focus:bg-theme-base focus:border-[var(--brand-primary)]/50 focus:ring-2 focus:ring-[var(--brand-primary)]/20 text-theme-text"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                         <kbd className="px-1.5 py-0.5 rounded text-[10px] font-medium border bg-theme-card border-theme-border text-theme-text-muted">Ctrl</kbd>
@@ -96,8 +95,8 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
 
                     {/* Profile Dropdown */}
                     {showProfileMenu && (
-                        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-theme-border shadow-xl py-1 z-50 bg-theme-card">
-                            <div className="px-4 py-3 border-b border-theme-border">
+                        <div className="absolute right-0 top-full mt-2 w-56 glass-card py-1 z-50 animate-fade-in-scale">
+                            <div className="px-4 py-3 border-b border-theme-border/50">
                                 <p className="text-sm font-semibold truncate text-theme-text">{user?.email}</p>
                                 <p className="text-xs mt-0.5 text-theme-text-muted">Plano: {user?.plan_label || user?.plan}</p>
                             </div>

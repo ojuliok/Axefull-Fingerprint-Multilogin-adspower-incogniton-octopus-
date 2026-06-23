@@ -155,8 +155,16 @@ export const LayoutManager: React.FC = () => {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-theme-base transition-colors duration-300">
-            {renderLayout()}
+        <div className="flex h-screen overflow-hidden bg-theme-base transition-colors duration-500 relative">
+            {/* Premium Animated Ambient Background */}
+            <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--brand-primary)]/10 blur-[100px] animate-pulse-slow"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--brand-secondary)]/10 blur-[100px] animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+            </div>
+
+            <div className="relative z-10 flex flex-1 w-full h-full">
+                {renderLayout()}
+            </div>
 
             {showExtensions && (
                 <ExtensionsModal onClose={() => setShowExtensions(false)} />
