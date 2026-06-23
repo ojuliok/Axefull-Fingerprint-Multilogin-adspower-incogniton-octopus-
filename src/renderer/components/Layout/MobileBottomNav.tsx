@@ -1,11 +1,11 @@
 import React from 'react';
 import { Monitor, CheckSquare, Globe } from 'lucide-react';
-import { ViewType } from '../../App';
+
 import { useTheme } from '../../context/ThemeContext';
 
 interface MobileBottomNavProps {
-    currentView: ViewType;
-    onViewChange: (view: ViewType) => void;
+    currentView: string;
+    onViewChange: (view: string) => void;
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentView, onViewChange }) => {

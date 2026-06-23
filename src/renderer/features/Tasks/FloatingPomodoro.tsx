@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, X, GripHorizontal, CheckCircle2 } from 'lucide-react';
-import { usePomodoro } from '../context/PomodoroContext';
+import { usePomodoro } from '../../context/PomodoroContext';
 
 const FloatingPomodoro: React.FC = () => {
     const {

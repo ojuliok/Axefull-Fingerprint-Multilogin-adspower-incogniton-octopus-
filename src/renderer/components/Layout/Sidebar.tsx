@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import {
     LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare
 } from 'lucide-react';
-import { ViewType } from '../../App';
+
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { isWebMode } from '../../utils/env';
 
 interface SidebarProps {
-    currentView: ViewType;
-    onViewChange: (view: ViewType) => void;
+    currentView: string;
+    onViewChange: (view: string) => void;
     onOpenExtensions: () => void;
 }
 

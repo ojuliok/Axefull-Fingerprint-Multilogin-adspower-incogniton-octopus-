@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { Profile, Folder } from '../../../types';
-import { useToast } from '../../../context/ToastContext';
-import { TagTemplate, FolderCustomization, DEFAULT_TAG_TEMPLATES } from '../../../utils/constants';
+import { Profile, Folder } from '../../types';
+import { useToast } from '../../context/ToastContext';
+import { TagTemplate, FolderCustomization, DEFAULT_TAG_TEMPLATES } from '../../utils/constants';
 
 interface DashboardContextType {
     profiles: Profile[];

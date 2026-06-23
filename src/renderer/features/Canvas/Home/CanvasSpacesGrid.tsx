@@ -96,7 +96,7 @@ export const CanvasSpacesGrid: React.FC<CanvasSpacesGridProps> = ({
                     <input
                       autoFocus
                       className={styles.folderName}
-                      style={{ width: '100%', border: '1px solid #e4e4e7', borderRadius: '4px', padding: '2px 4px', fontSize: '16px', fontWeight: 600, marginTop: '12px' }}
+                      style={{ width: '100%', border: '1px solid var(--border-default)', background: 'var(--bg-input)', color: 'var(--text-primary)', borderRadius: '4px', padding: '2px 4px', fontSize: '16px', fontWeight: 600, marginTop: '12px' }}
                       value={renameValue}
                       onChange={(e) => setRenameValue(e.target.value)}
                       onBlur={commitRename}

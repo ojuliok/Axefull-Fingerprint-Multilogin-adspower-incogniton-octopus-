@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Settings, Layout, Fingerprint, Tag, Trash2, Plus, Save, Edit2 } from 'lucide-react';
 import styles from './PropertiesModal.module.css';
-import { Profile } from '../../types';
+import { Profile } from '../../../types';
 
 interface TagTemplate {
     id: string;

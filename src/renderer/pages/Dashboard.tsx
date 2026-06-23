@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network } from 'lucide-react';
-import CreateProfileModal from '../components/ProfileEditor/CreateProfileModal';
-import PropertiesModal from '../components/ProfileEditor/PropertiesModal';
-import ProfileDetailModal from '../components/ProfileDetail/ProfileDetailModal';
-import AutomationModal from '../components/AutomationModal/AutomationModal';
-import TemplatesModal from '../components/Templates/TemplatesModal';
+import CreateProfileModal from '../features/Profiles/ProfileEditor/CreateProfileModal';
+import PropertiesModal from '../features/Profiles/ProfileEditor/PropertiesModal';
+import ProfileDetailModal from '../features/Profiles/ProfileDetail/ProfileDetailModal';
+import AutomationModal from '../features/AutomationModal/AutomationModal';
+import TemplatesModal from '../features/Templates/TemplatesModal';
 import { useToast } from '../context/ToastContext';
 import styles from './Dashboard.module.css';
-import { ProfileAIScore } from '../components/AI/ProfileAIScore';
+import { ProfileAIScore } from '../features/AI/ProfileAIScore';
 import { Profile, Folder } from '../types';
 
 import {
@@ -21,11 +21,11 @@ import {
     TagTemplate,
     FolderCustomization
 } from '../utils/constants';
-import { StatusPickerPopup } from '../components/Dashboard/StatusPickerPopup';
-import { TagPickerPopup } from '../components/Dashboard/TagPickerPopup';
-import { MiniSidebarItem as MiniItem } from '../components/Dashboard/MiniSidebarItem';
-import { FloatingBulkActions } from '../components/Dashboard/FloatingBulkActions';
-import { ResourceMonitor } from '../components/Dashboard/ResourceMonitor';
+import { StatusPickerPopup } from '../features/Dashboard/StatusPickerPopup';
+import { TagPickerPopup } from '../features/Dashboard/TagPickerPopup';
+import { MiniSidebarItem as MiniItem } from '../features/Dashboard/MiniSidebarItem';
+import { FloatingBulkActions } from '../features/Dashboard/FloatingBulkActions';
+import { ResourceMonitor } from '../features/Dashboard/ResourceMonitor';
 
 interface DashboardProps {
     onOpenExtensions?: () => void;

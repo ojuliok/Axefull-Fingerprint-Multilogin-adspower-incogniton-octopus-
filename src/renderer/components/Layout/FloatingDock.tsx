@@ -2,13 +2,13 @@ import React from 'react';
 import {
     LayoutGrid, Settings, Eraser, Puzzle, Monitor, Network, Sun, Moon, CheckSquare
 } from 'lucide-react';
-import { ViewType } from '../../App';
+
 import { useTheme } from '../../context/ThemeContext';
 import { isWebMode } from '../../utils/env';
 
 interface FloatingDockProps {
-    currentView: ViewType;
-    onViewChange: (view: ViewType) => void;
+    currentView: string;
+    onViewChange: (view: string) => void;
     onOpenExtensions: () => void;
     onOpenProxies: () => void;
 }

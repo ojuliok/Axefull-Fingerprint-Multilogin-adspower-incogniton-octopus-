@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Network, RefreshCw, Trash2, CheckCircle2, XCircle, Loader2, Globe, Edit3, X, Plus, Upload, LinkIcon } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { Profile } from '../types';
+import { Profile } from '../../types';
 import styles from './ProxiesModal.module.css';
 interface ProxyEntry {
     profileId: string;

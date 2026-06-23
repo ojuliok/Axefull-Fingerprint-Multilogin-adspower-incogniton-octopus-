@@ -5,8 +5,8 @@ import {
     Loader2, RefreshCw, Tag,
 } from 'lucide-react';
 import styles from './ProfileDetailModal.module.css';
-import { Profile } from '../../types';
-import { useToast } from '../../context/ToastContext';
+import { Profile } from '../../../types';
+import { useToast } from '../../../context/ToastContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

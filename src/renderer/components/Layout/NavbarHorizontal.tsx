@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import {
     LayoutGrid, Settings, Eraser, Puzzle, Monitor, Network, Sun, Moon, Bell, Search, CheckSquare
 } from 'lucide-react';
-import { ViewType } from '../../App';
+
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { isWebMode } from '../../utils/env';
 
 interface NavbarHorizontalProps {
-    currentView: ViewType;
-    onViewChange: (view: ViewType) => void;
+    currentView: string;
+    onViewChange: (view: string) => void;
     onOpenExtensions: () => void;
     onOpenProxies: () => void;
     runningProfilesCount: number;

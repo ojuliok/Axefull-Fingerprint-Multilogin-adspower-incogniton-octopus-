@@ -6,7 +6,7 @@ import {
     Check, Smile, AtSign, Settings, Trash, Eye, Lock, CheckSquare, Square
 } from 'lucide-react';
 import { MarketingPriority, LeadUpdate } from './marketingStorage';
-import { getTasksByCrmContact } from '../Tasks/tasksStorage';
+import { getTasksByCrmContact, TaskData } from '../Tasks/Tasks/tasksStorage';
 import { v4 as uuidv4 } from 'uuid';
 import { useTheme } from '../../context/ThemeContext';
 import { useCRMState } from './CRMContext';

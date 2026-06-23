@@ -5,11 +5,11 @@ import {
     X, Lock, Eye
 } from 'lucide-react';
 import styles from './MarketingPage.module.css';
-import KanbanBoard from '../components/Marketing/KanbanBoard';
-import CRMList from '../components/Marketing/CRMList';
-import LeadDetailModal from '../components/Marketing/LeadDetailModal';
-import { CRMProvider, useCRMState } from '../components/Marketing/CRMContext';
-import { MarketingSpace, MarketingFolder, MarketingBoard } from '../components/Marketing/marketingStorage';
+import KanbanBoard from '../features/Marketing/KanbanBoard';
+import CRMList from '../features/Marketing/CRMList';
+import LeadDetailModal from '../features/Marketing/LeadDetailModal';
+import { CRMProvider, useCRMState } from '../features/Marketing/CRMContext';
+import { MarketingSpace, MarketingFolder, MarketingBoard } from '../features/Marketing/marketingStorage';
 
 // ==========================================
 // CUSTOM POPUPS & MODALS (ClickUp Inspired)

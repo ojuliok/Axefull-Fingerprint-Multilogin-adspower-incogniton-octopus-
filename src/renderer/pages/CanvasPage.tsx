@@ -14,11 +14,11 @@ import {
     duplicateCanvas, getCanvasData,
     exportBackupData, importBackupData, exportCanvas, importCanvas,
     createFolder, moveCanvasItem
-} from '../components/Canvas/canvasStorage';
-import InfiniteCanvas from '../components/Canvas/InfiniteCanvas';
-import CanvasHome from '../components/Canvas/CanvasHome';
-import CanvasRichText from '../components/Canvas/CanvasRichText';
-import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES, getDefaultIconForType } from '../components/Canvas/CanvasIcons';
+} from '../features/Canvas/canvasStorage';
+import InfiniteCanvas from '../features/Canvas/InfiniteCanvas';
+import CanvasHome from '../features/Canvas/CanvasHome';
+import CanvasRichText from '../features/Canvas/CanvasRichText';
+import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES, getDefaultIconForType } from '../features/Canvas/CanvasIcons';
 import { CRMCanvasView } from './MarketingPage';
 
 import styles from './CanvasPage.module.css';

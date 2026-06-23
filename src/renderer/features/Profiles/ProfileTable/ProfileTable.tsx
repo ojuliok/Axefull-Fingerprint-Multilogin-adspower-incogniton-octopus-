@@ -1,6 +1,6 @@
 import React from 'react';
-import StatusBadge, { ProfileStatus } from '../StatusBadge/StatusBadge';
-import InlineNoteEditor from '../InlineNoteEditor/InlineNoteEditor';
+import StatusBadge, { ProfileStatus } from '../../../components/ui/StatusBadge/StatusBadge';
+import InlineNoteEditor from '../../Notes/InlineNoteEditor/InlineNoteEditor';
 
 interface Profile {
     id: string;

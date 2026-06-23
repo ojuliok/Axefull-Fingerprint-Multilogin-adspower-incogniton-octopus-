@@ -4,8 +4,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import styles from './TaskDetailModal.module.css';
 import { TaskData, updateTask, addTaskComment, setPinnedTaskId, Subtask, RecurringRule } from './tasksStorage';
-import { getMarketingData } from '../Marketing/marketingStorage';
-import { getCanvasList } from '../Canvas/canvasStorage';
+import { getMarketingData } from '../../Marketing/marketingStorage';
+import { getCanvasList } from '../../Canvas/canvasStorage';
 import CustomDatePicker from './CustomDatePicker';
 
 interface TaskDetailModalProps {

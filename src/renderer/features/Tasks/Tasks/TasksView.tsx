@@ -9,7 +9,7 @@ import TasksCalendarTimeline from './TasksCalendarTimeline';
 import TasksCalendarMonthView from './TasksCalendarMonthView';
 import TasksKanbanView from './TasksKanbanView';
 import CustomDatePicker from './CustomDatePicker';
-import { usePomodoro } from '../../context/PomodoroContext';
+import { usePomodoro } from '../../../context/PomodoroContext';
 
 const TasksView: React.FC = () => {
     const [tasks, setTasks] = useState<TaskData[]>([]);

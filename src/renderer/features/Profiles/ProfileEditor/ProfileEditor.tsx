@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X, Settings, Fingerprint, Globe, RotateCw, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import styles from './ProfileEditor.module.css';
-import { Profile } from '../../types';
-import { useToast } from '../../context/ToastContext';
+import { Profile } from '../../../types';
+import { useToast } from '../../../context/ToastContext';
 
 interface ProfileEditorProps {
     profile: Profile;

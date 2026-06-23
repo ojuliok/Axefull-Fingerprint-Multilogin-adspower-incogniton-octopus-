@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { TaskData } from '../components/Tasks/tasksStorage';
+import { TaskData } from '../features/Tasks/Tasks/tasksStorage';
 
 export type PomodoroMode = 'work' | 'short' | 'long';
 
