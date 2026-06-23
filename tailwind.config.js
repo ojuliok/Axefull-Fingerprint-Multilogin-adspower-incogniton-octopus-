@@ -19,6 +19,18 @@ export default {
                     900: '#7c2d12',
                     950: '#431407',
                 },
+                theme: {
+                    base: 'var(--bg-primary)',
+                    surface: 'var(--bg-secondary)',
+                    elevated: 'var(--bg-tertiary)',
+                    card: 'var(--bg-card)',
+                    'card-hover': 'var(--bg-card-hover)',
+                    border: 'var(--border-default)',
+                    'border-hover': 'var(--border-hover)',
+                    text: 'var(--text-primary)',
+                    'text-muted': 'var(--text-secondary)',
+                    'text-faint': 'var(--text-tertiary)'
+                },
                 dark: {
                     50: '#fafafa',
                     100: '#f4f4f5',

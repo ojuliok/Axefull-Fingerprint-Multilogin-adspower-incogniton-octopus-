@@ -26,7 +26,6 @@ const DEFAULT_ORDER = ['profiles', 'canvas', 'tasks', 'dadosclean'];
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExtensions }) => {
     const { theme, layout } = useTheme();
     const { toast } = useToast();
-    const isLight = theme === 'light';
     const isSplitPanel = layout === 'split-panel';
 
     // Drag and Drop State
@@ -83,15 +82,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
         localStorage.setItem('axe_sidebar_order', JSON.stringify(itemOrder));
     };
 
-    const sidebarBg = 'bg-transparent';
-    const dividerBg = isLight ? 'bg-black/[0.06]' : 'bg-white/[0.04]';
-
     return (
         <aside className={`
-            flex flex-col relative z-20 transition-all duration-300
-            ${isSplitPanel ? 'w-[220px]' : 'w-[64px]'} shrink-0
-            ${sidebarBg}
-            ${isSplitPanel ? (isLight ? 'border-r border-black/[0.05]' : 'border-r border-white/[0.04]') : ''}
+            flex flex-col relative z-20 transition-all duration-300 bg-transparent shrink-0
+            ${isSplitPanel ? 'w-[220px] border-r border-theme-border' : 'w-[64px]'}
         `}>
             {/* Logo Area */}
             <div className={`h-14 flex items-center shrink-0 border-b border-transparent ${isSplitPanel ? 'px-4 gap-3' : 'justify-center'}`}>
@@ -100,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                 </div>
                 {isSplitPanel && (
                     <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-300 tracking-tight leading-none">Axe Multi</span>
+                        <span className="text-xs font-bold text-theme-text-muted tracking-tight leading-none">Axe Multi</span>
                         <span className="text-[9px] text-emerald-400 font-semibold mt-0.5 leading-none">v1.0.0</span>
                     </div>
                 )}
@@ -141,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                                 flex rounded-lg transition-all relative group
                                 ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-3' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}
                                 ${isDragging ? 'opacity-30' : 'opacity-100'}
-                                ${isActive ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-[#1e293b] text-blue-400') : (isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.03]')}
+                                ${isActive ? 'bg-theme-card shadow-sm text-theme-text' : 'text-theme-text-muted hover:bg-theme-border'}
                             `}
                         >
                             {/* Destaque lateral moderno para item ativo */}
@@ -154,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                                     size={isSplitPanel ? 18 : 20} 
                                     strokeWidth={isActive ? 2.5 : 2} 
                                     className={`relative z-10 transition-transform duration-200
-                                        ${isActive ? item.colorClass : 'group-hover:scale-105 group-hover:text-slate-700 dark:group-hover:text-slate-300'}
+                                        ${isActive ? item.colorClass : 'group-hover:scale-105 group-hover:text-theme-text'}
                                     `} 
                                 />
                             </div>
@@ -169,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
 
             {/* Bottom Nav / Footer */}
             <div className={`mt-auto pb-4 flex flex-col gap-1.5 shrink-0 ${isSplitPanel ? 'px-3' : 'items-center px-2'}`}>
-                <div className={`w-full h-px mb-1.5 ${isSplitPanel ? 'bg-transparent' : dividerBg}`} />
+                <div className={`w-full h-px mb-1.5 ${isSplitPanel ? 'bg-transparent' : 'bg-theme-border'}`} />
 
                 {/* Desktop-only features */}
                 {['profiles', 'dadosclean'].map(key => {
@@ -190,7 +184,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                             className={`
                                 flex rounded-lg transition-all relative group
                                 ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-2.5' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}
-                                ${isActive ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-[#1e293b] text-blue-400') : (isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.03]')}
+                                ${isActive ? 'bg-theme-card shadow-sm text-theme-text' : 'text-theme-text-muted hover:bg-theme-border'}
                             `}
                         >
                             {isActive && (
@@ -200,7 +194,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                                 size={isSplitPanel ? 16 : 18} 
                                 strokeWidth={isActive ? 2.5 : 2} 
                                 className={`relative z-10 transition-transform duration-200
-                                    ${isActive ? item.colorClass : 'group-hover:scale-105 group-hover:text-slate-700 dark:group-hover:text-slate-300'}
+                                    ${isActive ? item.colorClass : 'group-hover:scale-105 group-hover:text-theme-text'}
                                 `} 
                             />
                             <span className={`tracking-tight ${isActive ? 'font-bold' : 'font-medium'} ${isSplitPanel ? 'text-xs' : 'text-[9px]'}`}>
@@ -215,9 +209,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                     <button
                         onClick={onOpenExtensions}
                         className={`
-                            flex rounded-lg transition-all relative group
+                            flex rounded-lg transition-all relative group text-theme-text-muted hover:bg-theme-border
                             ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-2.5' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}
-                            ${isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.03]'}
                         `}
                     >
                         <Puzzle size={isSplitPanel ? 16 : 18} strokeWidth={2} className="group-hover:scale-105 transition-transform" />
@@ -231,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                     className={`
                         flex rounded-lg transition-all relative group
                         ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-2.5' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}
-                        ${currentView === 'settings' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-[#1e293b] text-blue-400') : (isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.03]')}
+                        ${currentView === 'settings' ? 'bg-theme-card shadow-sm text-theme-text' : 'text-theme-text-muted hover:bg-theme-border'}
                     `}
                 >
                     {currentView === 'settings' && (
@@ -241,7 +234,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                         size={isSplitPanel ? 16 : 18} 
                         strokeWidth={currentView === 'settings' ? 2.5 : 2} 
                         className={`relative z-10 transition-transform duration-200
-                            ${currentView === 'settings' ? 'text-slate-400' : 'group-hover:scale-105'}
+                            ${currentView === 'settings' ? 'text-theme-text-faint' : 'group-hover:scale-105'}
                         `} 
                     />
                     <span className={`tracking-tight ${currentView === 'settings' ? 'font-bold' : 'font-medium'} ${isSplitPanel ? 'text-xs' : 'text-[9px]'}`}>

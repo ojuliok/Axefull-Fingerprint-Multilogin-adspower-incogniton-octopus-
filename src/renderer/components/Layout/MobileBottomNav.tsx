@@ -10,7 +10,6 @@ interface MobileBottomNavProps {
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentView, onViewChange }) => {
     const { theme } = useTheme();
-    const isLight = theme === 'light';
 
     const ITEMS = [
         { id: 'navegador' as ViewType, label: 'Navegador', icon: Globe, colorClass: 'text-indigo-500' },
@@ -19,14 +18,14 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentView, o
     ];
 
     return (
-        <div className={`md:hidden flex items-center justify-around w-full h-[64px] border-t shrink-0 z-50 pb-safe ${isLight ? 'bg-white border-black/[0.08]' : 'bg-[#18181b] border-white/[0.08]'}`}>
+        <div className="md:hidden flex items-center justify-around w-full h-[64px] border-t shrink-0 z-50 pb-safe bg-theme-base border-theme-border">
             {ITEMS.map(item => {
                 const isActive = currentView === item.id;
                 const Icon = item.icon;
                 return (
                     <button
                         key={item.id}
-                        className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive ? (isLight ? 'text-black' : 'text-white') : 'text-zinc-500'}`}
+                        className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive ? 'text-theme-text' : 'text-theme-text-muted hover:text-theme-text'}`}
                         onClick={() => {
                             if (isActive) {
                                 // Toggle the sidebar for the current view

@@ -37,14 +37,11 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     const isLight = theme === 'light';
-    const textClass = isLight ? 'text-slate-700' : 'text-slate-200';
-    const inputBg = isLight ? 'bg-black/[0.04] border-black/[0.05]' : 'bg-white/[0.04] border-white/[0.05]';
+    const textClass = 'text-theme-text';
     const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'Axe';
 
     return (
-        <header className={`h-16 flex items-center justify-between px-6 shrink-0 border-b border-white/[0.05] transition-colors duration-300 relative z-30
-            ${isLight ? 'bg-white border-black/[0.06]' : 'bg-[#0f0f14] border-white/[0.04]'}
-        `}>
+        <header className="h-16 flex items-center justify-between px-6 shrink-0 border-b border-theme-border transition-colors duration-300 relative z-30 bg-theme-base">
             {/* Left Section: Logo & Brand */}
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange('profiles')}>
@@ -77,11 +74,11 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                             }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
                                 ${isActive 
-                                    ? (isLight ? 'bg-black/[0.04] text-violet-600 shadow-sm' : 'bg-white/[0.05] text-violet-400') 
-                                    : (isLight ? 'text-slate-500 hover:bg-black/[0.02]' : 'text-slate-400 hover:bg-white/[0.02]')}
+                                    ? 'bg-theme-border text-violet-500 shadow-sm' 
+                                    : 'text-theme-text-muted hover:bg-theme-border'}
                             `}
                         >
-                            <IconComponent size={16} className={isActive ? item.colorClass : 'text-slate-400'} />
+                            <IconComponent size={16} className={isActive ? item.colorClass : 'text-theme-text-faint'} />
                             <span>{item.label}</span>
                         </button>
                     );
@@ -92,9 +89,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
             <div className="flex items-center gap-3">
                 {/* Active Profiles Badge */}
                 {runningProfilesCount > 0 && (
-                    <div className={`flex items-center gap-1.5 px-3 h-8 rounded-lg border
-                        ${isLight ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}
-                    `}>
+                    <div className="flex items-center gap-1.5 px-3 h-8 rounded-lg border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span className="text-xs font-semibold">{runningProfilesCount} Ativos</span>
                     </div>
@@ -104,9 +99,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                 <button
                     onClick={onOpenProxies}
                     title="Proxies"
-                    className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors
-                        ${isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.04]'}
-                    `}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
                 >
                     <Network size={16} />
                 </button>
@@ -115,9 +108,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                 <button
                     onClick={toggleTheme}
                     title="Tema"
-                    className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors
-                        ${isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.04]'}
-                    `}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
                 >
                     {isLight ? <Moon size={16} /> : <Sun size={16} />}
                 </button>
@@ -126,9 +117,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                 <button
                     onClick={onOpenExtensions}
                     title="Extensões"
-                    className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors
-                        ${isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.04]'}
-                    `}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
                 >
                     <Puzzle size={16} />
                 </button>
@@ -139,14 +128,14 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                     title="Configurações"
                     className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors
                         ${currentView === 'settings' 
-                            ? (isLight ? 'bg-black/[0.04] text-violet-600' : 'bg-white/[0.05] text-violet-400') 
-                            : (isLight ? 'text-slate-500 hover:bg-black/[0.04]' : 'text-slate-400 hover:bg-white/[0.04]')}
+                            ? 'bg-theme-border text-violet-500' 
+                            : 'text-theme-text-muted hover:bg-theme-border'}
                     `}
                 >
                     <Settings size={16} />
                 </button>
 
-                <div className={`w-px h-5 mx-1 ${isLight ? 'bg-black/10' : 'bg-white/10'}`} />
+                <div className="w-px h-5 mx-1 bg-theme-border" />
 
                 {/* User Dropdown */}
                 <div className="relative">
@@ -158,19 +147,15 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                     </button>
 
                     {showProfileMenu && (
-                        <div className={`absolute right-0 top-full mt-2 w-56 rounded-xl border shadow-xl py-1 z-50
-                            ${isLight ? 'bg-white border-black/10' : 'bg-[#18181b] border-white/10'}
-                        `}>
-                            <div className={`px-4 py-3 border-b ${isLight ? 'border-black/5' : 'border-white/5'}`}>
+                        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-theme-border shadow-xl py-1 z-50 bg-theme-card">
+                            <div className="px-4 py-3 border-b border-theme-border">
                                 <p className={`text-sm font-semibold truncate ${textClass}`}>{user?.email}</p>
-                                <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Plano: {user?.plan_label || user?.plan}</p>
+                                <p className="text-xs mt-0.5 text-theme-text-muted">Plano: {user?.plan_label || user?.plan}</p>
                             </div>
                             <div className="p-1">
                                 <button 
                                     onClick={logout}
-                                    className={`w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-red-500
-                                        ${isLight ? 'hover:bg-red-50' : 'hover:bg-red-500/10'}
-                                    `}
+                                    className="w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-red-500 hover:bg-red-500/10"
                                 >
                                     Sair
                                 </button>
@@ -186,3 +171,4 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
         </header>
     );
 };
+
