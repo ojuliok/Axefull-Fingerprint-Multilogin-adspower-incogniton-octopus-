@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
     StickyNote, Plus, Settings, Star, Trash2, Search, Lock, Unlock, 
     Folder, Send, X, Eye, Edit3, Copy, Check, Shield, ChevronLeft, ChevronRight,
-    ArrowRight, Menu, Bold, Italic, Heading, List, CheckSquare
+    ArrowRight, Menu, Bold, Italic, Heading, List, CheckSquare, Pin
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { useWorkspace } from '../context/WorkspaceContext';
+import NoteTiptapEditor from '../features/Notes/NoteTiptapEditor';
 
 // Interfaces for our Note System
 export interface Space {
@@ -40,6 +42,7 @@ const SPACE_ICONS = [
 
 const NotesPage: React.FC = () => {
     const { toast } = useToast();
+    const { setIsNotesFloating } = useWorkspace();
 
     // Notes Data States
     const [spaces, setSpaces] = useState<Space[]>([]);
@@ -960,28 +963,6 @@ const NotesPage: React.FC = () => {
                             </div>
 
                             <div className="flex items-center gap-2">
-                                {/* Toggle view mode */}
-                                <button
-                                    onClick={() => setIsEditMode(!isEditMode)}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                                        isEditMode
-                                            ? 'bg-amber-500 text-black border-amber-500'
-                                            : 'bg-theme-card border-theme-border text-theme-text-muted hover:text-theme-text'
-                                    }`}
-                                >
-                                    {isEditMode ? (
-                                        <>
-                                            <Eye size={13} />
-                                            <span>Visualizar Axefull Note</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Edit3 size={13} />
-                                            <span>Editar Código Fonte</span>
-                                        </>
-                                    )}
-                                </button>
-
                                 {/* Star Button */}
                                 <button
                                     onClick={() => handleToggleStar(activeNote.id)}
@@ -993,6 +974,15 @@ const NotesPage: React.FC = () => {
                                     title={activeNote.isStarred ? 'Remover dos Favoritos' : 'Marcar como Favorita'}
                                 >
                                     <Star size={14} fill={activeNote.isStarred ? 'currentColor' : 'none'} />
+                                </button>
+
+                                {/* Pin / Float Button */}
+                                <button
+                                    onClick={() => setIsNotesFloating(true)}
+                                    className="p-2 rounded-lg border bg-theme-card border-theme-border text-theme-text-muted hover:text-amber-500 hover:border-amber-500/50 transition-all"
+                                    title="Fixar como Widget Flutuante"
+                                >
+                                    <Pin size={14} />
                                 </button>
 
                                 {/* Delete note */}
@@ -1007,185 +997,11 @@ const NotesPage: React.FC = () => {
                         </div>
 
                         {/* Note Body */}
-                        <div className="flex-1 overflow-hidden relative flex flex-col">
-                            {isEditMode ? (
-                                /* RAW TEXTAREA EDITOR WITH MARKDOWN TOOLBAR */
-                                <div className="flex-1 flex flex-col h-full overflow-hidden">
-                                    
-                                    {/* Markdown Toolbar */}
-                                    <div className="px-6 py-2 border-b border-theme-border bg-theme-surface/40 flex items-center gap-1.5 select-none flex-wrap shrink-0">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleInsertMarkdown('bold')}
-                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-bold"
-                                            title="Negrito (**texto**)"
-                                        >
-                                            <Bold size={13} />
-                                            <span className="hidden sm:inline">Negrito</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleInsertMarkdown('italic')}
-                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
-                                            title="Itálico (*texto*)"
-                                        >
-                                            <Italic size={13} />
-                                            <span className="hidden sm:inline">Itálico</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleInsertMarkdown('heading')}
-                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
-                                            title="Título (## Título)"
-                                        >
-                                            <Heading size={13} />
-                                            <span className="hidden sm:inline">Título</span>
-                                        </button>
-                                        <div className="h-4 w-px bg-theme-border mx-1" />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleInsertMarkdown('code')}
-                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
-                                            title="Bloco de Código (```)"
-                                        >
-                                            <Copy size={13} />
-                                            <span className="hidden sm:inline">Código</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleInsertMarkdown('bullet')}
-                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
-                                            title="Lista Marcadores (- item)"
-                                        >
-                                            <List size={13} />
-                                            <span className="hidden sm:inline">Lista</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleInsertMarkdown('todo')}
-                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
-                                            title="Lista Tarefas (- [ ] tarefa)"
-                                        >
-                                            <CheckSquare size={13} />
-                                            <span className="hidden sm:inline">Tarefa</span>
-                                        </button>
-                                    </div>
-
-                                    <textarea
-                                        ref={textareaRef}
-                                        value={activeNote.content}
-                                        onChange={(e) => handleUpdateNoteContent(e.target.value)}
-                                        className="flex-1 w-full p-8 bg-theme-base text-sm focus:outline-none text-theme-text resize-none font-mono leading-relaxed overflow-y-auto"
-                                        placeholder="Escreva em markdown aqui..."
-                                    />
-                                </div>
-                            ) : (
-                                /* AXEFULL NOTE STYLE THREAD */
-                                <div 
-                                    onClick={handleBlockAreaClick}
-                                    className="flex-1 overflow-y-auto px-6 md:px-16 py-8 space-y-6 scrollbar-thin cursor-text select-none"
-                                >
-                                    
-                                    {/* Simulated System Message */}
-                                    <div className="flex gap-4 items-start max-w-3xl mx-auto p-4 rounded-xl bg-theme-surface/40 border border-theme-border/50 text-xs text-theme-text-muted select-none">
-                                        <div className="w-6 h-6 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0 text-amber-500 animate-pulse">
-                                            <Shield size={12} />
-                                        </div>
-                                        <div>
-                                            <span className="font-bold text-theme-text block mb-1">Axefull Note ativado</span>
-                                            Clique em qualquer lugar da nota para começar a escrever/editar. Use a caixa de inserção na parte inferior para adicionar novas anotações rapidamente.
-                                        </div>
-                                    </div>
-
-                                    {/* Render Blocks */}
-                                    <div className="max-w-3xl mx-auto space-y-6">
-                                        {parsedBlocks.length === 0 ? (
-                                            <div className="text-center py-12 text-theme-text-faint text-xs italic">
-                                                Esta nota está vazia. Clique para começar a escrever!
-                                            </div>
-                                        ) : (
-                                            parsedBlocks.map((block, index) => {
-                                                switch (block.type) {
-                                                    case 'h1':
-                                                        return <h1 key={block.key} className="text-2xl font-black text-theme-text border-b border-theme-border/60 pb-2 pt-4 select-text">{block.content}</h1>;
-                                                    case 'h2':
-                                                        return <h2 key={block.key} className="text-xl font-extrabold text-theme-text pt-3 select-text">{block.content}</h2>;
-                                                    case 'h3':
-                                                        return <h3 key={block.key} className="text-base font-bold text-theme-text pt-2 select-text">{block.content}</h3>;
-                                                    case 'todo':
-                                                        return (
-                                                            <div key={block.key} className="flex items-start gap-2.5 my-1 group/todo select-none">
-                                                                <input 
-                                                                    type="checkbox" 
-                                                                    checked={block.checked}
-                                                                    onChange={(e) => handleToggleTodo(index, block.content, block.checked || false)}
-                                                                    className="mt-1 h-4 w-4 rounded border-theme-border text-amber-500 focus:ring-amber-500/20 cursor-pointer"
-                                                                />
-                                                                <span className={`text-xs text-theme-text leading-relaxed select-text ${block.checked ? 'line-through text-theme-text-faint' : ''}`}>
-                                                                    {renderMarkdownInline(block.content)}
-                                                                </span>
-                                                            </div>
-                                                        );
-                                                    case 'bullet':
-                                                        return (
-                                                            <div key={block.key} className="flex items-start gap-2 pl-4 my-1">
-                                                                <span className="text-amber-500 mt-1 shrink-0 text-[10px]">•</span>
-                                                                <span className="text-xs text-theme-text leading-relaxed select-text">{renderMarkdownInline(block.content)}</span>
-                                                            </div>
-                                                        );
-                                                    case 'code':
-                                                        return (
-                                                            <div key={block.key} className="my-4 rounded-xl border border-theme-border overflow-hidden bg-zinc-950 font-mono text-[11px] shadow-md select-none">
-                                                                <div className="flex items-center justify-between px-4 py-1.5 bg-zinc-900 border-b border-zinc-800 text-zinc-400 select-none text-[9px] font-semibold">
-                                                                    <span>{block.language || 'code'}</span>
-                                                                    <button 
-                                                                        onClick={() => handleCopyCode(block.content, block.key)}
-                                                                        className="flex items-center gap-1 hover:text-zinc-200 transition-colors"
-                                                                    >
-                                                                        {copiedBlockKey === block.key ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
-                                                                        <span>{copiedBlockKey === block.key ? 'Copiado!' : 'Copiar'}</span>
-                                                                    </button>
-                                                                </div>
-                                                                <pre className="p-4 overflow-x-auto text-zinc-100 leading-relaxed scrollbar-thin select-text">
-                                                                    <code>{block.content}</code>
-                                                                </pre>
-                                                            </div>
-                                                        );
-                                                    default:
-                                                        return (
-                                                            <p key={block.key} className="text-xs text-theme-text leading-relaxed my-2 select-text text-justify">
-                                                                {renderMarkdownInline(block.content)}
-                                                            </p>
-                                                        );
-                                                }
-                                            })
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Easy Text Insertion input (Prompt Box) */}
-                            {!isEditMode && (
-                                <div className="p-4 border-t border-theme-border bg-theme-surface/50 backdrop-blur shrink-0 select-none">
-                                    <div className="max-w-3xl mx-auto flex items-end gap-2.5 bg-theme-card border border-theme-border rounded-xl p-2.5 shadow-sm focus-within:border-amber-500/60 focus-within:ring-2 focus-within:ring-amber-500/10 transition-all">
-                                        <textarea
-                                            value={inputText}
-                                            onChange={(e) => setInputText(e.target.value)}
-                                            onKeyDown={handleKeyPress}
-                                            rows={Math.min(5, inputText.split('\n').length || 1)}
-                                            placeholder="Inserir nota rápida... Digite texto ou código e envie. Shift+Enter para nova linha."
-                                            className="flex-1 bg-transparent text-xs text-theme-text focus:outline-none resize-none leading-relaxed px-2 py-1 scrollbar-none"
-                                        />
-                                        <button
-                                            onClick={handleInsertText}
-                                            disabled={!inputText.trim()}
-                                            className="p-2 rounded-lg bg-amber-500 text-black disabled:opacity-30 disabled:bg-theme-border hover:bg-amber-600 transition-all shrink-0 flex items-center justify-center shadow-sm"
-                                        >
-                                            <Send size={12} />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                        <div className="flex-1 overflow-hidden relative flex flex-col bg-theme-base">
+                            <NoteTiptapEditor 
+                                content={activeNote.content} 
+                                onChange={handleUpdateNoteContent} 
+                            />
                         </div>
                     </>
                 ) : (

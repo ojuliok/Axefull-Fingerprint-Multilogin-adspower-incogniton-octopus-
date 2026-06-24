@@ -1,12 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { addDays, addWeeks, addMonths, addYears } from 'date-fns';
 
-import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'COLOQUE_SUA_URL_AQUI';
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || 'COLOQUE_SUA_CHAVE_AQUI';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+import { supabase } from '../../../lib/supabase';
 
 // Helper for pushing to Supabase
 async function pushTaskSpaceToSupabase(space: TaskSpace, action: 'insert' | 'update' | 'remove') {

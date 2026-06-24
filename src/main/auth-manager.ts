@@ -79,6 +79,10 @@ export interface AuthResult {
     success: boolean;
     user?: AuthUser;
     error?: string;
+    session?: {
+        access_token: string;
+        refresh_token: string;
+    };
 }
 
 // ─── Auth actions (direto no Supabase) ─────────────────────────────────────────
@@ -140,7 +144,14 @@ export async function login(email: string, password: string): Promise<AuthResult
             refresh_token: data.session.refresh_token
         });
 
-        return { success: true, user };
+        return { 
+            success: true, 
+            user, 
+            session: { 
+                access_token: data.session.access_token, 
+                refresh_token: data.session.refresh_token 
+            } 
+        };
     } catch (err: any) {
         console.error('[Auth] login error:', err);
         return { success: false, error: err.message || 'Erro ao fazer login' };
@@ -196,7 +207,14 @@ export async function register(email: string, password: string, name?: string): 
                 email: user.email
             });
 
-            return { success: true, user };
+            return { 
+                success: true, 
+                user, 
+                session: { 
+                    access_token: data.session.access_token, 
+                    refresh_token: data.session.refresh_token 
+                } 
+            };
         } else {
             return { success: true, error: 'Confirme seu email para ativar a conta.' };
         }
@@ -276,7 +294,14 @@ export async function validateSession(): Promise<AuthResult> {
         };
 
         await saveSession({ access_token, idToken: access_token, refresh_token, expiresAt, userId, email });
-        return { success: true, user };
+        return { 
+            success: true, 
+            user, 
+            session: { 
+                access_token, 
+                refresh_token 
+            } 
+        };
     } catch (err) {
         console.error('[Auth] validateSession error:', err);
         return { success: false, error: 'Não foi possível conectar ao servidor' };

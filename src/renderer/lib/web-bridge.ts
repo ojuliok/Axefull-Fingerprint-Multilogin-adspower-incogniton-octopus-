@@ -1,20 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabase';
 import type { ElectronAPI, AuthUser, APIResponse } from '../../preload/preload';
-
-// Carrega as variáveis do Supabase do Vite
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-let supabase: any = null;
-try {
-    if (SUPABASE_URL && SUPABASE_KEY) {
-        supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    } else {
-        console.warn('[WebBridge] Chaves do Supabase ausentes no .env! O banco de dados não funcionará.');
-    }
-} catch (e) {
-    console.error('[WebBridge] Erro ao inicializar Supabase:', e);
-}
 
 function success(data?: any): APIResponse {
     return { success: true, data };
@@ -44,13 +29,13 @@ export const webApiBridge: ElectronAPI = {
                 max_profiles: 10,
                 is_active: true
             };
-            return success(user);
+            return { success: true, data: user, session: data.session };
         },
         register: async (email, password, name) => {
             if (!supabase) return error('Supabase desconectado. Verifique o .env');
             const { data, error: err } = await supabase.auth.signUp({ email, password });
             if (err) return error(err.message);
-            return success({ id: data.user?.id, email, plan: 'free', is_active: true });
+            return { success: true, data: { id: data.user?.id, email, plan: 'free', is_active: true }, session: data.session };
         },
         validateSession: async () => {
             if (!supabase) return error('Supabase não conectado. Configure o .env');
@@ -64,7 +49,7 @@ export const webApiBridge: ElectronAPI = {
                 max_profiles: 10,
                 is_active: true
             };
-            return success(user);
+            return { success: true, data: user, session: data.session };
         },
         logout: async () => {
             await supabase.auth.signOut();

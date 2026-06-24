@@ -1139,7 +1139,7 @@ const CanvasPage: React.FC = () => {
                         onDuplicateCanvas={handleDuplicate}
                         onUpdateCanvasInfo={handleUpdateCanvasInfo}
                         onMoveCanvasItem={(sourceId, targetId, position) => {
-                            moveCanvasItem(sourceId, targetId, position);
+                            moveCanvasItem(sourceId, targetId, position, currentWorkspace?.id || '');
                             reloadCanvasList();
                         }}
                     />
@@ -1159,7 +1159,7 @@ const CanvasPage: React.FC = () => {
                             onDuplicateCanvas={handleDuplicate}
                             onUpdateCanvasInfo={handleUpdateCanvasInfo}
                             onMoveCanvasItem={(sourceId, targetId, position) => {
-                                moveCanvasItem(sourceId, targetId, position);
+                                moveCanvasItem(sourceId, targetId, position, currentWorkspace?.id || '');
                                 reloadCanvasList();
                             }}
                         />

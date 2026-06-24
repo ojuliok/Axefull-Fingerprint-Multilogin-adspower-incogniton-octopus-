@@ -23,6 +23,8 @@ interface WorkspaceContextValue {
     setCurrentWorkspace: (ws: Workspace | null) => void;
     createWorkspace: (name: string) => Promise<Workspace | null>;
     refreshWorkspaces: () => Promise<void>;
+    isNotesFloating: boolean;
+    setIsNotesFloating: (val: boolean) => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -32,6 +34,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
     const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isNotesFloating, setIsNotesFloating] = useState(false);
 
     const refreshWorkspaces = useCallback(async () => {
         if (!user) {
@@ -123,7 +126,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <WorkspaceContext.Provider value={{ workspaces, currentWorkspace, isLoading, setCurrentWorkspace, createWorkspace, refreshWorkspaces }}>
+        <WorkspaceContext.Provider value={{ 
+            workspaces, currentWorkspace, isLoading, setCurrentWorkspace, 
+            createWorkspace, refreshWorkspaces, isNotesFloating, setIsNotesFloating 
+        }}>
             {children}
         </WorkspaceContext.Provider>
     );

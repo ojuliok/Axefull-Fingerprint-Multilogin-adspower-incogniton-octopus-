@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '../lib/supabase';
 
 export interface AuthUser {
     id: string;
@@ -66,6 +67,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const sessionRes = await window.api.auth.validateSession();
 
         if (sessionRes.success && sessionRes.data) {
+            if ((sessionRes as any).session) {
+                await supabase.auth.setSession((sessionRes as any).session);
+            }
             setUser(sessionRes.data as AuthUser);
             setState('authenticated');
             startHeartbeat();
@@ -82,6 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = useCallback(async (email: string, password: string) => {
         const res = await window.api.auth.login(email, password);
         if (res.success && res.data) {
+            if ((res as any).session) {
+                await supabase.auth.setSession((res as any).session);
+            }
             setUser(res.data as AuthUser);
             setState('authenticated');
             startHeartbeat();
@@ -93,6 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = useCallback(async (email: string, password: string, name?: string) => {
         const res = await window.api.auth.register(email, password, name);
         if (res.success && res.data) {
+            if ((res as any).session) {
+                await supabase.auth.setSession((res as any).session);
+            }
             setUser(res.data as AuthUser);
             setState('authenticated');
             startHeartbeat();
@@ -104,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = useCallback(async () => {
         stopHeartbeat();
         await window.api.auth.logout();
+        await supabase.auth.signOut();
         setUser(null);
         setState('unauthenticated');
     }, [stopHeartbeat]);

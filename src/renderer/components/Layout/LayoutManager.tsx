@@ -11,6 +11,7 @@ import ExtensionsModal from '../../features/Extensions/ExtensionsModal';
 import ProxiesModal from '../../features/Proxies/ProxiesModal';
 import GlobalTaskWidget from '../../features/Tasks/GlobalTaskWidget';
 import FloatingPomodoro from '../../features/Tasks/FloatingPomodoro';
+import FloatingNotes from '../../features/Notes/FloatingNotes';
 import { LockScreen } from '../../features/Security/LockScreen';
 
 export const LayoutManager: React.FC = () => {
@@ -175,6 +176,7 @@ export const LayoutManager: React.FC = () => {
 
             <GlobalTaskWidget />
             <FloatingPomodoro />
+            <FloatingNotes />
             <LockScreen />
         </div>
     );

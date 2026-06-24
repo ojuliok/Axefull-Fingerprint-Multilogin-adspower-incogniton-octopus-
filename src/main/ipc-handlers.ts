@@ -688,7 +688,7 @@ export function registerAuthHandlers(): void {
             if (result.success && result.user) {
                 logAction('user_logged_in', { email: result.user.email });
             }
-            return { success: result.success, data: result.user, error: result.error };
+            return { success: result.success, data: result.user, error: result.error, session: result.session };
         } catch (err) {
             return { success: false, error: String(err) };
         }
@@ -697,7 +697,7 @@ export function registerAuthHandlers(): void {
     ipcMain.handle('auth:register', async (_event: IpcMainInvokeEvent, email: string, password: string, name?: string) => {
         try {
             const result = await authManager.register(email, password, name);
-            return { success: result.success, data: result.user, error: result.error };
+            return { success: result.success, data: result.user, error: result.error, session: result.session };
         } catch (err) {
             return { success: false, error: String(err) };
         }
@@ -706,7 +706,7 @@ export function registerAuthHandlers(): void {
     ipcMain.handle('auth:validate-session', async () => {
         try {
             const result = await authManager.validateSession();
-            return { success: result.success, data: result.user, error: result.error };
+            return { success: result.success, data: result.user, error: result.error, session: result.session };
         } catch (err) {
             return { success: false, error: String(err) };
         }

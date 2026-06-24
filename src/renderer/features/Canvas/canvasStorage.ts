@@ -159,7 +159,7 @@ export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>)
     }
 }
 
-export async function moveCanvasItem(id: string, targetId: string, position: 'before' | 'after' | 'inside', workspaceId: string): Promise<void> {
+export async function moveCanvasItem(id: string, targetId: string, position: 'before' | 'after' | 'inside', workspaceId?: string): Promise<void> {
     const cleanId = sanitizeUUID(id);
     const cleanTargetId = sanitizeUUID(targetId);
     if (!cleanId || !cleanTargetId) return;
