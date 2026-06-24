@@ -1366,7 +1366,7 @@ const CanvasPage: React.FC = () => {
             />
 
             {/* Transition circular mask */}
-            <div className={`entrance-circular-mask ${transitionState === 'closing' ? 'closing' : 'opening'} ${transitionState === 'none' ? 'pointer-events-none opacity-0' : ''}`} />
+            <div className={`entrance-circular-mask ${transitionState === 'closing' ? 'closing' : transitionState === 'opening' ? 'opening' : ''}`} />
         </div>
     );
 };
