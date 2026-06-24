@@ -1,0 +1,405 @@
+/* Windows 97 Style Design System */
+
+.w97Container {
+  font-family: "MS Sans Serif", "Courier New", Tahoma, sans-serif;
+  background-color: #008080; /* Teal background */
+  color: #000000;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  font-size: 12px;
+}
+
+/* 3D Bevel Borders */
+.outset {
+  background-color: #c0c0c0;
+  border-top: 1.5px solid #ffffff;
+  border-left: 1.5px solid #ffffff;
+  border-right: 1.5px solid #808080;
+  border-bottom: 1.5px solid #808080;
+  box-shadow: inset 0.5px 0.5px 0px #dfdfdf, inset -0.5px -0.5px 0px #0a0a0a;
+}
+
+.outsetPressed, .outset:active:not(.noActiveState) {
+  border-top: 1.5px solid #808080;
+  border-left: 1.5px solid #808080;
+  border-right: 1.5px solid #ffffff;
+  border-bottom: 1.5px solid #ffffff;
+  box-shadow: inset 0.5px 0.5px 0px #0a0a0a, inset -0.5px -0.5px 0px #dfdfdf;
+  padding-top: 1px;
+  padding-left: 1px;
+}
+
+.inset {
+  background-color: #ffffff;
+  border-top: 1.5px solid #808080;
+  border-left: 1.5px solid #808080;
+  border-right: 1.5px solid #ffffff;
+  border-bottom: 1.5px solid #ffffff;
+  box-shadow: inset 0.5px 0.5px 0px #0a0a0a, inset -0.5px -0.5px 0px #dfdfdf;
+}
+
+.insetDark {
+  background-color: #808080;
+  border-top: 1.5px solid #000000;
+  border-left: 1.5px solid #000000;
+  border-right: 1.5px solid #ffffff;
+  border-bottom: 1.5px solid #ffffff;
+}
+
+/* Windows */
+.window {
+  position: absolute;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  background-color: #c0c0c0;
+  border-top: 1.5px solid #ffffff;
+  border-left: 1.5px solid #ffffff;
+  border-right: 1.5px solid #808080;
+  border-bottom: 1.5px solid #808080;
+  box-shadow: inset 0.5px 0.5px 0px #dfdfdf, inset -0.5px -0.5px 0px #0a0a0a, 2px 2px 10px rgba(0,0,0,0.3);
+}
+
+.windowActive {
+  z-index: 30 !important;
+}
+
+.titleBar {
+  padding: 3px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: #ffffff;
+  font-weight: bold;
+  cursor: move;
+  font-size: 11px;
+}
+
+.titleBarInactive {
+  background: linear-gradient(90deg, #808080, #c0c0c0) !important;
+  color: #c0c0c0 !important;
+}
+
+.titleText {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titleControls {
+  display: flex;
+  gap: 2px;
+}
+
+.titleButton {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+  background-color: #c0c0c0;
+  color: #000000;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+  cursor: pointer;
+}
+
+.titleButton:active {
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+}
+
+.menuBar {
+  display: flex;
+  padding: 2px 6px;
+  gap: 12px;
+  background-color: #c0c0c0;
+  border-bottom: 1px solid #808080;
+}
+
+.menuItem {
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.menuItem:hover {
+  background-color: #000080;
+  color: #ffffff;
+}
+
+.windowBody {
+  padding: 8px;
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop Icons */
+.desktopGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-auto-rows: 80px;
+  gap: 16px;
+  padding: 20px;
+  height: calc(100% - 40px);
+  align-content: start;
+}
+
+.desktopIcon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  transition: all 0.1s;
+}
+
+.desktopIcon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+.desktopIconSelected {
+  background-color: #000080 !important;
+  border: 1.5px dashed #ffff80 !important;
+}
+
+.iconLabel {
+  font-size: 11px;
+  margin-top: 4px;
+  word-break: break-word;
+  max-width: 72px;
+  text-shadow: 1px 1px 1px #000000;
+}
+
+.desktopIconSelected .iconLabel {
+  background-color: #000080;
+  text-shadow: none;
+}
+
+/* Taskbar */
+.taskbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background-color: #c0c0c0;
+  border-top: 1.5px solid #ffffff;
+  box-shadow: 0 -1px 0 #808080;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px;
+}
+
+.startButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-weight: bold;
+  height: 24px;
+  cursor: pointer;
+}
+
+.startButtonActive {
+  border-top: 1.5px solid #808080;
+  border-left: 1.5px solid #808080;
+  border-right: 1.5px solid #ffffff;
+  border-bottom: 1.5px solid #ffffff;
+  box-shadow: inset 0.5px 0.5px 0px #0a0a0a, inset -0.5px -0.5px 0px #dfdfdf;
+  background-color: #e0e0e0;
+}
+
+.taskbarTabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  margin-left: 8px;
+  overflow: hidden;
+  height: 24px;
+}
+
+.taskbarTab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  max-width: 140px;
+  width: 100%;
+  height: 24px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskbarTabActive {
+  background-color: #dfdfdf;
+  border-top: 1.5px solid #808080;
+  border-left: 1.5px solid #808080;
+  border-right: 1.5px solid #ffffff;
+  border-bottom: 1.5px solid #ffffff;
+  box-shadow: inset 0.5px 0.5px 0px #0a0a0a, inset -0.5px -0.5px 0px #dfdfdf;
+  font-weight: bold;
+}
+
+.tray {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 8px;
+  height: 24px;
+  font-size: 11px;
+}
+
+/* Start Menu */
+.startMenu {
+  position: absolute;
+  bottom: 30px;
+  left: 2px;
+  width: 180px;
+  z-index: 60;
+  display: flex;
+  background-color: #c0c0c0;
+}
+
+.startMenuSidebar {
+  width: 30px;
+  background: linear-gradient(180deg, #000080, #1084d0);
+  color: #ffffff;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+
+.startMenuSidebarText {
+  transform: rotate(-90deg);
+  transform-origin: 0 0;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  width: 0;
+  margin-left: 12px;
+}
+
+.startMenuItems {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2px 0;
+}
+
+.startMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #000000;
+}
+
+.startMenuItem:hover {
+  background-color: #000080;
+  color: #ffffff;
+}
+
+.startMenuDivider {
+  height: 1px;
+  background-color: #808080;
+  margin: 4px 0;
+  border-bottom: 1px solid #ffffff;
+}
+
+/* Graph Styling */
+.graphContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #050508; /* Space dark for neural network contrast */
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.graphCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.graphCanvas:active {
+  cursor: grabbing;
+}
+
+.nodePanel {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 260px;
+  max-height: 80%;
+  background-color: #c0c0c0;
+  font-size: 11px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.biosBoot {
+  position: absolute;
+  inset: 0;
+  background-color: #000000;
+  color: #ffffff;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 24px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  line-height: 1.4;
+}
+
+.biosProgress {
+  width: 250px;
+  height: 14px;
+  background-color: #222222;
+  border: 1px solid #808080;
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.biosProgressBar {
+  height: 100%;
+  background-color: #8B5CF6; /* Vault theme primary */
+  transition: width 0.1s linear;
+}

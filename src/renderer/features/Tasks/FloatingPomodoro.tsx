@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, X, GripHorizontal, CheckCircle2, Search, Plus } from 'lucide-react';
 import { usePomodoro } from '../../context/PomodoroContext';
-import { getTasksData, createTask, TaskData } from '../../components/Tasks/tasksStorage';
+import { getTasksData, createTask, TaskData } from './Tasks/tasksStorage';
 
 const FloatingPomodoro: React.FC = () => {
     const {

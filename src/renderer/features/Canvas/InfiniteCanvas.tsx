@@ -1421,6 +1421,15 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         });
     }, [strokes, viewport, saveData]);
 
+    const updateNodeStyles = useCallback((ids: string[] | Set<string>, stylesMap: Partial<CanvasNode>) => {
+        const idSet = ids instanceof Set ? ids : new Set(ids);
+        setNodes(prev => {
+            const updated = prev.map(n => idSet.has(n.id) ? { ...n, ...stylesMap } : n);
+            saveData(updated, strokes, viewport);
+            return updated;
+        });
+    }, [strokes, viewport, saveData]);
+
     const applyFormat = useCallback((command: string, value: string = '') => {
         document.execCommand(command, false, value);
     }, []);
@@ -2976,6 +2985,21 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                     width: '100%', height: '100%', position: 'relative',
                                     ...(!isFreeText && !isEmoji && !isIcon && !isProfile && !isShape && node.color ? { background: node.color } : {}),
                                     ...((isEmoji || isIcon) && node.color ? { background: node.color, border: '1px solid var(--border-default)', backdropFilter: 'blur(8px)' } : {}),
+                                    opacity: node.opacity !== undefined ? node.opacity : undefined,
+                                    borderRadius: node.borderRadius !== undefined ? (node.borderRadius === 9999 ? '9999px' : `${node.borderRadius}px`) : undefined,
+                                    borderStyle: node.borderStyle !== undefined ? node.borderStyle : undefined,
+                                    borderWidth: node.borderStyle && node.borderStyle !== 'none' && node.borderWidth !== undefined ? `${node.borderWidth}px` : undefined,
+                                    borderColor: node.borderStyle && node.borderStyle !== 'none' && node.borderColor ? node.borderColor : undefined,
+                                    padding: node.padding !== undefined ? `${node.padding}px` : undefined,
+                                    boxShadow: node.shadowIntensity === 'sm' ? 'var(--shadow-sm)' :
+                                               node.shadowIntensity === 'md' ? 'var(--shadow-md)' :
+                                               node.shadowIntensity === 'lg' ? 'var(--shadow-lg)' :
+                                               node.shadowIntensity === 'glow' ? 'var(--shadow-glow)' : undefined,
+                                    ...(node.blurBackground ? {
+                                        backdropFilter: 'blur(16px)',
+                                        WebkitBackdropFilter: 'blur(16px)',
+                                        ...(!node.color ? { background: 'rgba(20, 20, 25, 0.4)' } : {})
+                                    } : {})
                                 }}
                             >
                                 {/* Drag handle bar for card nodes */}
@@ -3034,7 +3058,9 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                     placeholder={isFreeText ? 'Texto livre...' : 'Digite aqui...'}
                                     style={{ 
                                         color: node.textColor || '#e2e8f0',
-                                        fontSize: node.fontSize ? `${node.fontSize}px` : undefined
+                                        fontSize: node.fontSize ? `${node.fontSize}px` : undefined,
+                                        fontFamily: node.fontFamily === 'serif' ? 'Georgia, serif' : node.fontFamily === 'mono' ? 'Courier New, monospace' : undefined,
+                                        textAlign: node.textAlignment || undefined
                                     }}
                                     autoFocus={isEditing}
                                     editable={isEditing}
@@ -4054,6 +4080,229 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                             })}
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* ── Appearance Panel ── */}
+            {selectedIds.size > 0 && !isTextEditing && (
+                <div className={styles.appearancePanel}>
+                    <div className={styles.appearanceSection}>
+                        <Lucide.Sliders size={13} className="text-theme-brand" />
+                        <span className={styles.appearanceLabel}>Aparência ({selectedIds.size})</span>
+                    </div>
+                    
+                    <div className={styles.formatDivider} />
+
+                    {/* Font Family Selector */}
+                    {(() => {
+                        const selectedNodesList = nodes.filter(n => selectedIds.has(n.id));
+                        const hasTextNode = selectedNodesList.some(n => n.type === 'text' || n.type === 'freetext');
+                        if (!hasTextNode) return null;
+                        
+                        const firstTextNode = selectedNodesList.find(n => n.type === 'text' || n.type === 'freetext');
+                        return (
+                            <>
+                                <div className={styles.appearanceSection}>
+                                    <select
+                                        className={styles.appearanceSelect}
+                                        value={firstTextNode?.fontFamily || 'sans'}
+                                        onChange={(e) => updateNodeStyles(selectedIds, { fontFamily: e.target.value as any })}
+                                    >
+                                        <option value="sans">Fonte: Sans</option>
+                                        <option value="serif">Fonte: Serifa</option>
+                                        <option value="mono">Fonte: Mono</option>
+                                    </select>
+                                </div>
+                                <div className={styles.formatDivider} />
+                                <div className={styles.appearanceSection}>
+                                    <button
+                                        className={`${styles.appearanceBtn} ${firstTextNode?.textAlignment === 'left' || !firstTextNode?.textAlignment ? styles.appearanceBtnActive : ''}`}
+                                        onClick={() => updateNodeStyles(selectedIds, { textAlignment: 'left' })}
+                                        title="Alinhar à esquerda"
+                                    >
+                                        <AlignLeft size={13} />
+                                    </button>
+                                    <button
+                                        className={`${styles.appearanceBtn} ${firstTextNode?.textAlignment === 'center' ? styles.appearanceBtnActive : ''}`}
+                                        onClick={() => updateNodeStyles(selectedIds, { textAlignment: 'center' })}
+                                        title="Centralizar"
+                                    >
+                                        <AlignCenter size={13} />
+                                    </button>
+                                    <button
+                                        className={`${styles.appearanceBtn} ${firstTextNode?.textAlignment === 'right' ? styles.appearanceBtnActive : ''}`}
+                                        onClick={() => updateNodeStyles(selectedIds, { textAlignment: 'right' })}
+                                        title="Alinhar à direita"
+                                    >
+                                        <AlignRight size={13} />
+                                    </button>
+                                    <button
+                                        className={`${styles.appearanceBtn} ${firstTextNode?.textAlignment === 'justify' ? styles.appearanceBtnActive : ''}`}
+                                        onClick={() => updateNodeStyles(selectedIds, { textAlignment: 'justify' })}
+                                        title="Justificar"
+                                    >
+                                        <AlignJustify size={13} />
+                                    </button>
+                                </div>
+                                <div className={styles.formatDivider} />
+                            </>
+                        );
+                    })()}
+
+                    {/* Opacity Selector */}
+                    {(() => {
+                        const selectedNodesList = nodes.filter(n => selectedIds.has(n.id));
+                        const firstNode = selectedNodesList[0];
+                        return (
+                            <div className={styles.appearanceSection}>
+                                <select
+                                    className={styles.appearanceSelect}
+                                    style={{ width: '75px' }}
+                                    value={firstNode?.opacity !== undefined ? firstNode.opacity : 1}
+                                    onChange={(e) => updateNodeStyles(selectedIds, { opacity: parseFloat(e.target.value) })}
+                                >
+                                    <option value="1">Opac: 100%</option>
+                                    <option value="0.9">Opac: 90%</option>
+                                    <option value="0.75">Opac: 75%</option>
+                                    <option value="0.5">Opac: 50%</option>
+                                    <option value="0.25">Opac: 25%</option>
+                                </select>
+                            </div>
+                        );
+                    })()}
+
+                    <div className={styles.formatDivider} />
+
+                    {/* Border Radius (Corner) Selector */}
+                    {(() => {
+                        const selectedNodesList = nodes.filter(n => selectedIds.has(n.id));
+                        const firstNode = selectedNodesList[0];
+                        return (
+                            <div className={styles.appearanceSection}>
+                                <select
+                                    className={styles.appearanceSelect}
+                                    style={{ width: '80px' }}
+                                    value={firstNode?.borderRadius !== undefined ? firstNode.borderRadius : 10}
+                                    onChange={(e) => updateNodeStyles(selectedIds, { borderRadius: parseInt(e.target.value) })}
+                                >
+                                    <option value="0">Canto: Reto</option>
+                                    <option value="6">Canto: 6px</option>
+                                    <option value="10">Canto: 10px</option>
+                                    <option value="16">Canto: 16px</option>
+                                    <option value="24">Canto: 24px</option>
+                                    <option value="9999">Canto: Arred</option>
+                                </select>
+                            </div>
+                        );
+                    })()}
+
+                    <div className={styles.formatDivider} />
+
+                    {/* Border Style Selector */}
+                    {(() => {
+                        const selectedNodesList = nodes.filter(n => selectedIds.has(n.id));
+                        const firstNode = selectedNodesList[0];
+                        const borderColors = [
+                            { id: 'default', value: 'var(--border-default)', label: 'Padrão' },
+                            { id: 'violet', value: 'var(--brand-primary)', label: 'Violeta' },
+                            { id: 'blue', value: 'var(--brand-secondary)', label: 'Azul' },
+                            { id: 'emerald', value: 'var(--success)', label: 'Verde' },
+                            { id: 'rose', value: 'var(--brand-accent)', label: 'Rosa' },
+                        ];
+                        
+                        return (
+                            <>
+                                <div className={styles.appearanceSection}>
+                                    <select
+                                        className={styles.appearanceSelect}
+                                        style={{ width: '85px' }}
+                                        value={firstNode?.borderStyle || 'none'}
+                                        onChange={(e) => updateNodeStyles(selectedIds, { borderStyle: e.target.value as any })}
+                                    >
+                                        <option value="none">Borda: Sem</option>
+                                        <option value="solid">Borda: Sólida</option>
+                                        <option value="dashed">Borda: Tracej</option>
+                                        <option value="dotted">Borda: Pontil</option>
+                                    </select>
+                                </div>
+                                {firstNode?.borderStyle && firstNode.borderStyle !== 'none' && (
+                                    <>
+                                        <div className={styles.formatDivider} />
+                                        <div className={styles.appearanceSection}>
+                                            <select
+                                                className={styles.appearanceSelect}
+                                                style={{ width: '54px' }}
+                                                value={firstNode.borderWidth || 2}
+                                                onChange={(e) => updateNodeStyles(selectedIds, { borderWidth: parseInt(e.target.value) })}
+                                            >
+                                                <option value="1">1px</option>
+                                                <option value="2">2px</option>
+                                                <option value="4">4px</option>
+                                                <option value="6">6px</option>
+                                            </select>
+                                        </div>
+                                        <div className={styles.formatDivider} />
+                                        <div className={styles.textColorSection}>
+                                            <div className={styles.textColorPicker}>
+                                                {borderColors.map(c => (
+                                                    <div key={c.id}
+                                                        className={`${styles.textColorDot} ${firstNode.borderColor === c.value || (!firstNode.borderColor && c.id === 'default') ? styles.textColorActive : ''}`}
+                                                        style={{ backgroundColor: c.value === 'var(--border-default)' ? 'transparent' : c.value, border: c.value === 'var(--border-default)' ? '1px solid var(--border-default)' : 'none' }}
+                                                        title={`Cor: ${c.label}`}
+                                                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); updateNodeStyles(selectedIds, { borderColor: c.value }); }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </>
+                        );
+                    })()}
+
+                    <div className={styles.formatDivider} />
+
+                    {/* Shadow Intensity Selector */}
+                    {(() => {
+                        const selectedNodesList = nodes.filter(n => selectedIds.has(n.id));
+                        const firstNode = selectedNodesList[0];
+                        return (
+                            <div className={styles.appearanceSection}>
+                                <select
+                                    className={styles.appearanceSelect}
+                                    style={{ width: '85px' }}
+                                    value={firstNode?.shadowIntensity || 'none'}
+                                    onChange={(e) => updateNodeStyles(selectedIds, { shadowIntensity: e.target.value as any })}
+                                >
+                                    <option value="none">Sombra: Sem</option>
+                                    <option value="sm">Sombra: Leve</option>
+                                    <option value="md">Sombra: Méd</option>
+                                    <option value="lg">Sombra: Forte</option>
+                                    <option value="glow">Sombra: Glow</option>
+                                </select>
+                            </div>
+                        );
+                    })()}
+
+                    <div className={styles.formatDivider} />
+
+                    {/* Glassmorphism Toggle */}
+                    {(() => {
+                        const selectedNodesList = nodes.filter(n => selectedIds.has(n.id));
+                        const firstNode = selectedNodesList[0];
+                        const isGlassActive = !!firstNode?.blurBackground;
+                        return (
+                            <div className={styles.appearanceSection}>
+                                <button
+                                    className={`${styles.appearanceBtn} ${isGlassActive ? styles.appearanceBtnActive : ''}`}
+                                    onClick={() => updateNodeStyles(selectedIds, { blurBackground: !isGlassActive })}
+                                    title="Efeito Vidro / Glassmorphism"
+                                >
+                                    <Lucide.Sparkles size={13} />
+                                </button>
+                            </div>
+                        );
+                    })()}
                 </div>
             )}
 

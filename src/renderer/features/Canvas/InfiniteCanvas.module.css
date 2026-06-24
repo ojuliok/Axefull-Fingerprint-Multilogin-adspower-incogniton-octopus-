@@ -3088,3 +3088,109 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
+/* ── Appearance Panel ── */
+.appearancePanel {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    z-index: 200;
+    animation: fadeInToolbar 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    max-height: 48px;
+}
+
+@media (max-width: 1024px) {
+    .appearancePanel {
+        bottom: 80px;
+        width: 90%;
+        max-width: 500px;
+        overflow-x: auto;
+        justify-content: flex-start;
+        scrollbar-width: none;
+    }
+    .appearancePanel::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.appearanceSection {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 4px;
+}
+
+.appearanceLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.appearanceInput {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-primary) !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    outline: none !important;
+    height: 24px !important;
+    width: 54px !important;
+    transition: all 0.15s ease !important;
+}
+
+.appearanceInput:focus {
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+}
+
+.appearanceSelect {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-primary) !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    outline: none !important;
+    height: 24px !important;
+    width: 80px !important;
+    cursor: pointer !important;
+}
+
+.appearanceBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+}
+
+.appearanceBtn:hover {
+    background: rgba(139, 92, 246, 0.15);
+    color: #c4b5fd;
+}
+
+.appearanceBtnActive {
+    background: var(--brand-primary) !important;
+    color: var(--bg-card) !important;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    LayoutGrid, Settings, Eraser, Puzzle, Monitor, Network, Sun, Moon, CheckSquare
+    LayoutGrid, Settings, Eraser, Puzzle, Monitor, Network, Sun, Moon, CheckSquare, Home
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -15,10 +15,12 @@ interface FloatingDockProps {
 
 const DOCK_ITEMS = isWebMode()
     ? [
+        { id: 'home',      label: 'Início',    icon: Home,       color: 'text-sky-500 hover:bg-sky-500/10' },
         { id: 'canvas',    label: 'Tela',      icon: Monitor,    color: 'text-amber-500 hover:bg-amber-500/10' },
         { id: 'tasks',     label: 'Tarefas',   icon: CheckSquare, color: 'text-blue-500 hover:bg-blue-500/10' }
       ]
     : [
+        { id: 'home',      label: 'Início',    icon: Home,       color: 'text-sky-500 hover:bg-sky-500/10' },
         { id: 'profiles',  label: 'Perfis',    icon: LayoutGrid, color: 'text-violet-500 hover:bg-violet-500/10' },
         { id: 'canvas',    label: 'Tela',      icon: Monitor,    color: 'text-amber-500 hover:bg-amber-500/10' },
       ];

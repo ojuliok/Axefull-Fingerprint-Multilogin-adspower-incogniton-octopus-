@@ -35,6 +35,16 @@ export interface CanvasNode {
     browserTabs?: BrowserTab[];
     activeTabId?: string;
     browserProxy?: string;
+    opacity?: number;
+    borderRadius?: number;
+    borderWidth?: number;
+    borderStyle?: 'solid' | 'dashed' | 'dotted' | 'none';
+    borderColor?: string;
+    shadowIntensity?: 'none' | 'sm' | 'md' | 'lg' | 'glow';
+    padding?: number;
+    blurBackground?: boolean;
+    fontFamily?: 'sans' | 'serif' | 'mono';
+    textAlignment?: 'left' | 'center' | 'right' | 'justify';
 }
 
 export interface Stroke {

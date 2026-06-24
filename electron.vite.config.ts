@@ -2,8 +2,12 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-export default defineConfig({
-    main: {
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+
+const config: any = {};
+
+if (!isVercel) {
+    config.main = {
         plugins: [externalizeDepsPlugin()],
         build: {
             outDir: 'dist/main',
@@ -20,8 +24,9 @@ export default defineConfig({
                 '@main': path.resolve(__dirname, 'src/main'),
             },
         },
-    },
-    preload: {
+    };
+
+    config.preload = {
         plugins: [externalizeDepsPlugin()],
         build: {
             outDir: 'dist/preload',
@@ -30,23 +35,26 @@ export default defineConfig({
                 formats: ['cjs'],
             },
         },
+    };
+}
+
+config.renderer = {
+    plugins: [react()],
+    root: 'src/renderer',
+    base: './',
+    envDir: path.resolve(__dirname),
+    build: {
+        outDir: 'dist/renderer',
+        emptyOutDir: true,
     },
-    renderer: {
-        plugins: [react()],
-        root: 'src/renderer',
-        base: './',
-        envDir: path.resolve(__dirname),
-        build: {
-            outDir: 'dist/renderer',
-            emptyOutDir: true,
-        },
-        resolve: {
-            alias: {
-                '@': path.resolve(__dirname, 'src/renderer'),
-            },
-        },
-        server: {
-            port: 5173,
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'src/renderer'),
         },
     },
-});
+    server: {
+        port: 5173,
+    },
+};
+
+export default defineConfig(config);

@@ -17,6 +17,8 @@ import LoginPage from './pages/LoginPage';
 import SalesPage from './pages/SalesPage';
 import DownloadPage from './pages/DownloadPage';
 import NavegadorMobile from './pages/NavegadorMobile';
+import VitrinePage from './pages/VitrinePage';
+import HomeW97 from './pages/HomeW97';
 
 import { LayoutManager } from './components/Layout/LayoutManager';
 import { isWebMode } from './utils/env';
@@ -60,7 +62,8 @@ const App: React.FC = () => {
                                 <HashRouter>
                                     <Routes>
                                         <Route path="/" element={<ProtectedRoute><LayoutManager /></ProtectedRoute>}>
-                                        <Route index element={<Navigate to={isWebMode() ? "/canvas" : "/profiles"} replace />} />
+                                        <Route index element={<Navigate to="/home" replace />} />
+                                        <Route path="home" element={<HomeW97 />} />
                                         <Route path="profiles" element={<Dashboard onOpenExtensions={() => {}} onOpenProxies={() => {}} />} />
                                         <Route path="dadosclean" element={<DadosClean />} />
                                         <Route path="canvas" element={<CanvasPage />} />
@@ -68,6 +71,7 @@ const App: React.FC = () => {
                                         <Route path="settings" element={<SettingsPage />} />
                                         <Route path="download" element={<DownloadPage />} />
                                         <Route path="navegador" element={<NavegadorMobile />} />
+                                        <Route path="vitrine" element={<VitrinePage />} />
                                     </Route>
                                     </Routes>
                                 </HashRouter>

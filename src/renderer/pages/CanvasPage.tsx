@@ -57,6 +57,7 @@ const CanvasPage: React.FC = () => {
     const [renameValue, setRenameValue] = useState('');
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasId: string } | null>(null);
     const [viewState, setViewState] = useState<ViewState>('home');
+    const [transitionState, setTransitionState] = useState<'none' | 'closing' | 'opening'>('none');
     const [sidebarEmojiPicker, setSidebarEmojiPicker] = useState<{ x: number; y: number; canvasId: string } | null>(null);
     const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
     const [sidebarCreateMenu, setSidebarCreateMenu] = useState<{ x: number; y: number; parentId?: string } | null>(null);
@@ -276,28 +277,46 @@ const CanvasPage: React.FC = () => {
     }, []);
 
     const handleSelectCanvas = useCallback(async (id: string) => {
-        const canvas = canvasList.find(c => c.id === id);
-        setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
-        const data = await getCanvasData(id);
-        setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
-        setRenamingId(null);
-        setViewState('canvas');
-        setIsHovered(false);
-        // Auto-close sidebar on mobile after navigation
-        if (isMobileViewport()) {
-            setMenuMode('collapsed');
-        }
-    }, []);
+        setTransitionState('closing');
+        
+        setTimeout(async () => {
+            const canvas = canvasList.find(c => c.id === id);
+            setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
+            const data = await getCanvasData(id);
+            setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+            setRenamingId(null);
+            setViewState('canvas');
+            setIsHovered(false);
+            if (isMobileViewport()) {
+                setMenuMode('collapsed');
+            }
+            
+            setTransitionState('opening');
+            
+            setTimeout(() => {
+                setTransitionState('none');
+            }, 800);
+        }, 800);
+    }, [canvasList]);
 
     const handleGoHome = useCallback(() => {
-        setNavigationStack([]);
-        setActiveCanvasData(null);
-        setViewState('home');
-        setIsHovered(false);
-        // Auto-close sidebar on mobile after navigation
-        if (isMobileViewport()) {
-            setMenuMode('collapsed');
-        }
+        setTransitionState('closing');
+        
+        setTimeout(() => {
+            setNavigationStack([]);
+            setActiveCanvasData(null);
+            setViewState('home');
+            setIsHovered(false);
+            if (isMobileViewport()) {
+                setMenuMode('collapsed');
+            }
+            
+            setTransitionState('opening');
+            
+            setTimeout(() => {
+                setTransitionState('none');
+            }, 800);
+        }, 800);
     }, []);
 
     const handleSectionDragStart = (e: React.DragEvent, section: 'favorites' | 'spaces') => {
@@ -1345,6 +1364,9 @@ const CanvasPage: React.FC = () => {
                 style={{ display: 'none' }}
                 onChange={handleVaultImportFile}
             />
+
+            {/* Transition circular mask */}
+            <div className={`entrance-circular-mask ${transitionState === 'closing' ? 'closing' : 'opening'} ${transitionState === 'none' ? 'pointer-events-none opacity-0' : ''}`} />
         </div>
     );
 };

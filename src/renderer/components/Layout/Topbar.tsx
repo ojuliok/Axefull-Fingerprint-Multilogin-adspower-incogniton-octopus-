@@ -21,7 +21,7 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
     const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'Axe';
 
     return (
-        <header className={`h-14 flex items-center justify-between px-4 shrink-0 transition-colors duration-300 backdrop-blur-md bg-theme-surface/50 z-20`}>
+        <header className={`h-14 flex items-center justify-between px-4 shrink-0 transition-colors duration-300 backdrop-blur-md bg-theme-surface/80 border-b border-theme-border/30 z-[60]`}>
             {/* Left side: Workspace / Branding */}
             <div className="flex items-center gap-3 relative">
                 <div 
@@ -36,8 +36,8 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
                 </div>
 
                 {showWorkspaceMenu && (
-                    <div className="absolute top-full left-0 mt-2 w-64 glass-card py-2 z-50 animate-fade-in-scale">
-                        <div className="px-3 pb-2 mb-2 border-b border-theme-border/50 text-xs font-semibold text-theme-text-muted uppercase">
+                    <div className="absolute top-full left-0 mt-1 w-64 bg-theme-surface/95 backdrop-blur-xl border border-theme-border/60 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-xl py-2 z-[70] animate-fade-in-scale" style={{ borderTopLeftRadius: '4px' }}>
+                        <div className="px-3 pb-2 mb-2 border-b border-theme-border/50 text-[11px] tracking-wider font-bold text-theme-text-muted uppercase">
                             Seus Workspaces
                         </div>
                         <div className="max-h-60 overflow-y-auto px-1">

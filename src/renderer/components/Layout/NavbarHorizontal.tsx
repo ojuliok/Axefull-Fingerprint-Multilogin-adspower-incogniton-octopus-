@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
-    LayoutGrid, Settings, Eraser, Puzzle, Monitor, Network, Sun, Moon, Bell, Search, CheckSquare
+    LayoutGrid, Settings, Eraser, Puzzle, Monitor, Network, Sun, Moon, Bell, Search, CheckSquare, Home
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { isWebMode } from '../../utils/env';
+import logoImg from '../../logo.png';
 
 interface NavbarHorizontalProps {
     currentView: string;
@@ -17,10 +18,12 @@ interface NavbarHorizontalProps {
 
 const NAV_ITEMS = isWebMode()
     ? [
+        { id: 'home',      label: 'Início',    icon: Home,       colorClass: 'text-sky-500' },
         { id: 'canvas',    label: 'Tela',      icon: Monitor,    colorClass: 'text-amber-500' },
         { id: 'tasks',     label: 'Tarefas',   icon: CheckSquare, colorClass: 'text-blue-500' },
       ]
     : [
+        { id: 'home',      label: 'Início',    icon: Home,       colorClass: 'text-sky-500' },
         { id: 'profiles',  label: 'Multi',     icon: LayoutGrid, colorClass: 'text-violet-500' },
         { id: 'canvas',    label: 'Tela',      icon: Monitor,    colorClass: 'text-amber-500' },
       ];
@@ -45,9 +48,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
             {/* Left Section: Logo & Brand */}
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange('profiles')}>
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-md">
-                        <span className="text-theme-text font-bold text-[10px]">Axe</span>
-                    </div>
+                    <img src={logoImg} alt="Axe Logo" className="w-8 h-8 rounded-xl object-contain shadow-md" />
                     <span className={`font-bold text-base tracking-tight ${textClass}`}>Axe VAULT</span>
                 </div>
             </div>

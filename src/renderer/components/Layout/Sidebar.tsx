@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
-    LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare
+    LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { isWebMode } from '../../utils/env';
+import logoImg from '../../logo.png';
 
 interface SidebarProps {
     currentView: string;
@@ -13,15 +14,16 @@ interface SidebarProps {
     onOpenExtensions: () => void;
 }
 
-const ALL_ITEMS: Record<string, { id: ViewType; label: string; icon: React.FC<any>; colorClass: string }> = {
-    profiles:   { id: 'profiles',   label: 'Multi',     icon: LayoutGrid, colorClass: 'text-violet-500' },
-    canvas:     { id: 'canvas',     label: 'Tela',      icon: Monitor,    colorClass: 'text-amber-500' },
+const ALL_ITEMS: Record<string, { id: string; label: string; icon: React.FC<any>; colorClass: string }> = {
+    home:       { id: 'home',       label: 'Início',    icon: Home,        colorClass: 'text-sky-500' },
+    profiles:   { id: 'profiles',   label: 'Multi',     icon: LayoutGrid,  colorClass: 'text-violet-500' },
+    canvas:     { id: 'canvas',     label: 'Tela',      icon: Monitor,     colorClass: 'text-amber-500' },
     tasks:      { id: 'tasks',      label: 'Tarefas',   icon: CheckSquare, colorClass: 'text-blue-500' },
-    dadosclean: { id: 'dadosclean', label: 'MetaClean', icon: Eraser,     colorClass: 'text-emerald-500' }
+    dadosclean: { id: 'dadosclean', label: 'MetaClean', icon: Eraser,      colorClass: 'text-emerald-500' }
 };
 
 // Ordem Padrão solicitada
-const DEFAULT_ORDER = ['profiles', 'canvas', 'tasks', 'dadosclean'];
+const DEFAULT_ORDER = ['home', 'profiles', 'canvas', 'tasks', 'dadosclean'];
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExtensions }) => {
     const { theme, layout } = useTheme();
@@ -89,9 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
         `} style={{ backgroundColor: 'var(--glass-bg)' }}>
             {/* Logo Area */}
             <div className={`h-14 flex items-center shrink-0 border-b border-transparent ${isSplitPanel ? 'px-4 gap-3' : 'justify-center'}`}>
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-md shrink-0">
-                    <span className="text-theme-text font-bold text-[10px]">Axe</span>
-                </div>
+                <img src={logoImg} alt="Axe Logo" className="w-8 h-8 rounded-xl object-contain shadow-md shrink-0 cursor-pointer" onClick={() => onViewChange('home')} />
                 {isSplitPanel && (
                     <div className="flex flex-col">
                         <span className="text-xs font-bold text-theme-text-muted tracking-tight leading-none">Axe Multi</span>
