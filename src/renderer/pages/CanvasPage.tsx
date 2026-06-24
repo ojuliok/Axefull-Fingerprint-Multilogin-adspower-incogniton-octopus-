@@ -576,20 +576,17 @@ const CanvasPage: React.FC = () => {
         const data = await getCanvasData(targetCanvasId);
         setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
     }, []);
-
     const handleBreadcrumbClick = useCallback(async (index: number) => {
         if (index === -1) {
             handleGoHome();
             return;
         }
-        setNavigationStack(prev => {
-            const next = prev.slice(0, index + 1);
-            const targetCanvasId = next[next.length - 1].id;
-            const data = await getCanvasData(targetCanvasId);
-            setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
-            return next;
-        });
-    }, [handleGoHome]);
+        const next = navigationStack.slice(0, index + 1);
+        setNavigationStack(next);
+        const targetCanvasId = next[next.length - 1].id;
+        const data = await getCanvasData(targetCanvasId);
+        setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+    }, [handleGoHome, navigationStack]);
 
     const toggleFolder = useCallback((id: string, e: React.MouseEvent) => {
         e.stopPropagation();
