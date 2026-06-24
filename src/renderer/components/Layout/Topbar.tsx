@@ -21,7 +21,7 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
     const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'Axe';
 
     return (
-        <header className={`h-14 flex items-center justify-between px-4 shrink-0 transition-colors duration-300 backdrop-blur-md bg-theme-surface/50 border-b border-theme-border/30 z-20`}>
+        <header className={`h-14 flex items-center justify-between px-4 shrink-0 transition-colors duration-300 backdrop-blur-md bg-theme-surface/50 z-20`}>
             {/* Left side: Workspace / Branding */}
             <div className="flex items-center gap-3 relative">
                 <div 

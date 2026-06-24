@@ -85,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
     return (
         <aside className={`
             flex flex-col relative z-20 transition-all duration-300 backdrop-blur-xl shrink-0
-            ${isSplitPanel ? 'w-[220px] border-r border-theme-border/50 shadow-xl' : 'w-[64px] border-r border-theme-border/30'}
+            ${isSplitPanel ? 'w-[220px] shadow-xl' : 'w-[64px]'}
         `} style={{ backgroundColor: 'var(--glass-bg)' }}>
             {/* Logo Area */}
             <div className={`h-14 flex items-center shrink-0 border-b border-transparent ${isSplitPanel ? 'px-4 gap-3' : 'justify-center'}`}>

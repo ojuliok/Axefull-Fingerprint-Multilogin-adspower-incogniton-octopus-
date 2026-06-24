@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, X, GripHorizontal, CheckCircle2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, GripHorizontal, CheckCircle2, Search, Plus } from 'lucide-react';
 import { usePomodoro } from '../../context/PomodoroContext';
+import { getTasksData, createTask, TaskData } from '../../components/Tasks/tasksStorage';
 
 const FloatingPomodoro: React.FC = () => {
     const {
@@ -23,6 +24,38 @@ const FloatingPomodoro: React.FC = () => {
     const dragStartPos = useRef({ x: 0, y: 0 });
     const initialPos = useRef({ x: 0, y: 0 });
     const [isDragOver, setIsDragOver] = useState(false);
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<TaskData[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+
+    useEffect(() => {
+        if (searchQuery.trim().length > 0) {
+            const allTasks = getTasksData();
+            const results = allTasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) && t.status !== 'done');
+            setSearchResults(results.slice(0, 5));
+        } else {
+            setSearchResults([]);
+        }
+    }, [searchQuery]);
+
+    const handleSelectTask = (task: TaskData) => {
+        setActiveTask(task);
+        setIsPomodoroRunning(true);
+        setPomodoroMode('work');
+        setSearchQuery('');
+        setIsSearching(false);
+    };
+
+    const handleCreateNewTask = () => {
+        if (!searchQuery.trim()) return;
+        const newTask = createTask(searchQuery.trim());
+        setActiveTask(newTask);
+        setIsPomodoroRunning(true);
+        setPomodoroMode('work');
+        setSearchQuery('');
+        setIsSearching(false);
+    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -137,6 +170,7 @@ const FloatingPomodoro: React.FC = () => {
                     <span style={{ fontSize: '14px', fontWeight: 600 }}>Pomodoro</span>
                 </div>
                 <button
+                    onPointerDown={(e) => e.stopPropagation()}
                     onClick={() => setIsFloating(false)}
                     style={{
                         background: 'transparent',
@@ -292,17 +326,75 @@ const FloatingPomodoro: React.FC = () => {
                         </button>
                     </div>
                 ) : (
-                    <div style={{
-                        marginTop: '20px',
-                        width: '100%',
-                        padding: '16px',
-                        border: '1px solid var(--border-default)',
-                        borderRadius: '8px',
-                        textAlign: 'center',
-                        color: 'var(--text-tertiary)',
-                        fontSize: '12px'
-                    }}>
-                        Arraste uma tarefa aqui para focar
+                    <div style={{ marginTop: '20px', width: '100%', position: 'relative' }}>
+                        {isSearching ? (
+                            <div style={{ position: 'relative', width: '100%' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', background: '#27272a', borderRadius: '8px', padding: '8px 12px' }}>
+                                    <Search size={14} color="#a1a1aa" />
+                                    <input 
+                                        autoFocus
+                                        type="text" 
+                                        placeholder="Buscar ou criar tarefa..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                if (searchResults.length > 0) {
+                                                    handleSelectTask(searchResults[0]);
+                                                } else {
+                                                    handleCreateNewTask();
+                                                }
+                                            } else if (e.key === 'Escape') {
+                                                setIsSearching(false);
+                                                setSearchQuery('');
+                                            }
+                                        }}
+                                        style={{ background: 'transparent', border: 'none', color: 'white', marginLeft: '8px', outline: 'none', width: '100%', fontSize: '13px' }}
+                                    />
+                                </div>
+                                {searchQuery.trim().length > 0 && (
+                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#18181b', border: '1px solid #3f3f46', borderRadius: '8px', marginTop: '4px', zIndex: 10, maxHeight: '150px', overflowY: 'auto' }}>
+                                        {searchResults.map(t => (
+                                            <div 
+                                                key={t.id} 
+                                                onClick={() => handleSelectTask(t)}
+                                                style={{ padding: '8px 12px', fontSize: '12px', cursor: 'pointer', borderBottom: '1px solid #27272a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#27272a'}
+                                                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                                            >
+                                                {t.title}
+                                            </div>
+                                        ))}
+                                        <div 
+                                            onClick={handleCreateNewTask}
+                                            style={{ padding: '8px 12px', fontSize: '12px', cursor: 'pointer', color: '#c084fc', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#27272a'}
+                                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                                        >
+                                            <Plus size={12} /> Criar "{searchQuery}"
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div 
+                                onClick={() => setIsSearching(true)}
+                                style={{
+                                    padding: '16px',
+                                    border: '1px dashed rgba(255,255,255,0.2)',
+                                    borderRadius: '8px',
+                                    textAlign: 'center',
+                                    color: 'var(--text-tertiary)',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                Arraste ou clique para focar numa tarefa
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

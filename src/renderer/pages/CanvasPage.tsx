@@ -20,6 +20,8 @@ import CanvasHome from '../features/Canvas/CanvasHome';
 import CanvasRichText from '../features/Canvas/CanvasRichText';
 import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES, getDefaultIconForType } from '../features/Canvas/CanvasIcons';
 import { CRMCanvasView } from './MarketingPage';
+import { useWorkspace } from '../context/WorkspaceContext';
+import { useAuth } from '../context/AuthContext';
 
 import styles from './CanvasPage.module.css';
 
@@ -82,10 +84,16 @@ const CanvasPage: React.FC = () => {
     const fileImportInputRef = useRef<HTMLInputElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
 
+    const reloadCanvasList = useCallback(async () => {
+        if (!currentWorkspace) return;
+        const list = await getCanvasList(currentWorkspace.id);
+        setCanvasList(list);
+    }, [currentWorkspace]);
+
     // Load canvas list on mount
     useEffect(() => {
         reloadCanvasList();
-    }, []);
+    }, [reloadCanvasList]);
 
     // Save menuMode preference
     useEffect(() => {
@@ -268,7 +276,7 @@ const CanvasPage: React.FC = () => {
     }, []);
 
     const handleSelectCanvas = useCallback(async (id: string) => {
-        const canvas = getCanvasList().find(c => c.id === id);
+        const canvas = canvasList.find(c => c.id === id);
         setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
         const data = await getCanvasData(id);
         setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
@@ -1081,7 +1089,7 @@ const CanvasPage: React.FC = () => {
                         <CanvasRichText 
                             key={activeCanvasId} 
                             canvasInfo={activeCanvasInfo} 
-                            onUpdate={() => setCanvasList(getCanvasList())} 
+                            onUpdate={() => reloadCanvasList()} 
                             onSelectCanvas={handleSelectCanvas}
                         />
                     ) : activeCanvasData ? (
@@ -1091,7 +1099,7 @@ const CanvasPage: React.FC = () => {
                             data={activeCanvasData}
                             onDataChange={handleDataChange}
                             onOpenPage={handleOpenPage}
-                            onCanvasCreated={() => setCanvasList(getCanvasList())}
+                            onCanvasCreated={() => reloadCanvasList()}
                             onNodesDeleted={handleNodesDeleted}
                         />
                     ) : (

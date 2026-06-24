@@ -75,7 +75,7 @@ export const LayoutManager: React.FC = () => {
                         onOpenProxies={() => setShowProxiesModal(true)}
                         runningProfilesCount={runningProfiles.length}
                     />
-                    <main className="flex-1 overflow-hidden relative border-t bg-theme-surface border-theme-border shadow-sm">
+                    <main className="flex-1 overflow-hidden relative bg-theme-surface shadow-sm">
                         <Outlet />
                     </main>
                 </div>
@@ -116,7 +116,7 @@ export const LayoutManager: React.FC = () => {
                                 onOpenActiveProfiles={() => {}}
                                 onOpenProxies={() => setShowProxiesModal(true)}
                             />
-                            <main className="flex-1 overflow-hidden relative border-t border-l border-theme-border bg-theme-base">
+                            <main className="flex-1 overflow-hidden relative bg-theme-base">
                                 <Outlet />
                             </main>
                         </div>
@@ -142,7 +142,7 @@ export const LayoutManager: React.FC = () => {
                         onOpenActiveProfiles={() => {}}
                         onOpenProxies={() => setShowProxiesModal(true)}
                     />
-                    <main className="flex-1 overflow-hidden relative border-t border-l bg-theme-surface border-theme-border shadow-sm rounded-tl-[16px]">
+                    <main className="flex-1 overflow-hidden relative bg-theme-surface rounded-tl-[16px]">
                         <Outlet />
                     </main>
                 </div>
