@@ -217,7 +217,7 @@ const DadosClean: React.FC = () => {
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
                     <div className={styles.appIcon}>
-                        <Eraser size={20} className="text-white" />
+                        <Eraser size={20} className="text-theme-text" />
                     </div>
                     <div>
                         <div className={styles.appTitle}>MetaClean</div>

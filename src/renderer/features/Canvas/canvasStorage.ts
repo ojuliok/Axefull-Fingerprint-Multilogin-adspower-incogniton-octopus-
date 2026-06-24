@@ -2,9 +2,15 @@
  * Canvas Storage — localStorage persistence for canvas pages and nodes
  */
 
+export interface BrowserTab {
+    id: string;
+    url: string;
+    title: string;
+}
+
 export interface CanvasNode {
     id: string;
-    type: 'text' | 'freetext' | 'image' | 'document' | 'emoji' | 'icon' | 'profile' | 'social' | 'embed' | 'card' | 'table' | 'page' | 'checklist' | 'frame' | 'shape';
+    type: 'text' | 'freetext' | 'image' | 'document' | 'emoji' | 'icon' | 'profile' | 'social' | 'embed' | 'card' | 'table' | 'page' | 'checklist' | 'frame' | 'shape' | 'browser';
     x: number;
     y: number;
     width: number;
@@ -29,6 +35,10 @@ export interface CanvasNode {
     shapeFillColor?: string;
     shapeRoughness?: number;
     flipped?: boolean;
+    browserUrl?: string; // legacy single url
+    browserTabs?: BrowserTab[];
+    activeTabId?: string;
+    browserProxy?: string;
 }
 
 export interface Stroke {
@@ -72,6 +82,7 @@ export interface CanvasInfo {
     description?: string;
     icon?: string;
     properties?: Record<string, string>;
+    tags?: string[];
     notes?: string;
 }
 

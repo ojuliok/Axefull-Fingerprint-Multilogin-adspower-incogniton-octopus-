@@ -19,7 +19,7 @@
   max-height: 800px;
   background: var(--bg-primary);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--bg-secondary);
   box-shadow: 0 24px 60px rgba(0,0,0,0.7);
   overflow: hidden;
   animation: scaleIn 0.2s ease-out;
@@ -40,8 +40,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 32px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  background: rgba(255,255,255,0.01);
+  border-bottom: 1px solid var(--bg-secondary);
+  background: var(--bg-secondary);
   flex-shrink: 0;
 }
 
@@ -65,7 +65,7 @@
 .title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -107,14 +107,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.refreshBtn:hover { color: var(--bg-secondary); background: rgba(255,255,255,0.06); }
+.refreshBtn:hover { color: var(--text-primary); background: var(--bg-secondary); }
 
 .body {
   flex: 1;
@@ -157,14 +157,14 @@
   align-items: center;
   padding: 12px 16px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.04);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   transition: all 0.15s;
 }
 
 .tableRow:hover {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.08);
+  background: var(--bg-secondary);
+  border-color: var(--text-primary);
 }
 
 .cellProfile {
@@ -190,7 +190,7 @@
 .profileName {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -214,7 +214,7 @@
   font-family: monospace;
 }
 
-.host { color: #94a3b8; }
+.host { color: var(--text-tertiary); }
 .port { color: var(--text-disabled); }
 
 .cellUser { font-size: 12px; color: var(--text-tertiary); }
@@ -232,7 +232,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #94a3b8;
+  color: var(--text-tertiary);
 }
 
 .statusOk {
@@ -266,14 +266,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 7px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.actionBtn:hover { color: var(--bg-secondary); background: rgba(255,255,255,0.07); }
+.actionBtn:hover { color: var(--text-primary); background: var(--bg-secondary); }
 .actionBtn:disabled { opacity: 0.4; cursor: default; }
 
 .actionDanger:hover { color: #f87171; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
@@ -292,7 +292,7 @@
 
 .editModal {
   background: #0f0f11;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--bg-secondary);
   border-radius: 20px;
   width: 420px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.7);
@@ -308,7 +308,7 @@
 .editHeader h3 {
   font-size: 16px;
   font-weight: 700;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -319,8 +319,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   cursor: pointer;
 }
@@ -354,10 +354,10 @@
 .editField input,
 .editField select {
   padding: 8px 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s;
@@ -382,8 +382,8 @@
 .cancelBtn {
   padding: 8px 18px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   font-size: 13px;
   font-weight: 600;
@@ -391,7 +391,7 @@
   transition: all 0.15s;
 }
 
-.cancelBtn:hover { color: var(--bg-secondary); }
+.cancelBtn:hover { color: var(--text-primary); }
 
 .saveBtn {
   display: flex;
@@ -399,7 +399,7 @@
   gap: 6px;
   padding: 8px 20px;
   border-radius: 10px;
-  background: #7c3aed;
+  background: var(--brand-secondary);
   border: 1px solid rgba(139,92,246,0.5);
   color: #fff;
   font-size: 13px;
@@ -416,8 +416,8 @@
   display: flex;
   gap: 2px;
   padding: 0 32px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  background: rgba(255,255,255,0.01);
+  border-bottom: 1px solid var(--bg-secondary);
+  background: var(--bg-secondary);
 }
 
 .tabBtn {
@@ -432,14 +432,14 @@
   margin-bottom: -1px;
   transition: all 0.15s;
 }
-.tabBtn:hover { color: #94a3b8; }
-.tabBtnActive { color: var(--bg-secondary) !important; border-bottom-color: #7c3aed !important; }
+.tabBtn:hover { color: var(--text-tertiary); }
+.tabBtnActive { color: var(--text-primary) !important; border-bottom-color: var(--brand-secondary) !important; }
 
 .tabCount {
   font-size: 10px;
   padding: 1px 6px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.05);
+  background: var(--bg-secondary);
   color: var(--text-disabled);
   font-weight: 700;
 }
@@ -463,8 +463,8 @@
 
 .assignSelect {
   font-size: 11px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 7px;
   color: var(--text-tertiary);
   padding: 4px 8px;
@@ -483,8 +483,8 @@
   display: block;
   font-size: 10px;
   color: var(--text-secondary);
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 8px;
   padding: 8px 12px;
   margin-bottom: 12px;
@@ -493,11 +493,11 @@
 
 .importTextarea {
   width: 100%;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
   padding: 10px 12px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 12px;
   font-family: monospace;
   resize: vertical;

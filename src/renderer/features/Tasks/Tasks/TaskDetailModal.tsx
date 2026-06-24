@@ -226,7 +226,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpda
                                         placeholder="Data de início"
                                     />
                                 </div>
-                                <span style={{ fontSize: '12px', color: '#71717a', fontWeight: '500' }}>até</span>
+                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '500' }}>até</span>
                                 <div style={{ flex: 1 }}>
                                     <CustomDatePicker 
                                         selectedDate={endDate}
@@ -303,9 +303,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpda
                         <div className={styles.sectionTitle} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><AlignLeft size={16} /> Descrição</div>
                             <div className={styles.richTextToolbar} style={{ display: 'flex', gap: '4px' }}>
-                                <button type="button" onClick={() => setDescription(description + '**Texto em negrito**')} title="Negrito" style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><Bold size={14}/></button>
-                                <button type="button" onClick={() => setDescription(description + '*Texto em itálico*')} title="Itálico" style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><Italic size={14}/></button>
-                                <button type="button" onClick={() => setDescription(description + '\n- Item de lista')} title="Lista" style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><ListIcon size={14}/></button>
+                                <button type="button" onClick={() => setDescription(description + '**Texto em negrito**')} title="Negrito" style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}><Bold size={14}/></button>
+                                <button type="button" onClick={() => setDescription(description + '*Texto em itálico*')} title="Itálico" style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}><Italic size={14}/></button>
+                                <button type="button" onClick={() => setDescription(description + '\n- Item de lista')} title="Lista" style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}><ListIcon size={14}/></button>
                             </div>
                         </div>
                         <textarea 
@@ -387,7 +387,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpda
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             {Object.entries(customFields).map(([key, value]) => (
                                 <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#18181b', padding: '6px', borderRadius: '6px', border: '1px solid #27272a' }}>
-                                    <span style={{ fontSize: '12px', color: '#a1a1aa', width: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{key}</span>
+                                    <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', width: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{key}</span>
                                     <input 
                                         className={styles.select}
                                         style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: '1px dashed #3f3f46', borderRadius: 0 }}
@@ -426,7 +426,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpda
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <Clock size={24} color="#8b5cf6" />
                             <div>
-                                <div style={{ fontSize: '12px', color: '#a1a1aa' }}>Tempo Dedicado</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Tempo Dedicado</div>
                                 <div className={styles.timerDisplay}>{formatTime(timeSpent)}</div>
                             </div>
                         </div>
@@ -480,7 +480,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpda
                                     </span>
                                     <button 
                                         onClick={() => handleDeleteSubtask(sub.id)}
-                                        style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}
+                                        style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}
                                     ><X size={14} /></button>
                                 </div>
                             ))}

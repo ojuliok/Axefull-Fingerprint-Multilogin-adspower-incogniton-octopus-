@@ -56,12 +56,12 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
                         className="fixed inset-0 z-40"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute left-0 top-full mt-2 z-50 bg-dark-950 border border-dark-700 rounded-xl shadow-2xl py-2 min-w-[140px] max-h-[280px] overflow-y-auto animate-fade-in">
+                    <div className="absolute left-0 top-full mt-2 z-50 bg-theme-surface border border-theme-border rounded-xl shadow-2xl py-2 min-w-[140px] max-h-[280px] overflow-y-auto animate-fade-in">
                         {(Object.keys(statusConfig) as ProfileStatus[]).map((s) => (
                             <button
                                 key={s}
                                 onClick={() => handleStatusSelect(s)}
-                                className={`w-full px-4 py-2.5 text-left text-xs font-medium transition-colors hover:bg-dark-800 flex items-center gap-2 ${s === status ? statusConfig[s].color : 'text-dark-300'
+                                className={`w-full px-4 py-2.5 text-left text-xs font-medium transition-colors hover:bg-theme-surface flex items-center gap-2 ${s === status ? statusConfig[s].color : 'text-theme-text'
                                     }`}
                             >
                                 <span className={`w-2 h-2 rounded-full ${statusConfig[s].dotColor}`} />

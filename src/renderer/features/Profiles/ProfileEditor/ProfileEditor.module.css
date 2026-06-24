@@ -18,7 +18,7 @@
   max-width: 520px;
   max-height: 78vh;
   background: var(--bg-primary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--bg-secondary);
   border-radius: 20px;
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
   display: flex;
@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .headerTitle h2 {
@@ -56,7 +56,7 @@
   padding: 10px;
   border-radius: 12px;
   transition: all 0.2s;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-secondary);
 }
 
 .closeBtn:hover {
@@ -68,8 +68,8 @@
   display: flex;
   gap: 4px;
   padding: 0 24px;
-  background: rgba(255, 255, 255, 0.01);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .tab {
@@ -88,12 +88,12 @@
 }
 
 .tab:hover {
-  color: #cbd5e1;
+  color: var(--text-primary);
 }
 
 .tabActive {
-  color: var(--bg-secondary) !important;
-  border-bottom-color: #7c3aed !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--brand-secondary) !important;
   background: transparent !important;
   box-shadow: none !important;
 }
@@ -125,11 +125,11 @@
 }
 
 .inputField {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
   padding: 10px 14px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 0.875rem;
   transition: all 0.2s;
   width: 100%;
@@ -149,8 +149,8 @@
 }
 
 .noteItem {
-  background: rgba(255, 255, 255, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 20px;
   padding: 20px;
   position: relative;
@@ -158,8 +158,8 @@
 }
 
 .noteItem:hover {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
+  border-color: var(--text-primary);
 }
 
 .noteHeader {
@@ -223,8 +223,8 @@
   padding: 16px 24px;
   display: flex;
   gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.01);
+  border-top: 1px solid var(--bg-secondary);
+  background: var(--bg-secondary);
 }
 
 .cancelBtn {
@@ -234,14 +234,14 @@
   font-weight: 700;
   font-size: 0.875rem;
   color: var(--text-tertiary);
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   transition: all 0.2s;
 }
 
 .cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--bg-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .saveBtn {
@@ -250,7 +250,7 @@
   border-radius: 12px;
   font-weight: 700;
   font-size: 0.875rem;
-  color: white;
+  color: var(--text-primary);
   background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%);
   transition: all 0.3s;
   box-shadow: 0 8px 20px -4px rgba(109, 40, 217, 0.4);
@@ -275,16 +275,16 @@
 }
 
 .fingerprintCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   padding: 16px;
   border-radius: 16px;
   transition: all 0.2s;
 }
 
 .fingerprintCard:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
+  border-color: var(--text-primary);
 }
 
 .fingerprintCard span {
@@ -298,7 +298,7 @@
 
 .fingerprintCard p {
   font-size: 0.8125rem;
-  color: #cbd5e1;
+  color: var(--text-primary);
   font-weight: 600;
   margin: 0;
 }
@@ -330,15 +330,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-secondary);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bg-secondary);
 }
 
 .toggleText h4 {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .toggleText p {
@@ -366,7 +366,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--text-primary);
   transition: .4s;
   border-radius: 24px;
 }
@@ -378,7 +378,7 @@
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: var(--text-primary);
   transition: .4s;
   border-radius: 50%;
 }
@@ -406,8 +406,8 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 20px;
   padding: 16px;
 }
@@ -455,10 +455,10 @@ input:checked + .slider:before {
 .tagInput {
   flex: 1;
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bg-secondary);
   border-radius: 12px;
   padding: 8px 14px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 0.8125rem;
   transition: all 0.2s;
 }
@@ -475,14 +475,14 @@ input:checked + .slider:before {
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: #8b5cf6;
-  color: white;
+  background: var(--brand-primary);
+  color: var(--text-primary);
   border-radius: 12px;
   transition: all 0.2s;
 }
 
 .tagAddBtn:hover {
-  background: #7c3aed;
+  background: var(--brand-secondary);
   transform: scale(1.05);
 }
 

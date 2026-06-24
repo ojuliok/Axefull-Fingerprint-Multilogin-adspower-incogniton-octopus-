@@ -249,7 +249,7 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ) : entries.length === 0 ? (
                         <div className={styles.emptyState}>
                             <Globe size={48} className="text-slate-700 mb-4" />
-                            <h3 className="text-slate-400 font-semibold text-base mb-1">Nenhum proxy configurado</h3>
+                            <h3 className="text-theme-text-muted font-semibold text-base mb-1">Nenhum proxy configurado</h3>
                             <p className="text-slate-600 text-sm">Edite um perfil para adicionar um proxy a ele.</p>
                         </div>
                     ) : (
@@ -295,7 +295,7 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ) : pool.length === 0 ? (
                         <div className={styles.emptyState}>
                             <Globe size={48} className="text-slate-700 mb-4" />
-                            <h3 className="text-slate-400 font-semibold text-base mb-1">Pool vazio</h3>
+                            <h3 className="text-theme-text-muted font-semibold text-base mb-1">Pool vazio</h3>
                             <p className="text-slate-600 text-sm mb-4">Importe proxies em massa para gerenciá-los aqui.</p>
                             <button className={styles.testAllBtn} onClick={() => setShowBulkImport(true)}><Upload size={14} /> Importar Proxies</button>
                         </div>

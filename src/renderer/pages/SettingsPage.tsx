@@ -6,6 +6,7 @@ import { useTheme, Theme, Layout, ButtonStyle } from '../context/ThemeContext';
 import { useSecurity } from '../context/SecurityContext';
 import styles from './SettingsPage.module.css';
 import { AITimelinePage } from './AITimelinePage';
+import { ThemeEditor } from '../features/Settings/ThemeEditor';
 
 interface AppInfo {
     version: string;
@@ -244,7 +245,7 @@ const SettingsPage: React.FC = () => {
 
                         {user?.plan === 'free' && (
                             <div className={styles.upgradeCard}>
-                                <h3 className="text-base font-bold text-white mb-1">Faça upgrade para Pro</h3>
+                                <h3 className="text-base font-bold text-theme-text mb-1">Faça upgrade para Pro</h3>
                                 <p className="text-sm text-slate-500 mb-4">Perfis ilimitados, fingerprints avançados e suporte prioritário.</p>
                                 <button className={styles.upgradeBtn}>
                                     Ver Planos <ChevronRight size={14} />
@@ -265,7 +266,7 @@ const SettingsPage: React.FC = () => {
                                 <div className={styles.teamGateIcon}>
                                     <Crown size={22} className="text-violet-400" />
                                 </div>
-                                <h3 className="text-base font-bold text-white mb-1">Recurso exclusivo Pro / Enterprise</h3>
+                                <h3 className="text-base font-bold text-theme-text mb-1">Recurso exclusivo Pro / Enterprise</h3>
                                 <p className="text-sm text-slate-500 mb-4">Times e workspaces compartilhados estão disponíveis nos planos pagos.</p>
                                 <button className={styles.upgradeBtn}>
                                     Ver Planos <ChevronRight size={14} />
@@ -449,6 +450,11 @@ const SettingsPage: React.FC = () => {
                                     );
                                 })}
                             </div>
+                        </div>
+
+                        {/* Editor de Tema Customizado */}
+                        <div className={styles.card}>
+                            <ThemeEditor />
                         </div>
 
                         {/* Layouts Estruturais */}
@@ -836,14 +842,14 @@ const SettingsPage: React.FC = () => {
                                         value={pinInput}
                                         onChange={e => setPinInput(e.target.value.replace(/\D/g, ''))}
                                         placeholder="0000"
-                                        className="w-24 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-center tracking-widest focus:outline-none focus:border-violet-500"
+                                        className="w-24 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-theme-text text-center tracking-widest focus:outline-none focus:border-violet-500"
                                     />
                                     <button 
                                         onClick={() => {
                                             setPin(pinInput || null);
                                             toast.success(pinInput ? 'PIN salvo com sucesso' : 'PIN removido');
                                         }}
-                                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm transition-colors"
+                                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-theme-text rounded-lg text-sm transition-colors"
                                     >
                                         Salvar
                                     </button>
@@ -863,14 +869,14 @@ const SettingsPage: React.FC = () => {
                                         value={passInput}
                                         onChange={e => setPassInput(e.target.value)}
                                         placeholder="Sua senha secreta"
-                                        className="w-40 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-violet-500"
+                                        className="w-40 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-theme-text focus:outline-none focus:border-violet-500"
                                     />
                                     <button 
                                         onClick={() => {
                                             setSecondPassword(passInput || null);
                                             toast.success(passInput ? 'Senha salva com sucesso' : 'Senha removida');
                                         }}
-                                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm transition-colors"
+                                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-theme-text rounded-lg text-sm transition-colors"
                                     >
                                         Salvar
                                     </button>
@@ -890,7 +896,7 @@ const SettingsPage: React.FC = () => {
                                         setTimeoutMinutes(parseInt(e.target.value, 10));
                                         toast.success('Tempo de bloqueio atualizado');
                                     }}
-                                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-violet-500"
+                                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-theme-text text-sm focus:outline-none focus:border-violet-500"
                                 >
                                     <option value="0" className="bg-[#18181b]">Nunca</option>
                                     <option value="1" className="bg-[#18181b]">1 minuto</option>
@@ -913,7 +919,7 @@ const SettingsPage: React.FC = () => {
                             ) : (
                                 <div className="overflow-hidden border border-white/10 rounded-xl">
                                     <table className="w-full text-left text-sm text-slate-300">
-                                        <thead className="bg-white/5 text-xs text-slate-400">
+                                        <thead className="bg-white/5 text-xs text-theme-text-muted">
                                             <tr>
                                                 <th className="px-4 py-3 font-medium">Data / Hora</th>
                                                 <th className="px-4 py-3 font-medium">Endereço IP</th>

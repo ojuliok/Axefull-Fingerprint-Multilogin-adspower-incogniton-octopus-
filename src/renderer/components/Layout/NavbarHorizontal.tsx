@@ -46,7 +46,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange('profiles')}>
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-md">
-                        <span className="text-white font-bold text-[10px]">Axe</span>
+                        <span className="text-theme-text font-bold text-[10px]">Axe</span>
                     </div>
                     <span className={`font-bold text-base tracking-tight ${textClass}`}>Axe VAULT</span>
                 </div>
@@ -141,7 +141,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                 <div className="relative">
                     <button
                         onClick={() => setShowProfileMenu(!showProfileMenu)}
-                        className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm transition-transform active:scale-95"
+                        className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-theme-text text-xs font-bold shadow-sm transition-transform active:scale-95"
                     >
                         {initials}
                     </button>

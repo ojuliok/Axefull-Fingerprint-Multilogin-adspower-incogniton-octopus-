@@ -89,22 +89,22 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
         <div className="overflow-x-auto">
             <table className="w-full text-sm">
                 <thead>
-                    <tr className="border-b border-dark-800 text-left">
+                    <tr className="border-b border-theme-border text-left">
                         <th className="px-4 py-3 w-10">
                             <input
                                 type="checkbox"
                                 checked={allSelected}
                                 onChange={onSelectAll}
-                                className="w-5 h-5 rounded-full border-2 border-dark-500 bg-dark-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0 cursor-pointer transition-all duration-200"
+                                className="w-5 h-5 rounded-full border-2 border-theme-border/50 bg-theme-card text-primary-500 focus:ring-primary-500 focus:ring-offset-0 cursor-pointer transition-all duration-200"
                             />
                         </th>
-                        <th className="px-4 py-3 text-dark-300 font-medium">Profile Name</th>
-                        <th className="px-4 py-3 text-dark-300 font-medium">Status</th>
-                        <th className="px-4 py-3 text-dark-300 font-medium min-w-[200px]">Notes</th>
-                        <th className="px-4 py-3 text-dark-300 font-medium">Proxy</th>
-                        <th className="px-4 py-3 text-dark-300 font-medium">Created</th>
-                        <th className="px-4 py-3 text-dark-300 font-medium">Last Used</th>
-                        <th className="px-4 py-3 text-dark-300 font-medium text-right">Actions</th>
+                        <th className="px-4 py-3 text-theme-text font-medium">Profile Name</th>
+                        <th className="px-4 py-3 text-theme-text font-medium">Status</th>
+                        <th className="px-4 py-3 text-theme-text font-medium min-w-[200px]">Notes</th>
+                        <th className="px-4 py-3 text-theme-text font-medium">Proxy</th>
+                        <th className="px-4 py-3 text-theme-text font-medium">Created</th>
+                        <th className="px-4 py-3 text-theme-text font-medium">Last Used</th>
+                        <th className="px-4 py-3 text-theme-text font-medium text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,7 +116,7 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
                         return (
                             <tr
                                 key={profile.id}
-                                className={`border-b border-dark-800 transition-colors hover:bg-dark-900 ${isSelected ? 'bg-primary-500/10' : ''
+                                className={`border-b border-theme-border transition-colors hover:bg-theme-surface ${isSelected ? 'bg-primary-500/10' : ''
                                     } ${isActive ? 'bg-green-500/5' : ''}`}
                             >
                                 {/* Checkbox */}
@@ -125,7 +125,7 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
                                         type="checkbox"
                                         checked={isSelected}
                                         onChange={() => onSelectProfile(profile.id)}
-                                        className="w-5 h-5 rounded-full border-2 border-dark-500 bg-dark-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0 cursor-pointer transition-all duration-200"
+                                        className="w-5 h-5 rounded-full border-2 border-theme-border/50 bg-theme-card text-primary-500 focus:ring-primary-500 focus:ring-offset-0 cursor-pointer transition-all duration-200"
                                     />
                                 </td>
 
@@ -136,7 +136,7 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
                                             {getPlatformIcon(profile.fingerprint.platform)}
                                         </div>
                                         <div>
-                                            <div className="font-medium text-white flex items-center gap-2">
+                                            <div className="font-medium text-theme-text flex items-center gap-2">
                                                 {profile.name}
                                                 {isActive && (
                                                     <span className="relative flex h-2 w-2">
@@ -145,7 +145,7 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="text-xs text-dark-400 flex items-center gap-1">
+                                            <div className="text-xs text-theme-text-muted flex items-center gap-1">
                                                 <span>{browserInfo.icon}</span>
                                                 <span>{browserInfo.name}</span>
                                             </div>
@@ -177,18 +177,18 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
                                             {profile.proxy.type.toUpperCase()} • {profile.proxy.host}
                                         </span>
                                     ) : (
-                                        <span className="text-dark-500 text-xs">No proxy</span>
+                                        <span className="text-theme-text-muted text-xs">No proxy</span>
                                     )}
                                 </td>
 
                                 {/* Created */}
-                                <td className="px-4 py-3 text-dark-400">
+                                <td className="px-4 py-3 text-theme-text-muted">
                                     <div>{formatDate(profile.created_at)}</div>
                                     <div className="text-xs">{formatTime(profile.created_at)}</div>
                                 </td>
 
                                 {/* Last Used */}
-                                <td className="px-4 py-3 text-dark-400">
+                                <td className="px-4 py-3 text-theme-text-muted">
                                     <div>{formatDate(profile.last_used)}</div>
                                     {profile.last_used && (
                                         <div className="text-xs">{formatTime(profile.last_used)}</div>
@@ -208,7 +208,7 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
                                         ) : (
                                             <button
                                                 onClick={() => onLaunch(profile.id)}
-                                                className="px-4 py-1.5 text-xs font-medium rounded-lg gradient-primary text-white hover:opacity-90 transition-all duration-200 shadow-lg shadow-primary-500/20"
+                                                className="px-4 py-1.5 text-xs font-medium rounded-lg gradient-primary text-theme-text hover:opacity-90 transition-all duration-200 shadow-lg shadow-primary-500/20"
                                             >
                                                 START
                                             </button>
@@ -216,17 +216,17 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
 
                                         {/* More actions menu */}
                                         <div className="relative group">
-                                            <button className="p-1.5 rounded-md text-dark-400 hover:bg-dark-700 hover:text-white transition-colors">
+                                            <button className="p-1.5 rounded-md text-theme-text-muted hover:bg-theme-card hover:text-theme-text transition-colors">
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                                                 </svg>
                                             </button>
 
                                             {/* Dropdown menu */}
-                                            <div className="absolute right-0 top-full mt-1 w-32 bg-dark-900 border border-dark-700 rounded-lg shadow-xl py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                            <div className="absolute right-0 top-full mt-1 w-32 bg-theme-surface border border-theme-border rounded-lg shadow-xl py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                                                 <button
                                                     onClick={() => onEdit(profile)}
-                                                    className="w-full px-3 py-2 text-left text-xs text-dark-300 hover:bg-dark-700 hover:text-white transition-colors"
+                                                    className="w-full px-3 py-2 text-left text-xs text-theme-text hover:bg-theme-card hover:text-theme-text transition-colors"
                                                 >
                                                     ✏️ Edit
                                                 </button>
@@ -247,7 +247,7 @@ const ProfileTable: React.FC<ProfileTableProps> = ({
             </table>
 
             {profiles.length === 0 && (
-                <div className="text-center py-12 text-dark-400">
+                <div className="text-center py-12 text-theme-text-muted">
                     <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                             d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />

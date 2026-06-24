@@ -86,7 +86,7 @@ const ExtensionsModal: React.FC<Props> = ({ onClose }) => {
 
                 <div className={styles.notice}>
                     <AlertCircle size={14} className="text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-slate-400 leading-relaxed">
+                    <p className="text-xs text-theme-text-muted leading-relaxed">
                         Apenas extensões <strong className="text-slate-300">desempacotadas</strong> (pasta com manifest.json) são suportadas.
                         Perfis ativos precisam ser reiniciados para aplicar mudanças.
                     </p>
@@ -100,7 +100,7 @@ const ExtensionsModal: React.FC<Props> = ({ onClose }) => {
                     ) : extensions.length === 0 ? (
                         <div className={styles.empty}>
                             <Puzzle size={32} className="text-slate-600 mb-3" />
-                            <p className="text-slate-400 font-medium">Nenhuma extensão instalada</p>
+                            <p className="text-theme-text-muted font-medium">Nenhuma extensão instalada</p>
                             <p className="text-slate-600 text-sm mt-1">Instale extensões desempacotadas para carregar em todos os perfis.</p>
                         </div>
                     ) : (

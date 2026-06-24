@@ -275,7 +275,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ profile, onClose, onSave 
                                         <p style={{ fontSize:11, color:'#92400e', margin:0 }}>Isso substituirá o fingerprint atual. Sessões ativas podem ser afetadas.</p>
                                     </div>
                                     <div style={{ display:'flex', gap:8 }}>
-                                        <button onClick={() => setRegenConfirm(false)} style={{ padding:'6px 12px', borderRadius:8, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', color:'#64748b', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                                        <button onClick={() => setRegenConfirm(false)} style={{ padding:'6px 12px', borderRadius:8, background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', fontSize:12, fontWeight:600, cursor:'pointer' }}>
                                             Cancelar
                                         </button>
                                         <button onClick={handleRegenerateFingerprint} style={{ padding:'6px 14px', borderRadius:8, background:'rgba(245,158,11,0.2)', border:'1px solid rgba(245,158,11,0.4)', color:'#fbbf24', fontSize:12, fontWeight:700, cursor:'pointer' }}>

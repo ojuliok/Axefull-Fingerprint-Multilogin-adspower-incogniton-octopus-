@@ -126,6 +126,7 @@ export interface AppInfoData {
 export interface AppAPI {
     info: () => Promise<APIResponse>;
     localApiPort: () => Promise<APIResponse>;
+    setWebviewProxy: (partitionId: string, proxyUrl: string) => Promise<APIResponse>;
 }
 
 export interface TemplatesAPI {
@@ -385,6 +386,7 @@ contextBridge.exposeInMainWorld('api', {
     app: {
         info: () => ipcRenderer.invoke('app:info'),
         localApiPort: () => ipcRenderer.invoke('app:local-api-port'),
+        setWebviewProxy: (partitionId: string, proxyUrl: string) => ipcRenderer.invoke('app:set-webview-proxy', partitionId, proxyUrl),
     },
     templates: {
         list: () => ipcRenderer.invoke('template:list'),

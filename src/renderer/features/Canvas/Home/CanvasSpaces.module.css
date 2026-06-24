@@ -35,7 +35,7 @@
     align-items: center;
     padding: 0 16px;
     transition: background 0.3s ease;
-    box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+    box-shadow: inset 0 2px 4px var(--bg-secondary);
 }
 
 .folderTab::after {
@@ -51,7 +51,7 @@
 }
 
 .folderCard:hover .folderTab {
-    background: var(--bg-card);
+    background: var(--bg-card-hover);
 }
 .folderCard:hover .folderTab::after {
     box-shadow: -8px 8px 0 0 var(--bg-card);
@@ -60,6 +60,9 @@
 .folderBody {
     flex: 1;
     background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px dashed rgba(255,255,255,0.15);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.08);
     border: 1px solid var(--border-default);
     border-radius: 0 16px 16px 16px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
@@ -75,7 +78,7 @@
 
 .folderCard:hover .folderBody {
     box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-    border-color: var(--border-hover);
+    border-color: var(--text-primary);
 }
 
 .folderCoverGradient {
@@ -104,6 +107,7 @@
     height: 44px;
     border-radius: 12px;
     background: var(--bg-secondary);
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -243,7 +247,7 @@
 
 .createFolderBody {
     flex: 1;
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--bg-secondary);
     border: 1px dashed var(--border-hover);
     border-radius: 0 16px 16px 16px;
     padding: 20px;
@@ -257,7 +261,7 @@
 }
 
 .createFolderCard:hover .createFolderBody {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--bg-secondary);
     border-color: var(--text-disabled);
     box-shadow: 0 12px 32px rgba(0,0,0,0.08);
 }
@@ -277,7 +281,7 @@
 
 .createFolderCard:hover .createFolderIcon {
     transform: scale(1.05);
-    background: var(--border-default);
+    background: var(--bg-tertiary);
     color: var(--text-primary);
 }
 

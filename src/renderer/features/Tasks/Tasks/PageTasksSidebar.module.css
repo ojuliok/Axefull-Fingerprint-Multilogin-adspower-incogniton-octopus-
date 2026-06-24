@@ -4,8 +4,8 @@
     right: 0;
     bottom: 0;
     width: 320px;
-    background: #0f0f13;
-    border-left: 1px solid #27272a;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-default);
     display: flex;
     flex-direction: column;
     z-index: 100;
@@ -20,7 +20,7 @@
 
 .sidebarHeader {
     padding: 16px;
-    border-bottom: 1px solid #27272a;
+    border-bottom: 1px solid var(--border-default);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -29,7 +29,7 @@
 .headerTitle {
     font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -49,8 +49,8 @@
 }
 
 .iconBtn:hover {
-    background: #27272a;
-    color: #e2e8f0;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .sidebarBody {
@@ -69,8 +69,8 @@
 }
 
 .taskItem, .linkTaskItem {
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 6px;
     padding: 10px;
     display: flex;
@@ -93,7 +93,7 @@
 .taskTitle {
     flex: 1;
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -131,8 +131,8 @@
 }
 
 .actionBtn {
-    background: #8b5cf6;
-    color: white;
+    background: var(--brand-primary);
+    color: var(--text-primary);
     border: none;
     padding: 10px;
     border-radius: 6px;
@@ -146,13 +146,13 @@
 }
 
 .actionBtn:hover {
-    background: #7c3aed;
+    background: var(--brand-secondary);
 }
 
 .actionBtnSecondary {
     background: transparent;
     color: var(--text-disabled);
-    border: 1px solid #27272a;
+    border: 1px solid var(--border-default);
     padding: 10px;
     border-radius: 6px;
     cursor: pointer;
@@ -165,8 +165,8 @@
 }
 
 .actionBtnSecondary:hover {
-    background: #27272a;
-    color: #e2e8f0;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .emptyText {
@@ -194,7 +194,7 @@
 .textBtn {
     background: transparent;
     border: none;
-    color: #8b5cf6;
+    color: var(--brand-primary);
     cursor: pointer;
     font-size: 12px;
 }
@@ -205,7 +205,7 @@
 
 .linkBtn {
     background: rgba(139, 92, 246, 0.1);
-    color: #8b5cf6;
+    color: var(--brand-primary);
     border: none;
     padding: 4px 8px;
     border-radius: 4px;

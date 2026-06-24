@@ -134,9 +134,9 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
                 style={{ 
                   width: '100%', 
                   height: '150px', 
-                  border: '1px solid rgba(0,0,0,0.1)', 
+                  border: '1px solid var(--border-default)', 
                   borderRadius: '8px', 
-                  background: isCanvas ? '#f8fafc' : '#ffffff',
+                  background: 'var(--bg-secondary)',
                   overflow: 'hidden',
                   position: 'relative',
                   pointerEvents: 'none'
@@ -144,14 +144,14 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
               >
                 {isPage && (
                   <div 
-                    style={{ padding: '12px', fontSize: '12px', color: '#52525b', opacity: 0.8, transform: 'scale(0.8)', transformOrigin: 'top left', width: '125%', height: '125%' }}
+                    style={{ padding: '12px', fontSize: '12px', color: 'var(--text-secondary)', opacity: 0.8, transform: 'scale(0.8)', transformOrigin: 'top left', width: '125%', height: '125%' }}
                     dangerouslySetInnerHTML={{ __html: getPagePreviewHTML(notes) || '<em style="color:#a1a1aa">Página vazia</em>' }}
                   />
                 )}
                 {isCanvas && canvasData && (
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {canvasData.nodes.length === 0 ? (
-                      <em style={{ color: '#a1a1aa', fontSize: '12px' }}>Canvas vazio</em>
+                      <em style={{ color: 'var(--text-tertiary)', fontSize: '12px' }}>Canvas vazio</em>
                     ) : (
                       <div style={{ position: 'relative', width: '100%', height: '100%', transform: 'scale(0.3)', transformOrigin: 'center' }}>
                         {canvasData.nodes.map(n => (
@@ -245,7 +245,7 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
           {/* Container Contents */}
           {isContainer && (
             <div className={styles.previewSection} style={{ marginTop: '0', marginBottom: '16px', background: 'rgba(244,244,245,0.4)', border: '1px solid #d4d4d8', borderRadius: '12px', padding: '16px' }}>
-              <div className={styles.sectionTitle} style={{ color: '#18181b', fontWeight: 600, borderBottom: '1px solid #e4e4e7', paddingBottom: '8px', marginBottom: '12px' }}>Conteúdo</div>
+              <div className={styles.sectionTitle} style={{ color: 'var(--text-primary)', fontWeight: 600, borderBottom: '1px solid #e4e4e7', paddingBottom: '8px', marginBottom: '12px' }}>Conteúdo</div>
               {children.length === 0 ? (
                 <div className={styles.propertiesEmptyState}>
                   Esta pasta está vazia.
@@ -285,8 +285,8 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
                       }}
                     >
                       <DynamicIcon name={child.icon || getDefaultIconForType(child.type)} size={16} />
-                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#3f3f46' }}>{child.name}</span>
-                      <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#a1a1aa', textTransform: 'capitalize', background: '#f4f4f5', padding: '2px 6px', borderRadius: '4px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)' }}>{child.name}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'capitalize', background: '#f4f4f5', padding: '2px 6px', borderRadius: '4px' }}>
                         {child.type}
                       </span>
                     </div>

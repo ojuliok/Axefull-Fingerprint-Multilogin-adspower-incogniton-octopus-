@@ -31,20 +31,20 @@ export const LockScreen: React.FC = () => {
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/80 backdrop-blur-md">
-            <div className="w-[380px] bg-[#0c0d0e] border border-white/10 rounded-2xl p-8 shadow-2xl flex flex-col items-center">
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center backdrop-blur-md" style={{ backgroundColor: 'var(--bg-overlay)' }}>
+            <div className="w-[380px] bg-theme-card border border-theme-border rounded-2xl p-8 shadow-2xl flex flex-col items-center">
                 
-                <div className="w-16 h-16 bg-violet-500/20 rounded-full flex items-center justify-center mb-6">
-                    <Lock size={32} className="text-violet-400" />
+                <div className="w-16 h-16 bg-[var(--brand-primary)]/20 rounded-full flex items-center justify-center mb-6">
+                    <Lock size={32} className="text-[var(--brand-primary-light)]" />
                 </div>
                 
-                <h2 className="text-xl font-bold text-white mb-2">Plataforma Bloqueada</h2>
-                <p className="text-sm text-slate-400 mb-8 text-center">
+                <h2 className="text-xl font-bold text-theme-text mb-2">Plataforma Bloqueada</h2>
+                <p className="text-sm text-theme-text-muted mb-8 text-center">
                     {mode === 'pin' ? 'Digite seu PIN de segurança' : 'Digite sua senha secundária'}
                 </p>
 
                 {error && (
-                    <div className="flex items-center gap-2 text-rose-400 bg-rose-500/10 px-4 py-2 rounded-lg mb-6 text-sm">
+                    <div className="flex items-center gap-2 text-[var(--danger)] bg-[var(--danger-light)] px-4 py-2 rounded-lg mb-6 text-sm">
                         <AlertCircle size={14} />
                         <span>Código incorreto. Tente novamente.</span>
                     </div>
@@ -57,7 +57,7 @@ export const LockScreen: React.FC = () => {
                                 <div 
                                     key={i}
                                     className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                                        i < inputValue.length ? 'bg-violet-400 scale-110 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'bg-white/10'
+                                        i < inputValue.length ? 'bg-[var(--brand-primary)] scale-110 shadow-[0_0_10px_var(--brand-primary)]' : 'bg-theme-elevated border border-theme-border'
                                     }`}
                                 />
                             ))}
@@ -68,26 +68,27 @@ export const LockScreen: React.FC = () => {
                                 <button
                                     key={num}
                                     onClick={() => handleInput(num.toString())}
-                                    className="w-full h-14 bg-white/5 hover:bg-white/10 rounded-xl text-white text-xl font-medium transition-colors"
+                                    className="w-full h-14 bg-theme-elevated hover:bg-theme-border rounded-xl text-theme-text text-xl font-medium transition-colors border border-theme-border"
                                 >
                                     {num}
                                 </button>
                             ))}
                             <button
                                 onClick={handleClear}
-                                className="w-full h-14 bg-white/5 hover:bg-white/10 rounded-xl text-slate-400 text-sm font-medium transition-colors"
+                                className="w-full h-14 bg-theme-elevated hover:bg-theme-border rounded-xl text-theme-text-muted text-sm font-medium transition-colors border border-theme-border"
                             >
                                 LIMPAR
                             </button>
                             <button
                                 onClick={() => handleInput('0')}
-                                className="w-full h-14 bg-white/5 hover:bg-white/10 rounded-xl text-white text-xl font-medium transition-colors"
+                                className="w-full h-14 bg-theme-elevated hover:bg-theme-border rounded-xl text-theme-text text-xl font-medium transition-colors border border-theme-border"
                             >
                                 0
                             </button>
                             <button
                                 onClick={() => handleSubmit()}
-                                className="w-full h-14 bg-violet-600 hover:bg-violet-500 rounded-xl text-white text-sm font-medium transition-colors flex items-center justify-center"
+                                className="w-full h-14 rounded-xl text-theme-inverse font-medium transition-colors flex items-center justify-center shadow-lg"
+                                style={{ background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark))', color: 'var(--bg-primary)' }}
                             >
                                 <Unlock size={18} />
                             </button>
@@ -105,12 +106,13 @@ export const LockScreen: React.FC = () => {
                                 setError(false);
                             }}
                             placeholder="Sua senha..."
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
+                            className="w-full bg-theme-elevated border border-theme-border rounded-xl px-4 py-3 text-theme-text focus:outline-none focus:border-[var(--brand-primary)] transition-colors"
                             autoFocus
                         />
                         <button
                             type="submit"
-                            className="w-full h-12 bg-violet-600 hover:bg-violet-500 rounded-xl text-white font-medium transition-colors flex items-center justify-center gap-2"
+                            className="w-full h-12 rounded-xl text-theme-inverse font-medium transition-colors flex items-center justify-center gap-2 shadow-lg"
+                            style={{ background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark))', color: 'var(--bg-primary)' }}
                         >
                             <Unlock size={16} /> Desbloquear
                         </button>
@@ -124,7 +126,7 @@ export const LockScreen: React.FC = () => {
                             setInputValue('');
                             setError(false);
                         }}
-                        className="mt-8 text-sm text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-2"
+                        className="mt-8 text-sm text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] transition-colors flex items-center gap-2"
                     >
                         <KeyRound size={14} />
                         {mode === 'pin' ? 'Usar Senha Secundária' : 'Usar PIN'}

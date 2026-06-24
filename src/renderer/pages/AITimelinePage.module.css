@@ -2,8 +2,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: var(--text-primary);
-    color: var(--bg-secondary);
+    background: var(--bg-card);
+    color: var(--text-primary);
     padding: 24px 32px;
 }
 
@@ -21,16 +21,16 @@
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-secondary);
+    color: var(--text-tertiary);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .backBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--bg-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .title {
@@ -51,9 +51,9 @@
 .content {
     flex: 1;
     overflow-y: auto;
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--bg-card);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--bg-secondary);
     padding: 24px;
 }
 
@@ -76,8 +76,8 @@
 
 .timelineItem {
     position: relative;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-secondary);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
@@ -85,7 +85,7 @@
 }
 
 .timelineItem:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-secondary);
     transform: translateX(4px);
 }
 
@@ -95,7 +95,7 @@
     top: 32px;
     bottom: -32px;
     width: 2px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
 }
 
 .timelineItem:last-child .timelineLine {
@@ -109,7 +109,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--text-primary);
+    background: var(--bg-card);
     border: 2px solid #8b5cf6;
     color: #8b5cf6;
     display: flex;
@@ -133,7 +133,7 @@
 .logAction {
     font-weight: 600;
     font-size: 15px;
-    color: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .logTime {
@@ -146,7 +146,7 @@
 
 .logDetails {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-tertiary);
     background: rgba(0, 0, 0, 0.2);
     padding: 10px;
     border-radius: 8px;

@@ -107,7 +107,7 @@
     width: 4px;
 }
 .columnBody::-webkit-scrollbar-thumb {
-    background: var(--border-default);
+    background: var(--bg-tertiary);
     border-radius: 10px;
 }
 .columnBody::-webkit-scrollbar-thumb:hover {
@@ -131,7 +131,7 @@
 }
 
 .kanbanCard:hover {
-    border-color: var(--border-hover);
+    border-color: var(--text-primary);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
@@ -190,7 +190,7 @@
     align-items: center;
     justify-content: space-between;
     margin-top: auto;
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--bg-secondary);
     padding-top: 10px;
 }
 
@@ -219,7 +219,7 @@
     border-radius: 50%;
     font-size: 9px;
     font-weight: 700;
-    color: white;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;

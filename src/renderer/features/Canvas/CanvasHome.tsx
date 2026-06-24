@@ -45,6 +45,7 @@ import { CanvasGridView } from './Home/CanvasGridView';
 import { CanvasListView } from './Home/CanvasListView';
 import { CanvasSpacesGrid } from './Home/CanvasSpacesGrid';
 import { useToast } from '../../context/ToastContext';
+import SpaceOverview from './SpaceOverview';
 import styles from './CanvasHome.module.css';
 
 // ─── Props ───────────────────────────────────────────
@@ -101,7 +102,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list'); // Default to list since it's the standard for Workspace view
-  const [activeTab, setActiveTab] = useState('Conteúdo');
+  const [activeTab, setActiveTab] = useState(activeSpaceId ? 'Visão Geral' : 'Conteúdo');
   const [favorites, setFavorites] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem('axe_canvas_favorites') || '{}'); }
     catch { return {}; }
@@ -494,7 +495,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           <div className={styles.workspaceTitleArea}>
             <div className={styles.workspaceTitleRow}>
               <h1>{activeSpace ? activeSpace.name : 'Área de trabalho principal'}</h1>
-              <ChevronDown size={18} className="text-gray-400" />
+              <ChevronDown size={18} className="text-theme-text-muted" />
             </div>
             <p className={styles.workspaceSubtitle}>
               {activeSpace?.description || (activeSpace ? 'Espaço de trabalho' : 'Adicionar descrição da área de trabalho')}
@@ -526,6 +527,9 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
         </div>
 
         <div className={styles.workspaceTabs}>
+          <button className={`${styles.tab} ${activeTab === 'Visão Geral' ? styles.tabActive : ''}`} onClick={() => setActiveTab('Visão Geral')}>
+            <LayoutDashboard size={16} /> Visão Geral
+          </button>
           <button className={`${styles.tab} ${activeTab === 'Conteúdo' ? styles.tabActive : ''}`} onClick={() => setActiveTab('Conteúdo')}>
             <FolderOpen size={16} /> Conteúdo
           </button>
@@ -541,7 +545,9 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
         </div>
       </div>
 
-      {activeTab === 'Conteúdo' ? (
+      {activeTab === 'Visão Geral' && activeSpace ? (
+        <SpaceOverview activeSpace={activeSpace} onUpdate={onUpdateCanvasInfo} />
+      ) : activeTab === 'Conteúdo' ? (
         <>
           {/* Unified Toolbar: Create + Search + View */}
           <div className={styles.contentToolbar}>
@@ -690,7 +696,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           <>
             {folders.length > 0 && (
               <>
-                <h2 className={styles.sectionTitle} style={{ marginTop: activeSpaceId ? '0px' : '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: '#18181b' }}>
+                <h2 className={styles.sectionTitle} style={{ marginTop: activeSpaceId ? '0px' : '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
                   <FolderOpen size={18} /> Pastas
                 </h2>
                 {renderItemList(folders)}
@@ -699,7 +705,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
             
             {regularItems.length > 0 && (
               <>
-                <h2 className={styles.sectionTitle} style={{ marginTop: '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: '#18181b' }}>
+                <h2 className={styles.sectionTitle} style={{ marginTop: '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
                   <FileText size={18} /> {folders.length > 0 || activeSpaceId ? 'Conteúdo' : 'Outros Arquivos'}
                 </h2>
                 {renderItemList(regularItems)}

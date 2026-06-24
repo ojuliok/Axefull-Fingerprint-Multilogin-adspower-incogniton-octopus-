@@ -85,7 +85,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                                 gap: 12,
                                 padding: '12px 14px 12px 16px',
                                 borderRadius: 16,
-                                background: 'rgba(15,23,42,0.97)',
+                                background: 'var(--bg-card)',
                                 border: `1px solid ${c.border}`,
                                 boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
                                 backdropFilter: 'blur(16px)',
@@ -115,14 +115,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                                 <p style={{
                                     fontSize: 13,
                                     fontWeight: 600,
-                                    color: '#f1f5f9',
+                                    color: 'var(--text-primary)',
                                     lineHeight: 1.4,
                                     margin: 0,
                                 }}>{t.title}</p>
                                 {t.message && (
                                     <p style={{
                                         fontSize: 12,
-                                        color: '#64748b',
+                                        color: 'var(--text-secondary)',
                                         marginTop: 3,
                                         lineHeight: 1.5,
                                     }}>{t.message}</p>

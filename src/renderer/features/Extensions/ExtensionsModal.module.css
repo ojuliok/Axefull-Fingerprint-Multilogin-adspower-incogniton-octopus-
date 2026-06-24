@@ -16,8 +16,8 @@
 }
 
 .modal {
-  background: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-card);
+  border: 1px solid var(--bg-secondary);
   border-radius: 20px;
   width: 540px;
   max-height: 80vh;
@@ -37,13 +37,13 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 24px 24px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -66,8 +66,8 @@
 }
 
 .closeBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--bg-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .notice {
@@ -129,13 +129,13 @@
   gap: 14px;
   padding: 14px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   transition: background 0.15s;
 }
 
 .extItem:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-secondary);
 }
 
 .extIcon {
@@ -157,7 +157,7 @@
 .extName {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -201,7 +201,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--bg-secondary);
 }
 
 .refreshBtn {
@@ -213,13 +213,13 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--bg-secondary);
   transition: all 0.2s;
 }
 
 .refreshBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.06);
-  color: #94a3b8;
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
 }
 
 .refreshBtn:disabled {
@@ -235,14 +235,14 @@
   border-radius: 12px;
   font-size: 13px;
   font-weight: 700;
-  background: #8b5cf6;
-  color: white;
+  background: var(--brand-primary);
+  color: var(--text-primary);
   transition: all 0.2s;
   box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
 }
 
 .installBtn:hover:not(:disabled) {
-  background: #7c3aed;
+  background: var(--brand-secondary);
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
 

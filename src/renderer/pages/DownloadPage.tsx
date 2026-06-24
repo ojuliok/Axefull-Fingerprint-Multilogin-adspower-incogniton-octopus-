@@ -6,7 +6,7 @@ const DownloadPage: React.FC = () => {
         <div className="flex flex-col items-center justify-center h-full w-full bg-theme-base text-theme-text">
             <div className="max-w-md p-8 rounded-2xl flex flex-col items-center text-center bg-theme-surface shadow-sm border border-theme-border">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg mb-6">
-                    <Monitor size={32} className="text-white" />
+                    <Monitor size={32} className="text-theme-text" />
                 </div>
                 
                 <h1 className="text-2xl font-bold mb-3 tracking-tight">Baixe o Aplicativo Desktop</h1>
@@ -36,7 +36,7 @@ const DownloadPage: React.FC = () => {
                     href="https://github.com/fagneraxefull/axefull-fingerprint/releases" 
                     target="_blank" 
                     rel="noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-theme-text font-medium transition-colors"
                 >
                     <Download size={18} />
                     <span>Baixar para Windows (MVP)</span>

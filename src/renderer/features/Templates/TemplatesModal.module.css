@@ -17,7 +17,7 @@
   max-width: 700px;
   max-height: 80vh;
   background: var(--bg-primary);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--bg-secondary);
   border-radius: 18px;
   box-shadow: 0 30px 60px -10px rgba(0,0,0,0.7);
   display: flex;
@@ -33,7 +33,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .headerLeft { display: flex; align-items: center; gap: 12px; }
@@ -51,7 +51,7 @@
   flex-shrink: 0;
 }
 
-.title { font-size: 14px; font-weight: 700; color: var(--bg-secondary); margin: 0; }
+.title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0; }
 .subtitle { font-size: 11px; color: var(--text-disabled); margin: 2px 0 0; }
 
 .closeBtn {
@@ -73,7 +73,7 @@
 /* ── List Pane ── */
 .listPane {
   width: 52%;
-  border-right: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid var(--bg-secondary);
   padding: 14px;
   overflow-y: auto;
   display: flex;
@@ -101,7 +101,7 @@
 }
 .emptyState p { font-size: 13px; font-weight: 600; color: var(--text-disabled); margin: 0; }
 .emptyState span { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
-.emptyIcon { color: #1e293b; margin-bottom: 4px; }
+.emptyIcon { color: var(--text-primary); margin-bottom: 4px; }
 
 .templateCard {
   width: 100%;
@@ -116,14 +116,14 @@
   transition: all 0.15s;
   text-align: left;
 }
-.templateCard:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.04); }
+.templateCard:hover { background: var(--bg-secondary); border-color: var(--text-primary); }
 .templateCardActive {
   background: rgba(139,92,246,0.06) !important;
   border-color: rgba(139,92,246,0.2) !important;
 }
 
 .templateInfo { flex: 1; min-width: 0; }
-.templateName { font-size: 12px; font-weight: 600; color: #e2e8f0; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.templateName { font-size: 12px; font-weight: 600; color: var(--text-primary); margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .templateMeta { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .metaBadge {
@@ -137,14 +137,14 @@
 .tagBadge {
   display: flex; align-items: center; gap: 2px;
   font-size: 9px; color: var(--text-disabled); padding: 2px 5px;
-  border-radius: 4px; background: rgba(255,255,255,0.03);
+  border-radius: 4px; background: var(--bg-secondary);
 }
 .metaDate { font-size: 9px; color: var(--text-secondary); margin-left: auto; }
 
 .templateDesc { font-size: 10px; color: var(--text-secondary); margin: 4px 0 0; line-height: 1.4; }
 
 .templateActions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-.chevron { color: #7c3aed; }
+.chevron { color: var(--brand-secondary); }
 .deleteBtn {
   width: 22px; height: 22px; border-radius: 6px;
   color: var(--text-disabled);
@@ -169,18 +169,18 @@
   height: 100%; text-align: center;
 }
 .emptyConfig p { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 0; }
-.emptyConfig span { font-size: 10px; color: #1e293b; }
+.emptyConfig span { font-size: 10px; color: var(--text-primary); }
 
 .field { display: flex; flex-direction: column; gap: 6px; }
 .fieldLabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-disabled); }
 .fieldHint { font-size: 10px; color: var(--text-secondary); margin: 2px 0 0; }
 
 .input {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 9px;
   padding: 9px 12px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 12px;
   width: 100%;
   transition: border-color 0.15s;
@@ -190,20 +190,20 @@
 .countRow { display: flex; align-items: center; gap: 8px; }
 .countBtn {
   width: 32px; height: 32px; border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
-  color: #94a3b8; font-size: 16px; font-weight: 700;
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
+  color: var(--text-tertiary); font-size: 16px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s; flex-shrink: 0;
 }
 .countBtn:hover { background: rgba(139,92,246,0.1); color: #a78bfa; }
 .countInput {
   flex: 1;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 9px;
   padding: 7px 12px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 13px; font-weight: 600;
   text-align: center;
 }
@@ -217,7 +217,7 @@
   border: 1px solid rgba(139,92,246,0.15);
 }
 .previewLabel { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #6d28d9; margin: 0 0 4px; }
-.previewName { font-size: 13px; font-weight: 700; color: #e2e8f0; margin: 0 0 2px; }
+.previewName { font-size: 13px; font-weight: 700; color: var(--text-primary); margin: 0 0 2px; }
 .previewDetail { font-size: 11px; color: var(--text-tertiary); margin: 0; }
 
 .createBtn {
@@ -225,7 +225,7 @@
   padding: 11px;
   border-radius: 11px;
   background: linear-gradient(135deg, #6d28d9, #4f46e5);
-  color: white; font-size: 13px; font-weight: 700;
+  color: var(--text-primary); font-size: 13px; font-weight: 700;
   transition: all 0.2s;
   box-shadow: 0 6px 16px -4px rgba(109,40,217,0.4);
   margin-top: auto;

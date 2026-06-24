@@ -11,14 +11,14 @@ function OfflineScreen({ onRetry }: { onRetry: () => void }) {
                 <WifiOff size={32} className="text-red-400" />
             </div>
             <div>
-                <h2 className="text-xl font-semibold text-white mb-2">Sem conexão com a internet</h2>
+                <h2 className="text-xl font-semibold text-theme-text mb-2">Sem conexão com a internet</h2>
                 <p className="text-sm text-zinc-400 max-w-xs">
                     O Axe MultiLogin requer conexão com a internet para verificar sua licença. Conecte-se e tente novamente.
                 </p>
             </div>
             <button
                 onClick={onRetry}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-theme-text text-sm font-medium transition-colors"
             >
                 <RefreshCw size={15} />
                 Tentar novamente
@@ -53,7 +53,7 @@ function Field({ label, icon, ...props }: InputProps) {
                 )}
                 <input
                     {...props}
-                    className={`w-full bg-zinc-800/60 border border-zinc-700/60 rounded-lg ${icon ? 'pl-10' : 'px-3.5'} pr-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/30 transition-all`}
+                    className={`w-full bg-zinc-800/60 border border-zinc-700/60 rounded-lg ${icon ? 'pl-10' : 'px-3.5'} pr-3.5 py-2.5 text-sm text-theme-text placeholder-zinc-500 outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/30 transition-all`}
                 />
             </div>
         </div>
@@ -156,9 +156,9 @@ function AuthForm({ mode, onChangeMode }: FormProps) {
                     </svg>
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">Email enviado!</h3>
+                    <h3 className="text-lg font-semibold text-theme-text mb-1">Email enviado!</h3>
                     <p className="text-sm text-zinc-400 max-w-xs">
-                        Enviamos um link de recuperação para <span className="text-white font-medium">{email}</span>. Verifique sua caixa de entrada e spam.
+                        Enviamos um link de recuperação para <span className="text-theme-text font-medium">{email}</span>. Verifique sua caixa de entrada e spam.
                     </p>
                 </div>
                 <button
@@ -220,7 +220,7 @@ function AuthForm({ mode, onChangeMode }: FormProps) {
                             onChange={e => setPassword(e.target.value)}
                             required
                             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                            className="w-full bg-zinc-800/60 border border-zinc-700/60 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/30 transition-all"
+                            className="w-full bg-zinc-800/60 border border-zinc-700/60 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-theme-text placeholder-zinc-500 outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/30 transition-all"
                         />
                         <button
                             type="button"
@@ -267,7 +267,7 @@ function AuthForm({ mode, onChangeMode }: FormProps) {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 mt-1"
+                className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-theme-text text-sm font-semibold transition-colors flex items-center justify-center gap-2 mt-1"
             >
                 {loading && <Loader2 size={15} className="animate-spin" />}
                 {mode === 'login' ? 'Entrar' : mode === 'register' ? 'Criar conta' : 'Enviar link de recuperação'}
@@ -344,11 +344,11 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
             <div className="hidden lg:flex flex-col justify-between w-2/5 bg-zinc-900 border-r border-zinc-800/60 p-10">
                 <div className="flex items-center gap-2.5">
                     <Fingerprint size={22} className="text-blue-400" />
-                    <span className="text-white font-bold text-lg tracking-tight">Axe MultiLogin</span>
+                    <span className="text-theme-text font-bold text-lg tracking-tight">Axe MultiLogin</span>
                 </div>
 
                 <div>
-                    <h1 className="text-3xl font-bold text-white leading-tight mb-4">
+                    <h1 className="text-3xl font-bold text-theme-text leading-tight mb-4">
                         Múltiplas identidades.<br />
                         Uma ferramenta.
                     </h1>
@@ -365,7 +365,7 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
                             <div key={item.title} className="flex items-start gap-3">
                                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
                                 <div>
-                                    <span className="text-sm font-medium text-white">{item.title}</span>
+                                    <span className="text-sm font-medium text-theme-text">{item.title}</span>
                                     <span className="text-xs text-zinc-500 ml-2">{item.desc}</span>
                                 </div>
                             </div>
@@ -381,7 +381,7 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
                 {onBack && (
                     <button 
                         onClick={onBack} 
-                        className="absolute top-8 left-8 flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+                        className="absolute top-8 left-8 flex items-center gap-2 text-sm text-zinc-400 hover:text-theme-text transition-colors"
                     >
                         <ArrowLeft size={16} /> Voltar para a página principal
                     </button>
@@ -391,7 +391,7 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
                     {/* Mobile logo */}
                     <div className="flex lg:hidden items-center gap-2 justify-center mb-8">
                         <Fingerprint size={22} className="text-blue-400" />
-                        <span className="text-white font-bold text-lg tracking-tight">Axe MultiLogin</span>
+                        <span className="text-theme-text font-bold text-lg tracking-tight">Axe MultiLogin</span>
                     </div>
 
                     {state === 'loading' && <LoadingScreen />}
@@ -401,7 +401,7 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
                     {(state === 'unauthenticated') && (
                         <div className="flex flex-col gap-6">
                             <div>
-                                <h2 className="text-xl font-bold text-white">
+                                <h2 className="text-xl font-bold text-theme-text">
                                     {getTitle()}
                                 </h2>
                                 <p className="text-sm text-zinc-400 mt-1">

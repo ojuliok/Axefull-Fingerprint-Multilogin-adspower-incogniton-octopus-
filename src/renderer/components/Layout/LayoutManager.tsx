@@ -67,7 +67,7 @@ export const LayoutManager: React.FC = () => {
     const renderLayout = () => {
         if (layout === 'top-navigation') {
             return (
-                <div className="flex flex-col flex-1 h-screen overflow-hidden">
+                <div className="flex flex-col flex-1 h-[100dvh] overflow-hidden">
                     <NavbarHorizontal
                         currentView={currentView}
                         onViewChange={onViewChange}
@@ -84,7 +84,7 @@ export const LayoutManager: React.FC = () => {
 
         if (layout === 'floating-dock') {
             return (
-                <div className="flex flex-col flex-1 h-screen overflow-hidden relative">
+                <div className="flex flex-col flex-1 h-[100dvh] overflow-hidden relative">
                     <main className="flex-1 overflow-hidden relative pb-24 bg-theme-surface">
                         <Outlet />
                     </main>
@@ -100,7 +100,7 @@ export const LayoutManager: React.FC = () => {
 
         if (layout === 'futuristic-console') {
             return (
-                <div className="flex flex-1 h-screen overflow-hidden p-2 bg-theme-base relative">
+                <div className="flex flex-1 h-[100dvh] overflow-hidden p-2 bg-theme-base relative">
                     {/* Futuristic scanline overlay */}
                     <div className="pointer-events-none absolute inset-0 z-50 bg-[linear-gradient(to_bottom,rgba(255,255,255,0),rgba(255,255,255,0)_50%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0.3))] bg-[length:100%_4px] opacity-10" />
                     
@@ -127,7 +127,7 @@ export const LayoutManager: React.FC = () => {
 
         // Default: classic-sidebar or split-panel
         return (
-            <div className="flex flex-col md:flex-row flex-1 h-screen overflow-hidden">
+            <div className="flex flex-col md:flex-row flex-1 h-[100dvh] overflow-hidden">
                 <div className="hidden md:flex">
                     <Sidebar
                         currentView={currentView}
@@ -155,7 +155,7 @@ export const LayoutManager: React.FC = () => {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-theme-base transition-colors duration-500 relative">
+        <div className="flex h-[100dvh] overflow-hidden bg-theme-base transition-colors duration-500 relative">
             {/* Premium Animated Ambient Background */}
             <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--brand-primary)]/10 blur-[100px] animate-pulse-slow"></div>

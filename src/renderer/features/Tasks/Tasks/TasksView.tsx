@@ -330,13 +330,13 @@ const TasksView: React.FC = () => {
                             <div className={styles.pomodoroSidebarHeader}>
                                 <span>⏱️ Pomodoro</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontSize: '11px', color: '#a1a1aa' }}>
+                                    <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>
                                         {pomodoroMode === 'work' ? 'Foco' : pomodoroMode === 'short' ? 'Pausa Curta' : 'Pausa Longa'}
                                     </span>
                                     <button 
                                         title="Fixar (Flutuante)"
                                         onClick={() => setIsFloating(true)}
-                                        style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: 0 }}
+                                        style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 0 }}
                                     >
                                         <Pin size={14} />
                                     </button>
@@ -753,7 +753,7 @@ const TasksView: React.FC = () => {
                                                 </div>
                                                 <div className={`${styles.taskListItemTitle} ${task.status === 'done' ? styles.done : ''}`}>{task.title || 'Sem título'}</div>
                                                 {task.date && (
-                                                    <div style={{ fontSize: '12px', color: '#a1a1aa', marginRight: '16px', background: 'rgba(139, 92, 246, 0.12)', padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                                                    <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginRight: '16px', background: 'rgba(139, 92, 246, 0.12)', padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
                                                         {format(new Date(task.date), 'dd/MM/yyyy')} {task.endDate && ` até ${format(new Date(task.endDate), 'dd/MM/yyyy')}`}
                                                     </div>
                                                 )}

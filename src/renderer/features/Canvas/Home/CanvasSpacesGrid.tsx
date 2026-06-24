@@ -60,7 +60,7 @@ export const CanvasSpacesGrid: React.FC<CanvasSpacesGridProps> = ({
             >
               {/* The "Tab" of the folder */}
               <div className={styles.folderTab}>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#71717a' }}>Espaço</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Espaço</span>
               </div>
 
               {/* The main body of the folder */}

@@ -50,7 +50,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                             onClick={() => onViewChange(item.id as ViewType)}
                             className={`relative w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-200 hover:-translate-y-1 hover:scale-110 group
                                 ${item.color}
-                                ${isActive ? 'bg-white/10 scale-105' : 'text-slate-400'}
+                                ${isActive ? 'bg-white/10 scale-105' : 'text-theme-text-muted'}
                             `}
                         >
                             <IconComponent size={20} strokeWidth={2} />
@@ -61,7 +61,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                             )}
 
                             {/* Tooltip */}
-                            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none bg-black text-white">
+                            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none bg-theme-elevated text-theme-text shadow-lg">
                                 {item.label}
                             </span>
                         </button>
@@ -78,7 +78,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                 <button
                     onClick={onOpenProxies}
                     title="Proxies"
-                    className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all hover:-translate-y-0.5"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-theme-text hover:bg-white/5 transition-all hover:-translate-y-0.5"
                 >
                     <Network size={18} />
                 </button>
@@ -87,7 +87,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                 <button
                     onClick={toggleTheme}
                     title="Tema"
-                    className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all hover:-translate-y-0.5"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-theme-text hover:bg-white/5 transition-all hover:-translate-y-0.5"
                 >
                     {isLight ? <Moon size={18} /> : <Sun size={18} />}
                 </button>
@@ -97,7 +97,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                     <button
                         onClick={onOpenExtensions}
                         title="Extensões"
-                        className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all hover:-translate-y-0.5"
+                        className="w-10 h-10 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-theme-text hover:bg-white/5 transition-all hover:-translate-y-0.5"
                     >
                         <Puzzle size={18} />
                     </button>
@@ -108,7 +108,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                     onClick={() => onViewChange('settings')}
                     title="Ajustes"
                     className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:-translate-y-0.5
-                        ${currentView === 'settings' ? 'text-violet-400 bg-white/5' : 'text-slate-400 hover:text-white hover:bg-white/5'}
+                        ${currentView === 'settings' ? 'text-violet-400 bg-white/5' : 'text-theme-text-muted hover:text-theme-text hover:bg-white/5'}
                     `}
                 >
                     <Settings size={18} />

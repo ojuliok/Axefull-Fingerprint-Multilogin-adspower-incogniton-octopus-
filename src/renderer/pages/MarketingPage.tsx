@@ -55,7 +55,7 @@ const CreateSpaceModal: React.FC<CreateSpaceModalProps> = ({ isOpen, onClose, on
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)',
+            background: 'var(--bg-card)', backdropFilter: 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 1000, color: 'var(--text-primary)'
         }} onClick={onClose}>
@@ -220,7 +220,7 @@ const CustomPromptModal: React.FC<CustomPromptModalProps> = ({ isOpen, title, pl
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(2px)',
+            background: 'var(--bg-card)', backdropFilter: 'blur(2px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 1100, color: 'var(--text-primary)'
         }} onClick={onClose}>

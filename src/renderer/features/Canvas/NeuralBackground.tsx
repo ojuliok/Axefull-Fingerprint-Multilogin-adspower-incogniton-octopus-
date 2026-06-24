@@ -118,8 +118,7 @@ const NeuralBackground: React.FC<NeuralBackgroundProps> = ({ color }) => {
   return (
     <div ref={containerRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
       <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
-      {/* Light gradient overlay to make it subtle */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.8) 100%)', pointerEvents: 'none' }} />
+      
     </div>
   );
 };

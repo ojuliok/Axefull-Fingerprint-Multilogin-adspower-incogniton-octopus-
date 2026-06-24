@@ -8,12 +8,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-primary);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     min-height: 36px;
@@ -22,7 +22,7 @@
 }
 
 .datePickerTrigger:hover {
-    border-color: #8b5cf6;
+    border-color: var(--brand-primary);
     background: rgba(139, 92, 246, 0.05);
     box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
 }
@@ -33,7 +33,7 @@
 }
 
 .dateText {
-    color: var(--bg-secondary);
+    color: var(--text-primary);
     font-weight: 500;
 }
 
@@ -69,7 +69,7 @@
     width: 280px;
     background: rgba(18, 18, 26, 0.95);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--bg-secondary);
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.15);
@@ -99,13 +99,13 @@
 .monthTitle {
     font-size: 13px;
     font-weight: 600;
-    color: var(--border-default);
+    color: var(--text-primary);
     text-transform: capitalize;
 }
 
 .navBtn {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--bg-secondary);
     color: var(--text-disabled);
     width: 28px;
     height: 28px;
@@ -118,9 +118,9 @@
 }
 
 .navBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--bg-secondary);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--text-primary);
 }
 
 .weekdaysGrid {
@@ -147,7 +147,7 @@
     align-items: center;
     justify-content: center;
     font-size: 11px;
-    color: #e2e8f0;
+    color: var(--text-primary);
     border-radius: 8px;
     cursor: pointer;
     margin: auto;
@@ -168,14 +168,14 @@
 }
 
 .todayDay {
-    border: 1px solid #8b5cf6;
+    border: 1px solid var(--brand-primary);
     color: #c084fc;
     font-weight: 600;
 }
 
 .selectedDay {
-    background: #8b5cf6 !important;
-    color: white !important;
+    background: var(--brand-primary) !important;
+    color: var(--text-primary) !important;
     font-weight: 600;
     box-shadow: 0 0 12px rgba(124, 58, 237, 0.5);
 }
@@ -183,7 +183,7 @@
 .calendarFooter {
     display: flex;
     justify-content: space-between;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--bg-secondary);
     padding-top: 12px;
     margin-top: 4px;
 }
@@ -201,6 +201,6 @@
 }
 
 .footerBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     color: #c084fc;
 }

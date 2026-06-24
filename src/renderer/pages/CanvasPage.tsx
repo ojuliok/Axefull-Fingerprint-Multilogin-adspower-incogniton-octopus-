@@ -968,7 +968,7 @@ const CanvasPage: React.FC = () => {
                                         <div style={{ padding: '8px 14px' }}>
                                             <button 
                                                 className={styles.sidebarBtn} 
-                                                style={{ width: '100%', padding: '6px 8px', color: '#71717a' }}
+                                                style={{ width: '100%', padding: '6px 8px', color: 'var(--text-secondary)' }}
                                                 onClick={(e) => { 
                                                     e.stopPropagation();
                                                     setShowCreateModal({ type: 'space' });
@@ -980,7 +980,7 @@ const CanvasPage: React.FC = () => {
                                             </button>
                                             <button 
                                                 className={styles.sidebarBtn} 
-                                                style={{ width: '100%', padding: '6px 8px', color: '#71717a', marginTop: '4px' }}
+                                                style={{ width: '100%', padding: '6px 8px', color: 'var(--text-secondary)', marginTop: '4px' }}
                                                 onClick={(e) => { 
                                                     e.stopPropagation();
                                                     const rect = e.currentTarget.getBoundingClientRect();

@@ -889,7 +889,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                             <div className="flex items-center justify-between mb-1 px-1">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Perfis</span>
                                 <button
-                                    className="p-1.5 bg-white/5 border border-white/5 rounded-lg text-slate-500 hover:text-white transition-colors"
+                                    className="p-1.5 bg-white/5 border border-white/5 rounded-lg text-slate-500 hover:text-theme-text transition-colors"
                                     onClick={() => setSidebarMode('mini')}
                                     title="Recolher sidebar">
                                     <PanelLeftClose size={15} />
@@ -912,7 +912,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 <div className={styles.sectionHeader} onClick={() => toggleSection('folders')}>
                                     <h4 className={styles.sidebarTitle}>Pastas</h4>
                                     <div className="flex items-center gap-2">
-                                        <Plus size={14} className="cursor-pointer hover:text-white" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleCreateFolder(); }} />
+                                        <Plus size={14} className="cursor-pointer hover:text-theme-text" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleCreateFolder(); }} />
                                         {expandedSections.folders ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                     </div>
                                 </div>
@@ -1025,7 +1025,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                                                 fontWeight: 700,
                                                                 color: '#475569',
                                                                 background: 'rgba(255, 255, 255, 0.01)',
-                                                                border: '1px dashed rgba(255, 255, 255, 0.04)',
+                                                                border: '1px solid var(--border-default)',
                                                                 marginTop: 8,
                                                                 marginBottom: 4,
                                                                 transition: 'all 0.15s',
@@ -1106,7 +1106,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
 
                                 <div className={`bg-gradient-to-br from-violet-600/10 to-indigo-600/10 rounded-2xl p-4 border border-violet-500/10 relative group ${styles.proBannerContent}`}>
                                     <p className="text-[10px] text-violet-400 font-bold uppercase tracking-wider mb-1">Versão Pro</p>
-                                    <p className="text-xs text-slate-400 leading-relaxed">Você está usando o plano profissional com perfis ilimitados.</p>
+                                    <p className="text-xs text-theme-text-muted leading-relaxed">Você está usando o plano profissional com perfis ilimitados.</p>
                                 </div>
 
                                 <div
@@ -1301,7 +1301,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                     ) : filteredProfiles.length === 0 ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                             <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-6 shadow-inner border border-white/5">
-                                {selectedCategory === 'trash' ? <Trash2 size={32} className="text-red-400/50" /> : <Shield size={32} className="text-slate-400" />}
+                                {selectedCategory === 'trash' ? <Trash2 size={32} className="text-red-400/50" /> : <Shield size={32} className="text-theme-text-muted" />}
                             </div>
                             <h3 className="text-xl font-bold text-slate-200 mb-2">
                                 {selectedCategory === 'trash' ? 'Lixeira vazia' : 'Nenhum perfil encontrado'}
@@ -1314,7 +1314,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                         : 'Você ainda não possui nenhum perfil criado neste workspace.'}
                             </p>
                             {!searchQuery && selectedCategory !== 'trash' && (
-                                <button className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all border border-white/10" onClick={() => setShowCreateModal(true)}>
+                                <button className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-theme-text font-medium rounded-xl transition-all border border-white/10" onClick={() => setShowCreateModal(true)}>
                                     <Plus size={18} /> Criar Primeiro Perfil
                                 </button>
                             )}
@@ -1521,21 +1521,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                     {showBulkFolderPicker && selectedProfileIds.length > 0 && (
                         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#18181b] border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)] rounded-2xl p-2 w-72 animate-in slide-in-from-bottom-2 fade-in duration-200">
                             <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 mb-1">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mover para pasta</p>
-                                <button onClick={() => setShowBulkFolderPicker(false)} className="text-slate-500 hover:text-white"><X size={14} /></button>
+                                <p className="text-xs font-bold text-theme-text-muted uppercase tracking-wider">Mover para pasta</p>
+                                <button onClick={() => setShowBulkFolderPicker(false)} className="text-slate-500 hover:text-theme-text"><X size={14} /></button>
                             </div>
                             <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                 {folders.map(f => (
                                     <button
                                         key={f.id}
-                                        className="w-full text-left px-3 py-2.5 hover:bg-white/5 rounded-xl flex items-center gap-3 text-sm text-slate-300 hover:text-white transition-colors"
+                                        className="w-full text-left px-3 py-2.5 hover:bg-white/5 rounded-xl flex items-center gap-3 text-sm text-slate-300 hover:text-theme-text transition-colors"
                                         onClick={() => handleBulkMoveToFolder(f.id)}>
                                         <FolderIcon size={16} style={{ color: getFolderColor(f.id) || '#a78bfa' }} /> {f.name}
                                     </button>
                                 ))}
                                 {folders.length > 0 && <div className="h-px bg-white/5 my-1 mx-2" />}
                                 <button
-                                    className="w-full text-left px-3 py-2.5 hover:bg-white/5 rounded-xl flex items-center gap-3 text-sm text-slate-300 hover:text-white transition-colors"
+                                    className="w-full text-left px-3 py-2.5 hover:bg-white/5 rounded-xl flex items-center gap-3 text-sm text-slate-300 hover:text-theme-text transition-colors"
                                     onClick={() => handleBulkMoveToFolder(null)}>
                                     <Square size={16} className="text-slate-500" /> Nenhuma Pasta
                                 </button>

@@ -372,7 +372,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
 
             return (
                 <div style={{ position:'fixed', inset:0, zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.82)', backdropFilter:'blur(12px)' }}>
-                    <div style={{ background:'#0f0f11', border:'1px solid rgba(255,255,255,0.08)', borderRadius:22, width:'100%', maxWidth:440, padding:'36px 32px', display:'flex', flexDirection:'column', alignItems:'center', gap:24, boxShadow:'0 32px 80px rgba(0,0,0,0.7)', animation:'slideUp 0.25s cubic-bezier(0.4,0,0.2,1)' }}>
+                    <div style={{ background:'#0f0f11', border: '1px solid var(--border-default)', borderRadius:22, width:'100%', maxWidth:440, padding:'36px 32px', display:'flex', flexDirection:'column', alignItems:'center', gap:24, boxShadow:'0 32px 80px rgba(0,0,0,0.7)', animation:'slideUp 0.25s cubic-bezier(0.4,0,0.2,1)' }}>
                         <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(12px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } } @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
                         {/* Icon */}
@@ -385,7 +385,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
 
                         {/* Title */}
                         <div style={{ textAlign:'center' }}>
-                            <h2 style={{ fontSize:17, fontWeight:700, color:'#f1f5f9', margin:'0 0 6px' }}>
+                            <h2 style={{ fontSize:17, fontWeight:700, color: 'var(--text-primary)', margin:'0 0 6px' }}>
                                 {singleDone ? 'Perfil pronto!' : 'Aquecendo o perfil...'}
                             </h2>
                             <p style={{ fontSize:12.5, color:'#475569', margin:0, lineHeight:1.5 }}>
@@ -401,7 +401,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                 <span style={{ fontSize:11, fontWeight:600, color: singleDone ? '#34d399' : '#fb923c' }}>
                                     {singleDone ? 'Concluído' : `${single.current} / ${single.total} sites`}
                                 </span>
-                                <span style={{ fontSize:11, fontWeight:700, color:'#64748b' }}>{pct}%</span>
+                                <span style={{ fontSize:11, fontWeight:700, color: 'var(--text-secondary)' }}>{pct}%</span>
                             </div>
                             <div style={{ height:6, background:'rgba(255,255,255,0.06)', borderRadius:999, overflow:'hidden' }}>
                                 <div style={{ height:'100%', borderRadius:999, background: singleDone ? '#34d399' : 'linear-gradient(90deg,#fb923c,#f97316)', width:`${pct}%`, transition:'width 0.6s ease' }} />
@@ -416,7 +416,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                         {/* Site icons strip — visual "social proof" */}
                         <div style={{ display:'flex', gap:6, flexWrap:'wrap', justifyContent:'center', opacity:0.45 }}>
                             {['Google','YouTube','Mercado Livre','Amazon','UOL','Globo','Reddit','Wikipedia'].map(s => (
-                                <span key={s} style={{ fontSize:10, padding:'2px 7px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:5, color:'#64748b' }}>{s}</span>
+                                <span key={s} style={{ fontSize:10, padding:'2px 7px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:5, color: 'var(--text-secondary)' }}>{s}</span>
                             ))}
                             <span style={{ fontSize:10, padding:'2px 7px', color:'#334155' }}>+32 mais</span>
                         </div>
@@ -440,7 +440,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
 
         return (
             <div style={{ position:'fixed', inset:0, zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.85)', backdropFilter:'blur(12px)' }}>
-                <div style={{ background:'#0f0f11', border:'1px solid rgba(255,255,255,0.08)', borderRadius:24, width:'100%', maxWidth:500, padding:'32px 28px', display:'flex', flexDirection:'column', gap:20, boxShadow:'0 32px 80px rgba(0,0,0,0.7)', animation:'slideUp 0.25s cubic-bezier(0.4,0,0.2,1)', maxHeight:'calc(100vh - 64px)', overflow:'hidden' }}>
+                <div style={{ background:'#0f0f11', border: '1px solid var(--border-default)', borderRadius:24, width:'100%', maxWidth:500, padding:'32px 28px', display:'flex', flexDirection:'column', gap:20, boxShadow:'0 32px 80px rgba(0,0,0,0.7)', animation:'slideUp 0.25s cubic-bezier(0.4,0,0.2,1)', maxHeight:'calc(100vh - 64px)', overflow:'hidden' }}>
                     <style>{`
                         @keyframes slideUp { from { opacity:0; transform:translateY(12px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
                         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
@@ -460,19 +460,19 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                             }
                         </div>
                         <div>
-                            <h2 style={{ fontSize:16, fontWeight:700, color:'#f1f5f9', margin:'0 0 4px' }}>
+                            <h2 style={{ fontSize:16, fontWeight:700, color: 'var(--text-primary)', margin:'0 0 4px' }}>
                                 {done ? 'Perfis prontos!' : `Aquecendo perfis (${warmup.mode === 'sequential' ? 'Fila' : 'Paralelo'})...`}
                             </h2>
-                            <p style={{ fontSize:12, color:'#64748b', margin:0 }}>
+                            <p style={{ fontSize:12, color: 'var(--text-secondary)', margin:0 }}>
                                 {completedCount} de {totalCount} perfis concluídos
                             </p>
                         </div>
                     </div>
 
                     {/* Overall Progress */}
-                    <div style={{ width:'100%', background:'rgba(255,255,255,0.02)', padding:'12px 16px', borderRadius:14, border:'1px solid rgba(255,255,255,0.05)', boxSizing:'border-box' }}>
+                    <div style={{ width:'100%', background:'rgba(255,255,255,0.02)', padding:'12px 16px', borderRadius:14, border: '1px solid var(--border-default)', boxSizing:'border-box' }}>
                         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                            <span style={{ fontSize:11, fontWeight:700, color:'#f1f5f9' }}>Progresso Geral</span>
+                            <span style={{ fontSize:11, fontWeight:700, color: 'var(--text-primary)' }}>Progresso Geral</span>
                             <span style={{ fontSize:11, fontWeight:800, color: done ? '#34d399' : '#fb923c' }}>{overallPct}%</span>
                         </div>
                         <div style={{ height:6, background:'rgba(255,255,255,0.06)', borderRadius:999, overflow:'hidden' }}>
@@ -498,10 +498,10 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                     }}
                                 >
                                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                                        <span style={{ fontSize:12.5, fontWeight:700, color:'#f1f5f9' }}>{p.profileName}</span>
+                                        <span style={{ fontSize:12.5, fontWeight:700, color: 'var(--text-primary)' }}>{p.profileName}</span>
                                         <div style={{ display:'flex', alignItems:'center', gap:5 }}>
                                             {p.phase === 'idle' && (
-                                                <span style={{ fontSize:10, fontWeight:700, color:'#475569', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.05)', padding:'2px 7px', borderRadius:6, display:'flex', alignItems:'center', gap:4 }}>
+                                                <span style={{ fontSize:10, fontWeight:700, color:'#475569', background:'rgba(255,255,255,0.03)', border: '1px solid var(--border-default)', padding:'2px 7px', borderRadius:6, display:'flex', alignItems:'center', gap:4 }}>
                                                     <Clock size={10} /> Aguardando
                                                 </span>
                                             )}
@@ -516,7 +516,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                                 </span>
                                             )}
                                             {p.phase === 'skipped' && (
-                                                <span style={{ fontSize:10, fontWeight:700, color:'#64748b', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', padding:'2px 7px', borderRadius:6, display:'flex', alignItems:'center', gap:4 }}>
+                                                <span style={{ fontSize:10, fontWeight:700, color: 'var(--text-secondary)', background:'rgba(255,255,255,0.05)', border: '1px solid var(--border-default)', padding:'2px 7px', borderRadius:6, display:'flex', alignItems:'center', gap:4 }}>
                                                     Pulado
                                                 </span>
                                             )}
@@ -550,7 +550,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                         {!done && warmup.mode === 'sequential' && currentWarming && (
                             <button
                                 onClick={skipCurrentProfile}
-                                style={{ flex:1, padding:'10px', borderRadius:11, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', color:'#94a3b8', fontSize:12, fontWeight:700, cursor:'pointer', transition:'all 0.15s', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}
+                                style={{ flex:1, padding:'10px', borderRadius:11, background:'rgba(255,255,255,0.03)', border: '1px solid var(--border-default)', color:'#94a3b8', fontSize:12, fontWeight:700, cursor:'pointer', transition:'all 0.15s', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}
                                 onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.06)'}
                                 onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.03)'}
                             >
@@ -560,7 +560,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                         {!done && (
                             <button
                                 onClick={skipAllWarmups}
-                                style={{ flex:1, padding:'10px', borderRadius:11, background:'transparent', border:'1px solid rgba(255,255,255,0.08)', color:'#475569', fontSize:12, fontWeight:600, cursor:'pointer', transition:'all 0.15s' }}
+                                style={{ flex:1, padding:'10px', borderRadius:11, background:'transparent', border: '1px solid var(--border-default)', color:'#475569', fontSize:12, fontWeight:600, cursor:'pointer', transition:'all 0.15s' }}
                                 onMouseEnter={e => e.currentTarget.style.color='#64748b'}
                                 onMouseLeave={e => e.currentTarget.style.color='#475569'}
                             >
@@ -578,7 +578,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
             style={{ position:'fixed', inset:0, zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.7)', backdropFilter:'blur(8px)' }}
             onClick={onClose}>
             <div
-                style={{ background:'#0f0f11', border:'1px solid rgba(255,255,255,0.08)', borderRadius:22, width:'100%', maxWidth:460, maxHeight:'calc(100vh - 48px)', display:'flex', flexDirection:'column', boxShadow:'0 32px 80px rgba(0,0,0,0.7)', animation:'slideUp 0.25s cubic-bezier(0.4,0,0.2,1)', overflow:'hidden' }}
+                style={{ background:'#0f0f11', border: '1px solid var(--border-default)', borderRadius:22, width:'100%', maxWidth:460, maxHeight:'calc(100vh - 48px)', display:'flex', flexDirection:'column', boxShadow:'0 32px 80px rgba(0,0,0,0.7)', animation:'slideUp 0.25s cubic-bezier(0.4,0,0.2,1)', overflow:'hidden' }}
                 onClick={e => e.stopPropagation()}>
 
                 <style>{`
@@ -596,11 +596,11 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                             <Fingerprint size={18} style={{ color:'#a78bfa' }} />
                         </div>
                         <div>
-                            <h2 style={{ fontSize:16, fontWeight:700, color:'#f1f5f9', margin:0 }}>Novo Perfil</h2>
+                            <h2 style={{ fontSize:16, fontWeight:700, color: 'var(--text-primary)', margin:0 }}>Novo Perfil</h2>
                             <p style={{ fontSize:11, color:'#475569', margin:0 }}>Identidade anti-detect isolada</p>
                         </div>
                     </div>
-                    <button onClick={onClose} style={{ width:30, height:30, borderRadius:8, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', color:'#64748b', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                    <button onClick={onClose} style={{ width:30, height:30, borderRadius:8, background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
                         <X size={15} />
                     </button>
                 </div>
@@ -611,25 +611,25 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                         {/* Name & Quantity */}
                         <div style={{ display:'grid', gridTemplateColumns:'3.2fr 1.8fr', gap:12 }}>
                             <div>
-                                <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#64748b', display:'block', marginBottom:8 }}>Nome do Perfil</label>
+                                <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color: 'var(--text-secondary)', display:'block', marginBottom:8 }}>Nome do Perfil</label>
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={e => setName(e.target.value)}
                                     placeholder="Ex: Conta Principal..."
                                     autoFocus
-                                    style={{ width:'100%', padding:'9px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:10, color:'#f1f5f9', fontSize:13, outline:'none', boxSizing:'border-box', transition:'border-color 0.15s' }}
+                                    style={{ width:'100%', padding:'9px 14px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:10, color: 'var(--text-primary)', fontSize:13, outline:'none', boxSizing:'border-box', transition:'border-color 0.15s' }}
                                     onFocus={e => e.currentTarget.style.borderColor='rgba(139,92,246,0.5)'}
-                                    onBlur={e => e.currentTarget.style.borderColor='rgba(255,255,255,0.08)'}
+                                    onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
                                 />
                             </div>
                             <div>
-                                <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#64748b', display:'block', marginBottom:8 }}>Quantidade</label>
-                                <div style={{ display:'flex', alignItems:'center', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:10, overflow:'hidden', height:38, boxSizing:'border-box' }}>
+                                <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color: 'var(--text-secondary)', display:'block', marginBottom:8 }}>Quantidade</label>
+                                <div style={{ display:'flex', alignItems:'center', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:10, overflow:'hidden', height:38, boxSizing:'border-box' }}>
                                     <button
                                         type="button"
                                         onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                        style={{ width:30, height:'100%', background:'none', border:'none', color:'#64748b', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:600, transition:'all 0.15s' }}
+                                        style={{ width:30, height:'100%', background:'none', border:'none', color: 'var(--text-secondary)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:600, transition:'all 0.15s' }}
                                         onMouseEnter={e => e.currentTarget.style.color='#f1f5f9'}
                                         onMouseLeave={e => e.currentTarget.style.color='#64748b'}
                                     >
@@ -639,12 +639,12 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                         type="number"
                                         value={quantity}
                                         onChange={e => setQuantity(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                                        style={{ flex:1, width:24, background:'none', border:'none', color:'#f1f5f9', fontSize:13, fontWeight:700, textAlign:'center', outline:'none', appearance:'none', margin:0, padding:0 }}
+                                        style={{ flex:1, width:24, background:'none', border:'none', color: 'var(--text-primary)', fontSize:13, fontWeight:700, textAlign:'center', outline:'none', appearance:'none', margin:0, padding:0 }}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setQuantity(q => Math.min(50, q + 1))}
-                                        style={{ width:30, height:'100%', background:'none', border:'none', color:'#64748b', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:600, transition:'all 0.15s' }}
+                                        style={{ width:30, height:'100%', background:'none', border:'none', color: 'var(--text-secondary)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:600, transition:'all 0.15s' }}
                                         onMouseEnter={e => e.currentTarget.style.color='#f1f5f9'}
                                         onMouseLeave={e => e.currentTarget.style.color='#64748b'}
                                     >
@@ -672,15 +672,15 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                         Nomenclatura do Lote
                                     </span>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span style={{ fontSize: 9, color: '#64748b' }}>Sufixo:</span>
+                                        <span style={{ fontSize: 9, color: 'var(--text-secondary)' }}>Sufixo:</span>
                                         <select
                                             value={namingPattern}
                                             onChange={e => setNamingPattern(e.target.value as any)}
                                             style={{
                                                 background: '#0f0f11',
-                                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                border: '1px solid var(--border-default)',
                                                 borderRadius: 6,
-                                                color: '#f1f5f9',
+                                                color: 'var(--text-primary)',
                                                 fontSize: 10.5,
                                                 padding: '3px 6px',
                                                 outline: 'none',
@@ -701,7 +701,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                     </strong>
                                 </div>
                                 {computedStartCounter > 1 && (
-                                    <div style={{ fontSize: 9.5, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <div style={{ fontSize: 9.5, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
                                         <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#fb923c', display: 'inline-block' }} />
                                         <span>Nomes anteriores já existentes. Iniciando sequência automaticamente a partir de {String(computedStartCounter).padStart(quantity + computedStartCounter - 1 >= 10 ? 2 : 1, '0')}.</span>
                                     </div>
@@ -711,7 +711,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
 
                         {/* Platform */}
                         <div>
-                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#64748b', display:'block', marginBottom:8 }}>Plataforma</label>
+                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color: 'var(--text-secondary)', display:'block', marginBottom:8 }}>Plataforma</label>
                             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
                                 {PLATFORMS.map(opt => (
                                     <button
@@ -733,7 +733,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
 
                         {/* Browser Engine */}
                         <div>
-                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#64748b', display:'block', marginBottom:8 }}>Navegador / Engine</label>
+                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color: 'var(--text-secondary)', display:'block', marginBottom:8 }}>Navegador / Engine</label>
                             <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8 }}>
                                 {[
                                     { id: 'chromium', label: 'Chrome (Chromium)', icon: '🌐' },
@@ -758,7 +758,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
 
                         {/* Tags */}
                         <div>
-                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#64748b', display:'block', marginBottom:8 }}>Tags</label>
+                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color: 'var(--text-secondary)', display:'block', marginBottom:8 }}>Tags</label>
                             {tags.length > 0 && (
                                 <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:8 }}>
                                     {tags.map(tag => {
@@ -784,9 +784,9 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                     onChange={e => setNewTag(e.target.value)}
                                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
                                     placeholder="Adicionar tag..."
-                                    style={{ flex:1, padding:'8px 12px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:9, color:'#f1f5f9', fontSize:12, outline:'none' }}
+                                    style={{ flex:1, padding:'8px 12px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:9, color: 'var(--text-primary)', fontSize:12, outline:'none' }}
                                 />
-                                <button type="button" onClick={addTag} style={{ width:34, height:34, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:9, color:'#64748b', cursor:'pointer' }}>
+                                <button type="button" onClick={addTag} style={{ width:34, height:34, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:9, color: 'var(--text-secondary)', cursor:'pointer' }}>
                                     <Plus size={14} />
                                 </button>
                             </div>
@@ -821,7 +821,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                                             : { borderColor: isSocial.border, color: isSocial.color, backgroundColor: isSocial.bg, opacity: 0.6, fontWeight: 500 })
                                                         : {
                                                             background: active ? `${tpl.color}18` : 'rgba(255,255,255,0.03)',
-                                                            border: active ? `1px solid ${tpl.color}55` : '1px solid rgba(255,255,255,0.08)',
+                                                            border: active ? `1px solid ${tpl.color}55` : '1px solid var(--border-default)',
                                                             color: active ? tpl.color : '#64748b',
                                                             fontWeight: active ? 700 : 500,
                                                         };
@@ -850,21 +850,21 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                             <button
                                 type="button"
                                 onClick={() => setShowProxy(v => !v)}
-                                style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 14px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:10, color:'#64748b', fontSize:12, fontWeight:600, cursor:'pointer', transition:'all 0.15s' }}>
+                                style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 14px', background:'rgba(255,255,255,0.02)', border: '1px solid var(--border-default)', borderRadius:10, color: 'var(--text-secondary)', fontSize:12, fontWeight:600, cursor:'pointer', transition:'all 0.15s' }}>
                                 <Globe size={14} />
                                 <span style={{ flex:1, textAlign:'left' }}>Adicionar Proxy (opcional)</span>
                                 {showProxy ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                             </button>
 
                             {showProxy && (
-                                <div style={{ marginTop:10, padding:14, background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:10, display:'flex', flexDirection:'column', gap:10 }}>
+                                <div style={{ marginTop:10, padding:14, background:'rgba(255,255,255,0.02)', border: '1px solid var(--border-default)', borderRadius:10, display:'flex', flexDirection:'column', gap:10 }}>
                                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                                         <div>
                                             <label style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#475569', display:'block', marginBottom:5 }}>Tipo</label>
                                             <select
                                                 value={proxy.type}
                                                 onChange={e => setProxy(p => ({ ...p, type: e.target.value as any }))}
-                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, color:'#f1f5f9', fontSize:12, outline:'none' }}>
+                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:8, color: 'var(--text-primary)', fontSize:12, outline:'none' }}>
                                                     <option value="http">HTTP</option>
                                                     <option value="https">HTTPS</option>
                                                     <option value="socks4">SOCKS4</option>
@@ -874,24 +874,24 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                         <div>
                                             <label style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#475569', display:'block', marginBottom:5 }}>Porta</label>
                                             <input type="number" value={proxy.port} onChange={e => setProxy(p => ({ ...p, port: e.target.value }))} placeholder="8080"
-                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, color:'#f1f5f9', fontSize:12, outline:'none', boxSizing:'border-box' }} />
+                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:8, color: 'var(--text-primary)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
                                         </div>
                                     </div>
                                     <div>
                                         <label style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#475569', display:'block', marginBottom:5 }}>Host / IP</label>
                                         <input type="text" value={proxy.host} onChange={e => setProxy(p => ({ ...p, host: e.target.value }))} placeholder="192.168.1.1 ou proxy.example.com"
-                                            style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, color:'#f1f5f9', fontSize:12, outline:'none', boxSizing:'border-box' }} />
+                                            style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:8, color: 'var(--text-primary)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
                                     </div>
                                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                                         <div>
                                             <label style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#475569', display:'block', marginBottom:5 }}>Usuário</label>
                                             <input type="text" value={proxy.username} onChange={e => setProxy(p => ({ ...p, username: e.target.value }))} placeholder="Opcional"
-                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, color:'#f1f5f9', fontSize:12, outline:'none', boxSizing:'border-box' }} />
+                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:8, color: 'var(--text-primary)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
                                         </div>
                                         <div>
                                             <label style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#475569', display:'block', marginBottom:5 }}>Senha</label>
                                             <input type="password" value={proxy.password} onChange={e => setProxy(p => ({ ...p, password: e.target.value }))} placeholder="Opcional"
-                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, color:'#f1f5f9', fontSize:12, outline:'none', boxSizing:'border-box' }} />
+                                                style={{ width:'100%', padding:'7px 10px', background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', borderRadius:8, color: 'var(--text-primary)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
                                         </div>
                                     </div>
                                 </div>
@@ -900,7 +900,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
 
                         {/* Creation mode cards */}
                         <div>
-                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'#64748b', display:'block', marginBottom:10 }}>Como deseja criar?</label>
+                            <label style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color: 'var(--text-secondary)', display:'block', marginBottom:10 }}>Como deseja criar?</label>
                             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
 
                                 {/* Card — Aquecido */}
@@ -912,7 +912,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                         padding:'14px 12px', borderRadius:14, cursor: !loading ? 'pointer' : 'default',
                                         background: selectedMode === 'aquecido' ? 'rgba(251,146,60,0.13)' : 'rgba(251,146,60,0.07)',
                                         border: selectedMode === 'aquecido' ? '2px solid rgba(251,146,60,0.6)' : '1px solid rgba(251,146,60,0.3)',
-                                        color:'#f1f5f9', textAlign:'left', display:'flex', flexDirection:'column', gap:10,
+                                        color: 'var(--text-primary)', textAlign:'left', display:'flex', flexDirection:'column', gap:10,
                                         transition:'all 0.15s', opacity: !loading ? 1 : 0.45,
                                         boxShadow: selectedMode === 'aquecido' ? '0 0 0 3px rgba(251,146,60,0.1)' : 'none',
                                     }}
@@ -943,7 +943,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                         ))}
                                     </div>
 
-                                    <div style={{ fontSize:10.5, color:'#64748b', lineHeight:1.4, borderTop:'1px solid rgba(251,146,60,0.12)', paddingTop:8 }}>
+                                    <div style={{ fontSize:10.5, color: 'var(--text-secondary)', lineHeight:1.4, borderTop:'1px solid rgba(251,146,60,0.12)', paddingTop:8 }}>
                                         Ideal para criar contas no Google, Meta, Twitter e qualquer site que analisa histórico do browser.
                                     </div>
                                 </button>
@@ -957,7 +957,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                         padding:'14px 12px', borderRadius:14, cursor: !loading ? 'pointer' : 'default',
                                         background: selectedMode === 'direto' ? 'rgba(148,163,184,0.1)' : 'rgba(255,255,255,0.02)',
                                         border: selectedMode === 'direto' ? '2px solid rgba(148,163,184,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                                        color:'#f1f5f9', textAlign:'left', display:'flex', flexDirection:'column', gap:10,
+                                        color: 'var(--text-primary)', textAlign:'left', display:'flex', flexDirection:'column', gap:10,
                                         transition:'all 0.15s', opacity: !loading ? 1 : 0.45,
                                         boxShadow: selectedMode === 'direto' ? '0 0 0 3px rgba(148,163,184,0.08)' : 'none',
                                     }}
@@ -965,7 +965,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                     onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = selectedMode === 'direto' ? 'rgba(148,163,184,0.1)' : 'rgba(255,255,255,0.02)'; }}
                                 >
                                     <div style={{ display:'flex', alignItems:'center', gap:7 }}>
-                                        <div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                        <div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,0.04)', border: '1px solid var(--border-default)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                                             <Zap size={13} style={{ color:'#94a3b8' }} />
                                         </div>
                                         <span style={{ fontSize:12, fontWeight:700, color:'#94a3b8' }}>Direto</span>
@@ -1028,7 +1028,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                                         Todos de uma vez
                                     </button>
                                 </div>
-                                <p style={{ fontSize: 9.5, color: '#64748b', margin: 0, lineHeight: 1.3 }}>
+                                <p style={{ fontSize: 9.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.3 }}>
                                     {warmupMode === 'sequential'
                                         ? 'Recomendado. Abre um navegador por vez para evitar alto consumo de CPU/Memória.'
                                         : 'Aviso: Abre todos os navegadores simultaneamente. Requer máquina potente.'}
@@ -1064,7 +1064,7 @@ const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ onClose, onCrea
                             </button>
                         )}
                         <button type="button" onClick={onClose}
-                            style={{ width:'100%', padding:'9px', borderRadius:11, background:'transparent', border:'1px solid rgba(255,255,255,0.06)', color:'#475569', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                            style={{ width:'100%', padding:'9px', borderRadius:11, background:'transparent', border: '1px solid var(--border-default)', color:'#475569', fontSize:12, fontWeight:600, cursor:'pointer' }}>
                             Cancelar
                         </button>
                     </div>

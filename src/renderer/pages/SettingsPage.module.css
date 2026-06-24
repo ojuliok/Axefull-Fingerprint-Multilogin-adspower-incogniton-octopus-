@@ -14,12 +14,12 @@
 .nav {
   width: 210px;
   flex-shrink: 0;
-  border-right: 1px solid rgba(255,255,255,0.04);
+  border-right: 1px solid var(--bg-secondary);
   padding: 24px 12px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background: rgba(255,255,255,0.01);
+  background: var(--bg-secondary);
 }
 
 .navHeader {
@@ -51,10 +51,10 @@
   transition: all 0.15s;
 }
 
-.navItem:hover { color: #cbd5e1; background: rgba(255,255,255,0.03); }
+.navItem:hover { color: var(--text-primary); background: var(--bg-secondary); }
 
 .navItemActive {
-  color: #e2e8f0;
+  color: var(--text-primary);
   background: rgba(139,92,246,0.08);
   font-weight: 600;
 }
@@ -71,7 +71,7 @@
 .sectionTitle {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   margin: 0 0 4px;
 }
 
@@ -82,8 +82,8 @@
 }
 
 .card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 14px;
   padding: 20px;
   margin-bottom: 16px;
@@ -111,7 +111,7 @@
 }
 
 .accountInfo { flex: 1; min-width: 0; }
-.accountEmail { font-size: 14px; font-weight: 600; color: #e2e8f0; margin: 0 0 6px; }
+.accountEmail { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0 0 6px; }
 
 .accountMeta { display: flex; align-items: center; gap: 8px; }
 
@@ -169,7 +169,7 @@
 .planName {
   font-size: 14px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 4px;
   text-transform: capitalize;
 }
@@ -217,9 +217,9 @@
   gap: 24px;
 }
 
-.settingDivider { height: 1px; background: rgba(255,255,255,0.04); margin: 16px 0; }
+.settingDivider { height: 1px; background: var(--bg-secondary); margin: 16px 0; }
 
-.settingLabel { font-size: 13px; font-weight: 600; color: #cbd5e1; margin: 0 0 4px; }
+.settingLabel { font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 0 0 4px; }
 .settingHint  { font-size: 11px; color: var(--text-disabled); margin: 0; }
 
 .sizeGroup { display: flex; gap: 6px; flex-shrink: 0; }
@@ -229,14 +229,14 @@
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.sizeBtn:hover { color: #cbd5e1; }
+.sizeBtn:hover { color: var(--text-primary); }
 
 .sizeBtnActive {
   background: rgba(139,92,246,0.15);
@@ -249,8 +249,8 @@
   width: 40px;
   height: 22px;
   border-radius: 11px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   position: relative;
   cursor: pointer;
   transition: all 0.2s;
@@ -290,14 +290,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.copyBtn:hover { color: var(--bg-secondary); }
+.copyBtn:hover { color: var(--text-primary); }
 
 .exportBtn {
   display: flex;
@@ -331,7 +331,7 @@
 }
 
 .aboutLabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-disabled); }
-.aboutValue { font-size: 13px; font-weight: 600; color: #94a3b8; font-family: monospace; }
+.aboutValue { font-size: 13px; font-weight: 600; color: var(--text-tertiary); font-family: monospace; }
 
 .aboutBrand { text-align: center; }
 
@@ -353,7 +353,7 @@
   transition: background 0.15s;
 }
 
-.supportItem:hover { background: rgba(255,255,255,0.03); }
+.supportItem:hover { background: var(--bg-secondary); }
 
 .supportIcon {
   width: 40px;
@@ -368,7 +368,7 @@
 .supportLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 3px;
 }
 
@@ -439,7 +439,7 @@
 .teamEmptyTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 4px;
 }
 
@@ -460,10 +460,10 @@
   flex: 1;
   min-width: 0;
   padding: 10px 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s;
@@ -515,7 +515,7 @@
 .teamName {
   font-size: 15px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 3px;
 }
 
@@ -549,26 +549,26 @@
   transition: background 0.15s;
 }
 
-.memberRow:hover { background: rgba(255,255,255,0.03); }
+.memberRow:hover { background: var(--bg-secondary); }
 
 .memberAvatar {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
 .memberEmail {
   font-size: 13px;
-  color: #cbd5e1;
+  color: var(--text-primary);
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -601,7 +601,7 @@
 .roleUser {
   background: rgba(100,116,139,0.15);
   border: 1px solid rgba(100,116,139,0.2);
-  color: #94a3b8;
+  color: var(--text-tertiary);
 }
 
 .memberRemoveBtn {
@@ -658,8 +658,8 @@
 }
 
 .themeCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 2px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 2px solid var(--bg-secondary);
   border-radius: 12px;
   padding: 12px;
   cursor: pointer;
@@ -671,9 +671,9 @@
 }
 
 .themeCard:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--text-primary);
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-secondary);
 }
 
 .themeCardActive {
@@ -684,7 +684,7 @@
 .themeLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .themePreview {
@@ -703,7 +703,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--bg-secondary);
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
@@ -716,8 +716,8 @@
 }
 
 .layoutCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 2px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border: 2px solid var(--bg-secondary);
   border-radius: 12px;
   padding: 14px;
   cursor: pointer;
@@ -729,9 +729,9 @@
 }
 
 .layoutCard:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--text-primary);
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-secondary);
 }
 
 .layoutCardActive {
@@ -746,7 +746,7 @@
 }
 
 .layoutIcon {
-  color: #94a3b8;
+  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
@@ -757,7 +757,7 @@
 .layoutLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .layoutDesc {
@@ -771,7 +771,7 @@
   height: 48px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bg-secondary);
   position: relative;
   overflow: hidden;
 }

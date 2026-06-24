@@ -167,7 +167,7 @@ export const CanvasTableView: React.FC<CanvasTableViewProps> = ({
 
                 {/* Dynamic Columns Data rendered here */}
                 {dynamicPropertyKeys.map(key => (
-                  <td key={key} style={{ color: '#e4e4e7' }}>
+                  <td key={key} style={{ color: 'var(--text-primary)' }}>
                     {canvas.properties?.[key] || '—'}
                   </td>
                 ))}

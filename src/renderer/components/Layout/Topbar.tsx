@@ -22,7 +22,7 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
             {/* Left side: Workspace / Branding */}
             <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-transparent transition-colors cursor-pointer hover:bg-theme-border">
-                    <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center text-white font-bold text-xs">
+                    <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center text-theme-text font-bold text-xs">
                         W
                     </div>
                     <span className="font-semibold text-sm text-theme-text">Axe Workspace</span>
@@ -88,7 +88,7 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
                 <div className="relative">
                     <button 
                         onClick={() => setShowProfileMenu(!showProfileMenu)}
-                        className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm transition-transform active:scale-95"
+                        className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-theme-text text-xs font-bold shadow-sm transition-transform active:scale-95"
                     >
                         {initials}
                     </button>

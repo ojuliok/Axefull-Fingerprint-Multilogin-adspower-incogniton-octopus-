@@ -41,7 +41,7 @@
 
   /* Surface with glassmorphism */
   --glass-bg: rgba(20, 20, 25, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border: var(--bg-secondary);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
   /* Text */
@@ -52,8 +52,8 @@
   --text-inverse: #0F172A;
 
   /* Borders */
-  --border-default: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.15);
+  --border-default: var(--bg-secondary);
+  --border-hover: var(--bg-secondary);
   --border-focus: rgba(139, 92, 246, 0.5);
   --border-error: var(--danger);
 
@@ -342,8 +342,8 @@ button:disabled,
 [class*="trashRestoreAllBtn"],
 .commentInputWrapper button {
   background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark)) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--bg-card) !important;
+  border: 1px solid var(--bg-secondary) !important;
   box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
 }
 
@@ -382,7 +382,7 @@ button:disabled,
 [class*="bulkActionBtn"]:not(:disabled):hover,
 .addSubtaskWrapper button:not(:disabled):hover {
   background: var(--bg-card-hover) !important;
-  border-color: var(--border-hover) !important;
+  border-color: var(--text-primary) !important;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -395,8 +395,8 @@ button:disabled,
 [class*="bulkDeleteBtn"],
 [class*="deletePropBtn"] {
   background: linear-gradient(135deg, var(--danger), #c0392b) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--bg-card) !important;
+  border: 1px solid var(--bg-secondary) !important;
   box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15) !important;
 }
 
@@ -484,7 +484,7 @@ button:disabled,
   transition: all var(--transition-normal);
 }
 .stat-card:hover {
-  border-color: var(--border-hover);
+  border-color: var(--text-primary);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -527,7 +527,7 @@ button:disabled,
   justify-content: center;
   font-weight: 700;
   font-size: 0.875rem;
-  color: white;
+  color: var(--text-primary);
   flex-shrink: 0;
 }
 .avatar-sm { width: 32px; height: 32px; font-size: 0.75rem; }
@@ -616,23 +616,24 @@ button:disabled,
    ============================================ */
 
 [data-theme="light"] {
-  --bg-primary:    #f8fafc;
-  --bg-secondary:  #f1f5f9;
-  --bg-tertiary:   #e8edf4;
-  --bg-card:       #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-elevated:   #ffffff;
-  --bg-input:      #f1f5f9;
+  --bg-primary:    #F8FAFC;
+  --bg-secondary:  #F1F5F9;
+  --bg-tertiary:   #E2E8F0;
+  --bg-card:       #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-elevated:   #FFFFFF;
+  --bg-input:      #FFFFFF;
   --bg-overlay:    rgba(15, 23, 42, 0.5);
 
-  --glass-bg:     rgba(255, 255, 255, 0.85);
+  --glass-bg:     rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.07);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 
-  --text-primary:   #0f172a;
+  --text-primary:   #0F172A;
   --text-secondary: #334155;
-  --text-tertiary:  #64748b;
-  --text-disabled:  #94a3b8;
+  --text-tertiary:  #64748B;
+  --text-disabled:  #94A3B8;
+  --text-inverse:   #FFFFFF;
 
   --border-default: rgba(0, 0, 0, 0.08);
   --border-hover:   rgba(0, 0, 0, 0.18);
@@ -769,10 +770,10 @@ button:disabled,
   --glass-bg: rgba(18, 19, 18, 0.9);
   --glass-border: rgba(166, 125, 67, 0.2);
 
-  --text-primary: #E2E8F0;
-  --text-secondary: #94A3B8;
-  --text-tertiary: #64748B;
-  --text-disabled: #475569;
+  --text-primary: var(--text-primary);
+  --text-secondary: var(--text-tertiary);
+  --text-tertiary: var(--text-secondary);
+  --text-disabled: var(--text-secondary);
   --text-inverse: #0A0A0A;
 
   --border-default: rgba(166, 125, 67, 0.2);
@@ -850,20 +851,20 @@ button:disabled,
   --bg-primary: #EBF2F3;
   --bg-secondary: #D7E5E7;
   --bg-tertiary: #C2D8DB;
-  --bg-card: #FFFFFF;
+  --bg-card: var(--bg-card);
   --bg-card-hover: #F2F7F8;
-  --bg-elevated: #FFFFFF;
-  --bg-input: #FFFFFF;
+  --bg-elevated: var(--bg-card);
+  --bg-input: var(--bg-card);
   --bg-overlay: rgba(22, 44, 48, 0.5);
 
-  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-bg: var(--bg-secondary);
   --glass-border: rgba(61, 160, 171, 0.2);
 
   --text-primary: #1A3033;
   --text-secondary: #3B5A5F;
   --text-tertiary: #678388;
   --text-disabled: #92ABB0;
-  --text-inverse: #FFFFFF;
+  --text-inverse: var(--bg-card);
 
   --border-default: rgba(61, 160, 171, 0.2);
   --border-hover: rgba(61, 160, 171, 0.45);
@@ -891,10 +892,10 @@ button:disabled,
 [data-button-style="retro-striped"] button[class*="btn-primary"],
 [data-button-style="retro-striped"] button[class*="primaryBtn"] {
   background: repeating-linear-gradient(45deg, #4f46e5, #4f46e5 10px, #4338ca 10px, #4338ca 20px) !important;
-  border: 2px solid #ffffff !important;
+  border: 2px solid var(--bg-card) !important;
   border-radius: 8px !important;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4) !important;
-  color: #ffffff !important;
+  color: var(--bg-card) !important;
   font-weight: 700 !important;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.6) !important;
   transition: transform 0.15s, box-shadow 0.15s !important;
@@ -965,7 +966,7 @@ button:disabled,
 [data-button-style="cyber-neon"] button[class*="btn-primary"]:hover {
   box-shadow: 0 0 15px rgba(0, 255, 67, 0.55), inset 0 0 8px rgba(0, 255, 67, 0.3) !important;
   text-shadow: 0 0 5px rgba(0, 255, 67, 0.8) !important;
-  color: #ffffff !important;
+  color: var(--bg-card) !important;
 }
 
 /* ── 4. Glossy Glass Capsule Button Style ── */
@@ -975,13 +976,13 @@ button:disabled,
 [data-button-style="glossy-pill"] [class*="teamCreateBtn"],
 [data-button-style="glossy-pill"] button[class*="btn-primary"],
 [data-button-style="glossy-pill"] button[class*="primaryBtn"] {
-  background: linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 50%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.15) 100%) !important;
+  background: linear-gradient(to bottom, var(--bg-secondary) 0%, var(--bg-secondary) 50%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.15) 100%) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255,255,255,0.25) !important;
+  border: 1px solid var(--bg-secondary) !important;
   border-radius: 9999px !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+  color: var(--bg-card) !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 0 var(--bg-secondary) !important;
   text-shadow: 0 1px 2px rgba(0,0,0,0.4) !important;
   font-weight: 600 !important;
   transition: all 0.2s ease !important;
@@ -990,8 +991,8 @@ button:disabled,
 [data-button-style="glossy-pill"] .btn-primary:hover,
 [data-button-style="glossy-pill"] [class*="upgradeBtn"]:hover,
 [data-button-style="glossy-pill"] button[class*="btn-primary"]:hover {
-  background: linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%) !important;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4) !important;
+  background: linear-gradient(to bottom, var(--bg-secondary) 0%, var(--bg-secondary) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 var(--bg-secondary) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -1002,13 +1003,13 @@ button:disabled,
 [data-button-style="glass-card"] [class*="teamCreateBtn"],
 [data-button-style="glass-card"] button[class*="btn-primary"],
 [data-button-style="glass-card"] button[class*="primaryBtn"] {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: var(--bg-secondary) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  border: 1.5px solid var(--bg-secondary) !important;
   border-radius: 10px !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 8px rgba(255, 255, 255, 0.1) !important;
+  color: var(--bg-card) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 8px var(--bg-secondary) !important;
   text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
   font-weight: 600 !important;
   transition: all 0.2s ease !important;
@@ -1017,9 +1018,9 @@ button:disabled,
 [data-button-style="glass-card"] .btn-primary:hover,
 [data-button-style="glass-card"] [class*="upgradeBtn"]:hover,
 [data-button-style="glass-card"] button[class*="btn-primary"]:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 255, 255, 0.2) !important;
+  background: var(--bg-secondary) !important;
+  border-color: var(--text-primary) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 12px var(--bg-secondary) !important;
   transform: translateY(-1px) !important;
 }
 

@@ -46,7 +46,7 @@ const NavegadorMobile: React.FC = () => {
             </div>
 
             {/* Browser Content */}
-            <div className="flex-1 w-full bg-white relative">
+            <div className="flex-1 w-full bg-theme-card relative">
                 {url ? (
                     <iframe 
                         src={url}
@@ -62,7 +62,7 @@ const NavegadorMobile: React.FC = () => {
                 )}
 
                 {/* Fingerprint / Camouflage Indicator (Fake for now) */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-theme-text text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
                     <Shield size={12} />
                     <span>Camuflagem Ativa (User-Agent Móvel)</span>
                 </div>

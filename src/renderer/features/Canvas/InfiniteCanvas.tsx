@@ -49,14 +49,14 @@ const SOCIAL_MEDIA_CATALOG: SocialPlatform[] = [
     { id: 'whatsapp',  name: 'WhatsApp',  color: '#25D366', bg: 'rgba(37,211,102,0.15)', svgPath: 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z' },
     { id: 'youtube',   name: 'YouTube',   color: '#FF0000', bg: 'rgba(255,0,0,0.15)', svgPath: 'M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z' },
     { id: 'tiktok',    name: 'TikTok',    color: '#69C9D0', bg: 'rgba(105,201,208,0.15)', svgPath: 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z' },
-    { id: 'x',         name: 'X (Twitter)', color: '#ffffff', bg: 'rgba(255,255,255,0.08)', svgPath: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' },
+    { id: 'x',         name: 'X (Twitter)', color: 'var(--text-primary)', bg: 'var(--border-default)', svgPath: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' },
     { id: 'linkedin',  name: 'LinkedIn',  color: '#0A66C2', bg: 'rgba(10,102,194,0.15)', svgPath: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z' },
     { id: 'telegram',  name: 'Telegram',  color: '#26A5E4', bg: 'rgba(38,165,228,0.15)', svgPath: 'M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z' },
     { id: 'pinterest', name: 'Pinterest', color: '#BD081C', bg: 'rgba(189,8,28,0.15)', svgPath: 'M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641 0 12.017 0z' },
     { id: 'snapchat',  name: 'Snapchat',  color: '#FFFC00', bg: 'rgba(255,252,0,0.12)', svgPath: 'M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12.922-.285.06-.045.12-.075.195-.09a.72.72 0 01.72.12c.18.15.27.375.24.6-.045.27-.24.455-.479.54a4.079 4.079 0 01-1.199.285c-.12.015-.241.03-.36.06-.165.045-.27.255-.3.45-.03.195-.015.39.09.525 1.29 1.815 2.939 2.79 3.089 2.88.21.12.391.27.48.48.09.18.12.39.07.59-.15.675-.72.93-.96.99-.33.09-.659.15-1.02.18a.72.72 0 00-.51.195c-.15.15-.21.36-.27.57-.06.21-.15.42-.36.525-.21.12-.465.12-.66.06-.45-.135-1.02-.27-1.77-.12-.84.165-1.65.885-2.67 1.77-.69.585-1.47 1.245-2.52 1.77-1.65.81-3.15.3-3.72.045-.57-.255-1.2-.63-1.74-1.05-.72-.57-1.35-1.245-2.01-1.815-.84-.765-1.5-1.38-2.19-1.515a5.345 5.345 0 00-1.02-.06c-.3.015-.555-.12-.69-.285a.806.806 0 01-.18-.45c-.03-.12-.06-.24-.105-.33-.045-.09-.105-.165-.195-.225a.69.69 0 00-.42-.12c-.345-.03-.72-.09-1.065-.195-.27-.075-.81-.315-.945-.96-.045-.195-.015-.42.06-.585.105-.21.27-.36.48-.48.15-.09 1.8-1.065 3.09-2.88.105-.135.12-.33.09-.525-.03-.195-.135-.405-.3-.45a5.3 5.3 0 00-.36-.06c-.45-.06-.84-.165-1.17-.285-.24-.09-.42-.27-.479-.54a.573.573 0 01.239-.6.706.706 0 01.2-.09.866.866 0 01.519-.015c.27.09.63.195.93.195.195 0 .33-.045.405-.09l-.006-.51c-.105-1.628-.23-3.654.3-4.848C6.07 1.07 9.46.793 10.45.793h1.756z' },
     { id: 'discord',   name: 'Discord',   color: '#5865F2', bg: 'rgba(88,101,242,0.15)', svgPath: 'M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z' },
     { id: 'reddit',    name: 'Reddit',    color: '#FF4500', bg: 'rgba(255,69,0,0.15)', svgPath: 'M12 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 01-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 01.042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 014.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 01.14-.197.35.35 0 01.238-.042l2.906.617a1.214 1.214 0 011.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 00-.231.094.33.33 0 000 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 000-.463.327.327 0 00-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 00-.232-.095z' },
-    { id: 'threads',   name: 'Threads',   color: '#ffffff', bg: 'rgba(255,255,255,0.08)', svgPath: 'M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.963-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 013.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.581-1.28-.876-2.28-.876h-.04c-.748.003-1.9.066-2.77.785l-1.326-1.544c1.329-1.098 2.98-1.357 4.111-1.357h.06c1.669 0 3.003.554 3.862 1.604.73.889 1.168 2.07 1.302 3.51a8.14 8.14 0 011.217.857c1.32 1.115 2.14 2.678 2.378 4.517.162 1.264-.072 3.26-1.82 5.007C17.706 23.19 15.333 23.975 12.186 24zm-1.638-8.01c-.32.018-2.428.168-2.339 1.69.045.802.652 1.378 1.726 1.455 1.282.072 2.243-.321 2.854-1.17.39-.54.657-1.263.79-2.153a11.57 11.57 0 00-3.031.178z' },
+    { id: 'threads',   name: 'Threads',   color: 'var(--text-primary)', bg: 'var(--border-default)', svgPath: 'M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.963-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 013.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.581-1.28-.876-2.28-.876h-.04c-.748.003-1.9.066-2.77.785l-1.326-1.544c1.329-1.098 2.98-1.357 4.111-1.357h.06c1.669 0 3.003.554 3.862 1.604.73.889 1.168 2.07 1.302 3.51a8.14 8.14 0 011.217.857c1.32 1.115 2.14 2.678 2.378 4.517.162 1.264-.072 3.26-1.82 5.007C17.706 23.19 15.333 23.975 12.186 24zm-1.638-8.01c-.32.018-2.428.168-2.339 1.69.045.802.652 1.378 1.726 1.455 1.282.072 2.243-.321 2.854-1.17.39-.54.657-1.263.79-2.153a11.57 11.57 0 00-3.031.178z' },
     { id: 'twitch',    name: 'Twitch',    color: '#9146FF', bg: 'rgba(145,70,255,0.15)', svgPath: 'M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z' },
     { id: 'spotify',   name: 'Spotify',   color: '#1DB954', bg: 'rgba(29,185,84,0.15)', svgPath: 'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z' },
 ];
@@ -298,6 +298,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
     const isTextEditing = editingNodeId !== null;
     const [isPanning, setIsPanning] = useState(false);
+    const [proxyConfiguringId, setProxyConfiguringId] = useState<string | null>(null);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [isDragOver, setIsDragOver] = useState(false);
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -1299,6 +1300,24 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         const newNode: CanvasNode = {
             id: genId(), type: 'document', x: cx - 130, y: cy - 30,
             width: 260, height: 72, content: base64, fileName, fileType, zIndex: maxZ() + 1,
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
+
+    const addBrowserNode = useCallback((canvasX?: number, canvasY?: number) => {
+        const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const initialTabId = genId();
+        const newNode: CanvasNode = {
+            id: genId(), type: 'browser', x: cx - 200, y: cy - 150,
+            width: 400, height: 300, content: 'Navegador Interno', zIndex: maxZ() + 1,
+            browserTabs: [{ id: initialTabId, url: 'https://www.google.com', title: 'Nova Guia' }],
+            activeTabId: initialTabId,
+            browserProxy: '',
+            color: '#1e293b'
         };
         const updated = [...nodes, newNode];
         setNodes(updated);
@@ -2438,7 +2457,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const gridOffsetY = (viewport?.y || 0) % gridSize;
     const dotSize = Math.max(0.8, viewport?.zoom || 1);
     const gridStyle: React.CSSProperties = {
-        backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.08) ${dotSize}px, transparent ${dotSize}px)`,
+        backgroundImage: `radial-gradient(circle, var(--border-default) ${dotSize}px, transparent ${dotSize}px)`,
         backgroundSize: `${gridSize}px ${gridSize}px`,
         backgroundPosition: `${gridOffsetX}px ${gridOffsetY}px`,
     };
@@ -2921,6 +2940,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     const isSocial = node.type === 'social';
                     const isCardNode = node.type === 'card';
                     const isShape = node.type === 'shape';
+                    const isBrowserNode = node.type === 'browser';
 
                     let nodeClass = styles.nodeCard;
                     if (isFreeText) nodeClass = styles.freeTextNode;
@@ -2929,6 +2949,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     else if (isProfile) nodeClass = styles.freeTextNode;
                     else if (isSocial) nodeClass = `${styles.socialNode} ${styles.freeTextNode}`;
                     else if (isCardNode) nodeClass = `${styles.cardNode}`;
+                    else if (isBrowserNode) nodeClass = `${styles.cardNode}`;
                     else if (isShape) nodeClass = styles.freeTextNode;
                     else if (node.type === 'frame') nodeClass = styles.freeTextNode;
 
@@ -2954,7 +2975,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                 style={{
                                     width: '100%', height: '100%', position: 'relative',
                                     ...(!isFreeText && !isEmoji && !isIcon && !isProfile && !isShape && node.color ? { background: node.color } : {}),
-                                    ...((isEmoji || isIcon) && node.color ? { background: node.color, border: '1.5px solid rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(8px)' } : {}),
+                                    ...((isEmoji || isIcon) && node.color ? { background: node.color, border: '1px solid var(--border-default)', backdropFilter: 'blur(8px)' } : {}),
                                 }}
                             >
                                 {/* Drag handle bar for card nodes */}
@@ -2983,7 +3004,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                 ))}
                                             </div>
                                             {isIcon && (
-                                                <div className={styles.colorPicker} style={{ paddingLeft: 4, marginLeft: 2, borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
+                                                <div className={styles.colorPicker} style={{ paddingLeft: 4, marginLeft: 2, borderLeft: '1px solid var(--border-default)' }}>
                                                     {TEXT_COLORS.slice(1, 7).map(c => (
                                                         <div key={c.id} className={`${styles.colorDot} ${node.textColor === c.value ? styles.activeColor : ''}`}
                                                             style={{ backgroundColor: c.value, borderRadius: '25%' }}
@@ -3105,6 +3126,166 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                 </div>
                             )}
 
+                            {isBrowserNode && (
+                                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', borderRadius: 'inherit', overflow: 'hidden' }}
+                                     onDoubleClick={(e) => { if (node.isLocked) return; e.stopPropagation(); }}>
+                                    
+                                    {/* Tab Bar */}
+                                    <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', padding: '4px 4px 0 4px', gap: '4px', borderBottom: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}
+                                         onMouseDown={(e) => handleNodeMouseDown(e, node.id)}>
+                                        {node.browserTabs?.map(tab => (
+                                            <div key={tab.id} 
+                                                 style={{ 
+                                                     display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', 
+                                                     background: tab.id === node.activeTabId ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                                     borderRadius: '6px 6px 0 0', fontSize: '11px', color: 'var(--text-secondary)',
+                                                     cursor: 'pointer', minWidth: '80px', maxWidth: '140px', borderRight: '1px solid rgba(255,255,255,0.05)'
+                                                 }}
+                                                 onClick={(e) => {
+                                                     e.stopPropagation();
+                                                     const newNodes = nodes.map(n => n.id === node.id ? { ...n, activeTabId: tab.id } : n);
+                                                     setNodes(newNodes);
+                                                     saveData(newNodes, strokes, viewport);
+                                                 }}>
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{tab.title}</span>
+                                                <button style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 0 }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            let newTabs = (node.browserTabs || []).filter(t => t.id !== tab.id);
+                                                            if (newTabs.length === 0) newTabs = [{ id: genId(), url: 'https://www.google.com', title: 'Nova Guia' }];
+                                                            const activeId = tab.id === node.activeTabId ? newTabs[newTabs.length - 1].id : node.activeTabId;
+                                                            const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserTabs: newTabs, activeTabId: activeId } : n);
+                                                            setNodes(newNodes);
+                                                            saveData(newNodes, strokes, viewport);
+                                                        }}>
+                                                    <Lucide.X size={10} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const newTab = { id: genId(), url: 'https://www.google.com', title: 'Nova Guia' };
+                                                    const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserTabs: [...(n.browserTabs||[]), newTab], activeTabId: newTab.id } : n);
+                                                    setNodes(newNodes);
+                                                    saveData(newNodes, strokes, viewport);
+                                                }}>
+                                            <Lucide.Plus size={12} />
+                                        </button>
+                                    </div>
+
+                                    {/* Navigation Bar */}
+                                    <div style={{ display: 'flex', gap: '8px', padding: '6px 8px', background: 'rgba(0,0,0,0.2)', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
+                                        <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: '2px', opacity: 0.7 }}
+                                            onClick={(e) => { e.stopPropagation(); const wv = document.getElementById(`webview-${node.id}-${node.activeTabId}`) as any; if (wv && wv.goBack) wv.goBack(); }}>
+                                            <Lucide.ChevronLeft size={14} />
+                                        </button>
+                                        <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: '2px', opacity: 0.7 }}
+                                            onClick={(e) => { e.stopPropagation(); const wv = document.getElementById(`webview-${node.id}-${node.activeTabId}`) as any; if (wv && wv.goForward) wv.goForward(); }}>
+                                            <Lucide.ChevronRight size={14} />
+                                        </button>
+                                        <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: '2px', opacity: 0.7 }}
+                                            onClick={(e) => { e.stopPropagation(); const wv = document.getElementById(`webview-${node.id}-${node.activeTabId}`) as any; if (wv && wv.reload) wv.reload(); }}>
+                                            <Lucide.RotateCw size={12} />
+                                        </button>
+                                        
+                                        <input 
+                                            type="text" 
+                                            key={node.activeTabId} /* Remount on tab change to show correct url */
+                                            defaultValue={node.browserTabs?.find(t => t.id === node.activeTabId)?.url || 'https://www.google.com'}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.stopPropagation();
+                                                    let val = e.currentTarget.value;
+                                                    if (!val.startsWith('http://') && !val.startsWith('https://')) val = 'https://' + val;
+                                                    const newTabs = (node.browserTabs || []).map(t => t.id === node.activeTabId ? { ...t, url: val } : t);
+                                                    const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserTabs: newTabs } : n);
+                                                    setNodes(newNodes);
+                                                    saveData(newNodes, strokes, viewport);
+                                                    const wv = document.getElementById(`webview-${node.id}-${node.activeTabId}`) as any;
+                                                    if (wv && wv.loadURL) wv.loadURL(val);
+                                                }
+                                            }}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-default)', color: '#fff', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', outline: 'none' }}
+                                        />
+
+                                        {/* Proxy Button */}
+                                        <div style={{ position: 'relative' }}>
+                                            <button style={{ background: node.browserProxy ? 'rgba(34,197,94,0.2)' : 'transparent', border: '1px solid ' + (node.browserProxy ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)'), color: node.browserProxy ? '#4ade80' : '#a1a1aa', cursor: 'pointer', display: 'flex', padding: '4px 6px', borderRadius: '4px', fontSize: '10px', alignItems: 'center', gap: '4px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setProxyConfiguringId(proxyConfiguringId === node.id ? null : node.id);
+                                                }}>
+                                                <Lucide.Shield size={12} /> {node.browserProxy ? 'Proxy ON' : 'Proxy OFF'}
+                                            </button>
+                                            
+                                            {proxyConfiguringId === node.id && (
+                                                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: '#1e293b', border: '1px solid var(--border-default)', borderRadius: '6px', padding: '8px', zIndex: 100, display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '200px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+                                                     onMouseDown={(e) => e.stopPropagation()}>
+                                                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600 }}>Configurar Proxy</div>
+                                                    <input 
+                                                        id={`proxy-input-${node.id}`}
+                                                        type="text" 
+                                                        defaultValue={node.browserProxy || ''}
+                                                        placeholder="http://ip:porta"
+                                                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-default)', color: '#fff', padding: '4px 6px', borderRadius: '4px', fontSize: '11px', outline: 'none' }}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.stopPropagation();
+                                                                const input = e.currentTarget;
+                                                                const newProxy = input.value;
+                                                                const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserProxy: newProxy } : n);
+                                                                setNodes(newNodes);
+                                                                saveData(newNodes, strokes, viewport);
+                                                                if (window.api && window.api.app && window.api.app.setWebviewProxy) {
+                                                                    window.api.app.setWebviewProxy(`persist:browser-${node.id}`, newProxy);
+                                                                }
+                                                                setProxyConfiguringId(null);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+                                                        <button style={{ background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', cursor: 'pointer' }}
+                                                                onClick={(e) => { e.stopPropagation(); setProxyConfiguringId(null); }}>
+                                                            Cancelar
+                                                        </button>
+                                                        <button style={{ background: '#a78bfa', border: 'none', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', cursor: 'pointer' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const input = document.getElementById(`proxy-input-${node.id}`) as HTMLInputElement;
+                                                                    const newProxy = input ? input.value : '';
+                                                                    const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserProxy: newProxy } : n);
+                                                                    setNodes(newNodes);
+                                                                    saveData(newNodes, strokes, viewport);
+                                                                    if (window.api && window.api.app && window.api.app.setWebviewProxy) {
+                                                                        window.api.app.setWebviewProxy(`persist:browser-${node.id}`, newProxy);
+                                                                    }
+                                                                    setProxyConfiguringId(null);
+                                                                }}>
+                                                            Salvar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Webviews */}
+                                    <div style={{ flex: 1, position: 'relative', width: '100%', height: '100%', background: '#fff' }}>
+                                        {node.browserTabs?.map(tab => (
+                                            <webview 
+                                                key={tab.id}
+                                                id={`webview-${node.id}-${tab.id}`}
+                                                src={tab.url} 
+                                                partition={`persist:browser-${node.id}`}
+                                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: tab.id === node.activeTabId ? 'flex' : 'none' }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {node.type === 'checklist' && (
                                 <div className={styles.checklistNode}>
                                     <div className={styles.checklistHeader}>
@@ -3222,14 +3403,22 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                         onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
                                         onDoubleClick={(e) => {
                                             e.stopPropagation();
-                                            const newName = prompt('Nome do Frame:', node.content);
-                                            if (newName !== null) {
-                                                setNodes(prev => {
-                                                    const updated = prev.map(n => n.id === node.id ? { ...n, content: newName } : n);
-                                                    saveData(updated, strokes, viewport);
-                                                    return updated;
-                                                });
-                                            }
+                                            setCustomDialogInputValue(node.content);
+                                            setCustomDialog({
+                                                isOpen: true,
+                                                type: 'prompt',
+                                                message: 'Nome do Frame:',
+                                                onConfirm: (val?: string) => {
+                                                    if (val !== undefined && val !== null) {
+                                                        setNodes(prev => {
+                                                            const updated = prev.map(n => n.id === node.id ? { ...n, content: val } : n);
+                                                            saveData(updated, strokes, viewport);
+                                                            return updated;
+                                                        });
+                                                    }
+                                                },
+                                                onCancel: () => {}
+                                            });
                                         }}
                                     >
                                         <LayoutTemplate size={14} /> {node.content || 'Frame'}
@@ -3608,7 +3797,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                         boxShadow: isOnline 
                                             ? '0 0 16px rgba(16, 185, 129, 0.15), inset 0 0 8px rgba(16, 185, 129, 0.05)'
                                             : (isStarting ? '0 0 16px rgba(251, 146, 60, 0.15)' : '0 8px 32px rgba(0,0,0,0.5)'),
-                                        color: '#f1f5f9',
+                                        color: 'var(--text-primary)',
                                         fontFamily: 'system-ui, -apple-system, sans-serif',
                                         userSelect: 'none',
                                         transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -3616,7 +3805,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                         {/* Top Row: Name and Status */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-                                                <span style={{ fontSize: 13, fontWeight: 700, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={node.content}>
+                                                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={node.content}>
                                                     {node.content}
                                                 </span>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
@@ -3629,7 +3818,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                             boxShadow: isOnline || isStarting ? `0 0 8px ${statusColor}` : 'none'
                                                         }} 
                                                     />
-                                                    <span style={{ fontSize: 10, color: '#64748b', fontWeight: 600 }}>{statusLabel}</span>
+                                                    <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600 }}>{statusLabel}</span>
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -3640,7 +3829,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                         padding: '2px 6px',
                                                         borderRadius: 6,
                                                         background: 'rgba(255, 255, 255, 0.04)',
-                                                        border: '1px solid rgba(255, 255, 255, 0.06)',
+                                                        border: '1px solid var(--border-default)',
                                                         color: '#94a3b8',
                                                         fontWeight: 600,
                                                         display: 'flex',
@@ -3953,7 +4142,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                 <div className={styles.layersPanel}>
                     <div className={styles.layersPanelHeader}>
                         <span className={styles.layersPanelTitle}>Camadas</span>
-                        <button onClick={() => setShowLayersPanel(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', padding: 2 }}><X size={12} /></button>
+                        <button onClick={() => setShowLayersPanel(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: 2 }}><X size={12} /></button>
                     </div>
                     <div className={styles.layersPanelContent}>
                         {[...nodes].sort((a, b) => (b.zIndex ?? 0) - (a.zIndex ?? 0)).map((node) => (
@@ -4129,6 +4318,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     <div className={styles.dockPopover} style={{ minWidth: '220px', flexDirection: 'column', gap: '2px', padding: '6px' }}>
                         <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Componentes</div>
                         <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addFrameNode()}><LayoutTemplate size={14} style={{ marginRight: 8 }} /> Frame Agrupador</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addBrowserNode()}><Globe size={14} style={{ marginRight: 8 }} /> Navegador Interno</button>
                         <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addPageNode()}><FileText size={14} style={{ marginRight: 8 }} /> Página Notion</button>
                         <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addCardNode()}><Lucide.Notebook size={14} style={{ marginRight: 8 }} /> Card Notion</button>
                         <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addChecklistNode()}><ListTodo size={14} style={{ marginRight: 8 }} /> Lista de Tarefas</button>
@@ -4254,7 +4444,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                 className={`${styles.colorPaletteDot} ${isActive ? styles.colorPaletteDotActive : ''}`}
                                                 style={{ 
                                                     background: c.value === 'transparent' ? 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.1) 4px, rgba(255,255,255,0.1) 8px)' : c.value,
-                                                    border: '1px solid rgba(255,255,255,0.1)'
+                                                    border: '1px solid var(--border-default)'
                                                 }}
                                                 onClick={() => updateProp('shapeFillColor', c.value)}
                                                 title={c.label}
@@ -4439,7 +4629,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                     <div className={styles.cardHeaderTitle}>
                                         <Type size={14} style={{ color: '#a78bfa' }} /> Editar Texto
                                     </div>
-                                    <button onClick={() => setShowTextSidebar(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex' }}>
+                                    <button onClick={() => setShowTextSidebar(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex' }}>
                                         <X size={14} />
                                     </button>
                                 </div>
@@ -4514,9 +4704,9 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                         flexDirection: 'column',
                                         padding: '8px 10px',
                                         background: 'rgba(255, 255, 255, 0.03)',
-                                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                                        border: '1px solid var(--border-default)',
                                         borderRadius: 8,
-                                        color: '#e2e8f0',
+                                        color: 'var(--text-secondary)',
                                         cursor: 'pointer',
                                         textAlign: 'left',
                                         transition: 'all 0.15s'
@@ -4527,7 +4717,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                     }}
                                     onMouseLeave={e => {
                                         e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+                                        e.currentTarget.style.borderColor = 'var(--border-default)';
                                     }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -4558,7 +4748,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                             );
                         })}
                         {filteredProfiles.length === 0 && (
-                            <span style={{ fontSize: 11, color: '#64748b', textAlign: 'center', paddingTop: 20 }}>
+                            <span style={{ fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center', paddingTop: 20 }}>
                                 {profileSearch ? 'Nenhum perfil encontrado' : 'Todos os perfis já foram adicionados'}
                             </span>
                         )}
@@ -5043,10 +5233,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     <button 
                         className={styles.ctxMenuItem}
                         onClick={() => {
-                            const url = window.prompt("Digite o Link / URL para o Navegador:", "https://www.google.com");
-                            if (url && url.trim()) {
-                                addEmbedNode(url.trim(), canvasContextMenu.canvasX, canvasContextMenu.canvasY);
-                            }
+                            addBrowserNode(canvasContextMenu.canvasX, canvasContextMenu.canvasY);
                             setCanvasContextMenu(null);
                         }}
                     >
@@ -5528,7 +5715,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
             {customDialog.isOpen && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }} onClick={() => setCustomDialog(prev => ({ ...prev, isOpen: false }))}>
                     <div 
-                        style={{ padding: '24px', width: '420px', maxWidth: '90%', background: 'rgba(20, 20, 28, 0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', boxShadow: '0 24px 64px rgba(0, 0, 0, 0.6)', display: 'flex', flexDirection: 'column', gap: '20px', animation: 'nodeAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                        style={{ padding: '24px', width: '420px', maxWidth: '90%', background: 'var(--bg-card)', backdropFilter: 'blur(20px)', border: '1px solid var(--border-default)', borderRadius: '16px', boxShadow: '0 24px 64px rgba(0, 0, 0, 0.6)', display: 'flex', flexDirection: 'column', gap: '20px', animation: 'nodeAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
@@ -5536,7 +5723,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                 {customDialog.type === 'confirm' ? <Lucide.AlertTriangle size={24} /> : <Lucide.Edit3 size={24} />}
                             </div>
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#f8fafc' }}>
+                                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
                                     {customDialog.type === 'confirm' ? 'Confirmar Ação' : 'Ação Necessária'}
                                 </h3>
                                 <p style={{ margin: 0, fontSize: '14px', color: '#94a3b8', lineHeight: 1.5 }}>
@@ -5550,7 +5737,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                 type="text"
                                 value={customDialogInputValue}
                                 onChange={(e) => setCustomDialogInputValue(e.target.value)}
-                                style={{ width: '100%', padding: '12px 14px', background: '#14141c', border: '1px solid #272733', borderRadius: '8px', color: '#f1f5f9', fontSize: '15px', outline: 'none', transition: 'border-color 0.2s' }}
+                                style={{ width: '100%', padding: '12px 14px', background: '#14141c', border: '1px solid #272733', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '15px', outline: 'none', transition: 'border-color 0.2s' }}
                                 onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
                                 onBlur={(e) => e.target.style.borderColor = '#272733'}
                                 autoFocus
@@ -5569,7 +5756,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                     customDialog.onCancel();
                                     setCustomDialog(prev => ({ ...prev, isOpen: false }));
                                 }}
-                                style={{ padding: '10px 20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#cbd5e1', cursor: 'pointer', fontSize: '14px', fontWeight: 500, transition: 'all 0.2s' }}
+                                style={{ padding: '10px 20px', background: 'transparent', border: '1px solid var(--border-default)', borderRadius: '8px', color: '#cbd5e1', cursor: 'pointer', fontSize: '14px', fontWeight: 500, transition: 'all 0.2s' }}
                                 onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#fff'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#cbd5e1'; }}
                             >

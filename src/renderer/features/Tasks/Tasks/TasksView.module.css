@@ -3,8 +3,8 @@
     flex-direction: column;
     width: 100%;
     height: 100vh;
-    background: #0f0f13; /* Dark mode background like Google Calendar */
-    color: #e2e8f0;
+    background: var(--bg-secondary); /* Dark mode background like Google Calendar */
+    color: var(--text-primary);
     font-family: 'Inter', -apple-system, sans-serif;
     overflow: hidden;
 }
@@ -15,8 +15,8 @@
     justify-content: space-between;
     height: 64px;
     padding: 8px 16px;
-    border-bottom: 1px solid #27272a;
-    background: #0f0f13;
+    border-bottom: 1px solid var(--border-default);
+    background: var(--bg-secondary);
 }
 
 .headerLeft {
@@ -40,13 +40,13 @@
 }
 
 .hamburgerBtn:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
 }
 
 .logoTitle {
     font-size: 20px;
     font-weight: 500;
-    color: var(--border-default);
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -55,12 +55,12 @@
 .logoIcon {
     width: 32px;
     height: 32px;
-    background: #8b5cf6;
+    background: var(--brand-primary);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--text-primary);
 }
 
 .headerMiddle {
@@ -72,7 +72,7 @@
 .todayBtn {
     background: transparent;
     border: 1px solid var(--text-secondary);
-    color: var(--border-default);
+    color: var(--text-primary);
     padding: 6px 14px;
     border-radius: 4px;
     font-size: 14px;
@@ -82,7 +82,7 @@
 }
 
 .todayBtn:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-secondary);
 }
 
 .navArrows {
@@ -93,7 +93,7 @@
 .navArrowBtn {
     background: transparent;
     border: none;
-    color: var(--border-default);
+    color: var(--text-primary);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -105,13 +105,13 @@
 }
 
 .navArrowBtn:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
 }
 
 .currentDateTitle {
     font-size: 20px;
     font-weight: 400;
-    color: var(--border-default);
+    color: var(--text-primary);
     min-width: 150px;
 }
 
@@ -136,13 +136,13 @@
 }
 
 .iconBtn:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
 }
 
 .viewSelector {
     background: transparent;
     border: 1px solid var(--text-secondary);
-    color: var(--border-default);
+    color: var(--text-primary);
     padding: 6px 12px;
     border-radius: 4px;
     font-size: 14px;
@@ -155,7 +155,7 @@
 }
 
 .viewSelector:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-secondary);
 }
 
 .googleBody {
@@ -187,11 +187,11 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--text-primary);
+    background: var(--bg-card);
     border: 1px solid var(--text-secondary);
     border-radius: 24px;
     padding: 10px 16px 10px 10px;
-    color: var(--border-default);
+    color: var(--text-primary);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -200,7 +200,7 @@
 }
 
 .createBtn:hover {
-    background: #27272a;
+    background: var(--bg-tertiary);
     box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
@@ -217,8 +217,8 @@
     margin-top: 24px;
     margin-bottom: 24px;
     padding: 16px 12px;
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    
     border-radius: 12px;
 }
 
@@ -229,7 +229,7 @@
     font-size: 13px;
     font-weight: 600;
     margin-bottom: 12px;
-    color: var(--border-default);
+    color: var(--text-primary);
     text-transform: capitalize;
 }
 
@@ -257,12 +257,12 @@
     height: 24px;
     margin: auto;
     transition: all 0.2s;
-    color: var(--border-default);
+    color: var(--text-primary);
     font-size: 11px;
 }
 
 .miniCalDayCell:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
 }
 
 .miniCalDayCell.outside {
@@ -270,8 +270,8 @@
 }
 
 .miniCalDayCell.today {
-    background: #8b5cf6;
-    color: white;
+    background: var(--brand-primary);
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -284,11 +284,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #8b5cf6;
+    background: var(--brand-primary);
     border: none;
     border-radius: 8px;
     padding: 8px 16px;
-    color: white;
+    color: var(--text-primary);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -296,7 +296,7 @@
 }
 
 .createBtnInline:hover {
-    background: #7c3aed;
+    background: var(--brand-secondary);
 }
 
 .createBtnInline:active {
@@ -320,7 +320,7 @@
 }
 
 .sectionTitle:hover {
-    color: var(--border-default);
+    color: var(--text-primary);
 }
 
 .spaceItem {
@@ -330,13 +330,13 @@
     padding: 8px;
     border-radius: 4px;
     cursor: pointer;
-    color: var(--border-default);
+    color: var(--text-primary);
     font-size: 13px;
     position: relative;
 }
 
 .spaceItem:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-secondary);
 }
 
 .spaceItemLeft {
@@ -372,8 +372,8 @@
 }
 
 .spaceOptionsBtn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--border-default);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .spaceCheckbox {
@@ -390,7 +390,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #14141c;
+    background: var(--bg-card);
     border-top-left-radius: 16px;
     box-shadow: -1px 0 10px rgba(0,0,0,0.2);
     overflow: hidden;
@@ -410,7 +410,7 @@
     align-items: center;
     justify-content: space-between;
     padding-bottom: 16px;
-    border-bottom: 1px solid #27272a;
+    border-bottom: 1px solid var(--border-default);
     margin-bottom: 16px;
 }
 
@@ -433,7 +433,7 @@
 /* Context Menus */
 .contextMenu {
     position: fixed;
-    background: #27272a;
+    background: var(--bg-tertiary);
     border: 1px solid var(--text-secondary);
     border-radius: 4px;
     padding: 4px 0;
@@ -446,7 +446,7 @@
 
 .contextMenuItem {
     padding: 8px 16px;
-    color: var(--border-default);
+    color: var(--text-primary);
     font-size: 13px;
     cursor: pointer;
     transition: background 0.1s ease;
@@ -454,7 +454,7 @@
     align-items: center;
     gap: 12px;
 }
-.contextMenuItem:hover { background: rgba(255,255,255,0.06); }
+.contextMenuItem:hover { background: var(--bg-secondary); }
 .contextMenuItem.danger { color: #ef4444; }
 
 .contextMenuDivider {
@@ -468,13 +468,13 @@
     display: flex;
     align-items: center;
     padding: 12px 16px;
-    border-bottom: 1px solid #27272a;
+    border-bottom: 1px solid var(--border-default);
     cursor: pointer;
     transition: background 0.1s;
 }
 
 .taskListItem:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--bg-secondary);
 }
 
 .taskListItemContent {
@@ -546,8 +546,8 @@
 }
 
 .quickActionBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--border-default);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .taskListItemTitle.done {
@@ -560,8 +560,8 @@
     margin-top: 24px;
     margin-bottom: 24px; /* Added bottom margin to allow scrolling completely past the Pomodoro */
     padding: 16px 12px;
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -574,13 +574,13 @@
     justify-content: space-between;
     font-size: 12px;
     font-weight: 600;
-    color: var(--border-default);
+    color: var(--text-primary);
 }
 
 .pomodoroSidebarTimer {
     font-size: 32px;
     font-weight: 700;
-    color: #8b5cf6;
+    color: var(--brand-primary);
     text-align: center;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.5px;
@@ -595,10 +595,10 @@
     flex: 1;
     font-size: 11px;
     padding: 6px 4px;
-    background: #27272a;
+    background: var(--bg-tertiary);
     border: 1px solid var(--text-secondary);
     border-radius: 6px;
-    color: var(--border-default);
+    color: var(--text-primary);
     cursor: pointer;
     text-align: center;
     transition: all 0.2s;
@@ -612,7 +612,7 @@
 .pomodoroSidebarModeBtn.active {
     background: rgba(139, 92, 246, 0.15);
     color: #c084fc;
-    border-color: #8b5cf6;
+    border-color: var(--brand-primary);
 }
 
 .pomodoroSidebarControls {
@@ -637,7 +637,7 @@
 
 .pomodoroSidebarControlBtn.play {
     background: #10b981;
-    color: white;
+    color: var(--text-primary);
 }
 
 .pomodoroSidebarControlBtn.play:hover {
@@ -646,7 +646,7 @@
 
 .pomodoroSidebarControlBtn.pause {
     background: #ef4444;
-    color: white;
+    color: var(--text-primary);
 }
 
 .pomodoroSidebarControlBtn.pause:hover {
@@ -654,9 +654,9 @@
 }
 
 .pomodoroSidebarControlBtn.reset {
-    background: #27272a;
+    background: var(--bg-tertiary);
     border: 1px solid var(--text-secondary);
-    color: var(--border-default);
+    color: var(--text-primary);
 }
 
 .pomodoroSidebarControlBtn.reset:hover {
@@ -669,7 +669,7 @@
     flex-direction: column;
     padding: 16px 24px 8px 24px;
     background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--bg-secondary);
 }
 
 .breadcrumb {
@@ -716,8 +716,8 @@
 }
 
 .editProjectHeaderBtn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--border-default);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .kanbanTabs {
@@ -741,13 +741,13 @@
 
 .kanbanTab:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-secondary);
 }
 
 .kanbanTabActive {
     color: var(--brand-primary-light) !important;
     background: var(--bg-secondary) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--text-primary) !important;
     border-bottom: 2px solid var(--brand-primary) !important;
     font-weight: 600;
 }
@@ -773,14 +773,14 @@
     justify-content: space-between;
     height: 56px;
     padding: 0 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--bg-secondary);
     background: var(--bg-primary);
 }
 
 .todoistHeaderTitle {
     font-size: 16px;
     font-weight: 600;
-    color: var(--bg-secondary);
+    color: var(--text-primary);
     letter-spacing: -0.01em;
 }
 
@@ -789,16 +789,16 @@
     display: flex;
     align-items: center;
     width: 240px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-secondary);
     border-radius: 8px;
     padding: 0 10px;
     transition: all 0.2s ease;
 }
 
 .searchWrapper:focus-within {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: #8b5cf6;
+    background: var(--bg-secondary);
+    border-color: var(--brand-primary);
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
     width: 280px;
 }
@@ -836,7 +836,7 @@
 .searchInput {
     background: transparent;
     border: none;
-    color: var(--bg-secondary);
+    color: var(--text-primary);
     font-size: 13px;
     width: 100%;
     outline: none;
@@ -864,7 +864,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: #7c3aed;
+    background: var(--brand-secondary);
     color: var(--bg-card);
     border: none;
     border-radius: 20px;
@@ -877,7 +877,7 @@
 }
 
 .centerGlowBtn:hover {
-    background: #8b5cf6;
+    background: var(--brand-primary);
     box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
     transform: translateY(-1px);
 }
@@ -888,8 +888,8 @@
 
 /* Inline Creation Card */
 .inlineCreationCard {
-    background: var(--text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-card);
+    border: 1px solid var(--bg-secondary);
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -904,7 +904,7 @@
 .inlineInputTitle {
     background: transparent;
     border: none;
-    color: var(--bg-secondary);
+    color: var(--text-primary);
     font-size: 14px;
     outline: none;
     width: 100%;
@@ -919,15 +919,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--bg-secondary);
     padding-top: 12px;
 }
 
 .inlineInputDate {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-secondary);
     border-radius: 6px;
-    color: var(--border-default);
+    color: var(--text-primary);
     font-size: 12px;
     padding: 4px 8px;
     outline: none;
@@ -952,13 +952,13 @@
 }
 
 .inlineCancelBtn:hover {
-    color: var(--bg-secondary);
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    background: var(--bg-secondary);
 }
 
 .inlineAddBtn {
-    background: #7c3aed;
-    color: white;
+    background: var(--brand-secondary);
+    color: var(--text-primary);
     border: none;
     font-size: 13px;
     font-weight: 600;
@@ -969,7 +969,7 @@
 }
 
 .inlineAddBtn:hover:not(:disabled) {
-    background: #8b5cf6;
+    background: var(--brand-primary);
 }
 
 .inlineAddBtn:disabled {
@@ -1010,7 +1010,7 @@
 
 /* Completed Tasks Section */
 .completedSectionWrapper {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--bg-secondary);
     padding-top: 20px;
 }
 
@@ -1031,7 +1031,7 @@
 
 .completedHeader:hover {
     color: var(--text-disabled);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-secondary);
 }
 
 .collapseChevron {
@@ -1066,7 +1066,7 @@
 .calendarDateTitle {
     font-size: 14px;
     font-weight: 500;
-    color: var(--border-default);
+    color: var(--text-primary);
     text-transform: capitalize;
     min-width: 180px;
     text-align: center;
@@ -1074,8 +1074,8 @@
 
 .viewToggle {
     display: flex;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-secondary);
     border-radius: 8px;
     padding: 2px;
 }
@@ -1093,7 +1093,7 @@
 }
 
 .toggleBtn:hover {
-    color: var(--border-default);
+    color: var(--text-primary);
 }
 
 .toggleActive {
@@ -1124,9 +1124,9 @@
 }
 
 .promptContent {
-    background: rgba(20, 20, 28, 0.85);
+    background: var(--bg-card);
     backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--bg-secondary);
     border-radius: 12px;
     width: 380px;
     max-width: 90vw;
@@ -1152,7 +1152,7 @@
 .promptTitle {
     font-size: 16px;
     font-weight: 600;
-    color: var(--bg-secondary);
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -1163,11 +1163,11 @@
 }
 
 .promptInput {
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    
     border-radius: 8px;
     padding: 10px 14px;
-    color: var(--bg-secondary);
+    color: var(--text-primary);
     font-size: 14px;
     outline: none;
     transition: all 0.2s ease;
@@ -1175,7 +1175,7 @@
 }
 
 .promptInput:focus {
-    border-color: #8b5cf6;
+    border-color: var(--brand-primary);
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }
 
@@ -1187,7 +1187,7 @@
 
 .promptCancelBtn {
     background: transparent;
-    border: 1px solid #27272a;
+    
     color: var(--text-disabled);
     font-size: 13px;
     font-weight: 500;
@@ -1198,14 +1198,14 @@
 }
 
 .promptCancelBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--bg-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .promptSubmitBtn {
-    background: #8b5cf6;
+    background: var(--brand-primary);
     border: none;
-    color: white;
+    color: var(--text-primary);
     font-size: 13px;
     font-weight: 600;
     padding: 8px 20px;
@@ -1216,7 +1216,7 @@
 }
 
 .promptSubmitBtn:hover:not(:disabled) {
-    background: #7c3aed;
+    background: var(--brand-secondary);
     box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
 }
 
@@ -1254,7 +1254,7 @@
         bottom: 0;
         left: 0;
         z-index: 100;
-        background: #14141c;
+        background: var(--bg-card);
         box-shadow: 4px 0 24px rgba(0,0,0,0.5);
     }
 

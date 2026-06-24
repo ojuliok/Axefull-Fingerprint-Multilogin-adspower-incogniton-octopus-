@@ -10,7 +10,7 @@ export const getOsLabel = (platform?: string): string | null => {
 };
 
 export const STATUS_CONFIG: Record<string, { label: string; cls: string; dot: string }> = {
-    ready:   { label: 'Pronto',   cls: 'text-slate-400 bg-slate-500/10 border-slate-500/20',   dot: '#64748b' },
+    ready:   { label: 'Pronto',   cls: 'text-theme-text-muted bg-slate-500/10 border-slate-500/20',   dot: '#64748b' },
     new:     { label: 'Novo',     cls: 'text-sky-400 bg-sky-500/10 border-sky-500/20',         dot: '#38bdf8' },
     farming: { label: 'Farming',  cls: 'text-blue-400 bg-blue-500/10 border-blue-500/20',      dot: '#60a5fa' },
     warming: { label: 'Warming',  cls: 'text-teal-400 bg-teal-500/10 border-teal-500/20',      dot: '#2dd4bf' },

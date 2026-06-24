@@ -30,8 +30,8 @@
 .tabNav {
   width: 200px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.015);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--bg-secondary);
   display: flex;
   flex-direction: column;
   padding: 16px 10px;
@@ -44,7 +44,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 6px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--bg-secondary);
   margin-bottom: 8px;
 }
 
@@ -58,7 +58,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 800;
-  color: white;
+  color: var(--text-primary);
   flex-shrink: 0;
   letter-spacing: 0.5px;
 }
@@ -72,7 +72,7 @@
 .profileMetaName {
   font-size: 12px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -116,8 +116,8 @@
 }
 
 .tabItem:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: #94a3b8;
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
 }
 
 .tabItemActive {
@@ -146,7 +146,7 @@
   font-weight: 700;
   padding: 1px 6px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-secondary);
   color: var(--text-disabled);
 }
 
@@ -158,7 +158,7 @@
 .tabNavFooter {
   margin-top: auto;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--bg-secondary);
 }
 
 .deleteProfileBtn {
@@ -192,14 +192,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--bg-secondary);
   flex-shrink: 0;
 }
 
 .headerTitle {
   font-size: 16px;
   font-weight: 700;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -218,8 +218,8 @@
 }
 
 .closeBtn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--bg-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .content {
@@ -233,7 +233,7 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 14px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--bg-secondary);
   flex-shrink: 0;
 }
 
@@ -244,13 +244,13 @@
   font-weight: 600;
   color: var(--text-tertiary);
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--bg-secondary);
   transition: all 0.15s;
 }
 
 .cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: #94a3b8;
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
 }
 
 .saveBtn {
@@ -258,13 +258,13 @@
   border-radius: 12px;
   font-size: 13px;
   font-weight: 700;
-  color: white;
+  color: var(--text-primary);
   background: #6d28d9;
   transition: all 0.2s;
 }
 
 .saveBtn:hover:not(:disabled) {
-  background: #7c3aed;
+  background: var(--brand-secondary);
   box-shadow: 0 6px 16px -4px rgba(109, 40, 217, 0.5);
 }
 
@@ -295,11 +295,11 @@
 }
 
 .input {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
   padding: 10px 14px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
   width: 100%;
@@ -319,8 +319,8 @@
 
 /* Tags */
 .tagsContainer {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
   padding: 10px 12px;
   display: flex;
@@ -349,7 +349,7 @@
 }
 
 .tagRemove {
-  color: #7c3aed;
+  color: var(--brand-secondary);
   display: flex;
   align-items: center;
   opacity: 0.7;
@@ -373,11 +373,11 @@
 
 .tagInput {
   flex: 1;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 8px;
   padding: 7px 10px;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 12px;
   outline: none;
   transition: border-color 0.15s;
@@ -417,8 +417,8 @@
 }
 
 .noteItem {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -428,8 +428,8 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .noteTitleInput {
@@ -439,7 +439,7 @@
   outline: none;
   font-size: 12px;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--text-tertiary);
 }
 
 .noteRemoveBtn {
@@ -468,7 +468,7 @@
   flex-direction: column;
   gap: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--bg-secondary);
 }
 
 .tplGroup {
@@ -506,17 +506,17 @@
   border-radius: 6px;
   font-size: 11px;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .tplTag:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #94a3b8;
-  border-color: rgba(255, 255, 255, 0.14);
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  border-color: var(--text-primary);
 }
 
 .tplTagActive {
@@ -532,15 +532,15 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--text-disabled);
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border: 1px dashed var(--bg-secondary);
   width: 100%;
   transition: all 0.15s;
 }
 
 .addNoteBtn:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--text-primary);
   color: var(--text-tertiary);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-secondary);
 }
 
 /* ── Fingerprint ───────────────────────────────────────────────────────────── */
@@ -551,8 +551,8 @@
 }
 
 .fpCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
   padding: 12px 14px;
 }
@@ -569,7 +569,7 @@
 
 .fpCardValue {
   font-size: 13px;
-  color: #cbd5e1;
+  color: var(--text-primary);
   font-weight: 500;
   margin: 0;
 }
@@ -582,16 +582,16 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   transition: all 0.15s;
   margin-top: 4px;
 }
 
 .regenBtn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #94a3b8;
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
 }
 
 .regenConfirmBox {
@@ -621,8 +621,8 @@
 .regenCancelBtn {
   padding: 6px 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   color: var(--text-tertiary);
   font-size: 12px;
   font-weight: 600;
@@ -646,15 +646,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 12px;
 }
 
 .proxyToggleTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin: 0 0 2px;
 }
 
@@ -668,7 +668,7 @@
   position: relative;
   width: 40px;
   height: 22px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
   border-radius: 11px;
   border: none;
   cursor: pointer;
@@ -677,7 +677,7 @@
 }
 
 .toggleSwitchOn {
-  background: #7c3aed;
+  background: var(--brand-secondary);
 }
 
 .toggleThumb {
@@ -686,7 +686,7 @@
   left: 3px;
   width: 16px;
   height: 16px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 50%;
   transition: transform 0.2s;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
@@ -747,11 +747,11 @@
 .searchInput {
   width: 100%;
   padding: 7px 10px 7px 30px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 8px;
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s;
 }
@@ -785,13 +785,13 @@
 }
 
 .actionBtnDefault {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  background: var(--bg-secondary);
+  border-color: var(--text-primary);
+  color: var(--text-tertiary);
 }
 
 .actionBtnDefault:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--bg-secondary);
 }
 
 .actionBtnDanger {
@@ -840,9 +840,9 @@
 .tableContainer {
   flex: 1;
   overflow: auto;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--bg-secondary);
 }
 
 .emptyState {
@@ -863,7 +863,7 @@
 }
 
 .table thead tr {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-secondary);
   position: sticky;
   top: 0;
 }
@@ -876,21 +876,21 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-disabled);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .table tbody tr {
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid var(--bg-secondary);
   transition: background 0.1s;
 }
 
 .table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-secondary);
 }
 
 .table td {
   padding: 8px 12px;
-  color: #94a3b8;
+  color: var(--text-tertiary);
 }
 
 .tdTrunc {
@@ -906,7 +906,7 @@
 
 .mono { font-family: monospace; }
 .dim { color: var(--text-disabled) !important; }
-.bright { color: #e2e8f0 !important; }
+.bright { color: var(--text-primary) !important; }
 .small { font-size: 10px !important; }
 .noWrap { white-space: nowrap; }
 
@@ -946,8 +946,8 @@
   gap: 8px;
   align-items: center;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 10px;
   flex-wrap: wrap;
 }
@@ -957,10 +957,10 @@
   min-width: 120px;
   padding: 7px 10px;
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--bg-secondary);
   border-radius: 7px;
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   outline: none;
 }
 
@@ -975,12 +975,12 @@
   align-items: center;
   gap: 10px;
   padding: 8px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--bg-secondary);
   transition: background 0.1s;
 }
 
 .bookmarkRow:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-secondary);
 }
 
 .bookmarkRow:hover .bmDeleteBtn {
@@ -999,7 +999,7 @@
 
 .bmName {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1051,14 +1051,14 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--bg-secondary);
+  background: var(--bg-secondary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .clearItem:hover {
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--text-primary);
 }
 
 .clearItemSelected {
@@ -1076,14 +1076,14 @@
 .clearIconBox {
   padding: 7px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-secondary);
   display: flex;
 }
 
 .clearLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .clearSubLabel {
@@ -1100,7 +1100,7 @@
   padding: 12px;
   border-radius: 10px;
   background: #dc2626;
-  color: white;
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 700;
   transition: all 0.15s;

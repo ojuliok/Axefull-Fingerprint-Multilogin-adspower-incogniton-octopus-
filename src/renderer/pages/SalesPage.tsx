@@ -31,7 +31,7 @@ export default function SalesPage({ onLogin, onRegister }: SalesPageProps) {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-blue-500/30 overflow-x-hidden">
+        <div className="min-h-screen bg-zinc-950 text-theme-text font-sans selection:bg-blue-500/30 overflow-x-hidden">
             {/* Header / Nav */}
             <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-zinc-950/80 backdrop-blur-lg border-b border-zinc-800/50 py-3' : 'bg-transparent py-5'}`}>
                 <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
@@ -40,15 +40,15 @@ export default function SalesPage({ onLogin, onRegister }: SalesPageProps) {
                             <Fingerprint size={28} className="text-blue-500 relative z-10" />
                             <div className="absolute inset-0 bg-blue-500 blur-md opacity-50 z-0"></div>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white">Axe<span className="text-blue-500">Full</span></span>
+                        <span className="text-xl font-bold tracking-tight text-theme-text">Axe<span className="text-blue-500">Full</span></span>
                     </div>
                     <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
-                        <a href="#features" className="hover:text-white transition-colors">Recursos</a>
-                        <a href="#technology" className="hover:text-white transition-colors">Tecnologia</a>
-                        <a href="#security" className="hover:text-white transition-colors">Segurança</a>
+                        <a href="#features" className="hover:text-theme-text transition-colors">Recursos</a>
+                        <a href="#technology" className="hover:text-theme-text transition-colors">Tecnologia</a>
+                        <a href="#security" className="hover:text-theme-text transition-colors">Segurança</a>
                     </nav>
                     <div className="flex items-center gap-4">
-                        <button onClick={onLogin} className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+                        <button onClick={onLogin} className="text-sm font-medium text-zinc-300 hover:text-theme-text transition-colors">
                             Entrar
                         </button>
                         <button onClick={onRegister} className="px-5 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-sm font-bold shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all hover:shadow-[0_0_25px_rgba(37,99,235,0.6)]">
@@ -85,11 +85,11 @@ export default function SalesPage({ onLogin, onRegister }: SalesPageProps) {
                         </p>
                         
                         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                            <button onClick={onRegister} className="w-full sm:w-auto px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-[0_0_30px_rgba(37,99,235,0.6)] group">
+                            <button onClick={onRegister} className="w-full sm:w-auto px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-theme-text font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-[0_0_30px_rgba(37,99,235,0.6)] group">
                                 Começar Agora
                                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                             </button>
-                            <button onClick={onLogin} className="w-full sm:w-auto px-8 py-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700 text-white font-bold text-lg transition-all flex items-center justify-center gap-2">
+                            <button onClick={onLogin} className="w-full sm:w-auto px-8 py-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700 text-theme-text font-bold text-lg transition-all flex items-center justify-center gap-2">
                                 Fazer Login
                             </button>
                         </div>
@@ -249,7 +249,7 @@ export default function SalesPage({ onLogin, onRegister }: SalesPageProps) {
                     <p className="text-xl text-zinc-300 mb-10 max-w-2xl mx-auto">
                         Junte-se a profissionais de tráfego, agências e operadores que exigem o máximo de performance e segurança.
                     </p>
-                    <button onClick={onRegister} className="px-10 py-5 rounded-2xl bg-white text-zinc-950 font-bold text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+                    <button onClick={onRegister} className="px-10 py-5 rounded-2xl bg-theme-card text-zinc-950 font-bold text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.3)]">
                         Criar Minha Conta Gratuita
                     </button>
                 </div>

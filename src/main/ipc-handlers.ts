@@ -1,4 +1,4 @@
-import { ipcMain, IpcMainInvokeEvent, dialog, app } from 'electron';
+import { ipcMain, IpcMainInvokeEvent, dialog, app, session } from 'electron';
 import { readMetadata, cleanFile, getHistory, clearHistory } from './metaclean';
 import { v4 as uuidv4 } from 'uuid';
 import { findAll, insert, update, remove, getDb } from './database/db';

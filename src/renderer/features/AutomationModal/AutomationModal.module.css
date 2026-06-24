@@ -10,8 +10,8 @@
 }
 
 .modal {
-  background: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-card);
+  border: 1px solid var(--bg-secondary);
   border-radius: 20px;
   width: 580px;
   display: flex;
@@ -30,13 +30,13 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 22px 24px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 .title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--bg-secondary);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -59,8 +59,8 @@
 }
 
 .closeBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--bg-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .body {
@@ -118,17 +118,17 @@
 }
 
 .copyBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
 }
 
 .tabs {
   display: flex;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-secondary);
   border-radius: 10px;
   padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bg-secondary);
   width: fit-content;
 }
 
@@ -147,13 +147,13 @@
 }
 
 .tab:not(.tabActive):hover {
-  color: #94a3b8;
+  color: var(--text-tertiary);
 }
 
 .codeBlock {
   position: relative;
   background: #020617;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--bg-secondary);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -162,7 +162,7 @@
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 12px;
   line-height: 1.7;
-  color: #94a3b8;
+  color: var(--text-tertiary);
   padding: 16px;
   margin: 0;
   overflow-x: auto;
@@ -180,15 +180,15 @@
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-secondary);
   color: var(--text-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--bg-secondary);
   transition: all 0.15s;
 }
 
 .copyCodeBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
 }
 
 .hint {

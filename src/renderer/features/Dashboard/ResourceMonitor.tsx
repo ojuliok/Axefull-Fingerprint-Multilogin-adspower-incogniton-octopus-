@@ -29,7 +29,7 @@ export const ResourceMonitor: React.FC = () => {
                 {/* CPU */}
                 <div>
                     <div className="flex justify-between items-center mb-1.5">
-                        <span className="flex items-center gap-1.5 text-xs text-slate-400"><Cpu size={12} /> CPU</span>
+                        <span className="flex items-center gap-1.5 text-xs text-theme-text-muted"><Cpu size={12} /> CPU</span>
                         <span className="text-xs font-mono text-slate-300">{cpuUsage}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -43,7 +43,7 @@ export const ResourceMonitor: React.FC = () => {
                 {/* RAM */}
                 <div>
                     <div className="flex justify-between items-center mb-1.5">
-                        <span className="flex items-center gap-1.5 text-xs text-slate-400"><HardDrive size={12} /> RAM</span>
+                        <span className="flex items-center gap-1.5 text-xs text-theme-text-muted"><HardDrive size={12} /> RAM</span>
                         <span className="text-xs font-mono text-slate-300">{ramUsage}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">

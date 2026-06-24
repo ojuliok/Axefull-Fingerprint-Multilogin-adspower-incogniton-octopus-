@@ -141,7 +141,7 @@ const FloatingPomodoro: React.FC = () => {
                     style={{
                         background: 'transparent',
                         border: 'none',
-                        color: '#a1a1aa',
+                        color: 'var(--text-tertiary)',
                         cursor: 'pointer',
                         padding: '4px',
                         display: 'flex',
@@ -246,8 +246,8 @@ const FloatingPomodoro: React.FC = () => {
                             justifyContent: 'center',
                             padding: '10px',
                             background: 'transparent',
-                            color: '#a1a1aa',
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: 'var(--text-tertiary)',
+                            border: '1px solid var(--border-default)',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             transition: 'all 0.2s'
@@ -296,10 +296,10 @@ const FloatingPomodoro: React.FC = () => {
                         marginTop: '20px',
                         width: '100%',
                         padding: '16px',
-                        border: '1px dashed rgba(255,255,255,0.2)',
+                        border: '1px solid var(--border-default)',
                         borderRadius: '8px',
                         textAlign: 'center',
-                        color: '#a1a1aa',
+                        color: 'var(--text-tertiary)',
                         fontSize: '12px'
                     }}>
                         Arraste uma tarefa aqui para focar

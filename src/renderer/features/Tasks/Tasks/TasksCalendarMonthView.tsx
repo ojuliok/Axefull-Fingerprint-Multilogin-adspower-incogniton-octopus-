@@ -22,7 +22,7 @@ const TasksCalendarMonthView: React.FC<TasksCalendarMonthViewProps> = ({ tasks, 
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#14141c', borderRadius: '8px', border: '1px solid #27272a', overflow: 'hidden' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid #27272a', background: '#0f0f13' }}>
                 {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map(day => (
-                    <div key={day} style={{ padding: '12px 8px', textAlign: 'center', fontSize: '11px', color: '#a1a1aa', fontWeight: 500 }}>
+                    <div key={day} style={{ padding: '12px 8px', textAlign: 'center', fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
                         {day}
                     </div>
                 ))}

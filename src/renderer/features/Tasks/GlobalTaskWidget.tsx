@@ -77,10 +77,10 @@ const GlobalTaskWidget: React.FC = () => {
                         >
                             {task.title}
                         </div>
-                        <button onClick={() => setShowFullModal(true)} style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', display: 'flex' }} title="Expandir Tarefa">
+                        <button onClick={() => setShowFullModal(true)} style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex' }} title="Expandir Tarefa">
                             <Maximize2 size={14} />
                         </button>
-                        <button onClick={unpin} style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', display: 'flex' }} title="Desafixar">
+                        <button onClick={unpin} style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex' }} title="Desafixar">
                             <X size={14} />
                         </button>
                     </div>
@@ -112,7 +112,7 @@ const GlobalTaskWidget: React.FC = () => {
                 <div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ width: '80%', height: '80%', maxWidth: '1000px', background: '#09090b', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ padding: '16px', borderBottom: '1px solid #27272a', display: 'flex', justifyContent: 'flex-end', background: '#0f0f13' }}>
-                            <button onClick={() => setShowFullModal(false)} style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', display: 'flex' }}>
+                            <button onClick={() => setShowFullModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex' }}>
                                 <X size={20} />
                             </button>
                         </div>

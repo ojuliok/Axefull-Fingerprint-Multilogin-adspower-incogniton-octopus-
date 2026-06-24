@@ -39,7 +39,7 @@
 
 .modalHeader {
     padding: 20px 24px;
-    border-bottom: 1px solid #27272a;
+    border-bottom: 1px solid var(--border-default);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -49,7 +49,7 @@
     background: transparent;
     border: none;
     border-bottom: 1.5px solid transparent;
-    color: var(--bg-secondary);
+    color: var(--text-primary);
     font-size: 22px;
     font-weight: 700;
     width: 100%;
@@ -60,7 +60,7 @@
 }
 
 .titleInput:focus {
-    border-bottom-color: #8b5cf6;
+    border-bottom-color: var(--brand-primary);
 }
 
 .headerActions {
@@ -82,8 +82,8 @@
 }
 
 .iconBtn:hover {
-    background: #27272a;
-    color: #e2e8f0;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .metaRow {
@@ -101,9 +101,9 @@
 }
 
 .select {
-    background: var(--text-primary);
-    border: 1px solid #27272a;
-    color: var(--bg-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
     padding: 8px 12px;
     border-radius: 8px;
     font-size: 13px;
@@ -113,12 +113,12 @@
 }
 
 .select:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--text-primary);
     background: #202024;
 }
 
 .select:focus {
-    border-color: #8b5cf6;
+    border-color: var(--brand-primary);
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }
 
@@ -134,7 +134,7 @@
 .sectionTitle {
     font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-primary);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -143,10 +143,10 @@
 
 .textarea {
     width: 100%;
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 8px;
-    color: #e2e8f0;
+    color: var(--text-primary);
     padding: 12px;
     font-size: 13px;
     resize: vertical;
@@ -156,18 +156,18 @@
 }
 
 .textarea:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--text-primary);
 }
 
 .textarea:focus {
-    border-color: #8b5cf6;
-    background: #14141c;
+    border-color: var(--brand-primary);
+    background: var(--bg-card);
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }
 
 .pomodoroSection {
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -179,7 +179,7 @@
     font-size: 32px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: #8b5cf6;
+    color: var(--brand-primary);
 }
 
 .pomodoroActions {
@@ -188,9 +188,9 @@
 }
 
 .pomodoroBtn {
-    background: #27272a;
+    background: var(--bg-tertiary);
     border: none;
-    color: #e2e8f0;
+    color: var(--text-primary);
     padding: 8px 16px;
     border-radius: 6px;
     font-weight: 500;
@@ -207,7 +207,7 @@
 
 .pomodoroBtn.active {
     background: #ef4444;
-    color: white;
+    color: var(--text-primary);
 }
 
 .pomodoroBtn.active:hover {
@@ -226,10 +226,10 @@
 }
 
 .commentItem {
-    background: var(--text-primary);
+    background: var(--bg-card);
     padding: 12px;
     border-radius: 8px;
-    border: 1px solid #27272a;
+    border: 1px solid var(--border-default);
 }
 
 .commentHeader {
@@ -242,7 +242,7 @@
 
 .commentAuthor {
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-primary);
 }
 
 .commentContent {
@@ -257,18 +257,18 @@
 
 .commentInputWrapper input {
     flex: 1;
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 6px;
     padding: 8px 12px;
-    color: #e2e8f0;
+    color: var(--text-primary);
     font-size: 13px;
     outline: none;
 }
 
 .commentInputWrapper button {
-    background: #8b5cf6;
-    color: white;
+    background: var(--brand-primary);
+    color: var(--text-primary);
     border: none;
     border-radius: 6px;
     padding: 0 16px;
@@ -278,7 +278,7 @@
 }
 
 .commentInputWrapper button:hover {
-    background: #7c3aed;
+    background: var(--brand-secondary);
 }
 
 .subtaskList {
@@ -292,16 +292,16 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--text-primary);
+    background: var(--bg-card);
     padding: 8px 12px;
     border-radius: 6px;
-    border: 1px solid #27272a;
+    border: 1px solid var(--border-default);
 }
 
 .subtaskTitle {
     flex: 1;
     font-size: 13px;
-    color: #e2e8f0;
+    color: var(--text-primary);
 }
 
 .subtaskTitle.completed {
@@ -328,24 +328,24 @@
 
 .addSubtaskWrapper input {
     flex: 1;
-    background: var(--text-primary);
-    border: 1px solid #27272a;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 8px;
     padding: 8px 12px;
-    color: #e2e8f0;
+    color: var(--text-primary);
     font-size: 13px;
     outline: none;
     transition: all 0.2s ease;
 }
 
 .addSubtaskWrapper input:focus {
-    border-color: #8b5cf6;
+    border-color: var(--brand-primary);
 }
 
 .addSubtaskWrapper button {
-    background: #27272a;
-    color: #e2e8f0;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--bg-secondary);
     border-radius: 8px;
     padding: 0 16px;
     font-size: 13px;
@@ -363,8 +363,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid #27272a;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
     padding: 16px;
     border-radius: 8px;
     margin-bottom: 8px;
