@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home
+    LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home, StickyNote
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -19,11 +19,12 @@ const ALL_ITEMS: Record<string, { id: string; label: string; icon: React.FC<any>
     profiles:   { id: 'profiles',   label: 'Multi',     icon: LayoutGrid,  colorClass: 'text-violet-500' },
     canvas:     { id: 'canvas',     label: 'Tela',      icon: Monitor,     colorClass: 'text-amber-500' },
     tasks:      { id: 'tasks',      label: 'Tarefas',   icon: CheckSquare, colorClass: 'text-blue-500' },
-    dadosclean: { id: 'dadosclean', label: 'MetaClean', icon: Eraser,      colorClass: 'text-emerald-500' }
+    dadosclean: { id: 'dadosclean', label: 'MetaClean', icon: Eraser,      colorClass: 'text-emerald-500' },
+    notes:      { id: 'notes',      label: 'Notas',     icon: StickyNote,  colorClass: 'text-pink-500' }
 };
 
 // Ordem Padrão solicitada
-const DEFAULT_ORDER = ['home', 'profiles', 'canvas', 'tasks', 'dadosclean'];
+const DEFAULT_ORDER = ['home', 'profiles', 'canvas', 'tasks', 'dadosclean', 'notes'];
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExtensions }) => {
     const { theme, layout } = useTheme();

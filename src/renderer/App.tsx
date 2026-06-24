@@ -19,6 +19,7 @@ import DownloadPage from './pages/DownloadPage';
 import NavegadorMobile from './pages/NavegadorMobile';
 import VitrinePage from './pages/VitrinePage';
 import HomeW97 from './pages/HomeW97';
+import NotesPage from './pages/NotesPage';
 
 import { LayoutManager } from './components/Layout/LayoutManager';
 import { isWebMode } from './utils/env';
@@ -72,6 +73,7 @@ const App: React.FC = () => {
                                         <Route path="download" element={<DownloadPage />} />
                                         <Route path="navegador" element={<NavegadorMobile />} />
                                         <Route path="vitrine" element={<VitrinePage />} />
+                                        <Route path="notes" element={<NotesPage />} />
                                     </Route>
                                     </Routes>
                                 </HashRouter>

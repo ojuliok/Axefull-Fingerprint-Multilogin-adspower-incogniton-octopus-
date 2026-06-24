@@ -9,15 +9,24 @@ function generateId(): string {
     return Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
 }
 
+function sanitizeUUID(id: string | undefined | null): string | null {
+    if (!id) return null;
+    const clean = id.trim();
+    if (clean === '') return null;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(clean) ? clean : null;
+}
+
 // ── List Operations ──
 
 export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> {
-    if (!workspaceId) return [];
+    const cleanWorkspaceId = sanitizeUUID(workspaceId);
+    if (!cleanWorkspaceId) return [];
     try {
         const { data, error } = await supabase
             .from('canvases')
             .select('*')
-            .eq('workspace_id', workspaceId)
+            .eq('workspace_id', cleanWorkspaceId)
             .order('created_at', { ascending: false });
         if (error) throw error;
         
@@ -46,15 +55,16 @@ export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> 
 }
 
 export async function createCanvas(workspaceId: string, ownerId: string, name: string, parentId?: string, type: 'canvas'|'page'|'card'|'table'|'folder'|'space' = 'canvas', forceId?: string): Promise<CanvasInfo> {
-    const id = forceId || crypto.randomUUID();
+    const cleanForceId = sanitizeUUID(forceId);
+    const id = cleanForceId || crypto.randomUUID();
     const emptyData: CanvasData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
     
     try {
         const { data, error } = await supabase.from('canvases').insert([{
             id,
-            workspace_id: workspaceId,
-            owner_id: ownerId,
-            parent_id: parentId,
+            workspace_id: sanitizeUUID(workspaceId),
+            owner_id: sanitizeUUID(ownerId),
+            parent_id: sanitizeUUID(parentId),
             name,
             type,
             data: emptyData
@@ -80,47 +90,57 @@ export async function createFolder(workspaceId: string, ownerId: string, name: s
 }
 
 export async function deleteCanvas(id: string): Promise<void> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return;
     try {
-        await supabase.from('canvases').delete().eq('id', id);
+        await supabase.from('canvases').delete().eq('id', cleanId);
     } catch (err) {
         console.error('Error deleting canvas', err);
     }
 }
 
 export async function softDeleteCanvas(id: string): Promise<void> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return;
     try {
         await supabase.from('canvases').update({
             is_deleted: true,
             deleted_at: new Date().toISOString()
-        }).eq('id', id);
+        }).eq('id', cleanId);
     } catch (err) {
         console.error('Error soft deleting canvas', err);
     }
 }
 
 export async function restoreCanvas(id: string): Promise<void> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return;
     try {
         await supabase.from('canvases').update({
             is_deleted: false,
             deleted_at: null
-        }).eq('id', id);
+        }).eq('id', cleanId);
     } catch (err) {
         console.error('Error restoring canvas', err);
     }
 }
 
 export async function renameCanvas(id: string, name: string): Promise<void> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return;
     try {
         await supabase.from('canvases').update({
             name,
             updated_at: new Date().toISOString()
-        }).eq('id', id);
+        }).eq('id', cleanId);
     } catch (err) {
         console.error('Error renaming canvas', err);
     }
 }
 
 export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>): Promise<void> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return;
     try {
         const dbUpdates: any = { updated_at: new Date().toISOString() };
         if (updates.name !== undefined) dbUpdates.name = updates.name;
@@ -133,24 +153,23 @@ export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>)
         if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
         if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
 
-        await supabase.from('canvases').update(dbUpdates).eq('id', id);
+        await supabase.from('canvases').update(dbUpdates).eq('id', cleanId);
     } catch (err) {
         console.error('Error updating canvas info', err);
     }
 }
 
 export async function moveCanvasItem(id: string, targetId: string, position: 'before' | 'after' | 'inside', workspaceId: string): Promise<void> {
+    const cleanId = sanitizeUUID(id);
+    const cleanTargetId = sanitizeUUID(targetId);
+    if (!cleanId || !cleanTargetId) return;
     try {
-        // Simplified approach for now: if inside, change parent_id to targetId. 
-        // If before/after, change parent_id to target's parent_id.
-        // Handling exact ordering (before/after) in DB requires a sequence/order column.
-        
         let newParentId: string | null = null;
         
         if (position === 'inside') {
-            newParentId = targetId;
+            newParentId = cleanTargetId;
         } else {
-            const { data: targetData } = await supabase.from('canvases').select('parent_id').eq('id', targetId).single();
+            const { data: targetData } = await supabase.from('canvases').select('parent_id').eq('id', cleanTargetId).single();
             if (targetData) {
                 newParentId = targetData.parent_id;
             }
@@ -159,7 +178,7 @@ export async function moveCanvasItem(id: string, targetId: string, position: 'be
         await supabase.from('canvases').update({
             parent_id: newParentId,
             updated_at: new Date().toISOString()
-        }).eq('id', id);
+        }).eq('id', cleanId);
         
     } catch (err) {
         console.error('Error moving canvas', err);
@@ -167,14 +186,18 @@ export async function moveCanvasItem(id: string, targetId: string, position: 'be
 }
 
 export async function duplicateCanvas(id: string, workspaceId: string, ownerId: string): Promise<CanvasInfo | null> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return null;
     try {
-        const { data: original } = await supabase.from('canvases').select('*').eq('id', id).single();
+        const { data: original } = await supabase.from('canvases').select('*').eq('id', cleanId).single();
         if (!original) return null;
         
         const newId = crypto.randomUUID();
         const { data: newCanvas, error } = await supabase.from('canvases').insert([{
             ...original,
             id: newId,
+            workspace_id: sanitizeUUID(workspaceId) || original.workspace_id,
+            owner_id: sanitizeUUID(ownerId) || original.owner_id,
             name: `${original.name} (cópia)`,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -199,8 +222,10 @@ export async function duplicateCanvas(id: string, workspaceId: string, ownerId: 
 // ── Canvas Data Operations ──
 
 export async function getCanvasData(id: string): Promise<CanvasData | null> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
     try {
-        const { data, error } = await supabase.from('canvases').select('data').eq('id', id).single();
+        const { data, error } = await supabase.from('canvases').select('data').eq('id', cleanId).single();
         if (error) throw error;
         
         if (data && data.data) {
@@ -214,11 +239,13 @@ export async function getCanvasData(id: string): Promise<CanvasData | null> {
 }
 
 export async function saveCanvasData(id: string, data: CanvasData): Promise<void> {
+    const cleanId = sanitizeUUID(id);
+    if (!cleanId) return;
     try {
         await supabase.from('canvases').update({
             data,
             updated_at: new Date().toISOString()
-        }).eq('id', id);
+        }).eq('id', cleanId);
     } catch (err) {
         console.error('Error saving canvas data', err);
     }

@@ -34,7 +34,8 @@ import {
   FolderPlus,
   Eye,
   EyeOff,
-  Box
+  Box,
+  Lock
 } from 'lucide-react';
 import { CanvasInfo, getCanvasData } from './canvasStorage';
 import { CANVAS_ICONS, DynamicIcon } from './CanvasIcons';
@@ -47,6 +48,7 @@ import { CanvasSpacesGrid } from './Home/CanvasSpacesGrid';
 import { useToast } from '../../context/ToastContext';
 import SpaceOverview from './SpaceOverview';
 import { MembersManager } from './MembersManager';
+import { ItemPinModal } from './ItemPinModal';
 import styles from './CanvasHome.module.css';
 
 // ─── Props ───────────────────────────────────────────
@@ -127,6 +129,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
     }, 1000);
   }, [onSelectCanvas]);
   const [showMembersManager, setShowMembersManager] = useState(false);
+  const [pinSettingsItem, setPinSettingsItem] = useState<CanvasInfo | null>(null);
   
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -390,7 +393,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
   // ── Context Menu Actions ──
   const handleMenuAction = useCallback(
-    (action: 'rename' | 'duplicate' | 'delete' | 'change_cover' | 'change_icon') => {
+    (action: 'rename' | 'duplicate' | 'delete' | 'change_cover' | 'change_icon' | 'pin') => {
       if (!contextMenu) return;
       const canvas = canvasList.find((c) => c.id === contextMenu.id);
       switch (action) {
@@ -409,6 +412,11 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
         case 'change_icon':
           if (canvas) {
             setEmojiPicker({ x: contextMenu.x, y: contextMenu.y, id: canvas.id });
+          }
+          break;
+        case 'pin':
+          if (canvas) {
+            setPinSettingsItem(canvas);
           }
           break;
       }
@@ -780,6 +788,13 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
               <Smile size={15} />
               Alterar Ícone
             </button>
+            <button
+              className={styles.contextMenuItem}
+              onClick={() => handleMenuAction('pin')}
+            >
+              <Lock size={15} />
+              Senha PIN
+            </button>
             <div className={styles.contextMenuSeparator} />
             <button
               className={`${styles.contextMenuItem} ${styles.contextMenuDanger}`}
@@ -849,6 +864,27 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
       />
       {showMembersManager && (
         <MembersManager onClose={() => setShowMembersManager(false)} />
+      )}
+      {pinSettingsItem && (
+        <ItemPinModal
+          itemId={pinSettingsItem.id}
+          itemName={pinSettingsItem.name}
+          initialPin={pinSettingsItem.properties?.pin}
+          initialRecoveryEmail={pinSettingsItem.properties?.recoveryEmail}
+          onSave={async (pin, recoveryEmail) => {
+            const currentProps = pinSettingsItem.properties || {};
+            const updatedProps = { ...currentProps };
+            if (pin) {
+              updatedProps.pin = pin;
+              updatedProps.recoveryEmail = recoveryEmail || '';
+            } else {
+              delete updatedProps.pin;
+              delete updatedProps.recoveryEmail;
+            }
+            onUpdateCanvasInfo(pinSettingsItem.id, { properties: updatedProps });
+          }}
+          onClose={() => setPinSettingsItem(null)}
+        />
       )}
     </div>
   );

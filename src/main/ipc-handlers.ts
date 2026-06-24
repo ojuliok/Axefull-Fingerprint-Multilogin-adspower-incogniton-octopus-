@@ -51,6 +51,7 @@ import {
     assignProxy,
     unassignProxy,
 } from './proxy/proxy-pool-manager';
+import { sendEmail } from './email-manager';
 
 /**
  * Register all IPC handlers for profile and browser management
@@ -560,6 +561,10 @@ export function registerAppHandlers(): void {
 
     ipcMain.handle('app:local-api-port', () => {
         return { success: true, data: { port: 54345 } };
+    });
+
+    ipcMain.handle('email:send', async (_event, params: any) => {
+        return sendEmail(params);
     });
 }
 

@@ -130,7 +130,9 @@ const SpaceOverview: React.FC<SpaceOverviewProps> = ({ activeSpace, onUpdate }) 
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}><Settings size={16} /> Propriedades</h3>
                     <div className={styles.propertiesList}>
-                        {Object.entries(activeSpace.properties || {}).map(([key, val]) => (
+                        {Object.entries(activeSpace.properties || {})
+                            .filter(([k]) => k !== 'pin' && k !== 'recoveryEmail' && k !== 'pending_invites')
+                            .map(([key, val]) => (
                             <div key={key} className={styles.propertyItem}>
                                 <div className={styles.propHeader}>
                                     <span className={styles.propKey}>{key}</span>

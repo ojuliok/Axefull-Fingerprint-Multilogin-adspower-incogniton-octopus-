@@ -5,7 +5,7 @@ import {
     Plus, MoreHorizontal, Trash2, Edit3,
     Copy, Download, Upload, ChevronRight, ChevronDown,
     Home, PenTool, FileText, Notebook, Search, Folder, FolderPlus, MessageSquare, Settings2, Box,
-    PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass
+    PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass, Lock
 } from 'lucide-react';
 import {
     CanvasInfo, CanvasData,
@@ -22,6 +22,8 @@ import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES, getDefaultIconForType } fro
 import { CRMCanvasView } from './MarketingPage';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useAuth } from '../context/AuthContext';
+import { ItemPinModal } from '../features/Canvas/ItemPinModal';
+import { ItemPinUnlockModal } from '../features/Canvas/ItemPinUnlockModal';
 
 import styles from './CanvasPage.module.css';
 
@@ -80,6 +82,53 @@ const CanvasPage: React.FC = () => {
     const [draggedSection, setDraggedSection] = useState<'favorites' | 'spaces' | null>(null);
 
     const [activeFilter, setActiveFilter] = useState<'all' | 'page' | 'canvas' | 'table'>('all');
+
+    // Security PIN States
+    const [unlockedItems, setUnlockedItems] = useState<Set<string>>(new Set());
+    const [pinSettingsItem, setPinSettingsItem] = useState<CanvasInfo | null>(null);
+    const [pinUnlockItem, setPinUnlockItem] = useState<CanvasInfo | null>(null);
+    const [onPinSuccess, setOnPinSuccess] = useState<(() => void) | null>(null);
+
+    const checkPinAndProceed = useCallback((id: string, onProceed: () => void) => {
+        const item = canvasList.find(c => c.id === id);
+        if (!item) {
+            onProceed();
+            return;
+        }
+
+        const getFirstLockedAncestor = (canvasId: string): CanvasInfo | null => {
+            let current = canvasList.find(c => c.id === canvasId);
+            while (current) {
+                const pinVal = current.properties?.pin;
+                if (pinVal && !unlockedItems.has(current.id)) {
+                    return current;
+                }
+                if (current.parentId) {
+                    current = canvasList.find(c => c.id === current.parentId);
+                } else {
+                    break;
+                }
+            }
+            return null;
+        };
+
+        const lockedAncestor = getFirstLockedAncestor(id);
+        if (lockedAncestor) {
+            setPinUnlockItem(lockedAncestor);
+            setOnPinSuccess(() => () => {
+                setUnlockedItems(prev => {
+                    const next = new Set(prev);
+                    next.add(lockedAncestor.id);
+                    return next;
+                });
+                setTimeout(() => {
+                    checkPinAndProceed(id, onProceed);
+                }, 100);
+            });
+        } else {
+            onProceed();
+        }
+    }, [canvasList, unlockedItems]);
 
     const renameInputRef = useRef<HTMLInputElement>(null);
     const fileImportInputRef = useRef<HTMLInputElement>(null);
@@ -277,27 +326,29 @@ const CanvasPage: React.FC = () => {
     }, []);
 
     const handleSelectCanvas = useCallback(async (id: string) => {
-        setTransitionState('closing');
-        
-        setTimeout(async () => {
-            const canvas = canvasList.find(c => c.id === id);
-            setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
-            const data = await getCanvasData(id);
-            setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
-            setRenamingId(null);
-            setViewState('canvas');
-            setIsHovered(false);
-            if (isMobileViewport()) {
-                setMenuMode('collapsed');
-            }
+        checkPinAndProceed(id, () => {
+            setTransitionState('closing');
             
-            setTransitionState('opening');
-            
-            setTimeout(() => {
-                setTransitionState('none');
+            setTimeout(async () => {
+                const canvas = canvasList.find(c => c.id === id);
+                setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
+                const data = await getCanvasData(id);
+                setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                setRenamingId(null);
+                setViewState('canvas');
+                setIsHovered(false);
+                if (isMobileViewport()) {
+                    setMenuMode('collapsed');
+                }
+                
+                setTransitionState('opening');
+                
+                setTimeout(() => {
+                    setTransitionState('none');
+                }, 800);
             }, 800);
-        }, 800);
-    }, [canvasList]);
+        });
+    }, [canvasList, checkPinAndProceed]);
 
     const handleGoHome = useCallback(() => {
         setTransitionState('closing');
@@ -617,13 +668,23 @@ const CanvasPage: React.FC = () => {
 
     const toggleFolder = useCallback((id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        setExpandedFolders(prev => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id);
-            else next.add(id);
-            return next;
-        });
-    }, []);
+        const isExpanding = !expandedFolders.has(id);
+        if (isExpanding) {
+            checkPinAndProceed(id, () => {
+                setExpandedFolders(prev => {
+                    const next = new Set(prev);
+                    next.add(id);
+                    return next;
+                });
+            });
+        } else {
+            setExpandedFolders(prev => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+            });
+        }
+    }, [expandedFolders, checkPinAndProceed]);
 
     const renderCanvasTree = useCallback((parentId: string | undefined = undefined, depth: number = 0) => {
         const items = canvasList.filter(c => {
@@ -1120,6 +1181,8 @@ const CanvasPage: React.FC = () => {
                             onOpenPage={handleOpenPage}
                             onCanvasCreated={() => reloadCanvasList()}
                             onNodesDeleted={handleNodesDeleted}
+                            workspaceId={currentWorkspace?.id || ''}
+                            ownerId={user?.id || ''}
                         />
                     ) : (
                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>Carregando dados...</div>
@@ -1171,6 +1234,17 @@ const CanvasPage: React.FC = () => {
                             </button>
                             <button className={styles.contextMenuItem} onClick={() => handleDuplicate(contextMenu.canvasId)}>
                                 <Copy size={14} /> Duplicar
+                            </button>
+                            <button
+                                className={styles.contextMenuItem}
+                                onClick={() => {
+                                    const id = contextMenu.canvasId;
+                                    const item = canvasList.find(c => c.id === id);
+                                    setPinSettingsItem(item || null);
+                                    setContextMenu(null);
+                                }}
+                            >
+                                <Lock size={14} /> Senha PIN
                             </button>
                             <button
                                 className={styles.contextMenuItem}
@@ -1364,6 +1438,51 @@ const CanvasPage: React.FC = () => {
                 style={{ display: 'none' }}
                 onChange={handleVaultImportFile}
             />
+
+            {/* PIN Settings Modal */}
+            {pinSettingsItem && (
+                <ItemPinModal
+                    itemId={pinSettingsItem.id}
+                    itemName={pinSettingsItem.name}
+                    initialPin={pinSettingsItem.properties?.pin}
+                    initialRecoveryEmail={pinSettingsItem.properties?.recoveryEmail}
+                    onSave={async (pin, recoveryEmail) => {
+                        const currentProps = pinSettingsItem.properties || {};
+                        const updatedProps = { ...currentProps };
+                        if (pin) {
+                            updatedProps.pin = pin;
+                            updatedProps.recoveryEmail = recoveryEmail || '';
+                        } else {
+                            delete updatedProps.pin;
+                            delete updatedProps.recoveryEmail;
+                        }
+                        await updateCanvasInfo(pinSettingsItem.id, { properties: updatedProps });
+                        await reloadCanvasList();
+                    }}
+                    onClose={() => setPinSettingsItem(null)}
+                />
+            )}
+
+            {/* PIN Unlock Modal */}
+            {pinUnlockItem && (
+                <ItemPinUnlockModal
+                    itemId={pinUnlockItem.id}
+                    itemName={pinUnlockItem.name}
+                    itemIcon={pinUnlockItem.icon}
+                    itemType={pinUnlockItem.type}
+                    correctPin={pinUnlockItem.properties?.pin || ''}
+                    recoveryEmail={pinUnlockItem.properties?.recoveryEmail || ''}
+                    onUnlock={() => {
+                        if (onPinSuccess) onPinSuccess();
+                        setPinUnlockItem(null);
+                        setOnPinSuccess(null);
+                    }}
+                    onClose={() => {
+                        setPinUnlockItem(null);
+                        setOnPinSuccess(null);
+                    }}
+                />
+            )}
 
             {/* Transition circular mask */}
             <div className={`entrance-circular-mask ${transitionState === 'closing' ? 'closing' : transitionState === 'opening' ? 'opening' : ''}`} />

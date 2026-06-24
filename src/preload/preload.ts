@@ -218,11 +218,16 @@ export interface BulkVideoAPI {
     onThumbnailsProgress: (callback: (data: { current: number; total: number; videoPath: string; thumbnailPath?: string }) => void) => () => void;
 }
 
+export interface EmailAPI {
+    send: (params: { to: string; subject: string; body: string; html?: string }) => Promise<APIResponse>;
+}
+
 export interface ElectronAPI {
     auth: AuthAPI;
     profiles: ProfileAPI;
     browser: BrowserAPI;
     browserData: BrowserDataAPI;
+    email: EmailAPI;
     license?: LicenseAPI;
     metaClean: MetaCleanAPI;
     extensions: ExtensionsAPI;
@@ -434,6 +439,9 @@ contextBridge.exposeInMainWorld('api', {
     cards: {
         save: (cardId: string, data: any) => ipcRenderer.invoke('cards:save', cardId, data),
         get: (cardId: string) => ipcRenderer.invoke('cards:get', cardId),
+    },
+    email: {
+        send: (params: any) => ipcRenderer.invoke('email:send', params),
     },
     bulkVideo: {
         startRender: (jobs: any[], template: any) => ipcRenderer.invoke('bulk-video:start-render', jobs, template),

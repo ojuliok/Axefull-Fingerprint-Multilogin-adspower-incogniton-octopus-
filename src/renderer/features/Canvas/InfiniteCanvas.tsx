@@ -278,13 +278,15 @@ interface InfiniteCanvasProps {
     onOpenPage?: (id: string, name: string) => void;
     onCanvasCreated?: () => void;
     onNodesDeleted?: (canvasIds: string[]) => void;
+    workspaceId?: string;
+    ownerId?: string;
 }
 
 interface ContextMenuState { x: number; y: number; nodeId: string; }
 interface SelectionRect { x: number; y: number; w: number; h: number; }
 interface ConnectionContextMenu { x: number; y: number; connectionId: string; }
 
-const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataChange, onOpenPage, onCanvasCreated, onNodesDeleted }) => {
+const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataChange, onOpenPage, onCanvasCreated, onNodesDeleted, workspaceId, ownerId }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [viewport, setViewport] = useState(data?.viewport || { x: 0, y: 0, zoom: 1 });
     const [nodes, setNodes] = useState<CanvasNode[]>(data?.nodes || []);
@@ -1217,10 +1219,10 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const addPageNode = useCallback((canvasX?: number, canvasY?: number) => {
         const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
         const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
-        const pageId = genId();
-        const targetCanvasId = `canvas_page_${pageId}`; // Ensure unique canvas
+        const pageId = crypto.randomUUID();
+        const targetCanvasId = pageId; // Clean UUID!
         
-        createCanvas('Página Sem Título', canvasId, 'page', targetCanvasId);
+        createCanvas(workspaceId || '', ownerId || '', 'Página Sem Título', canvasId, 'page', targetCanvasId);
         onCanvasCreated?.();
 
         const newNode: CanvasNode = {
@@ -1233,7 +1235,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         setSelectedIds(new Set([newNode.id]));
         setEditingNodeId(newNode.id);
         saveData(updated, strokes, viewport);
-    }, [nodes, strokes, viewport, saveData, canvasId, onCanvasCreated]);
+    }, [nodes, strokes, viewport, saveData, canvasId, onCanvasCreated, workspaceId, ownerId]);
 
     const addChecklistNode = useCallback((canvasX?: number, canvasY?: number) => {
         const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
@@ -1255,10 +1257,10 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const addCardNode = useCallback((canvasX?: number, canvasY?: number) => {
         const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
         const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
-        const cardId = genId();
-        const targetCanvasId = `canvas_card_${cardId}`;
+        const cardId = crypto.randomUUID();
+        const targetCanvasId = cardId; // Clean UUID!
 
-        createCanvas('Novo Card', canvasId, 'card', targetCanvasId);
+        createCanvas(workspaceId || '', ownerId || '', 'Novo Card', canvasId, 'card', targetCanvasId);
         onCanvasCreated?.();
 
         const newNode: CanvasNode = {
@@ -1279,7 +1281,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                 comments: []
             }).catch(err => console.error("Error saving initial card file:", err));
         }
-    }, [nodes, strokes, viewport, saveData, canvasId, onCanvasCreated]);
+    }, [nodes, strokes, viewport, saveData, canvasId, onCanvasCreated, workspaceId, ownerId]);
 
     const addImageNode = useCallback((base64: string, fileName: string) => {
         const cx = (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;

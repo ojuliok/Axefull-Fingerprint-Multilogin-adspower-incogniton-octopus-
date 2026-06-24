@@ -39,7 +39,10 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
   canvasList = [],
   onMoveCanvasItem,
 }) => {
-  const properties = previewCanvas.properties || {};
+  const rawProperties = previewCanvas.properties || {};
+  const properties = Object.fromEntries(
+    Object.entries(rawProperties).filter(([k]) => k !== 'pin' && k !== 'recoveryEmail' && k !== 'pending_invites')
+  );
   const notes = previewCanvas.notes || '';
   const icon = previewCanvas.icon || getDefaultIconForType(previewCanvas.type);
   
