@@ -118,3 +118,55 @@ CREATE TABLE IF NOT EXISTS user_access_logs (
     device_info TEXT,
     accessed_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 10. Workspaces table
+CREATE TABLE IF NOT EXISTS workspaces (
+    id UUID PRIMARY KEY,
+    name TEXT NOT NULL,
+    owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 11. Workspace Members table
+CREATE TABLE IF NOT EXISTS workspace_members (
+    id UUID PRIMARY KEY,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'viewer', -- 'owner', 'editor', 'viewer'
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 12. Canvases table
+-- Armazena Canvas, Pastas, Espaços (Nodes em geral)
+CREATE TABLE IF NOT EXISTS canvases (
+    id UUID PRIMARY KEY,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+    parent_id UUID REFERENCES canvases(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL, -- 'canvas', 'page', 'folder', 'table', 'space'
+    color TEXT,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    deleted_at TIMESTAMPTZ,
+    is_favorite BOOLEAN DEFAULT FALSE,
+    cover_image TEXT,
+    description TEXT,
+    icon TEXT,
+    properties JSONB,
+    tags JSONB,
+    notes TEXT,
+    data JSONB, -- O CanvasData completo (nós, conexões, etc)
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
+);
+
+-- 13. Shared Items table
+-- Para compartilhar itens individuais com usuários específicos (Granularidade)
+CREATE TABLE IF NOT EXISTS shared_items (
+    id UUID PRIMARY KEY,
+    canvas_id UUID REFERENCES canvases(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'viewer',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);

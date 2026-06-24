@@ -51,12 +51,13 @@ export const CanvasSpacesGrid: React.FC<CanvasSpacesGridProps> = ({
             <div
               key={space.id}
               className={styles.folderCard}
-              onClick={() => !renamingId && setActivePreviewId(space.id)}
+              onClick={() => !renamingId && onSelectCanvas(space.id)}
               onContextMenu={(e) => handleContextMenu(e, space.id)}
               onDoubleClick={(e) => {
                   e.stopPropagation();
                   startRename(space.id, space.name);
               }}
+
             >
               {/* The "Tab" of the folder */}
               <div className={styles.folderTab}>

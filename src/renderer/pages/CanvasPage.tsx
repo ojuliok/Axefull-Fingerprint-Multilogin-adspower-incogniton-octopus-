@@ -39,6 +39,8 @@ const CanvasPage: React.FC = () => {
     const activeCanvasType = activeCanvasInfo?.type || 'canvas';
     const [activeCanvasData, setActiveCanvasData] = useState<CanvasData | null>(null);
     const [isTrashView, setIsTrashView] = useState(false);
+    const { currentWorkspace } = useWorkspace();
+    const { user } = useAuth();
     
     // Sidebar Opening Mode States
     const [menuMode, setMenuMode] = useState<'expanded' | 'hover' | 'collapsed'>(() => {
@@ -82,7 +84,7 @@ const CanvasPage: React.FC = () => {
 
     // Load canvas list on mount
     useEffect(() => {
-        setCanvasList(getCanvasList());
+        reloadCanvasList();
     }, []);
 
     // Save menuMode preference
@@ -188,9 +190,9 @@ const CanvasPage: React.FC = () => {
 
     // ── Handlers ──
 
-    const handleUpdateCanvasInfo = useCallback((id: string, updates: Partial<CanvasInfo>) => {
-        updateCanvasInfo(id, updates);
-        setCanvasList(getCanvasList());
+    const handleUpdateCanvasInfo = useCallback(async (id: string, updates: Partial<CanvasInfo>) => {
+        await updateCanvasInfo(id, updates);
+        reloadCanvasList();
         
         setActiveCanvasData(prev => {
             if (prev && activeCanvasId === id) {
@@ -198,22 +200,22 @@ const CanvasPage: React.FC = () => {
             }
             return prev;
         });
-    }, [activeCanvasId]);
+    }, [activeCanvasId, reloadCanvasList]);
 
     const handleUpdateColor = useCallback((id: string, color?: string) => {
         handleUpdateCanvasInfo(id, { color });
         setContextMenu(null);
     }, [handleUpdateCanvasInfo]);
 
-    const handleToggleFavorite = useCallback((id: string) => {
+    const handleToggleFavorite = useCallback(async (id: string) => {
         const canvas = canvasList.find(c => c.id === id);
         if (canvas) {
             handleUpdateCanvasInfo(id, { isFavorite: !canvas.isFavorite });
         }
         setContextMenu(null);
-    }, [canvasList, handleUpdateCanvasInfo]);
+    }, [canvasList, handleUpdateCanvasInfo, reloadCanvasList]);
 
-    const handleConfirmCreateModal = useCallback(() => {
+    const handleConfirmCreateModal = useCallback(async () => {
         if (!showCreateModal) return;
         
         let defaultName = 'Novo Item';
@@ -227,8 +229,8 @@ const CanvasPage: React.FC = () => {
         const parentId = showCreateModal.parentId;
         
         if (showCreateModal.type === 'folder') {
-            createFolder(name, parentId);
-            setCanvasList(getCanvasList());
+            await createFolder(currentWorkspace?.id || '', user?.id || '', name, parentId);
+            reloadCanvasList();
             if (parentId) {
                 setExpandedFolders(prev => {
                     const next = new Set(prev);
@@ -237,8 +239,8 @@ const CanvasPage: React.FC = () => {
                 });
             }
         } else {
-            const info = createCanvas(name, parentId, showCreateModal.type);
-            setCanvasList(getCanvasList());
+            const info = await createCanvas(currentWorkspace?.id || '', user?.id || '', name, parentId, showCreateModal.type);
+            reloadCanvasList();
             if (parentId) {
                 setExpandedFolders(prev => {
                     const next = new Set(prev);
@@ -253,7 +255,7 @@ const CanvasPage: React.FC = () => {
         
         setShowCreateModal(null);
         setCreateModalName('');
-    }, [showCreateModal, createModalName]);
+    }, [showCreateModal, createModalName, reloadCanvasList, currentWorkspace, user]);
 
     const setModalNameToToday = useCallback(() => {
         const today = new Date().toLocaleDateString('pt-BR');
@@ -265,10 +267,10 @@ const CanvasPage: React.FC = () => {
         setCreateModalName('');
     }, []);
 
-    const handleSelectCanvas = useCallback((id: string) => {
+    const handleSelectCanvas = useCallback(async (id: string) => {
         const canvas = getCanvasList().find(c => c.id === id);
         setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
-        const data = getCanvasData(id);
+        const data = await getCanvasData(id);
         setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
         setRenamingId(null);
         setViewState('canvas');
@@ -316,9 +318,9 @@ const CanvasPage: React.FC = () => {
 
 
 
-    const handleSoftDeleteCanvas = useCallback((id: string) => {
-        softDeleteCanvas(id);
-        const remaining = getCanvasList();
+    const handleSoftDeleteCanvas = useCallback(async (id: string) => {
+        await softDeleteCanvas(id);
+        await reloadCanvasList(); const remaining = canvasList; // TODO Fix sync logic
         setCanvasList(remaining);
         if (activeCanvasId === id) {
             setNavigationStack([]);
@@ -326,23 +328,23 @@ const CanvasPage: React.FC = () => {
             setViewState('home');
         }
         setContextMenu(null);
-    }, [activeCanvasId]);
+    }, [activeCanvasId, reloadCanvasList]);
 
-    const handlePermanentDeleteCanvas = useCallback((id: string) => {
-        deleteCanvas(id);
-        setCanvasList(getCanvasList());
+    const handlePermanentDeleteCanvas = useCallback(async (id: string) => {
+        await deleteCanvas(id);
+        reloadCanvasList();
         setContextMenu(null);
     }, []);
 
-    const handleRestoreCanvas = useCallback((id: string) => {
-        restoreCanvas(id);
-        setCanvasList(getCanvasList());
+    const handleRestoreCanvas = useCallback(async (id: string) => {
+        await restoreCanvas(id);
+        reloadCanvasList();
         setContextMenu(null);
     }, []);
 
     const handleNodesDeleted = useCallback((canvasIds: string[]) => {
         canvasIds.forEach(id => softDeleteCanvas(id));
-        setCanvasList(getCanvasList());
+        reloadCanvasList();
     }, []);
 
     const handleStartRename = useCallback((id: string) => {
@@ -352,25 +354,25 @@ const CanvasPage: React.FC = () => {
             setRenameValue(canvas.name);
         }
         setContextMenu(null);
-    }, [canvasList]);
+    }, [canvasList, reloadCanvasList, currentWorkspace, user]);
 
-    const handleConfirmRename = useCallback(() => {
+    const handleConfirmRename = useCallback(async () => {
         if (renamingId && renameValue.trim()) {
-            renameCanvas(renamingId, renameValue.trim());
-            setCanvasList(getCanvasList());
+            await renameCanvas(renamingId, renameValue.trim());
+            reloadCanvasList();
         }
         setRenamingId(null);
-    }, [renamingId, renameValue]);
+    }, [renamingId, renameValue, reloadCanvasList]);
 
     const handleRenameKeyDown = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter') handleConfirmRename();
         if (e.key === 'Escape') setRenamingId(null);
     }, [handleConfirmRename]);
 
-    const handleDuplicate = useCallback((id: string) => {
-        const newInfo = duplicateCanvas(id);
+    const handleDuplicate = useCallback(async (id: string) => {
+        const newInfo = await duplicateCanvas(id, currentWorkspace?.id || '', user?.id || '');
         if (newInfo) {
-            setCanvasList(getCanvasList());
+            reloadCanvasList();
             setNavigationStack([{ id: newInfo.id, name: newInfo.name }]);
             const data = getCanvasData(newInfo.id);
             setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
@@ -391,11 +393,11 @@ const CanvasPage: React.FC = () => {
 
 
 
-    const handleCreateFolder = useCallback(() => {
+    const handleCreateFolder = useCallback(async () => {
         const count = canvasList.filter(c => c.type === 'folder' && !c.parentId).length + 1;
         createFolder(`Nova Pasta ${count}`);
-        setCanvasList(getCanvasList());
-    }, [canvasList]);
+        reloadCanvasList();
+    }, [canvasList, reloadCanvasList, currentWorkspace, user]);
 
     // ── Drag & Drop States ──
     const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -442,13 +444,13 @@ const CanvasPage: React.FC = () => {
         setDropPosition(null);
     }, []);
 
-    const handleDrop = useCallback((e: React.DragEvent, targetId: string) => {
+    const handleDrop = useCallback(async (e: React.DragEvent, targetId: string) => {
         e.preventDefault();
         e.stopPropagation();
         
         if (draggedId && draggedId !== targetId && dropPosition) {
-            moveCanvasItem(draggedId, targetId, dropPosition);
-            setCanvasList(getCanvasList());
+            await moveCanvasItem(draggedId, targetId, dropPosition, currentWorkspace?.id || '');
+            reloadCanvasList();
             
             // Auto expand folder if dropped inside
             if (dropPosition === 'inside') {
@@ -463,7 +465,7 @@ const CanvasPage: React.FC = () => {
         setDraggedId(null);
         setDragOverId(null);
         setDropPosition(null);
-    }, [draggedId, dropPosition]);
+    }, [draggedId, dropPosition, reloadCanvasList, currentWorkspace]);
 
     const handleDragEnd = useCallback(() => {
         setDraggedId(null);
@@ -477,7 +479,7 @@ const CanvasPage: React.FC = () => {
         setSidebarEmojiPicker({ x: rect.left, y: rect.bottom + 6, canvasId });
     }, []);
 
-    const selectSidebarEmoji = useCallback((emoji: string) => {
+    const selectSidebarEmoji = useCallback(async (emoji: string) => {
         if (sidebarEmojiPicker) {
             handleUpdateCanvasInfo(sidebarEmojiPicker.canvasId, { icon: emoji });
         }
@@ -515,7 +517,7 @@ const CanvasPage: React.FC = () => {
                 if (parsed.type === 'axecanvas') {
                     const info = importCanvas(content);
                     if (info) {
-                        setCanvasList(getCanvasList());
+                        reloadCanvasList();
                         handleSelectCanvas(info.id);
                         alert(`Canvas "${info.name}" importado com sucesso!`);
                     } else {
@@ -524,7 +526,7 @@ const CanvasPage: React.FC = () => {
                 } else if (parsed.list && parsed.canvases) {
                     const success = importBackupData(content);
                     if (success) {
-                        setCanvasList(getCanvasList());
+                        reloadCanvasList();
                         setViewState('home');
                         alert('Cofre (Backup geral) importado com sucesso!');
                     } else {
@@ -569,13 +571,13 @@ const CanvasPage: React.FC = () => {
         return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
     };
 
-    const handleOpenPage = useCallback((targetCanvasId: string, pageName: string) => {
+    const handleOpenPage = useCallback(async (targetCanvasId: string, pageName: string) => {
         setNavigationStack(prev => [...prev, { id: targetCanvasId, name: pageName }]);
-        const data = getCanvasData(targetCanvasId);
+        const data = await getCanvasData(targetCanvasId);
         setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
     }, []);
 
-    const handleBreadcrumbClick = useCallback((index: number) => {
+    const handleBreadcrumbClick = useCallback(async (index: number) => {
         if (index === -1) {
             handleGoHome();
             return;
@@ -583,7 +585,7 @@ const CanvasPage: React.FC = () => {
         setNavigationStack(prev => {
             const next = prev.slice(0, index + 1);
             const targetCanvasId = next[next.length - 1].id;
-            const data = getCanvasData(targetCanvasId);
+            const data = await getCanvasData(targetCanvasId);
             setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
             return next;
         });
@@ -1048,12 +1050,12 @@ const CanvasPage: React.FC = () => {
                             setCreateModalName('');
                         }}
                         onDeleteCanvas={handleSoftDeleteCanvas}
-                        onRenameCanvas={(id, name) => { renameCanvas(id, name); setCanvasList(getCanvasList()); }}
+                        onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
                         onDuplicateCanvas={handleDuplicate}
                         onUpdateCanvasInfo={handleUpdateCanvasInfo}
                         onMoveCanvasItem={(sourceId, targetId, position) => {
                             moveCanvasItem(sourceId, targetId, position);
-                            setCanvasList(getCanvasList());
+                            reloadCanvasList();
                         }}
                     />
                 ) : activeCanvasId ? (
@@ -1068,12 +1070,12 @@ const CanvasPage: React.FC = () => {
                                 setCreateModalName('');
                             }}
                             onDeleteCanvas={handleSoftDeleteCanvas}
-                            onRenameCanvas={(id, name) => { renameCanvas(id, name); setCanvasList(getCanvasList()); }}
+                            onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
                             onDuplicateCanvas={handleDuplicate}
                             onUpdateCanvasInfo={handleUpdateCanvasInfo}
                             onMoveCanvasItem={(sourceId, targetId, position) => {
                                 moveCanvasItem(sourceId, targetId, position);
-                                setCanvasList(getCanvasList());
+                                reloadCanvasList();
                             }}
                         />
                     ) : activeCanvasType === 'table' ? (
@@ -1108,7 +1110,7 @@ const CanvasPage: React.FC = () => {
                             setCreateModalName('');
                         }}
                         onDeleteCanvas={handleSoftDeleteCanvas}
-                        onRenameCanvas={(id, name) => { renameCanvas(id, name); setCanvasList(getCanvasList()); }}
+                        onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
                         onDuplicateCanvas={handleDuplicate}
                         onUpdateCanvasInfo={handleUpdateCanvasInfo}
                     />

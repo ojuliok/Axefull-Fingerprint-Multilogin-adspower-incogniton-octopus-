@@ -1798,3 +1798,21 @@
 .iconBlue { color: #3B82F6; }
 .iconGreen { color: #10B981; }
 .iconGray { color: #6B7280; }
+
+/* ── Space Entrance Animation ── */
+.enteringSpace {
+  animation: spaceClose 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes spaceClose {
+  0% {
+    clip-path: circle(150% at 50% 50%);
+    transform: scale(1);
+  }
+  100% {
+    clip-path: circle(0% at 50% 50%);
+    transform: scale(0.85);
+  }
+}
+

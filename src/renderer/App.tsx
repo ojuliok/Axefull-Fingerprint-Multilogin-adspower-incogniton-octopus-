@@ -5,6 +5,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PomodoroProvider } from './context/PomodoroContext';
 import { SecurityProvider } from './context/SecurityContext';
+import { WorkspaceProvider } from './context/WorkspaceContext';
 
 import Dashboard from './pages/Dashboard';
 import DadosClean from './pages/DadosClean';
@@ -55,9 +56,10 @@ const App: React.FC = () => {
                 <SecurityProvider>
                     <ToastProvider>
                         <PomodoroProvider>
-                            <HashRouter>
-                                <Routes>
-                                    <Route path="/" element={<ProtectedRoute><LayoutManager /></ProtectedRoute>}>
+                            <WorkspaceProvider>
+                                <HashRouter>
+                                    <Routes>
+                                        <Route path="/" element={<ProtectedRoute><LayoutManager /></ProtectedRoute>}>
                                         <Route index element={<Navigate to={isWebMode() ? "/canvas" : "/profiles"} replace />} />
                                         <Route path="profiles" element={<Dashboard onOpenExtensions={() => {}} onOpenProxies={() => {}} />} />
                                         <Route path="dadosclean" element={<DadosClean />} />
@@ -67,8 +69,9 @@ const App: React.FC = () => {
                                         <Route path="download" element={<DownloadPage />} />
                                         <Route path="navegador" element={<NavegadorMobile />} />
                                     </Route>
-                                </Routes>
-                            </HashRouter>
+                                    </Routes>
+                                </HashRouter>
+                            </WorkspaceProvider>
                         </PomodoroProvider>
                     </ToastProvider>
                 </SecurityProvider>

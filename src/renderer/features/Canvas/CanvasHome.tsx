@@ -46,6 +46,7 @@ import { CanvasListView } from './Home/CanvasListView';
 import { CanvasSpacesGrid } from './Home/CanvasSpacesGrid';
 import { useToast } from '../../context/ToastContext';
 import SpaceOverview from './SpaceOverview';
+import { MembersManager } from './MembersManager';
 import styles from './CanvasHome.module.css';
 
 // ─── Props ───────────────────────────────────────────
@@ -114,6 +115,18 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   });
   const [previewLayout, setPreviewLayout] = useState<'center' | 'side'>('center');
   const [isCreationOpen, setIsCreationOpen] = useState(true);
+
+  // ── Space Entrance Animation ──
+  const [isEnteringSpace, setIsEnteringSpace] = useState<boolean>(false);
+
+  const handleSpaceEnter = useCallback((id: string) => {
+    setIsEnteringSpace(true);
+    setTimeout(() => {
+      onSelectCanvas(id);
+      setIsEnteringSpace(false);
+    }, 1000);
+  }, [onSelectCanvas]);
+  const [showMembersManager, setShowMembersManager] = useState(false);
   
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -477,7 +490,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
   // ─── Render ────────────────────────────────────────
   return (
-    <div className={styles.container} style={{ position: 'relative' }}>
+    <div className={`${styles.container} ${isEnteringSpace ? styles.enteringSpace : ''}`} style={{ position: 'relative' }}>
       <NeuralBackground color={activeSpace?.color} />
       {/* Workspace Header */}
       <div className={styles.workspaceHeader}>
@@ -510,7 +523,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           <button className={styles.workspaceActionBtn}>
             <Users size={14} /> Agentes
           </button>
-          <button className={styles.workspaceActionBtn}>
+          <button className={styles.workspaceActionBtn} onClick={() => setShowMembersManager(true)}>
             Membros
           </button>
           <button className={styles.workspaceActionBtn} style={{ padding: '6px' }}>
@@ -653,7 +666,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
             commitRename={commitRename}
             startRename={startRename}
             setActivePreviewId={setActivePreviewId}
-            onSelectCanvas={onSelectCanvas}
+            onSelectCanvas={handleSpaceEnter}
             handleContextMenu={handleContextMenu}
             openEmojiPicker={openEmojiPicker}
             getChildCount={getChildCount}
@@ -834,6 +847,9 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
         style={{ display: 'none' }}
         onChange={handleCoverFileChange}
       />
+      {showMembersManager && (
+        <MembersManager onClose={() => setShowMembersManager(false)} />
+      )}
     </div>
   );
 };

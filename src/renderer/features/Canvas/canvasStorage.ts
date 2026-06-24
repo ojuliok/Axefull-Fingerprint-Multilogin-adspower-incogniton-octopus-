@@ -1,386 +1,230 @@
-/**
- * Canvas Storage — localStorage persistence for canvas pages and nodes
- */
+import { supabase } from '../../lib/supabase';
+import { CanvasInfo, CanvasData, CanvasNode, Stroke, CanvasConnection, BrowserTab } from './canvasTypes';
 
-export interface BrowserTab {
-    id: string;
-    url: string;
-    title: string;
+export * from './canvasTypes';
+
+// -- Helpers --
+
+function generateId(): string {
+    return Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
 }
-
-export interface CanvasNode {
-    id: string;
-    type: 'text' | 'freetext' | 'image' | 'document' | 'emoji' | 'icon' | 'profile' | 'social' | 'embed' | 'card' | 'table' | 'page' | 'checklist' | 'frame' | 'shape' | 'browser';
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    content: string;
-    fileName?: string;
-    fileType?: string;
-    color?: string;
-    textColor?: string;
-    fontSize?: number;
-    zIndex: number;
-    profileId?: string;
-    socialPlatform?: string;
-    tableData?: string[][];
-    checklistData?: { id: string; text: string; checked: boolean }[];
-    targetCanvasId?: string;
-    layerName?: string;
-    isLocked?: boolean;
-    shapeType?: 'rectangle' | 'diamond' | 'ellipse' | 'line' | 'arrow' | 'triangle' | 'blockArrow' | 'elbowArrow';
-    shapeStrokeWidth?: number;
-    shapeStrokeStyle?: 'solid' | 'dashed' | 'dotted';
-    shapeFillColor?: string;
-    shapeRoughness?: number;
-    flipped?: boolean;
-    browserUrl?: string; // legacy single url
-    browserTabs?: BrowserTab[];
-    activeTabId?: string;
-    browserProxy?: string;
-}
-
-export interface Stroke {
-    id: string;
-    points: { x: number; y: number }[];
-    color: string;
-    width: number;
-    isArrow?: boolean;
-}
-
-export interface CanvasConnection {
-    id: string;
-    fromId: string;
-    fromSide: 'n' | 'e' | 's' | 'w';
-    toId: string;
-    toSide: 'n' | 'e' | 's' | 'w';
-    color?: string;
-    label?: string;
-    hasArrow?: boolean;
-}
-
-export interface CanvasData {
-    nodes: CanvasNode[];
-    strokes?: Stroke[];
-    connections?: CanvasConnection[];
-    viewport: { x: number; y: number; zoom: number };
-}
-
-export interface CanvasInfo {
-    id: string;
-    name: string;
-    createdAt: number;
-    updatedAt: number;
-    parentId?: string;
-    type?: 'canvas' | 'page' | 'card' | 'folder' | 'table' | 'space';
-    color?: string;
-    isDeleted?: boolean;
-    deletedAt?: number;
-    isFavorite?: boolean;
-    coverImage?: string;
-    description?: string;
-    icon?: string;
-    properties?: Record<string, string>;
-    tags?: string[];
-    notes?: string;
-}
-
-const CANVAS_LIST_KEY = 'axe-canvas-list';
-const CANVAS_DATA_PREFIX = 'axe-canvas-data-';
 
 // ── List Operations ──
 
-export function getCanvasList(): CanvasInfo[] {
+export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> {
+    if (!workspaceId) return [];
     try {
-        const raw = localStorage.getItem(CANVAS_LIST_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw) as CanvasInfo[];
-        return Array.isArray(parsed) ? parsed.filter(c => c && c.id && c.name) : [];
-    } catch {
+        const { data, error } = await supabase
+            .from('canvases')
+            .select('*')
+            .eq('workspace_id', workspaceId)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        
+        return (data || []).map(row => ({
+            id: row.id,
+            name: row.name,
+            createdAt: new Date(row.created_at).getTime(),
+            updatedAt: new Date(row.updated_at).getTime(),
+            parentId: row.parent_id,
+            type: row.type as any,
+            color: row.color,
+            isDeleted: row.is_deleted,
+            deletedAt: row.deleted_at ? new Date(row.deleted_at).getTime() : undefined,
+            isFavorite: row.is_favorite,
+            coverImage: row.cover_image,
+            description: row.description,
+            icon: row.icon,
+            properties: row.properties,
+            tags: row.tags,
+            notes: row.notes
+        }));
+    } catch (err) {
+        console.error('Error fetching canvases', err);
         return [];
     }
 }
 
-function saveCanvasList(list: CanvasInfo[]): void {
-    localStorage.setItem(CANVAS_LIST_KEY, JSON.stringify(list));
-}
-
-export function createCanvas(name: string, parentId?: string, type: 'canvas'|'page'|'card'|'table'|'folder'|'space' = 'canvas', forceId?: string): CanvasInfo {
-    const list = getCanvasList();
-    const info: CanvasInfo = {
-        id: forceId || generateId(),
-        name,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        parentId,
-        type
-    };
-    list.unshift(info);
-    saveCanvasList(list);
-
-    // Initialize empty canvas data
-    const emptyData: CanvasData = {
-        nodes: [],
-        viewport: { x: 0, y: 0, zoom: 1 },
-    };
-    localStorage.setItem(CANVAS_DATA_PREFIX + info.id, JSON.stringify(emptyData));
-
-    return info;
-}
-
-export function createFolder(name: string, parentId?: string): CanvasInfo {
-    const list = getCanvasList();
-    const info: CanvasInfo = {
-        id: generateId(),
-        name,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        parentId,
-        type: 'folder'
-    };
-    list.unshift(info);
-    saveCanvasList(list);
-    return info;
-}
-
-export function deleteCanvas(id: string): void {
-    const list = getCanvasList();
+export async function createCanvas(workspaceId: string, ownerId: string, name: string, parentId?: string, type: 'canvas'|'page'|'card'|'table'|'folder'|'space' = 'canvas', forceId?: string): Promise<CanvasInfo> {
+    const id = forceId || crypto.randomUUID();
+    const emptyData: CanvasData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
     
-    // Find all children recursively to delete them as well
-    const idsToDelete = new Set<string>([id]);
-    let added = true;
-    while(added) {
-        added = false;
-        for (const c of list) {
-            if (c.parentId && idsToDelete.has(c.parentId) && !idsToDelete.has(c.id)) {
-                idsToDelete.add(c.id);
-                added = true;
-            }
-        }
-    }
-
-    const remaining = list.filter(c => !idsToDelete.has(c.id));
-    saveCanvasList(remaining);
-    idsToDelete.forEach(deletedId => {
-        localStorage.removeItem(CANVAS_DATA_PREFIX + deletedId);
-    });
-}
-
-export function softDeleteCanvas(id: string): void {
-    const list = getCanvasList();
-    const idsToDelete = new Set<string>([id]);
-    let added = true;
-    while(added) {
-        added = false;
-        for (const c of list) {
-            if (c.parentId && idsToDelete.has(c.parentId) && !idsToDelete.has(c.id)) {
-                idsToDelete.add(c.id);
-                added = true;
-            }
-        }
-    }
-
-    const now = Date.now();
-    for (const c of list) {
-        if (idsToDelete.has(c.id)) {
-            c.isDeleted = true;
-            c.deletedAt = now;
-        }
-    }
-    saveCanvasList(list);
-}
-
-export function restoreCanvas(id: string): void {
-    const list = getCanvasList();
-    const idsToRestore = new Set<string>([id]);
-    let added = true;
-    while(added) {
-        added = false;
-        for (const c of list) {
-            if (c.parentId && idsToRestore.has(c.parentId) && !idsToRestore.has(c.id)) {
-                idsToRestore.add(c.id);
-                added = true;
-            }
-        }
-    }
-
-    for (const c of list) {
-        if (idsToRestore.has(c.id)) {
-            c.isDeleted = false;
-            c.deletedAt = undefined;
-        }
-    }
-    saveCanvasList(list);
-}
-
-export function renameCanvas(id: string, name: string): void {
-    const list = getCanvasList();
-    const item = list.find(c => c.id === id);
-    if (item) {
-        item.name = name;
-        item.updatedAt = Date.now();
-        saveCanvasList(list);
-    }
-}
-
-export function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>): void {
-    const list = getCanvasList();
-    const item = list.find(c => c.id === id);
-    if (item) {
-        Object.assign(item, updates, { updatedAt: Date.now() });
-        saveCanvasList(list);
-    }
-}
-
-export function moveCanvasItem(id: string, targetId: string, position: 'before' | 'after' | 'inside'): void {
-    const list = getCanvasList();
-    const itemIndex = list.findIndex(c => c.id === id);
-    if (itemIndex === -1) return;
-
-    // Função auxiliar para evitar dependência circular (um item não pode entrar dentro de seu próprio filho/descendente)
-    const isDescendant = (potentialParentId: string | undefined, ancestorId: string) => {
-        let currentId = potentialParentId;
-        while (currentId) {
-            if (currentId === ancestorId) return true;
-            const currentItem = list.find(c => c.id === currentId);
-            if (!currentItem) break;
-            currentId = currentItem.parentId;
-        }
-        return false;
-    };
-
-    const targetItem = list.find(c => c.id === targetId);
-    if (!targetItem) return;
-
-    let newParentId: string | undefined;
-    if (position === 'inside') {
-        newParentId = targetId;
-    } else {
-        newParentId = targetItem.parentId;
-    }
-
-    const item = list[itemIndex];
-
-    // Espaços NUNCA devem ter um parentId. Eles devem ficar sempre na raiz.
-    if (item.type === 'space' && newParentId !== undefined) {
-        return; // Impede que o espaço entre dentro de uma pasta/canvas ou herde parentId
-    }
-
-    // Impede dependência circular: não podemos mover um item para dentro dele mesmo ou de um descendente
-    if (newParentId !== undefined && isDescendant(newParentId, id)) {
-        return;
-    }
-
-    list.splice(itemIndex, 1); // remove from current position
-
-    if (position === 'inside') {
-        item.parentId = targetId;
-        // Place it as the first child of targetId
-        const firstChildIndex = list.findIndex(c => c.parentId === targetId);
-        if (firstChildIndex !== -1) {
-            list.splice(firstChildIndex, 0, item);
-        } else {
-            // Target has no children yet, just put it right after the target folder
-            const newTargetIndex = list.findIndex(c => c.id === targetId);
-            list.splice(newTargetIndex !== -1 ? newTargetIndex + 1 : 0, item);
-        }
-    } else {
-        const newTargetIndex = list.findIndex(c => c.id === targetId);
-        if (newTargetIndex !== -1) {
-            // Inherit the parentId from the sibling we're dropping next to
-            item.parentId = list[newTargetIndex].parentId;
-            
-            if (position === 'before') {
-                list.splice(newTargetIndex, 0, item);
-            } else {
-                list.splice(newTargetIndex + 1, 0, item);
-            }
-        } else {
-            list.push(item);
-        }
-    }
-    
-    item.updatedAt = Date.now();
-    saveCanvasList(list);
-}
-
-export function duplicateCanvas(id: string): CanvasInfo | null {
-    const list = getCanvasList();
-    const original = list.find(c => c.id === id);
-    if (!original) return null;
-
-    const data = getCanvasData(id);
-    const newInfo: CanvasInfo = {
-        id: generateId(),
-        name: `${original.name} (cópia)`,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-    };
-    list.unshift(newInfo);
-    saveCanvasList(list);
-
-    if (data) {
-        // Deep-clone nodes with new IDs and keep mapping
-        const idMap = new Map<string, string>();
-        const clonedNodes = data.nodes.map(n => {
-            const newId = generateId();
-            idMap.set(n.id, newId);
-            return { ...n, id: newId };
-        });
-
-        // Clone connections using mapped IDs
-        const clonedConnections = (data.connections || []).map(conn => ({
-            ...conn,
-            id: generateId(),
-            fromId: idMap.get(conn.fromId) || conn.fromId,
-            toId: idMap.get(conn.toId) || conn.toId,
-        }));
-
-        const clonedData: CanvasData = {
-            nodes: clonedNodes,
-            strokes: data.strokes ? data.strokes.map(s => ({ ...s, id: generateId() })) : undefined,
-            connections: clonedConnections,
-            viewport: { ...data.viewport },
-        };
-        localStorage.setItem(CANVAS_DATA_PREFIX + newInfo.id, JSON.stringify(clonedData));
-    }
-
-    return newInfo;
-}
-
-// ── Canvas Data Operations ──
-
-export function getCanvasData(id: string): CanvasData | null {
     try {
-        const raw = localStorage.getItem(CANVAS_DATA_PREFIX + id);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw) as CanvasData;
+        const { data, error } = await supabase.from('canvases').insert([{
+            id,
+            workspace_id: workspaceId,
+            owner_id: ownerId,
+            parent_id: parentId,
+            name,
+            type,
+            data: emptyData
+        }]).select().single();
+        if (error) throw error;
+        
         return {
-            nodes: parsed.nodes || [],
-            strokes: parsed.strokes || [],
-            connections: parsed.connections || [],
-            viewport: parsed.viewport || { x: 0, y: 0, zoom: 1 }
+            id: data.id,
+            name: data.name,
+            createdAt: new Date(data.created_at).getTime(),
+            updatedAt: new Date(data.updated_at).getTime(),
+            parentId: data.parent_id,
+            type: data.type as any
         };
-    } catch {
+    } catch (err) {
+        console.error('Error creating canvas', err);
+        throw err;
+    }
+}
+
+export async function createFolder(workspaceId: string, ownerId: string, name: string, parentId?: string): Promise<CanvasInfo> {
+    return createCanvas(workspaceId, ownerId, name, parentId, 'folder');
+}
+
+export async function deleteCanvas(id: string): Promise<void> {
+    try {
+        await supabase.from('canvases').delete().eq('id', id);
+    } catch (err) {
+        console.error('Error deleting canvas', err);
+    }
+}
+
+export async function softDeleteCanvas(id: string): Promise<void> {
+    try {
+        await supabase.from('canvases').update({
+            is_deleted: true,
+            deleted_at: new Date().toISOString()
+        }).eq('id', id);
+    } catch (err) {
+        console.error('Error soft deleting canvas', err);
+    }
+}
+
+export async function restoreCanvas(id: string): Promise<void> {
+    try {
+        await supabase.from('canvases').update({
+            is_deleted: false,
+            deleted_at: null
+        }).eq('id', id);
+    } catch (err) {
+        console.error('Error restoring canvas', err);
+    }
+}
+
+export async function renameCanvas(id: string, name: string): Promise<void> {
+    try {
+        await supabase.from('canvases').update({
+            name,
+            updated_at: new Date().toISOString()
+        }).eq('id', id);
+    } catch (err) {
+        console.error('Error renaming canvas', err);
+    }
+}
+
+export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>): Promise<void> {
+    try {
+        const dbUpdates: any = { updated_at: new Date().toISOString() };
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.color !== undefined) dbUpdates.color = updates.color;
+        if (updates.isFavorite !== undefined) dbUpdates.is_favorite = updates.isFavorite;
+        if (updates.coverImage !== undefined) dbUpdates.cover_image = updates.coverImage;
+        if (updates.description !== undefined) dbUpdates.description = updates.description;
+        if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
+        if (updates.properties !== undefined) dbUpdates.properties = updates.properties;
+        if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+        if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+
+        await supabase.from('canvases').update(dbUpdates).eq('id', id);
+    } catch (err) {
+        console.error('Error updating canvas info', err);
+    }
+}
+
+export async function moveCanvasItem(id: string, targetId: string, position: 'before' | 'after' | 'inside', workspaceId: string): Promise<void> {
+    try {
+        // Simplified approach for now: if inside, change parent_id to targetId. 
+        // If before/after, change parent_id to target's parent_id.
+        // Handling exact ordering (before/after) in DB requires a sequence/order column.
+        
+        let newParentId: string | null = null;
+        
+        if (position === 'inside') {
+            newParentId = targetId;
+        } else {
+            const { data: targetData } = await supabase.from('canvases').select('parent_id').eq('id', targetId).single();
+            if (targetData) {
+                newParentId = targetData.parent_id;
+            }
+        }
+        
+        await supabase.from('canvases').update({
+            parent_id: newParentId,
+            updated_at: new Date().toISOString()
+        }).eq('id', id);
+        
+    } catch (err) {
+        console.error('Error moving canvas', err);
+    }
+}
+
+export async function duplicateCanvas(id: string, workspaceId: string, ownerId: string): Promise<CanvasInfo | null> {
+    try {
+        const { data: original } = await supabase.from('canvases').select('*').eq('id', id).single();
+        if (!original) return null;
+        
+        const newId = crypto.randomUUID();
+        const { data: newCanvas, error } = await supabase.from('canvases').insert([{
+            ...original,
+            id: newId,
+            name: `${original.name} (cópia)`,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        }]).select().single();
+        
+        if (error) throw error;
+        
+        return {
+            id: newCanvas.id,
+            name: newCanvas.name,
+            createdAt: new Date(newCanvas.created_at).getTime(),
+            updatedAt: new Date(newCanvas.updated_at).getTime(),
+            parentId: newCanvas.parent_id,
+            type: newCanvas.type as any
+        };
+    } catch (err) {
+        console.error('Error duplicating canvas', err);
         return null;
     }
 }
 
-export function saveCanvasData(id: string, data: CanvasData): void {
-    localStorage.setItem(CANVAS_DATA_PREFIX + id, JSON.stringify(data));
+// ── Canvas Data Operations ──
 
-    // Update the updatedAt timestamp
-    const list = getCanvasList();
-    const item = list.find(c => c.id === id);
-    if (item) {
-        item.updatedAt = Date.now();
-        saveCanvasList(list);
+export async function getCanvasData(id: string): Promise<CanvasData | null> {
+    try {
+        const { data, error } = await supabase.from('canvases').select('data').eq('id', id).single();
+        if (error) throw error;
+        
+        if (data && data.data) {
+            return data.data as CanvasData;
+        }
+        return { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+    } catch (err) {
+        console.error('Error fetching canvas data', err);
+        return null;
+    }
+}
+
+export async function saveCanvasData(id: string, data: CanvasData): Promise<void> {
+    try {
+        await supabase.from('canvases').update({
+            data,
+            updated_at: new Date().toISOString()
+        }).eq('id', id);
+    } catch (err) {
+        console.error('Error saving canvas data', err);
     }
 }
 
 // ── Debounced Save ──
-
 const saveTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
 export function debouncedSaveCanvasData(id: string, data: CanvasData, delay = 500): void {
@@ -393,107 +237,8 @@ export function debouncedSaveCanvasData(id: string, data: CanvasData, delay = 50
     }, delay);
 }
 
-// ── Helpers ──
-
-function generateId(): string {
-    return Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
-}
-
-// ── Vault (Cofre) Backup / Import / Export Operations ──
-
-export function exportBackupData(): string {
-    const list = getCanvasList();
-    const backup: Record<string, any> = {
-        version: '1.0',
-        list,
-        canvases: {},
-    };
-    list.forEach(c => {
-        const data = getCanvasData(c.id);
-        if (data) backup.canvases[c.id] = data;
-    });
-    return JSON.stringify(backup, null, 2);
-}
-
-export function importBackupData(jsonString: string): boolean {
-    try {
-        const backup = JSON.parse(jsonString);
-        if (!backup.list || !backup.canvases) return false;
-
-        const currentList = getCanvasList();
-        const newList = [...backup.list];
-
-        newList.forEach(item => {
-            // Check if active ID or duplicate canvas name already exists in current list
-            const exists = currentList.some(c => c.id === item.id);
-            const finalId = exists ? generateId() : item.id;
-            const finalName = exists ? `${item.name} (importado)` : item.name;
-
-            const canvasData = backup.canvases[item.id];
-            if (canvasData) {
-                const info: CanvasInfo = {
-                    id: finalId,
-                    name: finalName,
-                    createdAt: item.createdAt || Date.now(),
-                    updatedAt: Date.now(),
-                };
-
-                // Add to start of list
-                currentList.unshift(info);
-
-                // Save data under new ID
-                localStorage.setItem(CANVAS_DATA_PREFIX + finalId, JSON.stringify(canvasData));
-            }
-        });
-
-        localStorage.setItem(CANVAS_LIST_KEY, JSON.stringify(currentList));
-        return true;
-    } catch (e) {
-        console.error('Erro ao importar cofre:', e);
-        return false;
-    }
-}
-
-export function exportCanvas(id: string): { name: string; content: string } | null {
-    const list = getCanvasList();
-    const info = list.find(c => c.id === id);
-    const data = getCanvasData(id);
-    if (!info || !data) return null;
-
-    const exportData = {
-        type: 'axecanvas',
-        version: '1.0',
-        info,
-        data,
-    };
-    return {
-        name: `${info.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.axecanvas`,
-        content: JSON.stringify(exportData, null, 2),
-    };
-}
-
-export function importCanvas(jsonString: string): CanvasInfo | null {
-    try {
-        const parsed = JSON.parse(jsonString);
-        if (parsed.type !== 'axecanvas' || !parsed.info || !parsed.data) return null;
-
-        const list = getCanvasList();
-        const id = generateId(); // Always assign a fresh unique ID
-        const info: CanvasInfo = {
-            id,
-            name: `${parsed.info.name} (importado)`,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        };
-
-        list.unshift(info);
-        localStorage.setItem(CANVAS_LIST_KEY, JSON.stringify(list));
-        localStorage.setItem(CANVAS_DATA_PREFIX + id, JSON.stringify(parsed.data));
-
-        return info;
-    } catch (e) {
-        console.error('Erro ao importar canvas individual:', e);
-        return null;
-    }
-}
-
+// Vault methods are disabled/placeholder for now since we use Supabase
+export function exportBackupData(): string { return ''; }
+export function importBackupData(jsonString: string): boolean { return false; }
+export function exportCanvas(id: string): { name: string; content: string } | null { return null; }
+export function importCanvas(jsonString: string): CanvasInfo | null { return null; }
