@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
     StickyNote, Plus, Settings, Star, Trash2, Search, Lock, Unlock, 
-    Folder, Send, X, Eye, Edit3, Copy, Check, Shield, HelpCircle
+    Folder, Send, X, Eye, Edit3, Copy, Check, Shield, ChevronLeft, ChevronRight,
+    ArrowRight, Menu, Bold, Italic, Heading, List, CheckSquare
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
@@ -48,15 +49,25 @@ const NotesPage: React.FC = () => {
     
     // UI Interface States
     const [searchQuery, setSearchQuery] = useState('');
-    const [isEditMode, setIsEditMode] = useState(false); // Toggle between raw markdown and ChatGPT preview
+    const [isEditMode, setIsEditMode] = useState(false); // Toggle between raw markdown and Axefull Note preview
     const [inputText, setInputText] = useState('');
     const [copiedBlockKey, setCopiedBlockKey] = useState<string | null>(null);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // Dialog / Modal States
     const [isSpaceModalOpen, setIsSpaceModalOpen] = useState(false);
     const [newSpaceName, setNewSpaceName] = useState('');
     const [newSpaceIcon, setNewSpaceIcon] = useState('📁');
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+    // Right-Click Context Menu State
+    const [contextMenu, setContextMenu] = useState<{
+        x: number;
+        y: number;
+        visible: boolean;
+        noteId?: string;
+        spaceId?: string;
+    }>({ x: 0, y: 0, visible: false });
 
     // Security PIN States
     const [isLocked, setIsLocked] = useState(false);
@@ -66,6 +77,18 @@ const NotesPage: React.FC = () => {
     const [isPinIncorrect, setIsPinIncorrect] = useState(false);
     const [tempPin, setTempPin] = useState('');
     const [tempPinConfirm, setTempPinConfirm] = useState('');
+
+    // Refs
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    // Focus and select end of textarea when entering edit mode
+    useEffect(() => {
+        if (isEditMode && textareaRef.current) {
+            textareaRef.current.focus();
+            const length = textareaRef.current.value.length;
+            textareaRef.current.setSelectionRange(length, length);
+        }
+    }, [isEditMode]);
 
     // Load initial data
     useEffect(() => {
@@ -111,7 +134,7 @@ const NotesPage: React.FC = () => {
                     id: 'note-1',
                     spaceId: 'space-1',
                     title: 'Axe Multi - Próximas Atualizações',
-                    content: `# Axe Multi Roadmap\n\nEste é o bloco de notas principal do seu espaço. Você pode usar formatação moderna e adicionar anotações rápidas no estilo ChatGPT.\n\n## Funcionalidades a Fazer:\n- [x] Implementar barra lateral dinâmica\n- [ ] Adicionar suporte a múltiplos proxies residenciais\n- [ ] Criar sincronização em nuvem via Supabase\n\n## Exemplo de Código:\n\`\`\`javascript\n// Testando o interpretador de impressões digitais\nconst fingerprint = {\n  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',\n  language: 'pt-BR',\n  canvasSeed: 'axefull_fingerprint_seed_992'\n};\nconsole.log("Perfil iniciado com sucesso!", fingerprint);\n\`\`\``,
+                    content: `# Axe Multi Roadmap\n\nEste é o bloco de notas principal do seu espaço. Você pode usar formatação moderna e adicionar anotações rápidas com Axefull Note.\n\n## Funcionalidades a Fazer:\n- [x] Implementar barra lateral dinâmica\n- [ ] Adicionar suporte a múltiplos proxies residenciais\n- [ ] Criar sincronização em nuvem via Supabase\n\n## Exemplo de Código:\n\`\`\`javascript\n// Testando o interpretador de impressões digitais\nconst fingerprint = {\n  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',\n  language: 'pt-BR',\n  canvasSeed: 'axefull_fingerprint_seed_992'\n};\nconsole.log("Perfil iniciado com sucesso!", fingerprint);\n\`\`\``,
                     isStarred: true,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
@@ -138,6 +161,13 @@ const NotesPage: React.FC = () => {
                 setActiveNoteId(spaceNotes[0].id);
             }
         }
+
+        // Click listener to close context menu
+        const handleWindowClick = () => {
+            setContextMenu(prev => prev.visible ? { ...prev, visible: false } : prev);
+        };
+        window.addEventListener('click', handleWindowClick);
+        return () => window.removeEventListener('click', handleWindowClick);
     }, []);
 
     // Save helpers
@@ -154,7 +184,7 @@ const NotesPage: React.FC = () => {
     // Space actions
     const handleCreateSpace = () => {
         if (!newSpaceName.trim()) {
-            toast({ title: 'Aviso', message: 'O nome do espaço não pode estar vazio.', type: 'warning' });
+            toast.warning('Aviso', 'O nome do espaço não pode estar vazio.');
             return;
         }
 
@@ -171,12 +201,15 @@ const NotesPage: React.FC = () => {
         setActiveNoteId(''); // Reset selected note in the new space
         setNewSpaceName('');
         setIsSpaceModalOpen(false);
-        toast({ title: 'Sucesso', message: `Espaço "${newSpace.name}" criado com sucesso!`, type: 'success' });
+        toast.success('Sucesso', `Espaço "${newSpace.name}" criado com sucesso!`);
     };
 
-    const handleDeleteSpace = (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (confirm('Tem certeza que deseja excluir este espaço e todas as suas notas?')) {
+    const handleDeleteSpace = (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        const spaceToDelete = spaces.find(s => s.id === id);
+        const spaceName = spaceToDelete ? spaceToDelete.name : 'este espaço';
+
+        if (confirm(`Tem certeza que deseja excluir "${spaceName}" e todas as suas notas?`)) {
             const updatedSpaces = spaces.filter(s => s.id !== id);
             const updatedNotes = notes.filter(n => n.spaceId !== id);
             
@@ -193,14 +226,14 @@ const NotesPage: React.FC = () => {
                     setActiveNoteId('');
                 }
             }
-            toast({ title: 'Excluído', message: 'Espaço e suas notas foram excluídos.', type: 'info' });
+            toast.info('Excluído', 'Espaço e suas notas foram excluídos.');
         }
     };
 
     // Note actions
     const handleCreateNote = () => {
         if (!activeSpaceId) {
-            toast({ title: 'Erro', message: 'Selecione ou crie um espaço primeiro.', type: 'error' });
+            toast.error('Erro', 'Selecione ou crie um espaço primeiro.');
             return;
         }
 
@@ -245,11 +278,11 @@ const NotesPage: React.FC = () => {
         const updated = notes.map(n => {
             if (n.id === id) {
                 const newStarred = !n.isStarred;
-                toast({ 
-                    title: newStarred ? 'Favoritada' : 'Removida dos favoritos', 
-                    message: newStarred ? 'Nota marcada com estrela.' : 'Estrela removida da nota.', 
-                    type: 'success' 
-                });
+                if (newStarred) {
+                    toast.success('Favoritada', 'Nota marcada com estrela.');
+                } else {
+                    toast.info('Favorito removido', 'Estrela removida da nota.');
+                }
                 return { ...n, isStarred: newStarred };
             }
             return n;
@@ -265,8 +298,27 @@ const NotesPage: React.FC = () => {
                 const spaceNotes = updated.filter(n => n.spaceId === activeSpaceId);
                 setActiveNoteId(spaceNotes.length > 0 ? spaceNotes[0].id : '');
             }
-            toast({ title: 'Excluída', message: 'A nota foi excluída com sucesso.', type: 'info' });
+            toast.info('Excluída', 'A nota foi excluída com sucesso.');
         }
+    };
+
+    // Move Note Action
+    const handleMoveNote = (noteId: string, targetSpaceId: string) => {
+        const updated = notes.map(n => {
+            if (n.id === noteId) {
+                return { ...n, spaceId: targetSpaceId, updated_at: new Date().toISOString() };
+            }
+            return n;
+        });
+        saveNotesToStorage(updated);
+        
+        // If moving the currently selected note, update UI focus
+        if (noteId === activeNoteId) {
+            setActiveSpaceId(targetSpaceId);
+        }
+
+        const destSpace = spaces.find(s => s.id === targetSpaceId);
+        toast.success('Movida', `Nota movida para o espaço "${destSpace?.name || 'Destino'}".`);
     };
 
     // Chatbot-style Easy insertion handler
@@ -280,8 +332,7 @@ const NotesPage: React.FC = () => {
         handleUpdateNoteContent(appendedContent);
         setInputText('');
 
-        // Visual feedback
-        toast({ title: 'Adicionado', message: 'Texto inserido no bloco de notas.', type: 'success' });
+        toast.success('Adicionado', 'Texto inserido no bloco de notas.');
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -291,17 +342,88 @@ const NotesPage: React.FC = () => {
         }
     };
 
+    // Markdown insertion helper
+    const handleInsertMarkdown = (syntax: 'bold' | 'italic' | 'heading' | 'code' | 'bullet' | 'todo') => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const selectedText = text.substring(start, end);
+
+        let replacement = '';
+        let newCursorPos = start;
+
+        switch (syntax) {
+            case 'bold':
+                replacement = `**${selectedText || 'texto'}**`;
+                newCursorPos = start + 2 + (selectedText ? selectedText.length : 5);
+                break;
+            case 'italic':
+                replacement = `*${selectedText || 'texto'}*`;
+                newCursorPos = start + 1 + (selectedText ? selectedText.length : 5);
+                break;
+            case 'heading':
+                replacement = `\n## ${selectedText || 'Título'}`;
+                newCursorPos = start + replacement.length;
+                break;
+            case 'code':
+                replacement = `\n\`\`\`javascript\n${selectedText || '// código aqui'}\n\`\`\`\n`;
+                newCursorPos = start + replacement.length;
+                break;
+            case 'bullet':
+                replacement = `\n- ${selectedText || 'item'}`;
+                newCursorPos = start + replacement.length;
+                break;
+            case 'todo':
+                replacement = `\n- [ ] ${selectedText || 'tarefa'}`;
+                newCursorPos = start + replacement.length;
+                break;
+        }
+
+        const newContent = text.substring(0, start) + replacement + text.substring(end);
+        handleUpdateNoteContent(newContent);
+        
+        // Restore focus and selection position
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(newCursorPos, newCursorPos);
+        }, 0);
+    };
+
+    // Right-Click Context Menu Triggers
+    const handleNoteContextMenu = (e: React.MouseEvent, noteId: string) => {
+        e.preventDefault();
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            visible: true,
+            noteId
+        });
+    };
+
+    const handleSpaceContextMenu = (e: React.MouseEvent, spaceId: string) => {
+        e.preventDefault();
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            visible: true,
+            spaceId
+        });
+    };
+
     // Security PIN actions
     const handleUnlock = () => {
         if (pinInput === savedPin) {
             setIsLocked(false);
             setPinInput('');
             setIsPinIncorrect(false);
-            toast({ title: 'Acesso Liberado', message: 'Identidade verificada com sucesso.', type: 'success' });
+            toast.success('Acesso Liberado', 'Identidade verificada com sucesso.');
         } else {
             setIsPinIncorrect(true);
             setPinInput('');
-            toast({ title: 'Erro de Acesso', message: 'Senha PIN incorreta. Tente novamente.', type: 'error' });
+            toast.error('Erro de Acesso', 'Senha PIN incorreta. Tente novamente.');
         }
     };
 
@@ -329,25 +451,25 @@ const NotesPage: React.FC = () => {
         if (pinEnabled) {
             // Save PIN
             if (!tempPin || tempPin.length < 4) {
-                toast({ title: 'Aviso', message: 'O PIN deve conter pelo menos 4 números.', type: 'warning' });
+                toast.warning('Aviso', 'O PIN deve conter pelo menos 4 números.');
                 return;
             }
             if (tempPin !== tempPinConfirm) {
-                toast({ title: 'Erro', message: 'As senhas PIN digitadas não coincidem.', type: 'error' });
+                toast.error('Erro', 'As senhas PIN digitadas não coincidem.');
                 return;
             }
 
             localStorage.setItem('axe_notes_pin_enabled', 'true');
             localStorage.setItem('axe_notes_pin', tempPin);
             setSavedPin(tempPin);
-            toast({ title: 'Configuração Salva', message: 'Bloqueio de segurança PIN ativado.', type: 'success' });
+            toast.success('Configuração Salva', 'Bloqueio de segurança PIN ativado.');
         } else {
             // Disable PIN
             localStorage.removeItem('axe_notes_pin_enabled');
             localStorage.removeItem('axe_notes_pin');
             setSavedPin(null);
             setIsLocked(false);
-            toast({ title: 'Configuração Salva', message: 'Bloqueio de segurança desativado.', type: 'info' });
+            toast.info('Configuração Salva', 'Bloqueio de segurança desativado.');
         }
 
         setTempPin('');
@@ -360,9 +482,9 @@ const NotesPage: React.FC = () => {
             setIsLocked(true);
             setIsSettingsOpen(false);
             setPinInput('');
-            toast({ title: 'Bloqueado', message: 'Espaço de notas bloqueado.', type: 'info' });
+            toast.info('Bloqueado', 'Espaço de notas bloqueado.');
         } else {
-            toast({ title: 'Aviso', message: 'Configure uma senha PIN antes de bloquear.', type: 'warning' });
+            toast.warning('Aviso', 'Configure uma senha PIN antes de bloquear.');
         }
     };
 
@@ -473,7 +595,7 @@ const NotesPage: React.FC = () => {
                 return <em key={i} className="italic text-theme-text-muted">{part.slice(1, -1)}</em>;
             }
             if (part.startsWith('`') && part.endsWith('`')) {
-                return <code key={i} className="px-1.5 py-0.5 rounded bg-theme-border text-pink-400 font-mono text-[11px] border border-theme-border">{part.slice(1, -1)}</code>;
+                return <code key={i} className="px-1.5 py-0.5 rounded bg-theme-border text-amber-500 font-mono text-[11px] border border-theme-border">{part.slice(1, -1)}</code>;
             }
             return part;
         });
@@ -482,7 +604,7 @@ const NotesPage: React.FC = () => {
     const handleCopyCode = (codeText: string, blockKey: string) => {
         navigator.clipboard.writeText(codeText);
         setCopiedBlockKey(blockKey);
-        toast({ title: 'Copiado', message: 'Código copiado para a área de transferência.', type: 'info' });
+        toast.info('Copiado', 'Código copiado para a área de transferência.');
         setTimeout(() => {
             setCopiedBlockKey(null);
         }, 2000);
@@ -508,6 +630,20 @@ const NotesPage: React.FC = () => {
         });
 
         handleUpdateNoteContent(updatedLines.join('\n'));
+    };
+
+    // Click block area handler - triggers edit mode on click (unless clicking checkbox or copy btn)
+    const handleBlockAreaClick = (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (
+            target.tagName === 'INPUT' || 
+            target.tagName === 'BUTTON' || 
+            target.closest('button') || 
+            target.closest('input')
+        ) {
+            return;
+        }
+        setIsEditMode(true);
     };
 
     // Filter Notes
@@ -552,9 +688,9 @@ const NotesPage: React.FC = () => {
         return (
             <div className="flex flex-col items-center justify-center h-full w-full bg-theme-base select-none">
                 <div className="w-[380px] p-8 rounded-2xl border border-theme-border bg-theme-surface/80 backdrop-blur-xl shadow-2xl flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500" />
+                    <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500" />
                     
-                    <div className="w-16 h-16 rounded-full bg-pink-500/10 flex items-center justify-center mb-4 text-pink-400 animate-pulse">
+                    <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-4 text-amber-500 animate-pulse">
                         <Lock size={32} />
                     </div>
 
@@ -568,7 +704,7 @@ const NotesPage: React.FC = () => {
                                 key={idx} 
                                 className={`w-3.5 h-3.5 rounded-full border transition-all duration-200 ${
                                     pinInput.length > idx 
-                                        ? 'bg-pink-500 border-pink-500 scale-110 shadow-[0_0_8px_rgba(236,72,153,0.5)]' 
+                                        ? 'bg-amber-500 border-amber-500 scale-110 shadow-[0_0_8px_rgba(245,158,11,0.5)]' 
                                         : 'border-theme-border bg-transparent'
                                 } ${isPinIncorrect ? 'border-red-500 animate-bounce' : ''}`}
                             />
@@ -620,22 +756,35 @@ const NotesPage: React.FC = () => {
         <div className="flex h-full w-full bg-theme-base overflow-hidden relative">
             
             {/* ─── SIDEBAR ────────────────────────────────────── */}
-            <div className="w-[300px] bg-theme-surface/70 backdrop-blur-md border-r border-theme-border flex flex-col h-full shrink-0 select-none">
+            <div className={`
+                bg-theme-surface/70 backdrop-blur-md border-r border-theme-border flex flex-col h-full shrink-0 select-none
+                transition-all duration-300 ease-in-out
+                ${isSidebarCollapsed ? 'w-0 border-r-0 opacity-0 overflow-hidden' : 'w-[300px]'}
+            `}>
                 
                 {/* Search Header */}
                 <div className="p-4 border-b border-theme-border flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <StickyNote size={18} className="text-pink-500" />
+                            <StickyNote size={18} className="text-amber-500" />
                             <span className="font-bold text-sm text-theme-text">Bloco de Notas</span>
                         </div>
-                        <button 
-                            onClick={() => setIsSettingsOpen(true)}
-                            className="p-1.5 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-card transition-all"
-                            title="Segurança e Configurações"
-                        >
-                            <Settings size={16} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button 
+                                onClick={() => setIsSettingsOpen(true)}
+                                className="p-1.5 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-card transition-all"
+                                title="Segurança e Configurações"
+                            >
+                                <Settings size={15} />
+                            </button>
+                            <button 
+                                onClick={() => setIsSidebarCollapsed(true)}
+                                className="p-1.5 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-card transition-all"
+                                title="Recolher Menu"
+                            >
+                                <ChevronLeft size={15} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Search Bar */}
@@ -646,24 +795,24 @@ const NotesPage: React.FC = () => {
                             placeholder="Buscar notas..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-theme-base/60 text-xs border border-theme-border focus:border-pink-500 focus:outline-none rounded-lg py-2 pl-9 pr-4 text-theme-text placeholder-theme-text-faint transition-all"
+                            className="w-full bg-theme-base/60 text-xs border border-theme-border focus:border-amber-500 focus:outline-none rounded-lg py-2 pl-9 pr-4 text-theme-text placeholder-theme-text-faint transition-all"
                         />
                     </div>
                 </div>
 
                 {/* Spaces list */}
-                <div className="p-4 border-b border-theme-border bg-theme-base/20">
+                <div className="p-4 border-b border-theme-border bg-theme-base/20 flex flex-col shrink-0">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider">Espaços</span>
                         <button 
                             onClick={() => setIsSpaceModalOpen(true)}
-                            className="p-1 rounded bg-theme-card hover:bg-theme-border text-theme-text hover:text-pink-500 transition-colors flex items-center gap-1 text-[10px] font-medium"
+                            className="p-1 rounded bg-theme-card hover:bg-theme-border text-theme-text hover:text-amber-500 transition-colors flex items-center gap-1 text-[10px] font-medium"
                         >
                             <Plus size={10} /> Novo
                         </button>
                     </div>
 
-                    <div className="flex flex-col gap-1 max-h-[140px] overflow-y-auto scrollbar-none">
+                    <div className="flex flex-col gap-1 max-h-[160px] overflow-y-auto scrollbar-thin scrollbar-thumb-amber-500/20 hover:scrollbar-thumb-amber-500/40 pr-1">
                         {spaces.map(space => {
                             const isSelected = activeSpaceId === space.id;
                             return (
@@ -674,11 +823,13 @@ const NotesPage: React.FC = () => {
                                         const spaceNotes = notes.filter(n => n.spaceId === space.id);
                                         setActiveNoteId(spaceNotes.length > 0 ? spaceNotes[0].id : '');
                                     }}
+                                    onContextMenu={(e) => handleSpaceContextMenu(e, space.id)}
                                     className={`group flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
                                         isSelected 
-                                            ? 'bg-gradient-to-r from-pink-500/10 to-transparent border-l-2 border-pink-500 text-theme-text font-semibold' 
+                                            ? 'bg-gradient-to-r from-amber-500/10 to-transparent border-l-2 border-amber-500 text-theme-text font-semibold' 
                                             : 'text-theme-text-muted hover:bg-theme-card hover:text-theme-text'
                                     }`}
+                                    title="Clique com o botão direito para opções"
                                 >
                                     <div className="flex items-center gap-2 text-xs overflow-hidden">
                                         <span className="text-sm shrink-0">{space.icon}</span>
@@ -706,13 +857,13 @@ const NotesPage: React.FC = () => {
                         <button 
                             onClick={handleCreateNote}
                             disabled={!activeSpaceId}
-                            className="p-1 rounded bg-pink-500 hover:bg-pink-600 disabled:opacity-50 text-white transition-colors flex items-center gap-1 text-[10px] font-bold shadow-sm"
+                            className="p-1.5 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-black font-bold transition-colors flex items-center gap-1 text-[10px] shadow-sm"
                         >
-                            <Plus size={10} /> Nova Nota
+                            <Plus size={10} strokeWidth={2.5} /> Nova Nota
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1 scrollbar-none">
+                    <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1 scrollbar-thin scrollbar-thumb-amber-500/20 hover:scrollbar-thumb-amber-500/40 pr-1">
                         {filteredNotes.length === 0 ? (
                             <div className="text-center py-8 text-theme-text-faint text-xs">
                                 Nenhuma nota encontrada.
@@ -727,16 +878,18 @@ const NotesPage: React.FC = () => {
                                             setActiveNoteId(note.id);
                                             setIsEditMode(false);
                                         }}
+                                        onContextMenu={(e) => handleNoteContextMenu(e, note.id)}
                                         className={`group relative flex flex-col gap-1 p-3 rounded-lg cursor-pointer transition-all border ${
                                             isSelected 
                                                 ? 'bg-theme-card border-theme-border shadow-sm' 
                                                 : 'border-transparent hover:bg-theme-card/40 text-theme-text-muted'
                                         } ${note.isStarred ? 'border-amber-500/30 bg-gradient-to-r from-amber-500/[0.04] to-transparent' : ''}`}
+                                        title="Botão direito para Mover ou Excluir"
                                     >
                                         
                                         {/* Glowing border highlight for starred notes */}
                                         {note.isStarred && (
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-lg shadow-[0_0_8px_var(--brand-primary)]" />
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-lg shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                                         )}
 
                                         <div className="flex items-start justify-between gap-2">
@@ -777,6 +930,17 @@ const NotesPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* ─── SIDEBAR EXPAND TOGGLE ──────────────────────── */}
+            {isSidebarCollapsed && (
+                <button
+                    onClick={() => setIsSidebarCollapsed(false)}
+                    className="absolute top-4 left-4 z-40 p-2 rounded-xl bg-theme-surface border border-theme-border text-theme-text-muted hover:text-theme-text shadow-md hover:bg-theme-card transition-all"
+                    title="Expandir Menu"
+                >
+                    <Menu size={16} />
+                </button>
+            )}
+
             {/* ─── MAIN EDITOR AREA ───────────────────────────── */}
             <div className="flex-1 flex flex-col h-full bg-theme-base overflow-hidden">
                 {activeNote ? (
@@ -784,6 +948,7 @@ const NotesPage: React.FC = () => {
                         {/* Note Header */}
                         <div className="h-14 border-b border-theme-border px-6 flex items-center justify-between bg-theme-surface/30 backdrop-blur-sm shrink-0 select-none">
                             <div className="flex items-center gap-3 overflow-hidden flex-1 max-w-xl">
+                                {isSidebarCollapsed && <div className="w-8" /> /* Spacing for the floating Menu button */}
                                 <span className="text-lg">{activeSpace?.icon}</span>
                                 <input
                                     type="text"
@@ -800,14 +965,14 @@ const NotesPage: React.FC = () => {
                                     onClick={() => setIsEditMode(!isEditMode)}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                                         isEditMode
-                                            ? 'bg-pink-500 text-white border-pink-500'
+                                            ? 'bg-amber-500 text-black border-amber-500'
                                             : 'bg-theme-card border-theme-border text-theme-text-muted hover:text-theme-text'
                                     }`}
                                 >
                                     {isEditMode ? (
                                         <>
                                             <Eye size={13} />
-                                            <span>Visualizar ChatGPT</span>
+                                            <span>Visualizar Axefull Note</span>
                                         </>
                                     ) : (
                                         <>
@@ -844,105 +1009,177 @@ const NotesPage: React.FC = () => {
                         {/* Note Body */}
                         <div className="flex-1 overflow-hidden relative flex flex-col">
                             {isEditMode ? (
-                                /* RAW TEXTAREA EDITOR */
-                                <textarea
-                                    value={activeNote.content}
-                                    onChange={(e) => handleUpdateNoteContent(e.target.value)}
-                                    className="flex-1 w-full p-8 bg-theme-base text-sm focus:outline-none text-theme-text resize-none font-mono leading-relaxed"
-                                    placeholder="Escreva em markdown aqui..."
-                                />
+                                /* RAW TEXTAREA EDITOR WITH MARKDOWN TOOLBAR */
+                                <div className="flex-1 flex flex-col h-full overflow-hidden">
+                                    
+                                    {/* Markdown Toolbar */}
+                                    <div className="px-6 py-2 border-b border-theme-border bg-theme-surface/40 flex items-center gap-1.5 select-none flex-wrap shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleInsertMarkdown('bold')}
+                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-bold"
+                                            title="Negrito (**texto**)"
+                                        >
+                                            <Bold size={13} />
+                                            <span className="hidden sm:inline">Negrito</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleInsertMarkdown('italic')}
+                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
+                                            title="Itálico (*texto*)"
+                                        >
+                                            <Italic size={13} />
+                                            <span className="hidden sm:inline">Itálico</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleInsertMarkdown('heading')}
+                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
+                                            title="Título (## Título)"
+                                        >
+                                            <Heading size={13} />
+                                            <span className="hidden sm:inline">Título</span>
+                                        </button>
+                                        <div className="h-4 w-px bg-theme-border mx-1" />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleInsertMarkdown('code')}
+                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
+                                            title="Bloco de Código (```)"
+                                        >
+                                            <Copy size={13} />
+                                            <span className="hidden sm:inline">Código</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleInsertMarkdown('bullet')}
+                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
+                                            title="Lista Marcadores (- item)"
+                                        >
+                                            <List size={13} />
+                                            <span className="hidden sm:inline">Lista</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleInsertMarkdown('todo')}
+                                            className="p-1.5 rounded hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-all flex items-center gap-1 text-[10px] font-medium"
+                                            title="Lista Tarefas (- [ ] tarefa)"
+                                        >
+                                            <CheckSquare size={13} />
+                                            <span className="hidden sm:inline">Tarefa</span>
+                                        </button>
+                                    </div>
+
+                                    <textarea
+                                        ref={textareaRef}
+                                        value={activeNote.content}
+                                        onChange={(e) => handleUpdateNoteContent(e.target.value)}
+                                        className="flex-1 w-full p-8 bg-theme-base text-sm focus:outline-none text-theme-text resize-none font-mono leading-relaxed overflow-y-auto"
+                                        placeholder="Escreva em markdown aqui..."
+                                    />
+                                </div>
                             ) : (
-                                /* CHATGPT STYLE THREAD */
-                                <div className="flex-1 overflow-y-auto px-6 md:px-16 py-8 space-y-6 scrollbar-thin">
+                                /* AXEFULL NOTE STYLE THREAD */
+                                <div 
+                                    onClick={handleBlockAreaClick}
+                                    className="flex-1 overflow-y-auto px-6 md:px-16 py-8 space-y-6 scrollbar-thin cursor-text select-none"
+                                >
                                     
                                     {/* Simulated System Message */}
-                                    <div className="flex gap-4 items-start max-w-3xl mx-auto p-4 rounded-xl bg-theme-surface/40 border border-theme-border/50 text-xs text-theme-text-muted">
-                                        <div className="w-6 h-6 rounded-full bg-pink-500/15 flex items-center justify-center shrink-0 text-pink-400">
+                                    <div className="flex gap-4 items-start max-w-3xl mx-auto p-4 rounded-xl bg-theme-surface/40 border border-theme-border/50 text-xs text-theme-text-muted select-none">
+                                        <div className="w-6 h-6 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0 text-amber-500 animate-pulse">
                                             <Shield size={12} />
                                         </div>
                                         <div>
-                                            <span className="font-bold text-theme-text block mb-1">ChatGPT Notas ativado</span>
-                                            Adicione novos parágrafos, caixas de código ou listas usando a caixa de inserção facilitada no final da página. Pressione Enter para adicionar instantaneamente.
+                                            <span className="font-bold text-theme-text block mb-1">Axefull Note ativado</span>
+                                            Clique em qualquer lugar da nota para começar a escrever/editar. Use a caixa de inserção na parte inferior para adicionar novas anotações rapidamente.
                                         </div>
                                     </div>
 
                                     {/* Render Blocks */}
                                     <div className="max-w-3xl mx-auto space-y-6">
-                                        {parsedBlocks.map((block, index) => {
-                                            switch (block.type) {
-                                                case 'h1':
-                                                    return <h1 key={block.key} className="text-2xl font-black text-theme-text border-b border-theme-border/60 pb-2 pt-4">{block.content}</h1>;
-                                                case 'h2':
-                                                    return <h2 key={block.key} className="text-xl font-extrabold text-theme-text pt-3">{block.content}</h2>;
-                                                case 'h3':
-                                                    return <h3 key={block.key} className="text-base font-bold text-theme-text pt-2">{block.content}</h3>;
-                                                case 'todo':
-                                                    return (
-                                                        <div key={block.key} className="flex items-start gap-2.5 my-1 group/todo">
-                                                            <input 
-                                                                type="checkbox" 
-                                                                checked={block.checked}
-                                                                onChange={(e) => handleToggleTodo(index, block.content, block.checked || false)}
-                                                                className="mt-1 h-4 w-4 rounded border-theme-border text-pink-500 focus:ring-pink-500/20 cursor-pointer"
-                                                            />
-                                                            <span className={`text-xs text-theme-text leading-relaxed select-text ${block.checked ? 'line-through text-theme-text-faint' : ''}`}>
-                                                                {renderMarkdownInline(block.content)}
-                                                            </span>
-                                                        </div>
-                                                    );
-                                                case 'bullet':
-                                                    return (
-                                                        <div key={block.key} className="flex items-start gap-2 pl-4 my-1">
-                                                            <span className="text-pink-500 mt-1 shrink-0 text-[10px]">•</span>
-                                                            <span className="text-xs text-theme-text leading-relaxed select-text">{renderMarkdownInline(block.content)}</span>
-                                                        </div>
-                                                    );
-                                                case 'code':
-                                                    return (
-                                                        <div key={block.key} className="my-4 rounded-xl border border-theme-border overflow-hidden bg-zinc-950 font-mono text-[11px] shadow-md">
-                                                            <div className="flex items-center justify-between px-4 py-1.5 bg-zinc-900 border-b border-zinc-800 text-zinc-400 select-none text-[9px] font-semibold">
-                                                                <span>{block.language || 'code'}</span>
-                                                                <button 
-                                                                    onClick={() => handleCopyCode(block.content, block.key)}
-                                                                    className="flex items-center gap-1 hover:text-zinc-200 transition-colors"
-                                                                >
-                                                                    {copiedBlockKey === block.key ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
-                                                                    <span>{copiedBlockKey === block.key ? 'Copiado!' : 'Copiar'}</span>
-                                                                </button>
+                                        {parsedBlocks.length === 0 ? (
+                                            <div className="text-center py-12 text-theme-text-faint text-xs italic">
+                                                Esta nota está vazia. Clique para começar a escrever!
+                                            </div>
+                                        ) : (
+                                            parsedBlocks.map((block, index) => {
+                                                switch (block.type) {
+                                                    case 'h1':
+                                                        return <h1 key={block.key} className="text-2xl font-black text-theme-text border-b border-theme-border/60 pb-2 pt-4 select-text">{block.content}</h1>;
+                                                    case 'h2':
+                                                        return <h2 key={block.key} className="text-xl font-extrabold text-theme-text pt-3 select-text">{block.content}</h2>;
+                                                    case 'h3':
+                                                        return <h3 key={block.key} className="text-base font-bold text-theme-text pt-2 select-text">{block.content}</h3>;
+                                                    case 'todo':
+                                                        return (
+                                                            <div key={block.key} className="flex items-start gap-2.5 my-1 group/todo select-none">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={block.checked}
+                                                                    onChange={(e) => handleToggleTodo(index, block.content, block.checked || false)}
+                                                                    className="mt-1 h-4 w-4 rounded border-theme-border text-amber-500 focus:ring-amber-500/20 cursor-pointer"
+                                                                />
+                                                                <span className={`text-xs text-theme-text leading-relaxed select-text ${block.checked ? 'line-through text-theme-text-faint' : ''}`}>
+                                                                    {renderMarkdownInline(block.content)}
+                                                                </span>
                                                             </div>
-                                                            <pre className="p-4 overflow-x-auto text-zinc-100 leading-relaxed scrollbar-thin select-text">
-                                                                <code>{block.content}</code>
-                                                            </pre>
-                                                        </div>
-                                                    );
-                                                default:
-                                                    return (
-                                                        <p key={block.key} className="text-xs text-theme-text leading-relaxed my-2 select-text text-justify">
-                                                            {renderMarkdownInline(block.content)}
-                                                        </p>
-                                                    );
-                                            }
-                                        })}
+                                                        );
+                                                    case 'bullet':
+                                                        return (
+                                                            <div key={block.key} className="flex items-start gap-2 pl-4 my-1">
+                                                                <span className="text-amber-500 mt-1 shrink-0 text-[10px]">•</span>
+                                                                <span className="text-xs text-theme-text leading-relaxed select-text">{renderMarkdownInline(block.content)}</span>
+                                                            </div>
+                                                        );
+                                                    case 'code':
+                                                        return (
+                                                            <div key={block.key} className="my-4 rounded-xl border border-theme-border overflow-hidden bg-zinc-950 font-mono text-[11px] shadow-md select-none">
+                                                                <div className="flex items-center justify-between px-4 py-1.5 bg-zinc-900 border-b border-zinc-800 text-zinc-400 select-none text-[9px] font-semibold">
+                                                                    <span>{block.language || 'code'}</span>
+                                                                    <button 
+                                                                        onClick={() => handleCopyCode(block.content, block.key)}
+                                                                        className="flex items-center gap-1 hover:text-zinc-200 transition-colors"
+                                                                    >
+                                                                        {copiedBlockKey === block.key ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
+                                                                        <span>{copiedBlockKey === block.key ? 'Copiado!' : 'Copiar'}</span>
+                                                                    </button>
+                                                                </div>
+                                                                <pre className="p-4 overflow-x-auto text-zinc-100 leading-relaxed scrollbar-thin select-text">
+                                                                    <code>{block.content}</code>
+                                                                </pre>
+                                                            </div>
+                                                        );
+                                                    default:
+                                                        return (
+                                                            <p key={block.key} className="text-xs text-theme-text leading-relaxed my-2 select-text text-justify">
+                                                                {renderMarkdownInline(block.content)}
+                                                            </p>
+                                                        );
+                                                }
+                                            })
+                                        )}
                                     </div>
                                 </div>
                             )}
 
-                            {/* Easy Text Insertion input (ChatGPT Style Prompt Box) */}
+                            {/* Easy Text Insertion input (Prompt Box) */}
                             {!isEditMode && (
                                 <div className="p-4 border-t border-theme-border bg-theme-surface/50 backdrop-blur shrink-0 select-none">
-                                    <div className="max-w-3xl mx-auto flex items-end gap-2.5 bg-theme-card border border-theme-border rounded-xl p-2.5 shadow-sm focus-within:border-pink-500/60 focus-within:ring-2 focus-within:ring-pink-500/10 transition-all">
+                                    <div className="max-w-3xl mx-auto flex items-end gap-2.5 bg-theme-card border border-theme-border rounded-xl p-2.5 shadow-sm focus-within:border-amber-500/60 focus-within:ring-2 focus-within:ring-amber-500/10 transition-all">
                                         <textarea
                                             value={inputText}
                                             onChange={(e) => setInputText(e.target.value)}
                                             onKeyDown={handleKeyPress}
                                             rows={Math.min(5, inputText.split('\n').length || 1)}
-                                            placeholder="Inserir nota facilitada... Digite texto ou código (\`\`\`js) e envie. Shift+Enter para nova linha."
+                                            placeholder="Inserir nota rápida... Digite texto ou código e envie. Shift+Enter para nova linha."
                                             className="flex-1 bg-transparent text-xs text-theme-text focus:outline-none resize-none leading-relaxed px-2 py-1 scrollbar-none"
                                         />
                                         <button
                                             onClick={handleInsertText}
                                             disabled={!inputText.trim()}
-                                            className="p-2 rounded-lg bg-pink-500 text-white disabled:opacity-30 disabled:bg-theme-border hover:bg-pink-600 transition-all shrink-0 flex items-center justify-center shadow-sm"
+                                            className="p-2 rounded-lg bg-amber-500 text-black disabled:opacity-30 disabled:bg-theme-border hover:bg-amber-600 transition-all shrink-0 flex items-center justify-center shadow-sm"
                                         >
                                             <Send size={12} />
                                         </button>
@@ -954,7 +1191,7 @@ const NotesPage: React.FC = () => {
                 ) : (
                     /* EMPTY STATE */
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 select-none">
-                        <div className="w-16 h-16 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-400 mb-4 animate-bounce">
+                        <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 animate-bounce">
                             <StickyNote size={32} />
                         </div>
                         <h3 className="font-bold text-sm text-theme-text">Nenhuma Nota Aberta</h3>
@@ -964,7 +1201,7 @@ const NotesPage: React.FC = () => {
                         {activeSpaceId && (
                             <button
                                 onClick={handleCreateNote}
-                                className="mt-4 px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                                className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
                             >
                                 <Plus size={14} /> Criar Nova Nota
                             </button>
@@ -994,7 +1231,7 @@ const NotesPage: React.FC = () => {
                                     placeholder="Ex: Ideias, Estudos, Trabalho"
                                     value={newSpaceName}
                                     onChange={(e) => setNewSpaceName(e.target.value)}
-                                    className="w-full bg-theme-base border border-theme-border focus:border-pink-500 focus:outline-none rounded-lg px-3 py-2 text-xs text-theme-text"
+                                    className="w-full bg-theme-base border border-theme-border focus:border-amber-500 focus:outline-none rounded-lg px-3 py-2 text-xs text-theme-text"
                                     maxLength={24}
                                 />
                             </div>
@@ -1008,7 +1245,7 @@ const NotesPage: React.FC = () => {
                                             type="button"
                                             onClick={() => setNewSpaceIcon(emoji)}
                                             className={`text-lg p-1.5 rounded-lg hover:bg-theme-card transition-all active:scale-90 ${
-                                                newSpaceIcon === emoji ? 'bg-pink-500/20 border border-pink-500/60 scale-105' : 'border border-transparent'
+                                                newSpaceIcon === emoji ? 'bg-amber-500/20 border border-amber-500/60 scale-105' : 'border border-transparent'
                                             }`}
                                         >
                                             {emoji}
@@ -1027,7 +1264,7 @@ const NotesPage: React.FC = () => {
                             </button>
                             <button
                                 onClick={handleCreateSpace}
-                                className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
+                                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
                             >
                                 Criar Espaço
                             </button>
@@ -1051,7 +1288,7 @@ const NotesPage: React.FC = () => {
                             <X size={16} />
                         </button>
 
-                        <div className="flex items-center gap-2 text-pink-500 border-b border-theme-border pb-3">
+                        <div className="flex items-center gap-2 text-amber-500 border-b border-theme-border pb-3">
                             <Settings size={18} />
                             <h3 className="font-bold text-sm text-theme-text">Segurança das Notas</h3>
                         </div>
@@ -1074,7 +1311,7 @@ const NotesPage: React.FC = () => {
                                             setTempPinConfirm('');
                                         }
                                     }}
-                                    className="h-4.5 w-8 rounded-full border-theme-border text-pink-500 focus:ring-pink-500/20 cursor-pointer"
+                                    className="h-4.5 w-8 rounded-full border-theme-border text-amber-500 focus:ring-amber-500/20 cursor-pointer"
                                 />
                             </div>
 
@@ -1094,7 +1331,7 @@ const NotesPage: React.FC = () => {
                                                 placeholder="••••"
                                                 value={tempPin}
                                                 onChange={(e) => setTempPin(e.target.value.replace(/[^0-9]/g, ''))}
-                                                className="w-full text-center bg-theme-base border border-theme-border focus:border-pink-500 focus:outline-none rounded-lg px-2 py-1.5 text-xs text-theme-text tracking-widest font-mono"
+                                                className="w-full text-center bg-theme-base border border-theme-border focus:border-amber-500 focus:outline-none rounded-lg px-2 py-1.5 text-xs text-theme-text tracking-widest font-mono"
                                             />
                                         </div>
                                         <div>
@@ -1107,7 +1344,7 @@ const NotesPage: React.FC = () => {
                                                 placeholder="••••"
                                                 value={tempPinConfirm}
                                                 onChange={(e) => setTempPinConfirm(e.target.value.replace(/[^0-9]/g, ''))}
-                                                className="w-full text-center bg-theme-base border border-theme-border focus:border-pink-500 focus:outline-none rounded-lg px-2 py-1.5 text-xs text-theme-text tracking-widest font-mono"
+                                                className="w-full text-center bg-theme-base border border-theme-border focus:border-amber-500 focus:outline-none rounded-lg px-2 py-1.5 text-xs text-theme-text tracking-widest font-mono"
                                             />
                                         </div>
                                     </div>
@@ -1119,7 +1356,7 @@ const NotesPage: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={handleLockNow}
-                                    className="w-full py-2.5 border border-pink-500/20 bg-pink-500/5 hover:bg-pink-500/10 text-pink-400 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                                    className="w-full py-2.5 border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-500 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
                                 >
                                     <Lock size={12} /> Bloquear Sessão de Notas Agora
                                 </button>
@@ -1137,12 +1374,85 @@ const NotesPage: React.FC = () => {
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
+                                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
                             >
                                 Salvar Configurações
                             </button>
                         </div>
                     </form>
+                </div>
+            )}
+
+            {/* ─── CUSTOM CONTEXT MENU (RIGHT-CLICK) ───────────── */}
+            {contextMenu.visible && (
+                <div 
+                    style={{ 
+                        position: 'fixed', 
+                        left: contextMenu.x, 
+                        top: contextMenu.y, 
+                        zIndex: 1000 
+                    }}
+                    className="w-48 bg-theme-surface/95 border border-theme-border/80 backdrop-blur-xl rounded-xl shadow-2xl p-1.5 flex flex-col gap-0.5 animate-fade-in"
+                >
+                    {contextMenu.noteId && (
+                        <>
+                            {/* Option: Toggle Star */}
+                            <button
+                                onClick={() => handleToggleStar(contextMenu.noteId!)}
+                                className="w-full px-3 py-2 text-left text-xs font-medium text-theme-text hover:bg-theme-border hover:text-amber-500 rounded-lg flex items-center gap-2 transition-all"
+                            >
+                                <Star size={13} className="text-amber-500" fill={notes.find(n => n.id === contextMenu.noteId)?.isStarred ? 'currentColor' : 'none'} />
+                                <span>
+                                    {notes.find(n => n.id === contextMenu.noteId)?.isStarred ? 'Desfavoritar Nota' : 'Favoritar Nota'}
+                                </span>
+                            </button>
+
+                            {/* Option: Move Note Header */}
+                            <div className="border-t border-theme-border/60 my-1" />
+                            <div className="px-3 py-1 text-[9px] font-bold text-theme-text-faint uppercase tracking-wider">Mover para Espaço</div>
+                            
+                            {/* List target spaces */}
+                            {spaces
+                                .filter(s => s.id !== notes.find(n => n.id === contextMenu.noteId)?.spaceId)
+                                .map(space => (
+                                    <button
+                                        key={space.id}
+                                        onClick={() => handleMoveNote(contextMenu.noteId!, space.id)}
+                                        className="w-full px-4 py-1.5 text-left text-[11px] text-theme-text-muted hover:bg-theme-border hover:text-theme-text rounded-md flex items-center gap-1.5 transition-all truncate"
+                                    >
+                                        <span>{space.icon}</span>
+                                        <span>{space.name}</span>
+                                    </button>
+                                ))
+                            }
+                            {spaces.filter(s => s.id !== notes.find(n => n.id === contextMenu.noteId)?.spaceId).length === 0 && (
+                                <div className="px-4 py-1.5 text-[10px] text-theme-text-faint italic">Sem outros espaços</div>
+                            )}
+
+                            {/* Option: Delete Note */}
+                            <div className="border-t border-theme-border/60 my-1" />
+                            <button
+                                onClick={() => handleDeleteNote(contextMenu.noteId!)}
+                                className="w-full px-3 py-2 text-left text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-lg flex items-center gap-2 transition-all"
+                            >
+                                <Trash2 size={13} />
+                                <span>Excluir Nota</span>
+                            </button>
+                        </>
+                    )}
+
+                    {contextMenu.spaceId && (
+                        <>
+                            {/* Option: Delete Space */}
+                            <button
+                                onClick={() => handleDeleteSpace(contextMenu.spaceId!)}
+                                className="w-full px-3 py-2 text-left text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-lg flex items-center gap-2 transition-all"
+                            >
+                                <Trash2 size={13} />
+                                <span>Excluir Espaço</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             )}
 

@@ -20,7 +20,7 @@ const ALL_ITEMS: Record<string, { id: string; label: string; icon: React.FC<any>
     canvas:     { id: 'canvas',     label: 'Tela',      icon: Monitor,     colorClass: 'text-amber-500' },
     tasks:      { id: 'tasks',      label: 'Tarefas',   icon: CheckSquare, colorClass: 'text-blue-500' },
     dadosclean: { id: 'dadosclean', label: 'MetaClean', icon: Eraser,      colorClass: 'text-emerald-500' },
-    notes:      { id: 'notes',      label: 'Notas',     icon: StickyNote,  colorClass: 'text-pink-500' }
+    notes:      { id: 'notes',      label: 'Notas',     icon: StickyNote,  colorClass: 'text-amber-500' }
 };
 
 // Ordem Padrão solicitada
