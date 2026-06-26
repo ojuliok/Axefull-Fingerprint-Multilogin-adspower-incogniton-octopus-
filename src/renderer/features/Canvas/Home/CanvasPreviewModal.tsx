@@ -63,7 +63,15 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
     }
   };
 
-  const canvasData = isCanvas ? getCanvasData(previewCanvas.id) : null;
+  const [canvasData, setCanvasData] = React.useState<CanvasData | null>(null);
+
+  React.useEffect(() => {
+    if (isCanvas) {
+      getCanvasData(previewCanvas.id).then(data => setCanvasData(data));
+    } else {
+      setCanvasData(null);
+    }
+  }, [isCanvas, previewCanvas.id]);
 
   return (
     <div className={`${styles.previewModalContainer} ${previewLayout === 'side' ? styles.previewLayoutSide : styles.previewLayoutCenter}`}>

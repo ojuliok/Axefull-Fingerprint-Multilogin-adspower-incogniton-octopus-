@@ -54,7 +54,7 @@ import styles from './CanvasHome.module.css';
 // ─── Props ───────────────────────────────────────────
 interface CanvasHomeProps {
   canvasList: CanvasInfo[];
-  onSelectCanvas: (id: string) => void;
+  onSelectCanvas: (id: string, skipClosing?: boolean) => void;
   onCreateCanvas: () => void;
   onCreateItem?: (type: 'canvas' | 'page' | 'folder' | 'table' | 'space') => void;
   onDeleteCanvas: (id: string) => void;
@@ -124,9 +124,9 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   const handleSpaceEnter = useCallback((id: string) => {
     setIsEnteringSpace(true);
     setTimeout(() => {
-      onSelectCanvas(id);
+      onSelectCanvas(id, true);
       setIsEnteringSpace(false);
-    }, 1000);
+    }, 400);
   }, [onSelectCanvas]);
   const [showMembersManager, setShowMembersManager] = useState(false);
   const [pinSettingsItem, setPinSettingsItem] = useState<CanvasInfo | null>(null);
@@ -278,7 +278,8 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   );
 
   const getNodeCount = useCallback((id: string) => {
-    return getCanvasData(id)?.nodes?.length || 0;
+    // Cannot fetch canvas data synchronously here
+    return 0;
   }, []);
 
   const previewCanvas = useMemo(() => {

@@ -37,6 +37,41 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     const [isNotesFloating, setIsNotesFloating] = useState(false);
 
     const refreshWorkspaces = useCallback(async () => {
+        const isOffline = (() => {
+            try { return localStorage.getItem('axe_storage_mode') === 'offline'; }
+            catch { return false; }
+        })();
+
+        if (isOffline) {
+            setIsLoading(true);
+            try {
+                const saved = localStorage.getItem('axe_offline_workspaces');
+                let localWs: Workspace[] = saved ? JSON.parse(saved) : [];
+                if (localWs.length === 0) {
+                    const defaultWs: Workspace = {
+                        id: 'offline-workspace',
+                        name: 'Meu Workspace (Local)',
+                        owner_id: 'offline-owner',
+                        created_at: new Date().toISOString()
+                    };
+                    localWs = [defaultWs];
+                    localStorage.setItem('axe_offline_workspaces', JSON.stringify(localWs));
+                }
+                setWorkspaces(localWs);
+                if (!currentWorkspace) {
+                    setCurrentWorkspace(localWs[0]);
+                } else {
+                    const stillExists = localWs.find(w => w.id === currentWorkspace.id);
+                    if (!stillExists) setCurrentWorkspace(localWs[0]);
+                }
+            } catch (err) {
+                console.error('Error loading offline workspaces:', err);
+            } finally {
+                setIsLoading(false);
+            }
+            return;
+        }
+
         if (!user) {
             setWorkspaces([]);
             setCurrentWorkspace(null);
@@ -106,6 +141,32 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }, [refreshWorkspaces]);
 
     const createWorkspace = async (name: string) => {
+        const isOffline = (() => {
+            try { return localStorage.getItem('axe_storage_mode') === 'offline'; }
+            catch { return false; }
+        })();
+
+        if (isOffline) {
+            const newWs: Workspace = {
+                id: crypto.randomUUID(),
+                name,
+                owner_id: 'offline-owner',
+                created_at: new Date().toISOString()
+            };
+            try {
+                const saved = localStorage.getItem('axe_offline_workspaces');
+                const localWs: Workspace[] = saved ? JSON.parse(saved) : [];
+                localWs.push(newWs);
+                localStorage.setItem('axe_offline_workspaces', JSON.stringify(localWs));
+                setWorkspaces(localWs);
+                setCurrentWorkspace(newWs);
+                return newWs;
+            } catch (err) {
+                console.error('Error creating offline workspace:', err);
+                return null;
+            }
+        }
+
         if (!user) return null;
         try {
             const { data, error } = await supabase

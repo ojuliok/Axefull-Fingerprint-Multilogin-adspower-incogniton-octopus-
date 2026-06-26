@@ -85,9 +85,10 @@ const CanvasPage: React.FC = () => {
 
     // Security PIN States
     const [unlockedItems, setUnlockedItems] = useState<Set<string>>(new Set());
+    const unlockedItemsRef = useRef<Set<string>>(new Set());
     const [pinSettingsItem, setPinSettingsItem] = useState<CanvasInfo | null>(null);
     const [pinUnlockItem, setPinUnlockItem] = useState<CanvasInfo | null>(null);
-    const [onPinSuccess, setOnPinSuccess] = useState<(() => void) | null>(null);
+    const [onPinSuccess, setOnPinSuccess] = useState<((unlockedId: string) => void) | null>(null);
 
     const checkPinAndProceed = useCallback((id: string, onProceed: () => void) => {
         const item = canvasList.find(c => c.id === id);
@@ -100,7 +101,7 @@ const CanvasPage: React.FC = () => {
             let current = canvasList.find(c => c.id === canvasId);
             while (current) {
                 const pinVal = current.properties?.pin;
-                if (pinVal && !unlockedItems.has(current.id)) {
+                if (pinVal && !unlockedItemsRef.current.has(current.id)) {
                     return current;
                 }
                 if (current.parentId) {
@@ -115,20 +116,23 @@ const CanvasPage: React.FC = () => {
         const lockedAncestor = getFirstLockedAncestor(id);
         if (lockedAncestor) {
             setPinUnlockItem(lockedAncestor);
-            setOnPinSuccess(() => () => {
-                setUnlockedItems(prev => {
-                    const next = new Set(prev);
-                    next.add(lockedAncestor.id);
-                    return next;
-                });
-                setTimeout(() => {
-                    checkPinAndProceed(id, onProceed);
-                }, 100);
+            setOnPinSuccess(() => (pinUnlockedId: string) => {
+                unlockedItemsRef.current.add(pinUnlockedId);
+                setUnlockedItems(new Set(unlockedItemsRef.current));
+
+                const nextLocked = getFirstLockedAncestor(id);
+                if (!nextLocked) {
+                    onProceed();
+                    setPinUnlockItem(null);
+                    setOnPinSuccess(null);
+                } else {
+                    setPinUnlockItem(nextLocked);
+                }
             });
         } else {
             onProceed();
         }
-    }, [canvasList, unlockedItems]);
+    }, [canvasList]);
 
     const renameInputRef = useRef<HTMLInputElement>(null);
     const fileImportInputRef = useRef<HTMLInputElement>(null);
@@ -325,12 +329,28 @@ const CanvasPage: React.FC = () => {
         setCreateModalName('');
     }, []);
 
-    const handleSelectCanvas = useCallback(async (id: string) => {
-        checkPinAndProceed(id, () => {
-            setTransitionState('closing');
-            
-            setTimeout(async () => {
-                const canvas = canvasList.find(c => c.id === id);
+    const handleSelectCanvas = useCallback(async (id: string, skipClosing = false) => {
+        checkPinAndProceed(id, async () => {
+            const canvas = canvasList.find(c => c.id === id);
+            const isSpace = canvas?.type === 'space';
+
+            if (!isSpace) {
+                // Instantly load without any transitions for folders, pages, tables, canvas files, etc.
+                setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
+                const data = await getCanvasData(id);
+                setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                setRenamingId(null);
+                setViewState('canvas');
+                setIsHovered(false);
+                if (isMobileViewport()) {
+                    setMenuMode('collapsed');
+                }
+                setTransitionState('none');
+                return;
+            }
+
+            // For spaces, run the circular zoom transitions
+            if (skipClosing) {
                 setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
                 const data = await getCanvasData(id);
                 setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
@@ -345,29 +365,40 @@ const CanvasPage: React.FC = () => {
                 
                 setTimeout(() => {
                     setTransitionState('none');
-                }, 800);
-            }, 800);
+                }, 400);
+            } else {
+                setTransitionState('closing');
+                
+                setTimeout(async () => {
+                    setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
+                    const data = await getCanvasData(id);
+                    setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    setRenamingId(null);
+                    setViewState('canvas');
+                    setIsHovered(false);
+                    if (isMobileViewport()) {
+                        setMenuMode('collapsed');
+                    }
+                    
+                    setTransitionState('opening');
+                    
+                    setTimeout(() => {
+                        setTransitionState('none');
+                    }, 400);
+                }, 400);
+            }
         });
     }, [canvasList, checkPinAndProceed]);
 
     const handleGoHome = useCallback(() => {
-        setTransitionState('closing');
-        
-        setTimeout(() => {
-            setNavigationStack([]);
-            setActiveCanvasData(null);
-            setViewState('home');
-            setIsHovered(false);
-            if (isMobileViewport()) {
-                setMenuMode('collapsed');
-            }
-            
-            setTransitionState('opening');
-            
-            setTimeout(() => {
-                setTransitionState('none');
-            }, 800);
-        }, 800);
+        setNavigationStack([]);
+        setActiveCanvasData(null);
+        setViewState('home');
+        setIsHovered(false);
+        if (isMobileViewport()) {
+            setMenuMode('collapsed');
+        }
+        setTransitionState('none');
     }, []);
 
     const handleSectionDragStart = (e: React.DragEvent, section: 'favorites' | 'spaces') => {
@@ -452,7 +483,7 @@ const CanvasPage: React.FC = () => {
         if (newInfo) {
             reloadCanvasList();
             setNavigationStack([{ id: newInfo.id, name: newInfo.name }]);
-            const data = getCanvasData(newInfo.id);
+            const data = await getCanvasData(newInfo.id);
             setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
             setViewState('canvas');
         }
@@ -473,7 +504,8 @@ const CanvasPage: React.FC = () => {
 
     const handleCreateFolder = useCallback(async () => {
         const count = canvasList.filter(c => c.type === 'folder' && !c.parentId).length + 1;
-        createFolder(`Nova Pasta ${count}`);
+        if (!currentWorkspace || !user) return;
+        await createFolder(currentWorkspace.id, user.id, `Nova Pasta ${count}`);
         reloadCanvasList();
     }, [canvasList, reloadCanvasList, currentWorkspace, user]);
 
@@ -698,7 +730,7 @@ const CanvasPage: React.FC = () => {
             }
 
             // Normal tree view
-            return c.parentId === parentId;
+            return (c.parentId || undefined) === (parentId || undefined);
         });
 
         if (items.length === 0) return null;
@@ -1203,6 +1235,8 @@ const CanvasPage: React.FC = () => {
                     />
                 )}
 
+            {/* Transition circular mask */}
+            <div className={`entrance-circular-mask ${transitionState === 'closing' ? 'closing' : transitionState === 'opening' ? 'opening' : ''}`} />
             </div>
 
             {/* ── Context Menu ── */}
@@ -1473,9 +1507,12 @@ const CanvasPage: React.FC = () => {
                     correctPin={pinUnlockItem.properties?.pin || ''}
                     recoveryEmail={pinUnlockItem.properties?.recoveryEmail || ''}
                     onUnlock={() => {
-                        if (onPinSuccess) onPinSuccess();
-                        setPinUnlockItem(null);
-                        setOnPinSuccess(null);
+                        const unlockedId = pinUnlockItem.id;
+                        if (onPinSuccess) {
+                            onPinSuccess(unlockedId);
+                        } else {
+                            setPinUnlockItem(null);
+                        }
                     }}
                     onClose={() => {
                         setPinUnlockItem(null);
@@ -1484,8 +1521,6 @@ const CanvasPage: React.FC = () => {
                 />
             )}
 
-            {/* Transition circular mask */}
-            <div className={`entrance-circular-mask ${transitionState === 'closing' ? 'closing' : transitionState === 'opening' ? 'opening' : ''}`} />
         </div>
     );
 };

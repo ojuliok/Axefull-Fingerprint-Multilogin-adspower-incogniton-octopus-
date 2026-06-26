@@ -20,7 +20,7 @@ const SpaceOverview: React.FC<SpaceOverviewProps> = ({ activeSpace, onUpdate }) 
 
     useEffect(() => {
         if (mode === 'canvas') {
-            setCanvasData(getCanvasData(activeSpace.id));
+            getCanvasData(activeSpace.id).then(data => setCanvasData(data));
         }
     }, [activeSpace.id, mode]);
 

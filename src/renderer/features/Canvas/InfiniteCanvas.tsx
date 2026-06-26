@@ -192,7 +192,22 @@ const EditableDiv: React.FC<{
         }
     }, [autoFocus, editable]);
 
+    const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+
     const handleInput = useCallback(() => {
+        if (ref.current) {
+            const html = ref.current.innerHTML;
+            savedContent.current = html;
+            
+            if (saveTimeout.current) clearTimeout(saveTimeout.current);
+            saveTimeout.current = setTimeout(() => {
+                onSave(nodeId, html);
+            }, 800);
+        }
+    }, [nodeId, onSave]);
+
+    const handleBlur = useCallback(() => {
+        if (saveTimeout.current) clearTimeout(saveTimeout.current);
         if (ref.current) {
             const html = ref.current.innerHTML;
             savedContent.current = html;
@@ -259,6 +274,7 @@ const EditableDiv: React.FC<{
             suppressContentEditableWarning
             className={className}
             onInput={handleInput}
+            onBlur={handleBlur}
             onFocus={onFocusCb}
             onKeyDown={handleKeyDown}
             onMouseDown={(e) => { if (editable) e.stopPropagation(); }}
