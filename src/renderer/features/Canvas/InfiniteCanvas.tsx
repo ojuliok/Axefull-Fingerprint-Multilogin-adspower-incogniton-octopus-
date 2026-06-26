@@ -243,18 +243,18 @@ const EditableDiv: React.FC<{
 
                     if (beforeCursor === '#') {
                         e.preventDefault();
-                        document.execCommand('formatBlock', false, 'H1');
                         deletePrefix(offset);
+                        document.execCommand('formatBlock', false, 'H1');
                         setTimeout(() => { if (ref.current) handleInput(); }, 10);
                     } else if (beforeCursor === '##') {
                         e.preventDefault();
-                        document.execCommand('formatBlock', false, 'H2');
                         deletePrefix(offset);
+                        document.execCommand('formatBlock', false, 'H2');
                         setTimeout(() => { if (ref.current) handleInput(); }, 10);
                     } else if (beforeCursor === '###') {
                         e.preventDefault();
-                        document.execCommand('formatBlock', false, 'H3');
                         deletePrefix(offset);
+                        document.execCommand('formatBlock', false, 'H3');
                         setTimeout(() => { if (ref.current) handleInput(); }, 10);
                     } else if (beforeCursor === '---') {
                         e.preventDefault();
