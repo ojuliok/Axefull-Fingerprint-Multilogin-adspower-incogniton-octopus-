@@ -17,9 +17,23 @@ function sanitizeUUID(id: string | undefined | null): string | null {
     return uuidRegex.test(clean) ? clean : null;
 }
 
+function getStorageMode(): 'online' | 'offline' {
+    try {
+        return (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online';
+    } catch {
+        return 'online';
+    }
+}
+
 // ── List Operations ──
 
 export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        const list = offlineCanvases ? JSON.parse(offlineCanvases) : [];
+        return list.filter((c: any) => c.workspaceId === workspaceId && !c.isDeleted);
+    }
+
     const cleanWorkspaceId = sanitizeUUID(workspaceId);
     if (!cleanWorkspaceId) return [];
     try {
@@ -55,6 +69,39 @@ export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> 
 }
 
 export async function createCanvas(workspaceId: string, ownerId: string, name: string, parentId?: string, type: 'canvas'|'page'|'card'|'table'|'folder'|'space' = 'canvas', forceId?: string): Promise<CanvasInfo> {
+    if (getStorageMode() === 'offline') {
+        const id = forceId || crypto.randomUUID();
+        const emptyData: CanvasData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+        
+        const newCanvas: any = {
+            id,
+            workspaceId: workspaceId || 'offline-workspace',
+            ownerId: ownerId || 'offline-owner',
+            parentId: parentId || null,
+            name,
+            type,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            isDeleted: false,
+            data: emptyData
+        };
+        
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        const list = offlineCanvases ? JSON.parse(offlineCanvases) : [];
+        list.push(newCanvas);
+        localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+        localStorage.setItem(`axe_offline_canvas_data_${id}`, JSON.stringify(emptyData));
+        
+        return {
+            id: newCanvas.id,
+            name: newCanvas.name,
+            createdAt: newCanvas.createdAt,
+            updatedAt: newCanvas.updatedAt,
+            parentId: newCanvas.parentId,
+            type: newCanvas.type as any
+        };
+    }
+
     const cleanForceId = sanitizeUUID(forceId);
     const id = cleanForceId || crypto.randomUUID();
     const emptyData: CanvasData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
@@ -90,6 +137,17 @@ export async function createFolder(workspaceId: string, ownerId: string, name: s
 }
 
 export async function deleteCanvas(id: string): Promise<void> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        if (offlineCanvases) {
+            let list = JSON.parse(offlineCanvases);
+            list = list.filter((c: any) => c.id !== id);
+            localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+        }
+        localStorage.removeItem(`axe_offline_canvas_data_${id}`);
+        return;
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
     try {
@@ -100,6 +158,20 @@ export async function deleteCanvas(id: string): Promise<void> {
 }
 
 export async function softDeleteCanvas(id: string): Promise<void> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        if (offlineCanvases) {
+            const list = JSON.parse(offlineCanvases);
+            const found = list.find((c: any) => c.id === id);
+            if (found) {
+                found.isDeleted = true;
+                found.deletedAt = Date.now();
+                localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+            }
+        }
+        return;
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
     try {
@@ -113,6 +185,20 @@ export async function softDeleteCanvas(id: string): Promise<void> {
 }
 
 export async function restoreCanvas(id: string): Promise<void> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        if (offlineCanvases) {
+            const list = JSON.parse(offlineCanvases);
+            const found = list.find((c: any) => c.id === id);
+            if (found) {
+                found.isDeleted = false;
+                found.deletedAt = null;
+                localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+            }
+        }
+        return;
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
     try {
@@ -126,6 +212,20 @@ export async function restoreCanvas(id: string): Promise<void> {
 }
 
 export async function renameCanvas(id: string, name: string): Promise<void> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        if (offlineCanvases) {
+            const list = JSON.parse(offlineCanvases);
+            const found = list.find((c: any) => c.id === id);
+            if (found) {
+                found.name = name;
+                found.updatedAt = Date.now();
+                localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+            }
+        }
+        return;
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
     try {
@@ -139,6 +239,20 @@ export async function renameCanvas(id: string, name: string): Promise<void> {
 }
 
 export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>): Promise<void> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        if (offlineCanvases) {
+            const list = JSON.parse(offlineCanvases);
+            const found = list.find((c: any) => c.id === id);
+            if (found) {
+                Object.assign(found, updates);
+                found.updatedAt = Date.now();
+                localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+            }
+        }
+        return;
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
     try {
@@ -160,6 +274,25 @@ export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>)
 }
 
 export async function moveCanvasItem(id: string, targetId: string, position: 'before' | 'after' | 'inside', workspaceId?: string): Promise<void> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        if (offlineCanvases) {
+            const list = JSON.parse(offlineCanvases);
+            const found = list.find((c: any) => c.id === id);
+            const target = list.find((c: any) => c.id === targetId);
+            if (found) {
+                if (position === 'inside') {
+                    found.parentId = targetId;
+                } else {
+                    found.parentId = target ? target.parentId : null;
+                }
+                found.updatedAt = Date.now();
+                localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+            }
+        }
+        return;
+    }
+
     const cleanId = sanitizeUUID(id);
     const cleanTargetId = sanitizeUUID(targetId);
     if (!cleanId || !cleanTargetId) return;
@@ -186,6 +319,38 @@ export async function moveCanvasItem(id: string, targetId: string, position: 'be
 }
 
 export async function duplicateCanvas(id: string, workspaceId: string, ownerId: string): Promise<CanvasInfo | null> {
+    if (getStorageMode() === 'offline') {
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        const list = offlineCanvases ? JSON.parse(offlineCanvases) : [];
+        const original = list.find((c: any) => c.id === id);
+        if (!original) return null;
+        
+        const newId = crypto.randomUUID();
+        const origDataStr = localStorage.getItem(`axe_offline_canvas_data_${id}`);
+        const origData = origDataStr ? JSON.parse(origDataStr) : { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+        
+        const newCanvas: any = {
+            ...original,
+            id: newId,
+            name: `${original.name} (cópia)`,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
+        
+        list.push(newCanvas);
+        localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+        localStorage.setItem(`axe_offline_canvas_data_${newId}`, JSON.stringify(origData));
+        
+        return {
+            id: newCanvas.id,
+            name: newCanvas.name,
+            createdAt: newCanvas.createdAt,
+            updatedAt: newCanvas.updatedAt,
+            parentId: newCanvas.parentId,
+            type: newCanvas.type as any
+        };
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return null;
     try {
@@ -222,6 +387,14 @@ export async function duplicateCanvas(id: string, workspaceId: string, ownerId: 
 // ── Canvas Data Operations ──
 
 export async function getCanvasData(id: string): Promise<CanvasData | null> {
+    if (getStorageMode() === 'offline') {
+        const origDataStr = localStorage.getItem(`axe_offline_canvas_data_${id}`);
+        if (origDataStr) {
+            return JSON.parse(origDataStr);
+        }
+        return { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
     try {
@@ -239,6 +412,20 @@ export async function getCanvasData(id: string): Promise<CanvasData | null> {
 }
 
 export async function saveCanvasData(id: string, data: CanvasData): Promise<void> {
+    if (getStorageMode() === 'offline') {
+        localStorage.setItem(`axe_offline_canvas_data_${id}`, JSON.stringify(data));
+        const offlineCanvases = localStorage.getItem('axe_offline_canvases');
+        if (offlineCanvases) {
+            const list = JSON.parse(offlineCanvases);
+            const found = list.find((c: any) => c.id === id);
+            if (found) {
+                found.updatedAt = Date.now();
+                localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
+            }
+        }
+        return;
+    }
+
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
     try {
