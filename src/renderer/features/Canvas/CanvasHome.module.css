@@ -1816,3 +1816,253 @@
   }
 }
 
+/* ============================================
+   Quick Templates Styles
+   ============================================ */
+
+.templatesContainer {
+  margin-top: 32px;
+  width: 100%;
+  max-width: 600px;
+  animation: cardFadeIn 0.5s ease forwards;
+}
+
+.templatesTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 16px 0;
+  text-align: left;
+}
+
+.templatesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.templateCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.templateCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--item-rgb, 139, 92, 246), 0.4);
+  background: rgba(var(--item-rgb, 139, 92, 246), 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.templateIcon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(var(--item-rgb, 161, 161, 170), 0.1);
+  color: rgb(var(--item-rgb, 161, 161, 170));
+  transition: transform 0.2s ease;
+}
+
+.templateCard:hover .templateIcon {
+  transform: scale(1.08);
+}
+
+.templateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.templateName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.templateDesc {
+  font-size: 11.5px;
+  color: var(--text-disabled);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ============================================
+   Onboarding Checklist Widget Styles
+   ============================================ */
+
+.onboardingWidget {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  animation: fadeInOnboarding 0.3s ease-out;
+}
+
+.onboardingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.onboardingHeaderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.onboardingTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.onboardingSubtitle {
+  font-size: 12px;
+  color: var(--text-disabled);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.onboardingProgressContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  min-width: 180px;
+}
+
+@media (max-width: 768px) {
+  .onboardingProgressContainer {
+    align-items: flex-start;
+    width: 100%;
+  }
+}
+
+.onboardingProgressBar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.onboardingProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+  border-radius: 3px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.onboardingProgressLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.onboardingStepsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.onboardingStepItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-primary);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.onboardingStepDone {
+  border-color: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.01);
+}
+
+.onboardingStepCheck {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.checkboxCircle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.onboardingStepDone .checkboxCircle {
+  border-color: #10b981;
+  background: #10b981;
+}
+
+.checkIcon {
+  color: #fff;
+}
+
+.onboardingStepText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.onboardingStepLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.onboardingStepDone .onboardingStepLabel {
+  text-decoration: line-through;
+  color: var(--text-disabled);
+}
+
+.onboardingStepDesc {
+  font-size: 11px;
+  color: var(--text-disabled);
+  line-height: 1.35;
+}
+
+@keyframes fadeInOnboarding {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+

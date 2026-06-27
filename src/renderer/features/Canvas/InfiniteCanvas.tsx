@@ -2569,6 +2569,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         socialSearch.trim() === '' || platform.name.toLowerCase().includes(socialSearch.toLowerCase())
     );
 
+    const mapBounds = getMinimapData();
     
     const contextValue = {
         canvasId, nodes, setNodes, strokes, setStrokes, connections, setConnections, viewport, setViewport,
@@ -3807,6 +3808,23 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                         gap: 3
                                                     }}>
                                                         {prof.fingerprint.platform.includes('Win') ? '🪟 Win' : (prof.fingerprint.platform.includes('Mac') ? '🍎 Mac' : '🐧 Linux')}
+                                                    </span>
+                                                )}
+                                                {/* Proxy Badge */}
+                                                {prof?.proxy && (
+                                                    <span style={{
+                                                        fontSize: 9,
+                                                        padding: '2px 6px',
+                                                        borderRadius: 6,
+                                                        background: 'rgba(16, 185, 129, 0.06)',
+                                                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                                                        color: '#10b981',
+                                                        fontWeight: 600,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 3
+                                                    }} title={`${prof.proxy.type.toUpperCase()} - ${prof.proxy.host}:${prof.proxy.port}`}>
+                                                        🔌 {prof.proxy.host.length > 12 ? `${prof.proxy.host.substring(0, 10)}...` : prof.proxy.host}
                                                     </span>
                                                 )}
                                                 {/* AI Score */}

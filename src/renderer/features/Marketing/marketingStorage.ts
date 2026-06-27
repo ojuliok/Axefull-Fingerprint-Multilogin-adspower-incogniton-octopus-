@@ -61,6 +61,7 @@ export interface MarketingCardData {
     updates?: LeadUpdate[];
     tags?: string[];
     timeSpent?: number;
+    profileId?: string;
     subtasks?: { id: string; title: string; done: boolean }[];
     updatedAt: number;
     createdAt: number;

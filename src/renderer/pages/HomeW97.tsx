@@ -281,18 +281,18 @@ export const HomeW97: React.FC = () => {
       } else {
         clearInterval(logInterval);
       }
-    }, 150);
+    }, 70);
 
     const progressInterval = setInterval(() => {
       setBootProgress(prev => {
         if (prev >= 100) {
           clearInterval(progressInterval);
-          setTimeout(() => setBooting(false), 300);
+          setTimeout(() => setBooting(false), 200);
           return 100;
         }
         return prev + 5;
       });
-    }, 100);
+    }, 40);
 
     return () => {
       clearInterval(logInterval);

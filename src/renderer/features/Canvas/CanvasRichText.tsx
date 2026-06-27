@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CanvasInfo, updateCanvasInfo } from './canvasStorage';
-import { Image, Trash2, X, Upload } from 'lucide-react';
+import { Image, Trash2, X, Upload, AtSign } from 'lucide-react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TaskList from '@tiptap/extension-task-list';
@@ -53,6 +53,58 @@ const CanvasRichText: React.FC<CanvasRichTextProps> = ({ canvasInfo, onUpdate, o
     const [showCoverMenu, setShowCoverMenu] = useState(false);
     const [coverLinkUrl, setCoverLinkUrl] = useState('');
     const coverFileInputRef = useRef<HTMLInputElement>(null);
+
+    // Profile Mention States
+    const [profiles, setProfiles] = useState<any[]>([]);
+    const [showProfileSelector, setShowProfileSelector] = useState(false);
+    const profileSelectorRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const loadProfiles = async () => {
+            try {
+                const result = await window.api.profiles.list();
+                if (result && result.success) {
+                    setProfiles(result.data);
+                }
+            } catch (err) {
+                console.error("Error loading profiles in Rich Text editor:", err);
+            }
+        };
+        loadProfiles();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (profileSelectorRef.current && !profileSelectorRef.current.contains(e.target as Node)) {
+                setShowProfileSelector(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const insertProfileLink = (profileId: string, profileName: string) => {
+        if (editor) {
+            editor.chain().focus().extendMarkRange('link').setLink({ href: `axeprofile://${profileId}` }).insertContent(`@${profileName}`).run();
+            setShowProfileSelector(false);
+        }
+    };
+
+    const handleEditorClick = (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        const link = target.closest('a');
+        if (link) {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('axeprofile://')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const profileId = href.replace('axeprofile://', '');
+                window.api.browser.launch(profileId).catch(err => {
+                    console.error("Failed to launch profile from link:", err);
+                });
+            }
+        }
+    };
 
     const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -162,18 +214,69 @@ const CanvasRichText: React.FC<CanvasRichTextProps> = ({ canvasInfo, onUpdate, o
                             <button onClick={() => setShowCoverMenu(!showCoverMenu)} className={styles.coverActionBtn}>
                                 <Image size={14} /> Alterar Capa
                             </button>
+                            <button onClick={() => setShowProfileSelector(!showProfileSelector)} className={styles.coverActionBtn}>
+                                <AtSign size={14} /> Vincular Perfil
+                            </button>
                             <button onClick={handleRemoveCover} className={styles.coverActionBtn}>
                                 <Trash2 size={14} /> Remover
                             </button>
                         </div>
                     </div>
                 ) : (
-                    <div className={styles.addCoverWrapper}>
+                    <div className={styles.addCoverWrapper} style={{ display: 'flex', gap: '8px' }}>
                         <button className={styles.addCoverBtn} onClick={() => setShowCoverMenu(!showCoverMenu)}>
                             <Image size={14} /> Adicionar Capa
                         </button>
+                        <button className={styles.addCoverBtn} onClick={() => setShowProfileSelector(!showProfileSelector)}>
+                            <AtSign size={14} /> Vincular Perfil
+                        </button>
                     </div>
                 )}
+
+                {/* Profile Selector Popover */}
+                <div style={{ position: 'relative' }} ref={profileSelectorRef}>
+                    {showProfileSelector && (
+                        <div className={styles.coverMenuPopover} style={{ left: 0, top: '4px', width: '220px', zIndex: 100 }}>
+                            <div className={styles.coverMenuHeader}>
+                                Vincular Perfil
+                                <button onClick={() => setShowProfileSelector(false)}><X size={14} /></button>
+                            </div>
+                            <div className={styles.coverMenuBody} style={{ maxHeight: '180px', overflowY: 'auto', padding: '4px' }}>
+                                {profiles.length === 0 ? (
+                                    <div style={{ padding: '8px', fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                                        Nenhum perfil criado
+                                    </div>
+                                ) : (
+                                    profiles.map(p => (
+                                        <button 
+                                            key={p.id}
+                                            className={styles.coverMenuOption}
+                                            onClick={() => insertProfileLink(p.id, p.name)}
+                                            style={{
+                                                width: '100%',
+                                                textAlign: 'left',
+                                                padding: '6px 8px',
+                                                fontSize: '12px',
+                                                borderRadius: '4px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px'
+                                            }}
+                                        >
+                                            <span style={{
+                                                width: '6px',
+                                                height: '6px',
+                                                borderRadius: '50%',
+                                                background: p.is_active === 1 ? '#10b981' : '#6b7280'
+                                            }} />
+                                            {p.name}
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 {showCoverMenu && (
                     <div className={styles.coverMenuPopover}>
@@ -219,7 +322,10 @@ const CanvasRichText: React.FC<CanvasRichTextProps> = ({ canvasInfo, onUpdate, o
                     className={styles.titleInput}
                 />
 
-                <div className={styles.tiptapEditorWrapper}>
+                <div 
+                    className={styles.tiptapEditorWrapper}
+                    onClick={handleEditorClick}
+                >
                     <EditorContent editor={editor} />
                 </div>
             </div>

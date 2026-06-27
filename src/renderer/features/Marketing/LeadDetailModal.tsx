@@ -45,7 +45,11 @@ const LeadDetailModal: React.FC = () => {
     const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
     const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
     const [showTagsDropdown, setShowTagsDropdown] = useState(false);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     
+    // Profiles list state
+    const [profiles, setProfiles] = useState<any[]>([]);
+
     // New tag & subtask states
     const [newTagText, setNewTagText] = useState('');
     const [newSubtaskText, setNewSubtaskText] = useState('');
@@ -55,6 +59,7 @@ const LeadDetailModal: React.FC = () => {
     const assigneeRef = useRef<HTMLDivElement>(null);
     const priorityRef = useRef<HTMLDivElement>(null);
     const tagsRef = useRef<HTMLDivElement>(null);
+    const profileRef = useRef<HTMLDivElement>(null);
 
     // Load active card values
     useEffect(() => {
@@ -98,10 +103,69 @@ const LeadDetailModal: React.FC = () => {
             if (assigneeRef.current && !assigneeRef.current.contains(e.target as Node)) setShowAssigneeDropdown(false);
             if (priorityRef.current && !priorityRef.current.contains(e.target as Node)) setShowPriorityDropdown(false);
             if (tagsRef.current && !tagsRef.current.contains(e.target as Node)) setShowTagsDropdown(false);
+            if (profileRef.current && !profileRef.current.contains(e.target as Node)) setShowProfileDropdown(false);
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Load browser profiles and listen for window closed events in real-time
+    useEffect(() => {
+        const loadProfilesList = async () => {
+            try {
+                const result = await window.api.profiles.list();
+                if (result && result.success) {
+                    setProfiles(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading profiles in CRM Modal:', error);
+            }
+        };
+        
+        loadProfilesList();
+
+        const cleanup = window.api.browser.onProfileClosed((closedProfileId: string) => {
+            setProfiles((prev) => prev.map((p) =>
+                p.id === closedProfileId ? { ...p, is_active: 0, status: p.status === 'running' ? 'ready' : p.status } : p
+            ));
+        });
+
+        return () => {
+            if (cleanup) cleanup();
+        };
+    }, []);
+
+    const launchProfile = async (profileId: string) => {
+        setProfiles((prev) => prev.map((p) =>
+            p.id === profileId ? { ...p, status: 'running' } : p
+        ));
+        try {
+            const result = await window.api.browser.launch(profileId);
+            if (result && result.success) {
+                setProfiles((prev) => prev.map((p) =>
+                    p.id === profileId ? { ...p, is_active: 1, status: 'running' } : p
+                ));
+            } else {
+                setProfiles((prev) => prev.map((p) => p.id === profileId ? { ...p, status: 'ready' } : p));
+            }
+        } catch (error) {
+            setProfiles((prev) => prev.map((p) => p.id === profileId ? { ...p, status: 'ready' } : p));
+            console.error('Error launching profile from CRM:', error);
+        }
+    };
+
+    const closeProfile = async (profileId: string) => {
+        try {
+            const result = await window.api.browser.close(profileId);
+            if (result && result.success) {
+                setProfiles((prev) => prev.map((p) =>
+                    p.id === profileId ? { ...p, is_active: 0, status: 'ready' } : p
+                ));
+            }
+        } catch (error) {
+            console.error('Error closing profile from CRM:', error);
+        }
+    };
 
     if (!selectedLeadId || !selectedLead) return null;
 
@@ -810,6 +874,97 @@ Próximos Passos:
                                         <span style={{ fontSize: '12px', fontWeight: 600, color: isTracking ? '#ef4444' : 'var(--text-primary)', fontFamily: 'monospace' }}>
                                             {formatTimeSpent(timerSeconds)}
                                         </span>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', marginTop: '4px' }}>
+                                    <span style={{ width: '110px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Settings size={14} /> Perfil Browser
+                                    </span>
+                                    
+                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px' }} ref={profileRef}>
+                                        <button 
+                                            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                                            style={{
+                                                background: 'transparent', border: 'none', 
+                                                color: 'var(--text-primary)',
+                                                cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px',
+                                                padding: '4px 8px', borderRadius: '4px', fontWeight: 500
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            {selectedLead.profileId ? (
+                                                profiles.find(p => p.id === selectedLead.profileId)?.name || 'Perfil Vinculado'
+                                            ) : (
+                                                'Vazio'
+                                            )}
+                                        </button>
+
+                                        {selectedLead.profileId && (() => {
+                                            const prof = profiles.find(p => p.id === selectedLead.profileId);
+                                            const isRunning = prof?.status === 'running' || prof?.is_active === 1;
+                                            return (
+                                                <button
+                                                    onClick={() => isRunning ? closeProfile(prof.id) : launchProfile(prof.id)}
+                                                    style={{
+                                                        background: isRunning ? '#ef4444' : '#10b981',
+                                                        border: 'none', color: '#fff', borderRadius: '4px',
+                                                        padding: '2px 8px', fontSize: '11px', display: 'flex',
+                                                        alignItems: 'center', gap: '4px', cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    {isRunning ? <Pause size={10} fill="#fff" /> : <Play size={10} fill="#fff" />}
+                                                    {isRunning ? 'Parar' : 'Iniciar'}
+                                                </button>
+                                            );
+                                        })()}
+                                        
+                                        {showProfileDropdown && (
+                                            <div style={{
+                                                position: 'absolute', top: '100%', left: 0, background: 'var(--bg-card)',
+                                                border: '1px solid var(--border-default)', borderRadius: '6px', padding: '4px',
+                                                zIndex: 100, width: '180px', maxHeight: '200px', overflowY: 'auto',
+                                                boxShadow: 'var(--shadow-md)', marginTop: '4px'
+                                            }}>
+                                                <div 
+                                                    onClick={() => {
+                                                        updateLead(selectedLead.id, { profileId: undefined });
+                                                        setShowProfileDropdown(false);
+                                                    }}
+                                                    style={{
+                                                        padding: '6px 8px', fontSize: '12px', color: '#ef4444',
+                                                        cursor: 'pointer', borderRadius: '4px'
+                                                    }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                >
+                                                    Remover Vínculo
+                                                </div>
+                                                <div style={{ height: '1px', background: 'var(--border-default)', margin: '4px 0' }} />
+                                                {profiles.map(p => (
+                                                    <div 
+                                                        key={p.id}
+                                                        onClick={() => {
+                                                            updateLead(selectedLead.id, { profileId: p.id });
+                                                            setShowProfileDropdown(false);
+                                                        }}
+                                                        style={{
+                                                            padding: '6px 8px', fontSize: '12px', color: 'var(--text-primary)',
+                                                            cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px'
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        <span style={{
+                                                            width: '6px', height: '6px', borderRadius: '50%',
+                                                            background: p.status === 'running' || p.is_active === 1 ? '#10b981' : '#6b7280'
+                                                        }} />
+                                                        {p.name}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

@@ -1200,3 +1200,207 @@
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
+
+/* ============================================
+   TabBar and Tab System Styles
+   ============================================ */
+
+.tabBar {
+  display: flex;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+  padding: 6px 12px 0;
+  height: 38px;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  z-index: 100;
+  transition: padding-left 0.25s ease;
+}
+
+.tabBarCollapsed {
+  padding-left: 56px; /* Offset to prevent overlap with floating expand button */
+}
+
+.tabItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 6px 6px 0 0;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: none;
+  cursor: pointer;
+  max-width: 180px;
+  min-width: 90px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tabItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.tabItemActive {
+  background: var(--bg-primary);
+  border-color: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--bg-primary);
+  color: var(--text-primary);
+  font-weight: 500;
+  z-index: 2;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.tabTitle {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.tabCloseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-disabled);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: 6px;
+  opacity: 0.6;
+}
+
+.tabCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+/* ============================================
+   Preview Drawer Styles
+   ============================================ */
+
+.drawerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 140;
+  animation: fadeInDrawer 0.25s ease-out forwards;
+}
+
+.previewDrawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 520px;
+  max-width: 90%;
+  background: var(--bg-secondary);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  z-index: 150;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  animation: slideInRightDrawer 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  height: 50px;
+  background: rgba(255, 255, 255, 0.01);
+  flex-shrink: 0;
+}
+
+.drawerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.drawerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawerActionBtn,
+.drawerCloseBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-disabled);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.drawerActionBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.drawerCloseBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: rgb(239, 68, 68);
+}
+
+.drawerContent {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg-primary);
+}
+
+.drawerContent > div {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes fadeInDrawer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRightDrawer {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+

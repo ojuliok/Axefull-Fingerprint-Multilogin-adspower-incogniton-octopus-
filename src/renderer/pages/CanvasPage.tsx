@@ -5,7 +5,7 @@ import {
     Plus, MoreHorizontal, Trash2, Edit3,
     Copy, Download, Upload, ChevronRight, ChevronDown,
     Home, PenTool, FileText, Notebook, Search, Folder, FolderPlus, MessageSquare, Settings2, Box,
-    PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass, Lock
+    PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass, Lock, Eye, Maximize2
 } from 'lucide-react';
 import {
     CanvasInfo, CanvasData,
@@ -34,14 +34,53 @@ const MIN_SIDEBAR_WIDTH = 200;
 const MAX_SIDEBAR_WIDTH = 480;
 
 
+interface TabItem {
+    id: string;
+    name: string;
+    type: string;
+    icon?: string;
+    navigationStack: { id: string; name: string }[];
+}
+
 const CanvasPage: React.FC = () => {
     const [canvasList, setCanvasList] = useState<CanvasInfo[]>([]);
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
-    const [navigationStack, setNavigationStack] = useState<{id: string, name: string}[]>([]);
-    const activeCanvasId = navigationStack.length > 0 ? navigationStack[navigationStack.length - 1].id : null;
+
+    // Tabs States
+    const [openTabs, setOpenTabs] = useState<TabItem[]>(() => {
+        try {
+            const saved = localStorage.getItem('axe_canvas_open_tabs');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
+    const [activeTabId, setActiveTabId] = useState<string | null>(() => {
+        return localStorage.getItem('axe_canvas_active_tab_id') || null;
+    });
+
+    const [navigationStack, setNavigationStack] = useState<{id: string, name: string}[]>(() => {
+        const savedTabId = localStorage.getItem('axe_canvas_active_tab_id');
+        const savedTabs = localStorage.getItem('axe_canvas_open_tabs');
+        if (savedTabId && savedTabs) {
+            try {
+                const tabs: TabItem[] = JSON.parse(savedTabs);
+                const activeTab = tabs.find(t => t.id === savedTabId);
+                if (activeTab) {
+                    return activeTab.navigationStack || [{ id: activeTab.id, name: activeTab.name }];
+                }
+            } catch {}
+        }
+        return [];
+    });
+
+    const activeCanvasId = activeTabId;
     const activeCanvasInfo = activeCanvasId ? canvasList.find(c => c.id === activeCanvasId) : null;
     const activeCanvasType = activeCanvasInfo?.type || 'canvas';
     const [activeCanvasData, setActiveCanvasData] = useState<CanvasData | null>(null);
+    const [previewItemId, setPreviewItemId] = useState<string | null>(null);
+    const [previewCanvasData, setPreviewCanvasData] = useState<CanvasData | null>(null);
+    const previewItemInfo = previewItemId ? canvasList.find(c => c.id === previewItemId) : null;
     const [isTrashView, setIsTrashView] = useState(false);
     const { currentWorkspace } = useWorkspace();
     const { user } = useAuth();
@@ -58,7 +97,10 @@ const CanvasPage: React.FC = () => {
     const [renamingId, setRenamingId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasId: string } | null>(null);
-    const [viewState, setViewState] = useState<ViewState>('home');
+    const [viewState, setViewState] = useState<ViewState>(() => {
+        const savedTabId = localStorage.getItem('axe_canvas_active_tab_id');
+        return savedTabId ? 'canvas' : 'home';
+    });
     const [transitionState, setTransitionState] = useState<'none' | 'closing' | 'opening'>('none');
     const [sidebarEmojiPicker, setSidebarEmojiPicker] = useState<{ x: number; y: number; canvasId: string } | null>(null);
     const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
@@ -177,6 +219,75 @@ const CanvasPage: React.FC = () => {
             });
         }
     }, [activeCanvasId, canvasList]);
+
+    // Sync openTabs to localStorage
+    useEffect(() => {
+        localStorage.setItem('axe_canvas_open_tabs', JSON.stringify(openTabs));
+    }, [openTabs]);
+
+    // Sync activeTabId to localStorage
+    useEffect(() => {
+        if (activeTabId) {
+            localStorage.setItem('axe_canvas_active_tab_id', activeTabId);
+        } else {
+            localStorage.removeItem('axe_canvas_active_tab_id');
+        }
+    }, [activeTabId]);
+
+    // Reactively update tab details (name, icon, type) when canvasList changes
+    useEffect(() => {
+        if (canvasList.length > 0) {
+            setOpenTabs(prev => {
+                let changed = false;
+                const next = prev.map(tab => {
+                    const canvas = canvasList.find(c => c.id === tab.id);
+                    if (canvas && (canvas.name !== tab.name || canvas.icon !== tab.icon || canvas.type !== tab.type)) {
+                        changed = true;
+                        return {
+                            ...tab,
+                            name: canvas.name,
+                            icon: canvas.icon || tab.icon,
+                            type: canvas.type
+                        };
+                    }
+                    return tab;
+                });
+                return changed ? next : prev;
+            });
+        }
+    }, [canvasList]);
+
+    // Load active canvas data when activeCanvasId changes
+    useEffect(() => {
+        if (activeCanvasId) {
+            const canvas = canvasList.find(c => c.id === activeCanvasId);
+            if (canvas && (canvas.type === 'canvas' || !canvas.type)) {
+                getCanvasData(activeCanvasId).then(data => {
+                    setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                }).catch(err => {
+                    console.error("Error loading active canvas data:", err);
+                });
+            }
+        } else {
+            setActiveCanvasData(null);
+        }
+    }, [activeCanvasId, canvasList]);
+
+    // Load preview canvas data when previewItemId changes
+    useEffect(() => {
+        if (previewItemId) {
+            const canvas = canvasList.find(c => c.id === previewItemId);
+            if (canvas && (canvas.type === 'canvas' || !canvas.type)) {
+                getCanvasData(previewItemId).then(data => {
+                    setPreviewCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                }).catch(err => {
+                    console.error("Error loading preview canvas data:", err);
+                });
+            }
+        } else {
+            setPreviewCanvasData(null);
+        }
+    }, [previewItemId, canvasList]);
 
     // Listen for toggle-canvas-sidebar event from MobileBottomNav
     useEffect(() => {
@@ -310,6 +421,20 @@ const CanvasPage: React.FC = () => {
                     return next;
                 });
             }
+            
+            // Add to openTabs and make it active
+            const newTab: TabItem = {
+                id: info.id,
+                name: info.name,
+                type: info.type,
+                icon: info.icon,
+                navigationStack: [{ id: info.id, name: info.name }]
+            };
+            setOpenTabs(prev => {
+                if (prev.some(t => t.id === info.id)) return prev;
+                return [...prev, newTab];
+            });
+            setActiveTabId(info.id);
             setNavigationStack([{ id: info.id, name: info.name }]);
             setActiveCanvasData({ nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
             setViewState('canvas');
@@ -332,13 +457,40 @@ const CanvasPage: React.FC = () => {
     const handleSelectCanvas = useCallback(async (id: string, skipClosing = false) => {
         checkPinAndProceed(id, async () => {
             const canvas = canvasList.find(c => c.id === id);
-            const isSpace = canvas?.type === 'space';
+            if (!canvas) return;
+
+            // Check if already in openTabs
+            setOpenTabs(prev => {
+                const exists = prev.some(t => t.id === id);
+                if (exists) return prev;
+                
+                const newTab: TabItem = {
+                    id: canvas.id,
+                    name: canvas.name,
+                    type: canvas.type,
+                    icon: canvas.icon,
+                    navigationStack: [{ id: canvas.id, name: canvas.name }]
+                };
+                return [...prev, newTab];
+            });
+
+            // Set as active
+            setActiveTabId(id);
+
+            // Restore navigation stack
+            setOpenTabs(currentTabs => {
+                const existingTab = currentTabs.find(t => t.id === id);
+                if (existingTab) {
+                    setNavigationStack(existingTab.navigationStack || [{ id, name: canvas.name }]);
+                } else {
+                    setNavigationStack([{ id, name: canvas.name }]);
+                }
+                return currentTabs;
+            });
+
+            const isSpace = canvas.type === 'space';
 
             if (!isSpace) {
-                // Instantly load without any transitions for folders, pages, tables, canvas files, etc.
-                setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
-                const data = await getCanvasData(id);
-                setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
                 setRenamingId(null);
                 setViewState('canvas');
                 setIsHovered(false);
@@ -349,39 +501,28 @@ const CanvasPage: React.FC = () => {
                 return;
             }
 
-            // For spaces, run the circular zoom transitions
+            // For spaces, run transitions if we want
             if (skipClosing) {
-                setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
-                const data = await getCanvasData(id);
-                setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
                 setRenamingId(null);
                 setViewState('canvas');
                 setIsHovered(false);
                 if (isMobileViewport()) {
                     setMenuMode('collapsed');
                 }
-                
                 setTransitionState('opening');
-                
                 setTimeout(() => {
                     setTransitionState('none');
                 }, 400);
             } else {
                 setTransitionState('closing');
-                
                 setTimeout(async () => {
-                    setNavigationStack([{ id, name: canvas?.name || 'Canvas' }]);
-                    const data = await getCanvasData(id);
-                    setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
                     setRenamingId(null);
                     setViewState('canvas');
                     setIsHovered(false);
                     if (isMobileViewport()) {
                         setMenuMode('collapsed');
                     }
-                    
                     setTransitionState('opening');
-                    
                     setTimeout(() => {
                         setTransitionState('none');
                     }, 400);
@@ -391,6 +532,8 @@ const CanvasPage: React.FC = () => {
     }, [canvasList, checkPinAndProceed]);
 
     const handleGoHome = useCallback(() => {
+        // Do not touch openTabs, just de-activate the active tab and go home
+        setActiveTabId(null);
         setNavigationStack([]);
         setActiveCanvasData(null);
         setViewState('home');
@@ -400,6 +543,37 @@ const CanvasPage: React.FC = () => {
         }
         setTransitionState('none');
     }, []);
+
+    const handleCloseTab = useCallback((tabId: string, e?: React.MouseEvent) => {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        
+        setOpenTabs(prev => {
+            const nextTabs = prev.filter(t => t.id !== tabId);
+            
+            // If the closed tab was the active one, we need to choose a new active tab
+            if (activeTabId === tabId) {
+                if (nextTabs.length > 0) {
+                    // Try to activate the tab next to the closed one, or the last one
+                    const closedIndex = prev.findIndex(t => t.id === tabId);
+                    const newActiveIndex = Math.min(closedIndex, nextTabs.length - 1);
+                    const nextActiveTab = nextTabs[newActiveIndex];
+                    
+                    setActiveTabId(nextActiveTab.id);
+                    setNavigationStack(nextActiveTab.navigationStack);
+                    setViewState('canvas');
+                } else {
+                    setActiveTabId(null);
+                    setNavigationStack([]);
+                    setViewState('home');
+                }
+            }
+            
+            return nextTabs;
+        });
+    }, [activeTabId]);
 
     const handleSectionDragStart = (e: React.DragEvent, section: 'favorites' | 'spaces') => {
         setDraggedSection(section);
@@ -429,21 +603,24 @@ const CanvasPage: React.FC = () => {
 
     const handleSoftDeleteCanvas = useCallback(async (id: string) => {
         await softDeleteCanvas(id);
-        await reloadCanvasList(); const remaining = canvasList; // TODO Fix sync logic
-        setCanvasList(remaining);
-        if (activeCanvasId === id) {
-            setNavigationStack([]);
-            setActiveCanvasData(null);
-            setViewState('home');
-        }
+        await reloadCanvasList();
+        
+        // Close tab if open
+        handleCloseTab(id);
+        
         setContextMenu(null);
-    }, [activeCanvasId, reloadCanvasList]);
+    }, [reloadCanvasList, handleCloseTab]);
 
     const handlePermanentDeleteCanvas = useCallback(async (id: string) => {
         await deleteCanvas(id);
         reloadCanvasList();
+        
+        // Close tab if open
+        handleCloseTab(id);
+        
         setContextMenu(null);
-    }, []);
+    }, [reloadCanvasList, handleCloseTab]);
+
 
     const handleRestoreCanvas = useCallback(async (id: string) => {
         await restoreCanvas(id);
@@ -682,21 +859,35 @@ const CanvasPage: React.FC = () => {
     };
 
     const handleOpenPage = useCallback(async (targetCanvasId: string, pageName: string) => {
-        setNavigationStack(prev => [...prev, { id: targetCanvasId, name: pageName }]);
+        const nextStack = [...navigationStack, { id: targetCanvasId, name: pageName }];
+        setNavigationStack(nextStack);
+        
+        // Update stack in the active tab
+        if (activeTabId) {
+            setOpenTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, navigationStack: nextStack } : t));
+        }
+        
         const data = await getCanvasData(targetCanvasId);
         setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
-    }, []);
+    }, [navigationStack, activeTabId]);
+
     const handleBreadcrumbClick = useCallback(async (index: number) => {
         if (index === -1) {
             handleGoHome();
             return;
         }
-        const next = navigationStack.slice(0, index + 1);
-        setNavigationStack(next);
-        const targetCanvasId = next[next.length - 1].id;
+        const nextStack = navigationStack.slice(0, index + 1);
+        setNavigationStack(nextStack);
+        
+        // Update stack in the active tab
+        if (activeTabId) {
+            setOpenTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, navigationStack: nextStack } : t));
+        }
+        
+        const targetCanvasId = nextStack[nextStack.length - 1].id;
         const data = await getCanvasData(targetCanvasId);
         setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
-    }, [handleGoHome, navigationStack]);
+    }, [handleGoHome, navigationStack, activeTabId]);
 
     const toggleFolder = useCallback((id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -1133,9 +1324,40 @@ const CanvasPage: React.FC = () => {
 
             {/* ── Main Content Area ── */}
             <div className={styles.mainContent}>
+                {/* Tabs Bar */}
+                {openTabs.length > 0 && (
+                    <div className={`${styles.tabBar} ${!isSidebarExpanded ? styles.tabBarCollapsed : ''}`}>
+                        {openTabs.map(tab => {
+                            const isActive = viewState === 'canvas' && activeTabId === tab.id;
+                            return (
+                                <div
+                                    key={tab.id}
+                                    className={`${styles.tabItem} ${isActive ? styles.tabItemActive : ''}`}
+                                    onClick={() => handleSelectCanvas(tab.id)}
+                                    title={tab.name}
+                                >
+                                    <span className={styles.tabIcon}>
+                                        <DynamicIcon name={tab.icon || getDefaultIconForType(tab.type)} size={12} />
+                                    </span>
+                                    <span className={styles.tabTitle}>{tab.name}</span>
+                                    <button
+                                        className={styles.tabCloseBtn}
+                                        onClick={(e) => handleCloseTab(tab.id, e)}
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
                 {/* Breadcrumb */}
                 {viewState === 'canvas' && navigationStack.length > 0 && (
-                    <div className={styles.breadcrumbBar}>
+                    <div 
+                        className={styles.breadcrumbBar}
+                        style={openTabs.length > 0 ? { top: '50px' } : undefined}
+                    >
                         <span
                             className={styles.breadcrumbItem}
                             onClick={() => handleBreadcrumbClick(-1)}
@@ -1235,6 +1457,72 @@ const CanvasPage: React.FC = () => {
                     />
                 )}
 
+
+                {/* ── Preview Drawer ── */}
+                {previewItemId && previewItemInfo && (
+                    <>
+                        <div className={styles.drawerOverlay} onClick={() => setPreviewItemId(null)} />
+                        <div className={styles.previewDrawer}>
+                            <div className={styles.drawerHeader}>
+                                <span className={styles.drawerIcon}>
+                                    <DynamicIcon name={previewItemInfo.icon || getDefaultIconForType(previewItemInfo.type)} size={14} />
+                                </span>
+                                <span className={styles.drawerTitle}>{previewItemInfo.name}</span>
+                                
+                                <button
+                                    className={styles.drawerActionBtn}
+                                    onClick={() => {
+                                        handleSelectCanvas(previewItemInfo.id);
+                                        setPreviewItemId(null);
+                                    }}
+                                    title="Abrir em Tela Cheia"
+                                >
+                                    <Maximize2 size={14} />
+                                </button>
+                                <button
+                                    className={styles.drawerCloseBtn}
+                                    onClick={() => setPreviewItemId(null)}
+                                    title="Fechar"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                            <div className={styles.drawerContent}>
+                                {previewItemInfo.type === 'table' ? (
+                                    <CRMCanvasView key={`preview-${previewItemId}`} boardId={previewItemId} />
+                                ) : previewItemInfo.type === 'page' ? (
+                                    <CanvasRichText 
+                                        key={`preview-${previewItemId}`} 
+                                        canvasInfo={previewItemInfo} 
+                                        onUpdate={() => reloadCanvasList()} 
+                                        onSelectCanvas={(id) => {
+                                            handleSelectCanvas(id);
+                                            setPreviewItemId(null);
+                                        }}
+                                    />
+                                ) : previewCanvasData ? (
+                                    <InfiniteCanvas
+                                        key={`preview-${previewItemId}`}
+                                        canvasId={previewItemId}
+                                        data={previewCanvasData}
+                                        onDataChange={() => {}}
+                                        onOpenPage={(id, name) => {
+                                            handleSelectCanvas(id);
+                                            setPreviewItemId(null);
+                                        }}
+                                        onCanvasCreated={() => reloadCanvasList()}
+                                        onNodesDeleted={handleNodesDeleted}
+                                        workspaceId={currentWorkspace?.id || ''}
+                                        ownerId={user?.id || ''}
+                                    />
+                                ) : (
+                                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>Carregando...</div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+
             {/* Transition circular mask */}
             <div className={`entrance-circular-mask ${transitionState === 'closing' ? 'closing' : transitionState === 'opening' ? 'opening' : ''}`} />
             </div>
@@ -1258,6 +1546,15 @@ const CanvasPage: React.FC = () => {
                         </>
                     ) : (
                         <>
+                            <button
+                                className={styles.contextMenuItem}
+                                onClick={() => {
+                                    setPreviewItemId(contextMenu.canvasId);
+                                    setContextMenu(null);
+                                }}
+                            >
+                                <Eye size={14} /> Pré-visualizar
+                            </button>
                             <button className={styles.contextMenuItem} onClick={() => handleToggleFavorite(contextMenu.canvasId)}>
                                 <Star size={14} fill={canvasList.find(c => c.id === contextMenu.canvasId)?.isFavorite ? "currentColor" : "none"} /> 
                                 {canvasList.find(c => c.id === contextMenu.canvasId)?.isFavorite ? 'Remover dos Favoritos' : 'Favoritar'}

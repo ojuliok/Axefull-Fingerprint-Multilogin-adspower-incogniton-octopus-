@@ -135,6 +135,89 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setEditState({ profileId: entry.profileId, type: entry.proxy.type, host: entry.proxy.host, port: String(entry.proxy.port), username: entry.proxy.username || '', password: entry.proxy.password || '' });
     };
 
+    const handleHostChange = (val: string) => {
+        if (!editState) return;
+        const input = val.trim();
+
+        // Check for SOCKS/HTTP protocol prefix: e.g. socks5://username:password@host:port
+        const protocolMatch = input.match(/^(https?|socks4|socks5):\/\/([^:]+):([^@]+)@([^:]+):(\d+)$/i);
+        if (protocolMatch) {
+            const [, type, username, password, host, port] = protocolMatch;
+            setEditState(s => s && ({
+                ...s,
+                type: type.toLowerCase() as any,
+                host,
+                port,
+                username,
+                password
+            }));
+            toast.success("Proxy formatado com sucesso!");
+            return;
+        }
+
+        const protocolMatchNoAuth = input.match(/^(https?|socks4|socks5):\/\/([^:]+):(\d+)$/i);
+        if (protocolMatchNoAuth) {
+            const [, type, host, port] = protocolMatchNoAuth;
+            setEditState(s => s && ({
+                ...s,
+                type: type.toLowerCase() as any,
+                host,
+                port,
+                username: '',
+                password: ''
+            }));
+            toast.success("Proxy formatado com sucesso!");
+            return;
+        }
+
+        // Check for host:port:user:pass
+        const parts = input.split(':');
+        if (parts.length === 4) {
+            const [host, port, username, password] = parts;
+            if (!isNaN(parseInt(port, 10))) {
+                setEditState(s => s && ({
+                    ...s,
+                    host,
+                    port,
+                    username,
+                    password
+                }));
+                toast.success("Proxy formatado com sucesso!");
+                return;
+            }
+        }
+
+        // Check for user:pass@host:port
+        const userPassHostPortMatch = input.match(/^([^:]+):([^@]+)@([^:]+):(\d+)$/);
+        if (userPassHostPortMatch) {
+            const [, username, password, host, port] = userPassHostPortMatch;
+            setEditState(s => s && ({
+                ...s,
+                host,
+                port,
+                username,
+                password
+            }));
+            toast.success("Proxy formatado com sucesso!");
+            return;
+        }
+
+        // Check for host:port
+        if (parts.length === 2) {
+            const [host, port] = parts;
+            if (!isNaN(parseInt(port, 10))) {
+                setEditState(s => s && ({
+                    ...s,
+                    host,
+                    port
+                }));
+                return;
+            }
+        }
+
+        setEditState(s => s && ({ ...s, host: val }));
+    };
+
     const handleSaveEdit = async () => {
         if (!editState) return;
         setSaving(true);
@@ -362,7 +445,12 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             <div className={styles.editRow}>
                                 <div className={`${styles.editField} flex-1`}>
                                     <label>Host / IP</label>
-                                    <input type="text" value={editState.host} onChange={e => setEditState(s => s && ({ ...s, host: e.target.value }))} />
+                                    <input 
+                                        type="text" 
+                                        value={editState.host} 
+                                        placeholder="Coloque IP, host:port ou host:port:user:pass..." 
+                                        onChange={e => handleHostChange(e.target.value)} 
+                                    />
                                 </div>
                                 <div className={styles.editField} style={{ width: 90 }}>
                                     <label>Porta</label>

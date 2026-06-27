@@ -35,7 +35,8 @@ import {
   Eye,
   EyeOff,
   Box,
-  Lock
+  Lock,
+  Check
 } from 'lucide-react';
 import { CanvasInfo, getCanvasData } from './canvasStorage';
 import { CANVAS_ICONS, DynamicIcon } from './CanvasIcons';
@@ -103,6 +104,36 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   onMoveCanvasItem,
 }) => {
   const { toast } = useToast();
+
+  // ── Onboarding Checklist Logic ──
+  const [profiles, setProfiles] = useState<any[]>([]);
+  useEffect(() => {
+    if (window.api && window.api.profiles && window.api.profiles.list) {
+      window.api.profiles.list().then(res => {
+        if (res && res.success) {
+          setProfiles(res.data || []);
+        }
+      }).catch(err => console.error('Failed to load profiles for checklist:', err));
+    }
+  }, []);
+
+  const onboardingSteps = useMemo(() => {
+    const hasProfile = profiles.length > 0;
+    const hasProxy = profiles.some(p => p.proxy_id || p.proxy);
+    const hasCanvas = canvasList.some(c => c.type === 'canvas' && !c.isDeleted);
+    const hasCRM = canvasList.some(c => c.type === 'table' && !c.isDeleted);
+
+    return [
+      { id: 'profile', label: 'Criar seu primeiro perfil de navegador', done: hasProfile, desc: 'Configure as opções iniciais de hardware fingerprinting.' },
+      { id: 'proxy', label: 'Vincular um Proxy ao perfil', done: hasProxy, desc: 'Garanta navegação com IPs isolados por perfil.' },
+      { id: 'canvas', label: 'Criar um quadro de fluxo Canvas', done: hasCanvas, desc: 'Mapeie visualmente sua esteira de contingência.' },
+      { id: 'crm', label: 'Inicializar um CRM Kanban', done: hasCRM, desc: 'Gerencie o aquecimento e progresso de suas contas.' },
+    ];
+  }, [profiles, canvasList]);
+
+  const completedStepsCount = useMemo(() => onboardingSteps.filter(s => s.done).length, [onboardingSteps]);
+  const isOnboardingCompleted = completedStepsCount === onboardingSteps.length;
+
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list'); // Default to list since it's the standard for Workspace view
   const [activeTab, setActiveTab] = useState(activeSpaceId ? 'Visão Geral' : 'Conteúdo');
@@ -666,6 +697,40 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
       {/* Content */}
       <div className={styles.content} style={{ position: 'relative', zIndex: 1 }}>
+        {/* ── Onboarding Checklist Widget ── */}
+        {!activeSpaceId && !search && !isOnboardingCompleted && (
+          <div className={styles.onboardingWidget}>
+            <div className={styles.onboardingHeader}>
+              <div className={styles.onboardingHeaderInfo}>
+                <h3 className={styles.onboardingTitle}>🎯 Configuração Inicial da Operação</h3>
+                <p className={styles.onboardingSubtitle}>Complete a trilha essencial para ativar sua contingência de anúncios e ganhar bônus de proxy.</p>
+              </div>
+              <div className={styles.onboardingProgressContainer}>
+                <div className={styles.onboardingProgressBar}>
+                  <div className={styles.onboardingProgressFill} style={{ width: `${(completedStepsCount / onboardingSteps.length) * 100}%` }} />
+                </div>
+                <span className={styles.onboardingProgressLabel}>{completedStepsCount} de {onboardingSteps.length} concluídas</span>
+              </div>
+            </div>
+
+            <div className={styles.onboardingStepsList}>
+              {onboardingSteps.map((step) => (
+                <div key={step.id} className={`${styles.onboardingStepItem} ${step.done ? styles.onboardingStepDone : ''}`}>
+                  <div className={styles.onboardingStepCheck}>
+                    <div className={styles.checkboxCircle}>
+                      {step.done && <Check size={12} strokeWidth={3} className={styles.checkIcon} />}
+                    </div>
+                  </div>
+                  <div className={styles.onboardingStepText}>
+                    <span className={styles.onboardingStepLabel}>{step.label}</span>
+                    <span className={styles.onboardingStepDesc}>{step.desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {!activeSpaceId && (
           <CanvasSpacesGrid
             spaces={spaces}
@@ -707,11 +772,43 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
                 {activeSpaceId ? 'Criar primeira Pasta' : 'Criar primeiro Espaço'}
               </button>
             )}
-            {/* Highlight Criar Objeto when inside a folder/space */}
+            
+            {/* Quick Templates for Objects inside a space/folder */}
             {!search && activeSpaceId && (
-              <button className={styles.workspaceActionBtn} style={{ marginTop: '12px', justifyContent: 'center', padding: '10px 16px', background: 'transparent', border: '1px solid #e5e7eb', color: '#6b7280', fontSize: '14px' }} onClick={() => onCreateItem && onCreateItem('page')}>
-                <Plus size={16} /> Criar Objeto
-              </button>
+              <div className={styles.templatesContainer}>
+                <h4 className={styles.templatesTitle}>Ou inicie com um modelo:</h4>
+                <div className={styles.templatesGrid}>
+                  <div className={styles.templateCard} onClick={() => onCreateItem && onCreateItem('page')} style={{ '--item-rgb': '96, 165, 250' } as React.CSSProperties}>
+                    <div className={styles.templateIcon}>
+                      <FileText size={20} />
+                    </div>
+                    <div className={styles.templateInfo}>
+                      <h5 className={styles.templateName}>Documento de Texto</h5>
+                      <p className={styles.templateDesc}>Páginas com Rich Text para anotações, roteiros e SOPs.</p>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.templateCard} onClick={() => onCreateItem && onCreateItem('canvas')} style={{ '--item-rgb': '192, 132, 252' } as React.CSSProperties}>
+                    <div className={styles.templateIcon}>
+                      <LayoutDashboard size={20} />
+                    </div>
+                    <div className={styles.templateInfo}>
+                      <h5 className={styles.templateName}>Quadro Canvas</h5>
+                      <p className={styles.templateDesc}>Organização visual de fluxos de contingência, BMs e ideias.</p>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.templateCard} onClick={() => onCreateItem && onCreateItem('table')} style={{ '--item-rgb': '74, 222, 128' } as React.CSSProperties}>
+                    <div className={styles.templateIcon}>
+                      <KanbanSquare size={20} />
+                    </div>
+                    <div className={styles.templateInfo}>
+                      <h5 className={styles.templateName}>CRM / Kanban</h5>
+                      <p className={styles.templateDesc}>Gerenciamento de leads de marketing, vendas e tarefas.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         ) : (folders.length > 0 || regularItems.length > 0) && (
