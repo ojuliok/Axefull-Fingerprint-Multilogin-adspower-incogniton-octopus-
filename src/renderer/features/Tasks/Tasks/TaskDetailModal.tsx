@@ -5,7 +5,8 @@ import { ptBR } from 'date-fns/locale';
 import styles from './TaskDetailModal.module.css';
 import { TaskData, updateTask, addTaskComment, setPinnedTaskId, Subtask, RecurringRule } from './tasksStorage';
 import { getMarketingData } from '../../Marketing/marketingStorage';
-import { getCanvasList } from '../../Canvas/canvasStorage';
+import { useWorkspace } from '../../../context/WorkspaceContext';
+import { getCanvasList, CanvasInfo } from '../../Canvas/canvasStorage';
 import CustomDatePicker from './CustomDatePicker';
 
 interface TaskDetailModalProps {
@@ -50,7 +51,16 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpda
     // Load CRM & Canvas Data
     const crmData = getMarketingData();
     const leads = crmData.leads;
-    const allCanvas = getCanvasList();
+    
+    const { currentWorkspace } = useWorkspace();
+    const [allCanvas, setAllCanvas] = useState<CanvasInfo[]>([]);
+
+    useEffect(() => {
+        if (currentWorkspace?.id) {
+            getCanvasList(currentWorkspace.id).then(list => setAllCanvas(list));
+        }
+    }, [currentWorkspace?.id]);
+
     const canvasPages = allCanvas.filter(c => c.type === 'page' || c.type === 'canvas');
 
     useEffect(() => {

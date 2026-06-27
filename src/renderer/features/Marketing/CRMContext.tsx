@@ -23,7 +23,8 @@ import {
     deleteMarketingCard as deleteStorageCard,
     moveMarketingCard as moveStorageCard
 } from './marketingStorage';
-import { getCanvasList } from '../Canvas/canvasStorage';
+import { useWorkspace } from '../../context/WorkspaceContext';
+import { getCanvasList, CanvasInfo } from '../Canvas/canvasStorage';
 
 interface CRMContextType {
     spaces: MarketingSpace[];
@@ -86,6 +87,15 @@ interface CRMContextType {
 const CRMContext = createContext<CRMContextType | undefined>(undefined);
 
 export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string }> = ({ children, forcedBoardId }) => {
+    const { currentWorkspace } = useWorkspace();
+    const [canvasList, setCanvasList] = useState<CanvasInfo[]>([]);
+
+    useEffect(() => {
+        if (currentWorkspace?.id) {
+            getCanvasList(currentWorkspace.id).then(list => setCanvasList(list));
+        }
+    }, [currentWorkspace?.id]);
+
     const [spaces, setSpaces] = useState<MarketingSpace[]>([]);
     const [folders, setFolders] = useState<MarketingFolder[]>([]);
     const [boards, setBoards] = useState<MarketingBoard[]>([]);
@@ -218,7 +228,7 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
     
     // Fallback to Canvas Storage if this is a CRM/Table canvas
     if (!activeBoard && activeBoardId) {
-        const canvas = getCanvasList().find(c => c.id === activeBoardId);
+        const canvas = canvasList.find(c => c.id === activeBoardId);
         if (canvas) {
             activeBoard = {
                 id: canvas.id,

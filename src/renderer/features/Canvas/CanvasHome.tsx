@@ -25,6 +25,7 @@ import {
   FolderOpen,
   Home,
   ChevronDown,
+  ChevronUp,
   MessageSquare,
   Maximize2,
   Minimize2,
@@ -133,6 +134,18 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
   const completedStepsCount = useMemo(() => onboardingSteps.filter(s => s.done).length, [onboardingSteps]);
   const isOnboardingCompleted = completedStepsCount === onboardingSteps.length;
+
+  const [isOnboardingMinimized, setIsOnboardingMinimized] = useState(() => {
+    return localStorage.getItem('axe_onboarding_minimized') === 'true';
+  });
+
+  const toggleOnboardingMinimize = useCallback(() => {
+    setIsOnboardingMinimized(prev => {
+      const next = !prev;
+      localStorage.setItem('axe_onboarding_minimized', String(next));
+      return next;
+    });
+  }, []);
 
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list'); // Default to list since it's the standard for Workspace view
@@ -700,10 +713,15 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
         {/* ── Onboarding Checklist Widget ── */}
         {!activeSpaceId && !search && !isOnboardingCompleted && (
           <div className={styles.onboardingWidget}>
-            <div className={styles.onboardingHeader}>
+            <div className={styles.onboardingHeader} style={{ cursor: 'pointer', userSelect: 'none' }} onClick={toggleOnboardingMinimize}>
               <div className={styles.onboardingHeaderInfo}>
-                <h3 className={styles.onboardingTitle}>🎯 Configuração Inicial da Operação</h3>
-                <p className={styles.onboardingSubtitle}>Complete a trilha essencial para ativar sua contingência de anúncios e ganhar bônus de proxy.</p>
+                <h3 className={styles.onboardingTitle} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🎯 Configuração Inicial da Operação
+                  {isOnboardingMinimized ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                </h3>
+                {!isOnboardingMinimized && (
+                  <p className={styles.onboardingSubtitle}>Complete a trilha essencial para ativar sua contingência de anúncios e ganhar bônus de proxy.</p>
+                )}
               </div>
               <div className={styles.onboardingProgressContainer}>
                 <div className={styles.onboardingProgressBar}>
@@ -713,21 +731,23 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
               </div>
             </div>
 
-            <div className={styles.onboardingStepsList}>
-              {onboardingSteps.map((step) => (
-                <div key={step.id} className={`${styles.onboardingStepItem} ${step.done ? styles.onboardingStepDone : ''}`}>
-                  <div className={styles.onboardingStepCheck}>
-                    <div className={styles.checkboxCircle}>
-                      {step.done && <Check size={12} strokeWidth={3} className={styles.checkIcon} />}
+            {!isOnboardingMinimized && (
+              <div className={styles.onboardingStepsList}>
+                {onboardingSteps.map((step) => (
+                  <div key={step.id} className={`${styles.onboardingStepItem} ${step.done ? styles.onboardingStepDone : ''}`}>
+                    <div className={styles.onboardingStepCheck}>
+                      <div className={styles.checkboxCircle}>
+                        {step.done && <Check size={12} strokeWidth={3} className={styles.checkIcon} />}
+                      </div>
+                    </div>
+                    <div className={styles.onboardingStepText}>
+                      <span className={styles.onboardingStepLabel}>{step.label}</span>
+                      <span className={styles.onboardingStepDesc}>{step.desc}</span>
                     </div>
                   </div>
-                  <div className={styles.onboardingStepText}>
-                    <span className={styles.onboardingStepLabel}>{step.label}</span>
-                    <span className={styles.onboardingStepDesc}>{step.desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

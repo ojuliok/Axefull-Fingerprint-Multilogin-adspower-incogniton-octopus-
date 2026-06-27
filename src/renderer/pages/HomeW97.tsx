@@ -1514,7 +1514,7 @@ export const HomeW97: React.FC = () => {
           <div className="w-4 h-4 rounded bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
             <span className="text-white font-extrabold text-[8px]">A</span>
           </div>
-          <span>Iniciar</span>
+          {!isMobile && <span>Iniciar</span>}
         </button>
 
         {/* Opened Windows Tabs */}
@@ -1534,12 +1534,13 @@ export const HomeW97: React.FC = () => {
                   }
                 }}
                 className={`${styles.taskbarTab} ${styles.outset} ${isActive ? styles.taskbarTabActive : ''}`}
+                style={isMobile ? { maxWidth: '32px', minWidth: '32px', justifyContent: 'center', padding: '2px' } : undefined}
               >
                 {win.id === 'neuralNetwork' && <Network size={12} className="text-purple-600" />}
                 {win.id === 'documents' && <FolderOpen size={12} className="text-yellow-600" />}
                 {win.id === 'systemAbout' && <Monitor size={12} className="text-blue-600" />}
                 {win.id === 'notes' && <FileText size={12} className="text-yellow-600" />}
-                <span>{win.title}</span>
+                {!isMobile && <span>{win.title}</span>}
               </button>
             );
           })}
