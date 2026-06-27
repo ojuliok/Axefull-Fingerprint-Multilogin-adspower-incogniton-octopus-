@@ -3092,7 +3092,7 @@
 /* ── Appearance Panel ── */
 .appearancePanel {
     position: absolute;
-    bottom: 24px;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -3113,7 +3113,7 @@
 
 @media (max-width: 1024px) {
     .appearancePanel {
-        bottom: 80px;
+        bottom: 150px;
         width: 90%;
         max-width: 500px;
         overflow-x: auto;
