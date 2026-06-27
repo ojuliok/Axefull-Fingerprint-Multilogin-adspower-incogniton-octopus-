@@ -18,13 +18,6 @@ import { ProfileAIScore } from '../AI/ProfileAIScore';
 import { LinearPageRenderer } from './LinearPageRenderer';
 import styles from './InfiniteCanvas.module.css';
 
-import { CanvasContext } from './hooks/CanvasContext';
-import { useCanvasNodes } from './hooks/useCanvasNodes';
-import { CanvasToolbar } from './components/CanvasToolbar';
-import { CanvasPropertiesPanel } from './components/CanvasPropertiesPanel';
-import { CanvasZoomControls } from './components/CanvasZoomControls';
-
-
 // ── Curated Emojis and Icons Catalog ──
 
 const EMOJI_LIST = [
@@ -251,17 +244,17 @@ const EditableDiv: React.FC<{
                     if (beforeCursor === '#') {
                         e.preventDefault();
                         deletePrefix(offset);
-                        document.execCommand('formatBlock', false, '<h1>');
+                        document.execCommand('formatBlock', false, 'H1');
                         setTimeout(() => { if (ref.current) handleInput(); }, 10);
                     } else if (beforeCursor === '##') {
                         e.preventDefault();
                         deletePrefix(offset);
-                        document.execCommand('formatBlock', false, '<h2>');
+                        document.execCommand('formatBlock', false, 'H2');
                         setTimeout(() => { if (ref.current) handleInput(); }, 10);
                     } else if (beforeCursor === '###') {
                         e.preventDefault();
                         deletePrefix(offset);
-                        document.execCommand('formatBlock', false, '<h3>');
+                        document.execCommand('formatBlock', false, 'H3');
                         setTimeout(() => { if (ref.current) handleInput(); }, 10);
                     } else if (beforeCursor === '---') {
                         e.preventDefault();
@@ -1001,65 +994,6 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                 active.closest('input, textarea, [contenteditable="true"]') !== null
             );
 
-            // Figma-like Keyboard Shortcuts
-            if (!isTyping && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-                switch(e.key.toLowerCase()) {
-                    case 'v': e.preventDefault(); setActiveTool('select'); break;
-                    case 'h': e.preventDefault(); setActiveTool('hand'); break;
-                    case 'r': e.preventDefault(); setActiveTool('rectangle'); break;
-                    case 'o': e.preventDefault(); setActiveTool('ellipse'); break;
-                    case 'd': e.preventDefault(); setActiveTool('diamond'); break;
-                    case 'l': e.preventDefault(); setActiveTool('line'); break;
-                    case 'a': e.preventDefault(); setActiveTool('arrow'); break;
-                    case 't': e.preventDefault(); setActiveTool('freetext'); break;
-                    case 'f': e.preventDefault(); setActiveTool('frame'); break;
-                    case 'p': e.preventDefault(); setActiveTool('pen'); break;
-                    case ']': 
-                        e.preventDefault(); 
-                        if (selectedIds.size > 0) {
-                            Array.from(selectedIds).forEach(id => bringToFront(id));
-                        }
-                        break;
-                    case '[': 
-                        e.preventDefault(); 
-                        if (selectedIds.size > 0) {
-                            Array.from(selectedIds).forEach(id => sendToBack(id));
-                        }
-                        break;
-                }
-            }
-            
-            // Modifier shortcuts (Ctrl/Meta)
-            if ((e.ctrlKey || e.metaKey) && !isTyping) {
-                if (e.key.toLowerCase() === 'a') {
-                    e.preventDefault();
-                    setSelectedIds(new Set(nodes.map(n => n.id)));
-                }
-                if (e.key.toLowerCase() === 'd') {
-                    e.preventDefault();
-                    if (selectedIds.size > 0) {
-                        Array.from(selectedIds).forEach(id => duplicateNode(id));
-                    }
-                }
-                if (e.key === ']') {
-                    e.preventDefault();
-                    if (selectedIds.size > 0) {
-                        Array.from(selectedIds).forEach(id => bringToFront(id));
-                    }
-                }
-                if (e.key === '[') {
-                    e.preventDefault();
-                    if (selectedIds.size > 0) {
-                        Array.from(selectedIds).forEach(id => sendToBack(id));
-                    }
-                }
-                if (e.key.toLowerCase() === 'g') {
-                    e.preventDefault();
-                    // Grouping placeholder for future implementation
-                    console.log("Grouping triggered");
-                }
-            }
-
             if (e.code === 'Space' && !e.repeat && !isTyping) {
                 e.preventDefault();
                 setSpaceHeld(true);
@@ -1267,15 +1201,181 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         saveData(updated, strokes, viewport);
     }, [nodes, strokes, viewport, saveData]);
 
-    
-    const {
-        addFrameNode, addTableNode, addPageNode, addChecklistNode, addCardNode,
-        addImageNode, addDocumentNode, addBrowserNode, addEmojiOrIconNode,
-        addFreeTextAt, duplicateNode, bringToFront, sendToBack
-    } = useCanvasNodes(
-        containerRef, workspaceId, ownerId, canvasId, onCanvasCreated, 
-        setShowPickerPopover, setEditingNodeId, setContextMenu
-    );
+    const addFrameNode = useCallback((canvasX?: number, canvasY?: number) => {
+        const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const newNode: CanvasNode = {
+            id: genId(), type: 'frame', x: cx - 200, y: cy - 150,
+            width: 400, height: 300, content: 'Novo Frame', zIndex: maxZ() - 100, // Frames usually stay behind
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
+
+    const addTableNode = useCallback((canvasX?: number, canvasY?: number) => {
+        const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const initialTableData = [
+            ['Cabeçalho 1', 'Cabeçalho 2'],
+            ['Linha 1', 'Valor 1']
+        ];
+        const newNode: CanvasNode = {
+            id: genId(), type: 'table', x: cx - 150, y: cy - 80,
+            width: 300, height: 160, content: '', tableData: initialTableData, zIndex: maxZ() + 1,
+            color: '#1e293b', textColor: '#e2e8f0'
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
+
+    const addPageNode = useCallback((canvasX?: number, canvasY?: number) => {
+        const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const pageId = crypto.randomUUID();
+        const targetCanvasId = pageId; // Clean UUID!
+        
+        createCanvas(workspaceId || '', ownerId || '', 'Página Sem Título', canvasId, 'page', targetCanvasId);
+        onCanvasCreated?.();
+
+        const newNode: CanvasNode = {
+            id: pageId, type: 'page', x: cx - 100, y: cy - 40,
+            width: 200, height: 80, content: 'Página Sem Título', targetCanvasId, zIndex: maxZ() + 1,
+            color: '#0f172a', textColor: '#ffffff'
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        setEditingNodeId(newNode.id);
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData, canvasId, onCanvasCreated, workspaceId, ownerId]);
+
+    const addChecklistNode = useCallback((canvasX?: number, canvasY?: number) => {
+        const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const newNode: CanvasNode = {
+            id: genId(), type: 'checklist', x: cx - 130, y: cy - 100,
+            width: 260, height: 200, content: 'Novo Checklist', zIndex: maxZ() + 1,
+            checklistData: [
+                { id: genId(), text: 'Tarefa 1', checked: false },
+                { id: genId(), text: 'Tarefa 2', checked: false }
+            ]
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
+
+    const addCardNode = useCallback((canvasX?: number, canvasY?: number) => {
+        const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const cardId = crypto.randomUUID();
+        const targetCanvasId = cardId; // Clean UUID!
+
+        createCanvas(workspaceId || '', ownerId || '', 'Novo Card', canvasId, 'card', targetCanvasId);
+        onCanvasCreated?.();
+
+        const newNode: CanvasNode = {
+            id: cardId, type: 'card', x: cx - 130, y: cy - 80,
+            width: 260, height: 160, content: 'Novo Card', targetCanvasId, zIndex: maxZ() + 1,
+            color: '#1e293b' // Elegant slate dark color default
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+
+        // Save initial default card content in filesystem
+        if (window.api && window.api.cards) {
+            window.api.cards.save(cardId, {
+                title: 'Novo Card',
+                content: '',
+                comments: []
+            }).catch(err => console.error("Error saving initial card file:", err));
+        }
+    }, [nodes, strokes, viewport, saveData, canvasId, onCanvasCreated, workspaceId, ownerId]);
+
+    const addImageNode = useCallback((base64: string, fileName: string) => {
+        const cx = (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const newNode: CanvasNode = {
+            id: genId(), type: 'image', x: cx - 150, y: cy - 100,
+            width: 300, height: 220, content: base64, fileName, zIndex: maxZ() + 1,
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
+
+    const addDocumentNode = useCallback((base64: string, fileName: string, fileType: string) => {
+        const cx = (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const newNode: CanvasNode = {
+            id: genId(), type: 'document', x: cx - 130, y: cy - 30,
+            width: 260, height: 72, content: base64, fileName, fileType, zIndex: maxZ() + 1,
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
+
+    const addBrowserNode = useCallback((canvasX?: number, canvasY?: number) => {
+        const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const initialTabId = genId();
+        const newNode: CanvasNode = {
+            id: genId(), type: 'browser', x: cx - 200, y: cy - 150,
+            width: 400, height: 300, content: 'Navegador Interno', zIndex: maxZ() + 1,
+            browserTabs: [{ id: initialTabId, url: 'https://www.google.com', title: 'Nova Guia' }],
+            activeTabId: initialTabId,
+            browserProxy: '',
+            color: '#1e293b'
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
+
+    const addEmojiOrIconNode = useCallback((type: 'emoji' | 'icon', content: string) => {
+        const cx = (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
+        const cy = (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
+        const newNode: CanvasNode = {
+            id: genId(),
+            type: type,
+            x: cx - 35,
+            y: cy - 35,
+            width: 70,
+            height: 70,
+            content: content,
+            zIndex: maxZ() + 1,
+            color: type === 'icon' ? 'rgba(139, 92, 246, 0.2)' : undefined,
+            textColor: type === 'icon' ? '#a78bfa' : undefined,
+        };
+        const updated = [...nodes, newNode];
+        setNodes(updated);
+        setSelectedIds(new Set([newNode.id]));
+        saveData(updated, strokes, viewport);
+        setShowPickerPopover(false);
+    }, [nodes, strokes, viewport, saveData]);
+
+
+    const duplicateNode = useCallback((id: string) => {
+        const node = nodes.find(n => n.id === id);
+        if (!node) return;
+        const dup: CanvasNode = { ...node, id: genId(), x: node.x + 30, y: node.y + 30, zIndex: maxZ() + 1 };
+        const updated = [...nodes, dup];
+        setNodes(updated);
+        setSelectedIds(new Set([dup.id]));
+        setContextMenu(null);
+        saveData(updated, strokes, viewport);
+    }, [nodes, strokes, viewport, saveData]);
 
     const downloadNode = useCallback((id: string) => {
         const node = nodes.find(n => n.id === id);
@@ -2588,18 +2688,9 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         socialSearch.trim() === '' || platform.name.toLowerCase().includes(socialSearch.toLowerCase())
     );
 
-    
-    const contextValue = {
-        canvasId, nodes, setNodes, strokes, setStrokes, connections, setConnections, viewport, setViewport,
-        activeTool, setActiveTool, isToolLocked, setIsToolLocked,
-        selectedIds, setSelectedIds,
-        currentStrokeColor, setCurrentStrokeColor, currentStrokeWidth, setCurrentStrokeWidth, currentStrokeStyle, setCurrentStrokeStyle, currentFillColor, setCurrentFillColor, currentShapeRoughness, setCurrentShapeRoughness,
-        gridSnap, setGridSnap, viewMode, setViewMode,
-        saveData, undo: handleUndo, redo: handleRedo, canUndo: historyIndexRef.current > 0, canRedo: historyIndexRef.current < history.length - 1
-    };
-    
+    const mapBounds = getMinimapData();
+
     return (
-        <CanvasContext.Provider value={contextValue}>
         <div
             ref={containerRef}
             className={`${styles.canvasContainer} ${viewMode === 'canvas' ? cursorClass : ''}`}
@@ -2646,42 +2737,6 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     <div className={styles.canvasSurface} style={{ transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})` }}>
 
                         {/* SVG Drawing & Connections Layer */}
-                        
-                        {/* Figma-like Multi-Selection Bounding Box */}
-                        {(() => {
-                            if (selectedIds.size > 1 && viewMode === 'canvas') {
-                                const selectedNodes = nodes.filter(n => selectedIds.has(n.id));
-                                if (selectedNodes.length > 0) {
-                                    const minX = Math.min(...selectedNodes.map(n => n.x));
-                                    const minY = Math.min(...selectedNodes.map(n => n.y));
-                                    const maxX = Math.max(...selectedNodes.map(n => n.x + (n.width || 0)));
-                                    const maxY = Math.max(...selectedNodes.map(n => n.y + (n.height || 0)));
-                                    const bw = maxX - minX;
-                                    const bh = maxY - minY;
-                                    
-                                    return (
-                                        <div style={{
-                                            position: 'absolute',
-                                            left: minX,
-                                            top: minY,
-                                            width: bw,
-                                            height: bh,
-                                            border: '2px dashed #a78bfa',
-                                            pointerEvents: 'none',
-                                            zIndex: 9999
-                                        }}>
-                                            {/* Corner Handles */}
-                                            <div style={{ position: 'absolute', left: -4, top: -4, width: 8, height: 8, background: '#a78bfa', border: '1px solid #14141c', cursor: 'nwse-resize', pointerEvents: 'auto' }} />
-                                            <div style={{ position: 'absolute', right: -4, top: -4, width: 8, height: 8, background: '#a78bfa', border: '1px solid #14141c', cursor: 'nesw-resize', pointerEvents: 'auto' }} />
-                                            <div style={{ position: 'absolute', left: -4, bottom: -4, width: 8, height: 8, background: '#a78bfa', border: '1px solid #14141c', cursor: 'nesw-resize', pointerEvents: 'auto' }} />
-                                            <div style={{ position: 'absolute', right: -4, bottom: -4, width: 8, height: 8, background: '#a78bfa', border: '1px solid #14141c', cursor: 'nwse-resize', pointerEvents: 'auto' }} />
-                                        </div>
-                                    );
-                                }
-                            }
-                            return null;
-                        })()}
-
                         <svg className={styles.drawingLayer} style={{ overflow: 'visible' }}>
                     <defs>
                         <marker
@@ -4435,31 +4490,381 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                 );
             })()}
 
-            
-            <CanvasToolbar 
-                clearStrokes={clearStrokes}
-                addFreeTextAt={addFreeTextAt}
-                addFrameNode={addFrameNode}
-                addBrowserNode={addBrowserNode}
-                addPageNode={addPageNode}
-                addCardNode={addCardNode}
-                addChecklistNode={addChecklistNode}
-                addTableNode={addTableNode}
-                fileInputRef={fileInputRef}
-                docInputRef={docInputRef}
-                setShowProfilePicker={setShowProfilePicker}
-                setShowPickerPopover={setShowPickerPopover}
-                setShowSocialPicker={setShowSocialPicker}
-                setShowFunnelPicker={setShowFunnelPicker}
-            />
+            {/* ── Central Dock (Grouped Toolbars) ── */}
+            <div className={styles.canvasDock}>
+                {/* Lock Tool toggle */}
+                <button 
+                    onClick={() => setIsToolLocked(l => !l)} 
+                    className={isToolLocked ? styles.toolActive : ''} 
+                    title={isToolLocked ? "Ferramenta travada (clique para destravar)" : "Travar ferramenta após desenhar"}
+                >
+                    {isToolLocked ? <Lock size={16} /> : <Unlock size={16} />}
+                </button>
 
-            <CanvasPropertiesPanel 
-                isPropSidebarMinimized={isPropSidebarMinimized}
-                setIsPropSidebarMinimized={setIsPropSidebarMinimized}
-                lockAllSelected={lockAllSelected}
-                deleteSelectedElements={deleteSelectedElements}
-            />
-{/* ── Right Text Editor Sidebar ── */}
+                <div className={styles.dockDivider} />
+
+                {/* 1. Seleção e Mão */}
+                <button 
+                    onClick={() => setActiveTool('select')} 
+                    className={activeTool === 'select' ? styles.toolActive : ''} 
+                    title="Cursor / Selecionar (V)"
+                >
+                    <MousePointer2 size={18} />
+                </button>
+                <button 
+                    onClick={() => setActiveTool('hand')} 
+                    className={activeTool === 'hand' ? styles.toolActive : ''} 
+                    title="Mão / Pan (H)"
+                >
+                    <Lucide.Hand size={18} />
+                </button>
+
+                <div className={styles.dockDivider} />
+
+                {/* 2. Formas Geométricas */}
+                <div className={styles.dockPopoverContainer}>
+                    <button 
+                        className={['rectangle', 'diamond', 'ellipse', 'line', 'arrow', 'triangle', 'blockArrow', 'elbowArrow'].includes(activeTool) ? styles.toolActive : ''} 
+                        title="Formas Geométricas"
+                    >
+                        <Lucide.Shapes size={18} />
+                    </button>
+                    <div className={styles.dockPopover} style={{ minWidth: '180px', flexDirection: 'column', gap: '2px', padding: '6px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Formas</div>
+                        
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'rectangle' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('rectangle')}><Square size={14} style={{ marginRight: 8 }} /> Retângulo <span style={{ marginLeft: 'auto', opacity: 0.5 }}>R</span></button>
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'ellipse' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('ellipse')}><Lucide.Circle size={14} style={{ marginRight: 8 }} /> Elipse <span style={{ marginLeft: 'auto', opacity: 0.5 }}>O</span></button>
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'diamond' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('diamond')}><Lucide.Triangle size={14} style={{ marginRight: 8, transform: 'rotate(45deg)' }} /> Losango <span style={{ marginLeft: 'auto', opacity: 0.5 }}>D</span></button>
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'line' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('line')}><Minus size={14} style={{ marginRight: 8, transform: 'rotate(-45deg)' }} /> Linha <span style={{ marginLeft: 'auto', opacity: 0.5 }}>L</span></button>
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'arrow' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('arrow')}><ArrowUpRight size={14} style={{ marginRight: 8 }} /> Seta <span style={{ marginLeft: 'auto', opacity: 0.5 }}>A</span></button>
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'elbowArrow' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('elbowArrow')}><Lucide.CornerDownRight size={14} style={{ marginRight: 8 }} /> Seta em cotovelo</button>
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'blockArrow' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('blockArrow')}><ArrowUpRight size={14} style={{ marginRight: 8, strokeWidth: 3 }} /> Seta em bloco</button>
+                        <div style={{ height: 1, background: '#ffffff1a', margin: '4px 0' }} />
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'triangle' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('triangle')}><Lucide.Triangle size={14} style={{ marginRight: 8 }} /> Triângulo</button>
+                    </div>
+                </div>
+
+                {/* 3. Desenho Livre & Texto */}
+                <div className={styles.dockPopoverContainer}>
+                    <button 
+                        className={['pen', 'arrowPen'].includes(activeTool) ? styles.toolActive : ''} 
+                        title="Canetas e Desenho Livre"
+                    >
+                        <Pencil size={18} />
+                    </button>
+                    <div className={styles.dockPopover} style={{ minWidth: '180px', flexDirection: 'column', gap: '2px', padding: '6px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Desenho</div>
+                        
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'pen' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('pen')}><Pencil size={14} style={{ marginRight: 8 }} /> Caneta Livre <span style={{ marginLeft: 'auto', opacity: 0.5 }}>P</span></button>
+                        <button className={`${styles.ctxMenuItem} ${activeTool === 'arrowPen' ? styles.toolActive : ''}`} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => setActiveTool('arrowPen')}><Lucide.ChevronRightSquare size={14} style={{ marginRight: 8 }} /> Caneta com Seta</button>
+                        
+                        {strokes.length > 0 && (
+                            <>
+                                <div className={styles.ctxMenuDivider} />
+                                <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px', color: '#ef4444' }} onClick={clearStrokes}><Eraser size={14} style={{ marginRight: 8 }} /> Apagar desenhos</button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                <button 
+                    onClick={() => {
+                        const pos = { x: -viewport.x/viewport.zoom + 200, y: -viewport.y/viewport.zoom + 200 };
+                        addFreeTextAt(pos.x, pos.y);
+                    }} 
+                    title="Adicionar Texto (T)"
+                >
+                    <Type size={18} />
+                </button>
+
+                <div className={styles.dockDivider} />
+
+                {/* 4. Componentes Axe Workspace */}
+                <div className={styles.dockPopoverContainer}>
+                    <button title="Inserir Componentes (Notion, Tabelas, Perfis...)"><Plus size={18} /><Lucide.ChevronDown size={10} style={{ marginLeft: 2 }} /></button>
+                    <div className={styles.dockPopover} style={{ minWidth: '220px', flexDirection: 'column', gap: '2px', padding: '6px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Componentes</div>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addFrameNode()}><LayoutTemplate size={14} style={{ marginRight: 8 }} /> Frame Agrupador</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addBrowserNode()}><Globe size={14} style={{ marginRight: 8 }} /> Navegador Interno</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addPageNode()}><FileText size={14} style={{ marginRight: 8 }} /> Página Notion</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addCardNode()}><Lucide.Notebook size={14} style={{ marginRight: 8 }} /> Card Notion</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addChecklistNode()}><ListTodo size={14} style={{ marginRight: 8 }} /> Lista de Tarefas</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => addTableNode()}><Table size={14} style={{ marginRight: 8 }} /> Tabela Flexível</button>
+                        <div className={styles.ctxMenuDivider} />
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Arquivos</div>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => fileInputRef.current?.click()}><Image size={14} style={{ marginRight: 8 }} /> Imagem</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => docInputRef.current?.click()}><FileText size={14} style={{ marginRight: 8 }} /> Documento</button>
+                        <div className={styles.ctxMenuDivider} />
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: '#a78bfa', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Ativos</div>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => { setShowProfilePicker(true); setShowPickerPopover(false); setShowSocialPicker(false); setShowFunnelPicker(false); }}><Lucide.Users size={14} style={{ marginRight: 8 }} /> Perfil</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => { setShowPickerPopover(true); setShowProfilePicker(false); setShowSocialPicker(false); setShowFunnelPicker(false); }}><Smile size={14} style={{ marginRight: 8 }} /> Emoji</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => { setShowSocialPicker(true); setShowProfilePicker(false); setShowPickerPopover(false); setShowFunnelPicker(false); }}><Share2 size={14} style={{ marginRight: 8 }} /> Rede Social</button>
+                        <button className={styles.ctxMenuItem} style={{ width: '100%', justifyContent: 'flex-start', height: '28px', fontSize: '12px' }} onClick={() => { setShowFunnelPicker(true); setShowProfilePicker(false); setShowPickerPopover(false); setShowSocialPicker(false); }}><Filter size={14} style={{ marginRight: 8 }} /> Funil de Vendas</button>
+                    </div>
+                </div>
+
+                <div className={styles.dockDivider} />
+
+                {/* 5. Ações de Visualização e Grade */}
+                <button onClick={() => setGridSnap(g => !g)} className={gridSnap ? styles.toolActive : ''} title="Ajustar à Grade"><Grid size={18} /></button>
+                <button onClick={() => setViewMode(m => m === 'canvas' ? 'page' : 'canvas')} className={viewMode === 'page' ? styles.toolActive : ''} title="Modo Documento (Página)"><ScrollText size={18} /></button>
+            </div>
+
+            {/* ── Left Properties Panel (Excalidraw properties) ── */}
+            {(() => {
+                const selectedNodes = nodes.filter(n => selectedIds.has(n.id));
+                const selectedShapes = selectedNodes.filter(n => n.type === 'shape');
+                const selectedTexts = selectedNodes.filter(n => n.type === 'freetext' || n.type === 'text');
+                
+                if (selectedShapes.length === 0 && selectedTexts.length === 0) return null;
+
+                const hasShapes = selectedShapes.length > 0;
+
+                const borderColors = [
+                    { value: '#a78bfa', label: 'Roxo' },
+                    { value: '#3b82f6', label: 'Azul' },
+                    { value: '#10b981', label: 'Verde' },
+                    { value: '#f59e0b', label: 'Laranja' },
+                    { value: '#ef4444', label: 'Vermelho' },
+                    { value: '#e2e8f0', label: 'Branco' },
+                    { value: '#000000', label: 'Preto' }
+                ];
+
+                const fillColors = [
+                    { value: 'transparent', label: 'Nenhum' },
+                    { value: 'rgba(167, 139, 250, 0.22)', label: 'Roxo' },
+                    { value: 'rgba(59, 130, 246, 0.22)', label: 'Azul' },
+                    { value: 'rgba(16, 185, 129, 0.22)', label: 'Verde' },
+                    { value: 'rgba(245, 158, 11, 0.22)', label: 'Laranja' },
+                    { value: 'rgba(239, 68, 68, 0.22)', label: 'Vermelho' },
+                    { value: 'rgba(255, 255, 255, 0.15)', label: 'Branco' }
+                ];
+
+                const updateProp = (key: string, val: any) => {
+                    setNodes(prev => {
+                        const updated = prev.map(n => {
+                            if (selectedIds.has(n.id)) {
+                                return { ...n, [key]: val };
+                            }
+                            return n;
+                        });
+                        saveData(updated, strokes, viewport);
+                        return updated;
+                    });
+                    
+                    if (key === 'color') setCurrentStrokeColor(val);
+                    if (key === 'shapeStrokeWidth') setCurrentStrokeWidth(val);
+                    if (key === 'shapeStrokeStyle') setCurrentStrokeStyle(val);
+                    if (key === 'shapeFillColor') setCurrentFillColor(val);
+                    if (key === 'shapeRoughness') setCurrentShapeRoughness(val);
+                };
+
+                return (
+                    <div className={`${styles.propertiesSidebar} ${isPropSidebarMinimized ? styles.propertiesSidebarMinimized : ''}`} onMouseDown={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isPropSidebarMinimized ? '0' : '8px', width: '100%' }}>
+                            {!isPropSidebarMinimized && <span className={styles.propTitle} style={{ margin: 0 }}>Configurações</span>}
+                            <button 
+                                className={styles.propBtn}
+                                style={{ width: isPropSidebarMinimized ? '100%' : '32px', border: isPropSidebarMinimized ? '1px solid rgba(139,92,246,0.3)' : 'none', background: isPropSidebarMinimized ? 'rgba(139,92,246,0.1)' : 'transparent' }}
+                                onClick={(e) => { e.stopPropagation(); setIsPropSidebarMinimized(!isPropSidebarMinimized); }}
+                                title={isPropSidebarMinimized ? "Abrir configurações do objeto" : "Minimizar configurações"}
+                            >
+                                <Lucide.Settings size={isPropSidebarMinimized ? 20 : 16} color={isPropSidebarMinimized ? '#c4b5fd' : '#94a3b8'} />
+                            </button>
+                        </div>
+                        
+                        {!isPropSidebarMinimized && (
+                            <>
+                                {/* Contorno / Cor do Texto */}
+                        <div className={styles.propSection}>
+                            <span className={styles.propTitle}>
+                                {hasShapes ? 'Cor do Contorno' : 'Cor do Texto'}
+                            </span>
+                            <div className={styles.colorPalette}>
+                                {borderColors.map(c => {
+                                    const isActive = hasShapes 
+                                        ? currentStrokeColor === c.value
+                                        : selectedNodes[0]?.textColor === c.value;
+                                    return (
+                                        <div
+                                            key={c.value}
+                                            className={`${styles.colorPaletteDot} ${isActive ? styles.colorPaletteDotActive : ''}`}
+                                            style={{ backgroundColor: c.value === '#000000' ? '#14141c' : c.value, border: c.value === '#000000' ? '1px solid rgba(255,255,255,0.2)' : undefined }}
+                                            onClick={() => updateProp(hasShapes ? 'color' : 'textColor', c.value)}
+                                            title={c.label}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Preenchimento */}
+                        {hasShapes && (
+                            <div className={styles.propSection}>
+                                <span className={styles.propTitle}>Cor do Preenchimento</span>
+                                <div className={styles.colorPalette}>
+                                    {fillColors.map(c => {
+                                        const isActive = currentFillColor === c.value;
+                                        return (
+                                            <div
+                                                key={c.value}
+                                                className={`${styles.colorPaletteDot} ${isActive ? styles.colorPaletteDotActive : ''}`}
+                                                style={{ 
+                                                    background: c.value === 'transparent' ? 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.1) 4px, rgba(255,255,255,0.1) 8px)' : c.value,
+                                                    border: '1px solid var(--border-default)'
+                                                }}
+                                                onClick={() => updateProp('shapeFillColor', c.value)}
+                                                title={c.label}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Espessura do Contorno / Tamanho da Fonte */}
+                        <div className={styles.propSection}>
+                            <span className={styles.propTitle}>
+                                {hasShapes ? 'Espessura do Contorno' : 'Tamanho do Texto'}
+                            </span>
+                            {hasShapes ? (
+                                <div className={styles.propButtonGroup}>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentStrokeWidth === 2 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeStrokeWidth', 2)}
+                                    >
+                                        Fina
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentStrokeWidth === 4 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeStrokeWidth', 4)}
+                                    >
+                                        Média
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentStrokeWidth === 6 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeStrokeWidth', 6)}
+                                    >
+                                        Grossa
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className={styles.propButtonGroup}>
+                                    <button 
+                                        className={`${styles.propBtn} ${(selectedNodes[0]?.fontSize || 15) === 14 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('fontSize', 14)}
+                                    >
+                                        P
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${(selectedNodes[0]?.fontSize || 15) === 18 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('fontSize', 18)}
+                                    >
+                                        M
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${(selectedNodes[0]?.fontSize || 15) === 24 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('fontSize', 24)}
+                                    >
+                                        G
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${(selectedNodes[0]?.fontSize || 15) === 36 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('fontSize', 36)}
+                                    >
+                                        GG
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Estilo do Traço */}
+                        {hasShapes && (
+                            <div className={styles.propSection}>
+                                <span className={styles.propTitle}>Estilo do Traço</span>
+                                <div className={styles.propButtonGroup}>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentStrokeStyle === 'solid' ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeStrokeStyle', 'solid')}
+                                    >
+                                        Sólido
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentStrokeStyle === 'dashed' ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeStrokeStyle', 'dashed')}
+                                    >
+                                        Tracejado
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentStrokeStyle === 'dotted' ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeStrokeStyle', 'dotted')}
+                                    >
+                                        Pontilhado
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Estilo do Desenho */}
+                        {hasShapes && (
+                            <div className={styles.propSection}>
+                                <span className={styles.propTitle}>Estilo de Desenho</span>
+                                <div className={styles.propButtonGroup}>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentShapeRoughness === 1 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeRoughness', 1)}
+                                    >
+                                        Sketchy
+                                    </button>
+                                    <button 
+                                        className={`${styles.propBtn} ${currentShapeRoughness === 0 ? styles.propBtnActive : ''}`}
+                                        onClick={() => updateProp('shapeRoughness', 0)}
+                                    >
+                                        Clean
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Lock / Unlock */}
+                        <div style={{ marginTop: '4px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px', display: 'flex', gap: '6px' }}>
+                            <button 
+                                className={styles.propBtn} 
+                                style={{ flex: 1, gap: 4 }}
+                                onClick={() => {
+                                    const allLocked = selectedNodes.every(n => n.isLocked);
+                                    lockAllSelected(!allLocked);
+                                }}
+                            >
+                                {selectedNodes.every(n => n.isLocked) ? <Unlock size={12} /> : <Lock size={12} />}
+                                <span>{selectedNodes.every(n => n.isLocked) ? 'Desbloquear' : 'Bloquear'}</span>
+                            </button>
+                            <button 
+                                className={styles.propBtn} 
+                                style={{ flex: 'none', width: '28px', background: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', color: '#f87171' }}
+                                onClick={() => {
+                                    setCustomDialog({
+                                        isOpen: true,
+                                        type: 'confirm',
+                                        message: `Deseja realmente excluir os ${selectedNodes.length} itens selecionados?`,
+                                        onConfirm: () => {
+                                            deleteSelectedElements(new Set(selectedNodes.map(n => n.id)));
+                                        },
+                                        onCancel: () => {}
+                                    });
+                                }}
+                                title="Excluir selecionados"
+                            >
+                                <Trash2 size={12} />
+                            </button>
+                        </div>
+                            </>
+                        )}
+                    </div>
+                );
+            })()}
+
+            {/* ── Right Text Editor Sidebar ── */}
             {(() => {
                 const selectedTexts = nodes.filter(n => selectedIds.has(n.id) && (n.type === 'text' || n.type === 'freetext'));
                 if (selectedTexts.length !== 1) return null;
@@ -4515,8 +4920,21 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                 );
             })()}
 
-                        <CanvasZoomControls />
-{/* ── Searchable Profiles Picker Panel ── */}
+            {/* ── Zoom and History Bottom-Left Controls ── */}
+            <div className={styles.zoomControls} onMouseDown={(e) => e.stopPropagation()}>
+                <button onClick={zoomOut} title="Diminuir Zoom"><ZoomOut size={15} /></button>
+                <div className={styles.zoomValue} onClick={resetZoom} title="Resetar Zoom (100%)">
+                    {Math.round(viewport.zoom * 100)}%
+                </div>
+                <button onClick={zoomIn} title="Aumentar Zoom"><ZoomIn size={15} /></button>
+                
+                <div style={{ width: '1px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+                
+                <button onClick={handleUndo} disabled={historyIndexRef.current === 0} title="Desfazer (Ctrl+Z)"><Undo2 size={15} /></button>
+                <button onClick={handleRedo} disabled={historyIndexRef.current >= history.length - 1} title="Refazer (Ctrl+Y)"><Redo2 size={15} /></button>
+            </div>
+
+            {/* ── Searchable Profiles Picker Panel ── */}
             {showProfilePicker && (
                 <div className={styles.pickerPopover}>
                     <div className={styles.pickerHeader} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px 6px' }}>
@@ -5008,9 +5426,6 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                         )}
                         {!ctxNode?.isLocked && (
                             <>
-                                
-                                <button className={styles.ctxMenuItem} onClick={() => bringToFront(contextMenu.nodeId)}><Lucide.ArrowUp size={14} />Trazer para Frente</button>
-                                <button className={styles.ctxMenuItem} onClick={() => sendToBack(contextMenu.nodeId)}><Lucide.ArrowDown size={14} />Enviar para Trás</button>
                                 <button className={styles.ctxMenuItem} onClick={() => duplicateNode(contextMenu.nodeId)}><Copy size={14} />Duplicar</button>
                                 <div className={styles.ctxMenuDivider} />
                                 <button 
@@ -5632,7 +6047,6 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
             )}
         </div>
 
-        </CanvasContext.Provider>
     );
 };
 

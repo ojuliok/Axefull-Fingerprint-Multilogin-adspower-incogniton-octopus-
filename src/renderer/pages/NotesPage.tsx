@@ -244,7 +244,7 @@ const NotesPage: React.FC = () => {
             id: `note-${Date.now()}`,
             spaceId: activeSpaceId,
             title: 'Nova Nota',
-            content: '# Nova Nota\n\nClique para começar a escrever...',
+            content: '<h1>Nova Nota</h1><hr><p>Clique para começar a escrever...</p>',
             isStarred: false,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -259,7 +259,13 @@ const NotesPage: React.FC = () => {
     const handleUpdateNoteContent = (content: string) => {
         const updated = notes.map(n => {
             if (n.id === activeNoteId) {
-                return { ...n, content, updated_at: new Date().toISOString() };
+                let newTitle = n.title;
+                const match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
+                if (match && match[1] !== undefined) {
+                    const text = match[1].replace(/<[^>]+>/g, '').trim();
+                    if (text || text === '') newTitle = text || 'Sem Título';
+                }
+                return { ...n, content, title: newTitle, updated_at: new Date().toISOString() };
             }
             return n;
         });
@@ -269,7 +275,13 @@ const NotesPage: React.FC = () => {
     const handleUpdateNoteTitle = (title: string) => {
         const updated = notes.map(n => {
             if (n.id === activeNoteId) {
-                return { ...n, title, updated_at: new Date().toISOString() };
+                let newContent = n.content;
+                if (/<h1[^>]*>.*?<\/h1>/i.test(newContent)) {
+                    newContent = newContent.replace(/(<h1[^>]*>)(.*?)(<\/h1>)/i, `$1${title}$3`);
+                } else {
+                    newContent = `<h1>${title}</h1><hr><p></p>` + newContent;
+                }
+                return { ...n, title, content: newContent, updated_at: new Date().toISOString() };
             }
             return n;
         });
@@ -917,7 +929,7 @@ const NotesPage: React.FC = () => {
                                         </div>
 
                                         <span className="text-[10px] text-theme-text-faint line-clamp-2">
-                                            {note.content.replace(/[#*`\-[\]]/g, '').trim() || 'Sem conteúdo...'}
+                                            {note.content.replace(/<[^>]*>?/gm, '').replace(/[#*`\-[\]]/g, '').trim() || 'Sem conteúdo...'}
                                         </span>
 
                                         <span className="text-[8px] text-theme-text-faint text-right mt-1">
