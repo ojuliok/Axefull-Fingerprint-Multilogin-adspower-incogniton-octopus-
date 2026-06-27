@@ -95,6 +95,18 @@ export const HomeW97: React.FC = () => {
   const { logout, user } = useAuth();
   const { currentWorkspace } = useWorkspace();
 
+  // ─── STATE FOR MOBILE RESPONSIVENESS ─────────────────
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // ─── STATE FOR SYSTEM BOOT SCREEN ────────────────────
   const [booting, setBooting] = useState(true);
   const [bootProgress, setBootProgress] = useState(0);
@@ -238,6 +250,21 @@ export const HomeW97: React.FC = () => {
     alert('Nota salva com sucesso no banco de dados local!');
   };
 
+  const handleDocumentItemClick = (id: string) => {
+    openWindow('neuralNetwork');
+    const node = allNodes.find(n => n.id === id);
+    if (node) {
+      if (node.type === 'canvas' || node.type === 'document') {
+        setGraphFilter('notas');
+      } else if (node.type === 'task') {
+        setGraphFilter('tarefas');
+      } else if (node.type === 'profile') {
+        setGraphFilter('perfis');
+      }
+      setSelectedNode(node);
+    }
+  };
+
   // ─── NEURAL GRAPH STATE ──────────────────────────────
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -250,14 +277,15 @@ export const HomeW97: React.FC = () => {
   useEffect(() => {
     const updateTime = () => {
       const d = new Date();
-      setCurrentTime(
-        d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-      );
+      const options: Intl.DateTimeFormatOptions = isMobile
+        ? { hour: '2-digit', minute: '2-digit' }
+        : { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      setCurrentTime(d.toLocaleTimeString('pt-BR', options));
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMobile]);
 
   // ─── BOOT BIOS EMULATION ANIMATION ───────────────────
   useEffect(() => {
@@ -852,6 +880,7 @@ export const HomeW97: React.FC = () => {
   // Window Drag Handlers
   const handleWindowMouseDown = (id: string, e: React.MouseEvent) => {
     focusWindow(id);
+    if (isMobile) return;
     const win = windows[id];
     if (win.isMaximized) return;
 
@@ -936,7 +965,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'myComputer' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('myComputer');
+            if (isMobile) {
+              openWindow('systemAbout');
+            } else {
+              setSelectedDesktopIcon('myComputer');
+            }
           }}
           onDoubleClick={() => openWindow('systemAbout')}
         >
@@ -949,7 +982,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'myDocuments' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('myDocuments');
+            if (isMobile) {
+              openWindow('documents');
+            } else {
+              setSelectedDesktopIcon('myDocuments');
+            }
           }}
           onDoubleClick={() => openWindow('documents')}
         >
@@ -962,7 +999,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'neuralNet' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('neuralNet');
+            if (isMobile) {
+              openWindow('neuralNetwork');
+            } else {
+              setSelectedDesktopIcon('neuralNet');
+            }
           }}
           onDoubleClick={() => openWindow('neuralNetwork')}
         >
@@ -975,7 +1016,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'profiles' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('profiles');
+            if (isMobile) {
+              navigate('/profiles');
+            } else {
+              setSelectedDesktopIcon('profiles');
+            }
           }}
           onDoubleClick={() => navigate('/profiles')}
         >
@@ -988,7 +1033,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'canvas' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('canvas');
+            if (isMobile) {
+              navigate('/canvas');
+            } else {
+              setSelectedDesktopIcon('canvas');
+            }
           }}
           onDoubleClick={() => navigate('/canvas')}
         >
@@ -1001,7 +1050,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'tasks' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('tasks');
+            if (isMobile) {
+              navigate('/tasks');
+            } else {
+              setSelectedDesktopIcon('tasks');
+            }
           }}
           onDoubleClick={() => navigate('/tasks')}
         >
@@ -1014,7 +1067,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'dadosclean' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('dadosclean');
+            if (isMobile) {
+              navigate('/dadosclean');
+            } else {
+              setSelectedDesktopIcon('dadosclean');
+            }
           }}
           onDoubleClick={() => navigate('/dadosclean')}
         >
@@ -1027,7 +1084,11 @@ export const HomeW97: React.FC = () => {
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'retroNotes' ? styles.desktopIconSelected : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedDesktopIcon('retroNotes');
+            if (isMobile) {
+              openWindow('notes');
+            } else {
+              setSelectedDesktopIcon('retroNotes');
+            }
           }}
           onDoubleClick={() => openWindow('notes')}
         >
@@ -1042,10 +1103,10 @@ export const HomeW97: React.FC = () => {
         <div
           className={`${styles.window} ${activeWindowId === 'systemAbout' ? styles.windowActive : ''}`}
           style={{
-            left: windows.systemAbout.isMaximized ? 0 : windows.systemAbout.x,
-            top: windows.systemAbout.isMaximized ? 0 : windows.systemAbout.y,
-            width: windows.systemAbout.isMaximized ? '100%' : windows.systemAbout.width,
-            height: windows.systemAbout.isMaximized ? 'calc(100% - 32px)' : windows.systemAbout.height,
+            left: (windows.systemAbout.isMaximized || isMobile) ? 0 : windows.systemAbout.x,
+            top: (windows.systemAbout.isMaximized || isMobile) ? 0 : windows.systemAbout.y,
+            width: (windows.systemAbout.isMaximized || isMobile) ? '100%' : windows.systemAbout.width,
+            height: (windows.systemAbout.isMaximized || isMobile) ? 'calc(100% - 32px)' : windows.systemAbout.height,
             display: windows.systemAbout.isMinimized ? 'none' : 'flex'
           }}
           onClick={() => focusWindow('systemAbout')}
@@ -1082,10 +1143,10 @@ export const HomeW97: React.FC = () => {
         <div
           className={`${styles.window} ${activeWindowId === 'documents' ? styles.windowActive : ''}`}
           style={{
-            left: windows.documents.isMaximized ? 0 : windows.documents.x,
-            top: windows.documents.isMaximized ? 0 : windows.documents.y,
-            width: windows.documents.isMaximized ? '100%' : windows.documents.width,
-            height: windows.documents.isMaximized ? 'calc(100% - 32px)' : windows.documents.height,
+            left: (windows.documents.isMaximized || isMobile) ? 0 : windows.documents.x,
+            top: (windows.documents.isMaximized || isMobile) ? 0 : windows.documents.y,
+            width: (windows.documents.isMaximized || isMobile) ? '100%' : windows.documents.width,
+            height: (windows.documents.isMaximized || isMobile) ? 'calc(100% - 32px)' : windows.documents.height,
             display: windows.documents.isMinimized ? 'none' : 'flex'
           }}
           onClick={() => focusWindow('documents')}
@@ -1115,12 +1176,10 @@ export const HomeW97: React.FC = () => {
                 <div
                   key={c.id}
                   className="flex items-center gap-2 p-1.5 hover:bg-blue-900 hover:text-white cursor-pointer border border-transparent hover:border-blue-400 rounded"
-                  onDoubleClick={() => {
-                    openWindow('neuralNetwork');
-                    // Find node in graph and select it
-                    const node = nodes.find(n => n.id === c.id);
-                    if (node) setSelectedNode(node);
+                  onClick={() => {
+                    if (isMobile) handleDocumentItemClick(c.id);
                   }}
+                  onDoubleClick={() => handleDocumentItemClick(c.id)}
                 >
                   <Layers size={18} className="text-amber-500" />
                   <div className="flex flex-col">
@@ -1135,11 +1194,10 @@ export const HomeW97: React.FC = () => {
                 <div
                   key={t.id}
                   className="flex items-center gap-2 p-1.5 hover:bg-blue-900 hover:text-white cursor-pointer border border-transparent hover:border-blue-400 rounded"
-                  onDoubleClick={() => {
-                    openWindow('neuralNetwork');
-                    const node = nodes.find(n => n.id === t.id);
-                    if (node) setSelectedNode(node);
+                  onClick={() => {
+                    if (isMobile) handleDocumentItemClick(t.id);
                   }}
+                  onDoubleClick={() => handleDocumentItemClick(t.id)}
                 >
                   <CheckSquare size={18} className="text-blue-500" />
                   <div className="flex flex-col">
@@ -1154,11 +1212,10 @@ export const HomeW97: React.FC = () => {
                 <div
                   key={p.id}
                   className="flex items-center gap-2 p-1.5 hover:bg-blue-900 hover:text-white cursor-pointer border border-transparent hover:border-blue-400 rounded"
-                  onDoubleClick={() => {
-                    openWindow('neuralNetwork');
-                    const node = nodes.find(n => n.id === p.id);
-                    if (node) setSelectedNode(node);
+                  onClick={() => {
+                    if (isMobile) handleDocumentItemClick(p.id);
                   }}
+                  onDoubleClick={() => handleDocumentItemClick(p.id)}
                 >
                   <User size={18} className="text-purple-500" />
                   <div className="flex flex-col">
@@ -1173,11 +1230,10 @@ export const HomeW97: React.FC = () => {
                 <div
                   key={d.id}
                   className="flex items-center gap-2 p-1.5 hover:bg-blue-900 hover:text-white cursor-pointer border border-transparent hover:border-blue-400 rounded"
-                  onDoubleClick={() => {
-                    openWindow('neuralNetwork');
-                    const node = nodes.find(n => n.id === d.id);
-                    if (node) setSelectedNode(node);
+                  onClick={() => {
+                    if (isMobile) handleDocumentItemClick(d.id);
                   }}
+                  onDoubleClick={() => handleDocumentItemClick(d.id)}
                 >
                   <FileText size={18} className="text-emerald-500" />
                   <div className="flex flex-col">
@@ -1197,10 +1253,10 @@ export const HomeW97: React.FC = () => {
         <div
           className={`${styles.window} ${activeWindowId === 'neuralNetwork' ? styles.windowActive : ''}`}
           style={{
-            left: windows.neuralNetwork.isMaximized ? 0 : windows.neuralNetwork.x,
-            top: windows.neuralNetwork.isMaximized ? 0 : windows.neuralNetwork.y,
-            width: windows.neuralNetwork.isMaximized ? '100%' : windows.neuralNetwork.width,
-            height: windows.neuralNetwork.isMaximized ? 'calc(100% - 32px)' : windows.neuralNetwork.height,
+            left: (windows.neuralNetwork.isMaximized || isMobile) ? 0 : windows.neuralNetwork.x,
+            top: (windows.neuralNetwork.isMaximized || isMobile) ? 0 : windows.neuralNetwork.y,
+            width: (windows.neuralNetwork.isMaximized || isMobile) ? '100%' : windows.neuralNetwork.width,
+            height: (windows.neuralNetwork.isMaximized || isMobile) ? 'calc(100% - 32px)' : windows.neuralNetwork.height,
             display: windows.neuralNetwork.isMinimized ? 'none' : 'flex'
           }}
           onClick={() => focusWindow('neuralNetwork')}
@@ -1367,10 +1423,10 @@ export const HomeW97: React.FC = () => {
         <div
           className={`${styles.window} ${activeWindowId === 'notes' ? styles.windowActive : ''}`}
           style={{
-            left: windows.notes.isMaximized ? 0 : windows.notes.x,
-            top: windows.notes.isMaximized ? 0 : windows.notes.y,
-            width: windows.notes.isMaximized ? '100%' : windows.notes.width,
-            height: windows.notes.isMaximized ? 'calc(100% - 32px)' : windows.notes.height,
+            left: (windows.notes.isMaximized || isMobile) ? 0 : windows.notes.x,
+            top: (windows.notes.isMaximized || isMobile) ? 0 : windows.notes.y,
+            width: (windows.notes.isMaximized || isMobile) ? '100%' : windows.notes.width,
+            height: (windows.notes.isMaximized || isMobile) ? 'calc(100% - 32px)' : windows.notes.height,
             display: windows.notes.isMinimized ? 'none' : 'flex'
           }}
           onClick={() => focusWindow('notes')}

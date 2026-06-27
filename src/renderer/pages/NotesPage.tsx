@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     StickyNote, Plus, Settings, Star, Trash2, Search, Lock, Unlock, 
     X, Eye, Edit3, Copy, Check, Shield, ChevronLeft,
@@ -64,9 +64,6 @@ const NotesPage: React.FC = () => {
     
     // UI Interface States
     const [searchQuery, setSearchQuery] = useState('');
-    const [isEditMode, setIsEditMode] = useState(false); // Toggle between raw markdown and Axefull Note preview
-    const [inputText, setInputText] = useState('');
-    const [copiedBlockKey, setCopiedBlockKey] = useState<string | null>(null);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // Dialog / Modal States
@@ -133,18 +130,6 @@ const NotesPage: React.FC = () => {
     
     // Keep reference of current vault password for decrypting/encrypting
     const [vaultPassword, setVaultPassword] = useState<string>('');
-
-    // Refs
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    // Focus and select end of textarea when entering edit mode
-    useEffect(() => {
-        if (isEditMode && textareaRef.current) {
-            textareaRef.current.focus();
-            const length = textareaRef.current.value.length;
-            textareaRef.current.setSelectionRange(length, length);
-        }
-    }, [isEditMode]);
 
     // Load initial data
     useEffect(() => {
@@ -314,7 +299,6 @@ const NotesPage: React.FC = () => {
         const updated = [newNote, ...notes];
         saveNotesToStorage(updated);
         setActiveNoteId(newNote.id);
-        setIsEditMode(false);
         setIsPassSelected(false);
         if (window.innerWidth < 768) {
             setIsSidebarCollapsed(true);
@@ -401,76 +385,7 @@ const NotesPage: React.FC = () => {
         toast.success('Movida', `Nota movida para o espaço "${destSpace?.name || 'Destino'}".`);
     };
 
-    // Chatbot-style Easy insertion handler
-    const handleInsertText = () => {
-        if (!inputText.trim() || !activeNoteId) return;
-
-        const currentNote = notes.find(n => n.id === activeNoteId);
-        if (!currentNote) return;
-
-        const appendedContent = currentNote.content + `\n\n${inputText.trim()}`;
-        handleUpdateNoteContent(appendedContent);
-        setInputText('');
-
-        toast.success('Adicionado', 'Texto inserido no bloco de notas.');
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleInsertText();
-        }
-    };
-
-    // Markdown insertion helper
-    const handleInsertMarkdown = (syntax: 'bold' | 'italic' | 'heading' | 'code' | 'bullet' | 'todo') => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const text = textarea.value;
-        const selectedText = text.substring(start, end);
-
-        let replacement = '';
-        let newCursorPos = start;
-
-        switch (syntax) {
-            case 'bold':
-                replacement = `**${selectedText || 'texto'}**`;
-                newCursorPos = start + 2 + (selectedText ? selectedText.length : 5);
-                break;
-            case 'italic':
-                replacement = `*${selectedText || 'texto'}*`;
-                newCursorPos = start + 1 + (selectedText ? selectedText.length : 5);
-                break;
-            case 'heading':
-                replacement = `\n## ${selectedText || 'Título'}`;
-                newCursorPos = start + replacement.length;
-                break;
-            case 'code':
-                replacement = `\n\`\`\`javascript\n${selectedText || '// código aqui'}\n\`\`\`\n`;
-                newCursorPos = start + replacement.length;
-                break;
-            case 'bullet':
-                replacement = `\n- ${selectedText || 'item'}`;
-                newCursorPos = start + replacement.length;
-                break;
-            case 'todo':
-                replacement = `\n- [ ] ${selectedText || 'tarefa'}`;
-                newCursorPos = start + replacement.length;
-                break;
-        }
-
-        const newContent = text.substring(0, start) + replacement + text.substring(end);
-        handleUpdateNoteContent(newContent);
-        
-        // Restore focus and selection position
-        setTimeout(() => {
-            textarea.focus();
-            textarea.setSelectionRange(newCursorPos, newCursorPos);
-        }, 0);
-    };
+    // Old insertion handler removed because it is unused
 
     // Right-Click Context Menu Triggers
     const handleNoteContextMenu = (e: React.MouseEvent, noteId: string) => {
@@ -1525,7 +1440,6 @@ const NotesPage: React.FC = () => {
                                         key={note.id}
                                         onClick={() => {
                                             setActiveNoteId(note.id);
-                                            setIsEditMode(false);
                                             setIsPassSelected(false);
                                             if (window.innerWidth < 768) {
                                                 setIsSidebarCollapsed(true);
