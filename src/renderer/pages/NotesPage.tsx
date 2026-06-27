@@ -799,10 +799,6 @@ const NotesPage: React.FC = () => {
         toast.info('Senha Gerada', 'Uma senha forte foi inserida no campo.');
     };
 
-        }
-        setIsEditMode(true);
-    };
-
     // Filter Notes
     const activeSpace = spaces.find(s => s.id === activeSpaceId);
     
@@ -821,7 +817,6 @@ const NotesPage: React.FC = () => {
         });
 
     const activeNote = notes.find(n => n.id === activeNoteId);
-    const parsedBlocks = activeNote ? parseMarkdownToBlocks(activeNote.content) : [];
 
     // Keyboard lock event
     useEffect(() => {
