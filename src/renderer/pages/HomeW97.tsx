@@ -137,6 +137,18 @@ export const HomeW97: React.FC = () => {
       width: 380,
       height: 220,
       zIndex: 12
+    },
+    notes: {
+      id: 'notes',
+      title: 'Bloco de Notas',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 150,
+      y: 80,
+      width: 550,
+      height: 400,
+      zIndex: 13
     }
   });
 
@@ -151,6 +163,80 @@ export const HomeW97: React.FC = () => {
   const [canvases, setCanvases] = useState<CanvasInfo[]>([]);
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
+
+  // ─── RETRO NOTES STATE & ACTIONS ─────────────────────
+  const [retroNotes, setRetroNotes] = useState<any[]>([]);
+  const [activeRetroNoteId, setActiveRetroNoteId] = useState<string>('');
+
+  useEffect(() => {
+    if (!booting) {
+      const saved = localStorage.getItem('axe_notes_notes');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setRetroNotes(parsed);
+          if (parsed.length > 0) {
+            setActiveRetroNoteId(parsed[0].id);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, [booting]);
+
+  const saveRetroNotes = (updated: any[]) => {
+    setRetroNotes(updated);
+    localStorage.setItem('axe_notes_notes', JSON.stringify(updated));
+  };
+
+  const handleCreateRetroNote = () => {
+    const newNote = {
+      id: `note-${Date.now()}`,
+      spaceId: 'space-2', // Default general space
+      title: 'Nova Nota Retro',
+      content: 'Digite o conteúdo aqui...',
+      isStarred: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    const updated = [newNote, ...retroNotes];
+    saveRetroNotes(updated);
+    setActiveRetroNoteId(newNote.id);
+  };
+
+  const handleDeleteRetroNote = () => {
+    if (!activeRetroNoteId) return;
+    if (confirm('Tem certeza que deseja excluir esta nota?')) {
+      const updated = retroNotes.filter(n => n.id !== activeRetroNoteId);
+      saveRetroNotes(updated);
+      setActiveRetroNoteId(updated.length > 0 ? updated[0].id : '');
+    }
+  };
+
+  const handleUpdateRetroNoteTitle = (newTitle: string) => {
+    const updated = retroNotes.map(n => {
+      if (n.id === activeRetroNoteId) {
+        return { ...n, title: newTitle, updated_at: new Date().toISOString() };
+      }
+      return n;
+    });
+    saveRetroNotes(updated);
+  };
+
+  const handleUpdateRetroNoteContent = (newContent: string) => {
+    const updated = retroNotes.map(n => {
+      if (n.id === activeRetroNoteId) {
+        return { ...n, content: newContent, updated_at: new Date().toISOString() };
+      }
+      return n;
+    });
+    saveRetroNotes(updated);
+  };
+
+  const handleSaveRetroNote = () => {
+    alert('Nota salva com sucesso no banco de dados local!');
+  };
 
   // ─── NEURAL GRAPH STATE ──────────────────────────────
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
@@ -245,22 +331,31 @@ export const HomeW97: React.FC = () => {
     }
   }, [booting, currentWorkspace]);
 
-  // ─── NEURAL GRAPH COMPUTED DATA ──────────────────────
-  const { nodes, links } = useMemo(() => {
+  // ─── NEURAL GRAPH COMPUTED DATA & FILTERS ────────────
+  const [graphFilter, setGraphFilter] = useState<'all' | 'notas' | 'tarefas' | 'perfis'>('all');
+  const nodePositionsRef = useRef<Record<string, { x: number; y: number; vx: number; vy: number }>>({});
+
+  const { allNodes, allLinks } = useMemo(() => {
     const newNodes: GraphNode[] = [];
     const newLinks: GraphLink[] = [];
 
     // Helper to add nodes safely
     const addNode = (id: string, label: string, type: 'canvas' | 'task' | 'profile' | 'document', color: string, original: any) => {
       if (!newNodes.some(n => n.id === id)) {
+        const stored = nodePositionsRef.current[id] || {
+          x: Math.random() * 500 + 100,
+          y: Math.random() * 350 + 50,
+          vx: 0,
+          vy: 0
+        };
         newNodes.push({
           id,
           label,
           type,
-          x: Math.random() * 500 + 100,
-          y: Math.random() * 350 + 50,
-          vx: 0,
-          vy: 0,
+          x: stored.x,
+          y: stored.y,
+          vx: stored.vx,
+          vy: stored.vy,
           radius: type === 'document' ? 16 : 14,
           color,
           originalObject: original
@@ -369,8 +464,26 @@ export const HomeW97: React.FC = () => {
       });
     });
 
-    return { nodes: newNodes, links: newLinks };
+    return { allNodes: newNodes, allLinks: newLinks };
   }, [canvases, tasks, profiles]);
+
+  const { nodes, links } = useMemo(() => {
+    let filteredNodes = allNodes;
+    if (graphFilter === 'notas') {
+      filteredNodes = allNodes.filter(n => n.type === 'canvas' || n.type === 'document');
+    } else if (graphFilter === 'tarefas') {
+      filteredNodes = allNodes.filter(n => n.type === 'task');
+    } else if (graphFilter === 'perfis') {
+      filteredNodes = allNodes.filter(n => n.type === 'profile');
+    }
+
+    const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+    const filteredLinks = allLinks.filter(l => 
+      filteredNodeIds.has(l.source) && filteredNodeIds.has(l.target)
+    );
+
+    return { nodes: filteredNodes, links: filteredLinks };
+  }, [allNodes, allLinks, graphFilter]);
 
   // ─── PHYSICS-BASED FORCE DIRECTED GRAPH SIMULATION ───
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -467,21 +580,25 @@ export const HomeW97: React.FC = () => {
       const centerX = width / 2;
       const centerY = height / 2;
       nodes.forEach(n => {
-        if (n === dragNodeRef.current) return;
-        const dx = centerX - n.x;
-        const dy = centerY - n.y;
-        n.vx += dx * kGravity;
-        n.vy += dy * kGravity;
+        if (n !== dragNodeRef.current) {
+          const dx = centerX - n.x;
+          const dy = centerY - n.y;
+          n.vx += dx * kGravity;
+          n.vy += dy * kGravity;
 
-        // Apply velocities and friction
-        n.x += n.vx;
-        n.y += n.vy;
-        n.vx *= friction;
-        n.vy *= friction;
+          // Apply velocities and friction
+          n.x += n.vx;
+          n.y += n.vy;
+          n.vx *= friction;
+          n.vy *= friction;
 
-        // Clamp inside bounds
-        n.x = Math.max(20, Math.min(width - 20, n.x));
-        n.y = Math.max(20, Math.min(height - 20, n.y));
+          // Clamp inside bounds
+          n.x = Math.max(20, Math.min(width - 20, n.x));
+          n.y = Math.max(20, Math.min(height - 20, n.y));
+        }
+
+        // Persist position
+        nodePositionsRef.current[n.id] = { x: n.x, y: n.y, vx: n.vx, vy: n.vy };
       });
 
       // ── DRAWING GRAPH ──
@@ -905,6 +1022,19 @@ export const HomeW97: React.FC = () => {
           <span className={styles.iconLabel}>MetaClean</span>
         </div>
 
+        {/* Bloco de Notas Shortcut */}
+        <div
+          className={`${styles.desktopIcon} ${selectedDesktopIcon === 'retroNotes' ? styles.desktopIconSelected : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedDesktopIcon('retroNotes');
+          }}
+          onDoubleClick={() => openWindow('notes')}
+        >
+          <FileText size={32} strokeWidth={1.5} className="text-yellow-200" />
+          <span className={styles.iconLabel}>Bloco de Notas</span>
+        </div>
+
       </div>
 
       {/* ─── RETRO WINDOW: ABOUT / MY COMPUTER ─────────── */}
@@ -1114,6 +1244,46 @@ export const HomeW97: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Windows 97 style tab navigation bar */}
+          <div className={styles.tabContainer} onClick={e => e.stopPropagation()}>
+            <button
+              className={`${styles.tab} ${graphFilter === 'all' ? styles.tabActive : ''}`}
+              onClick={() => {
+                setGraphFilter('all');
+                setSelectedNode(null);
+              }}
+            >
+              <span>Todos</span>
+            </button>
+            <button
+              className={`${styles.tab} ${graphFilter === 'notas' ? styles.tabActive : ''}`}
+              onClick={() => {
+                setGraphFilter('notas');
+                setSelectedNode(null);
+              }}
+            >
+              <span>Canvas & Documentos (Notas)</span>
+            </button>
+            <button
+              className={`${styles.tab} ${graphFilter === 'tarefas' ? styles.tabActive : ''}`}
+              onClick={() => {
+                setGraphFilter('tarefas');
+                setSelectedNode(null);
+              }}
+            >
+              <span>Tarefas</span>
+            </button>
+            <button
+              className={`${styles.tab} ${graphFilter === 'perfis' ? styles.tabActive : ''}`}
+              onClick={() => {
+                setGraphFilter('perfis');
+                setSelectedNode(null);
+              }}
+            >
+              <span>Perfis / Objetos</span>
+            </button>
+          </div>
           
           <div className={styles.windowBody} style={{ padding: 0, position: 'relative' }}>
             <div className={styles.graphContainer}>
@@ -1192,6 +1362,88 @@ export const HomeW97: React.FC = () => {
         </div>
       )}
 
+      {/* ─── RETRO WINDOW: NOTES / NOTEPAD ─────────────── */}
+      {windows.notes.isOpen && (
+        <div
+          className={`${styles.window} ${activeWindowId === 'notes' ? styles.windowActive : ''}`}
+          style={{
+            left: windows.notes.isMaximized ? 0 : windows.notes.x,
+            top: windows.notes.isMaximized ? 0 : windows.notes.y,
+            width: windows.notes.isMaximized ? '100%' : windows.notes.width,
+            height: windows.notes.isMaximized ? 'calc(100% - 32px)' : windows.notes.height,
+            display: windows.notes.isMinimized ? 'none' : 'flex'
+          }}
+          onClick={() => focusWindow('notes')}
+        >
+          <div className={`${styles.titleBar} ${activeWindowId !== 'notes' ? styles.titleBarInactive : ''}`} onMouseDown={(e) => handleWindowMouseDown('notes', e)}>
+            <div className={styles.titleText}>
+              <FileText size={12} />
+              <span>Bloco de Notas - Axe 97</span>
+            </div>
+            <div className={styles.titleControls}>
+              <button className={styles.titleButton} onClick={(e) => minimizeWindow('notes', e)}>_</button>
+              <button className={styles.titleButton} onClick={(e) => toggleMaximizeWindow('notes', e)}>□</button>
+              <button className={styles.titleButton} onClick={(e) => closeWindow('notes', e)}>X</button>
+            </div>
+          </div>
+          <div className={styles.menuBar}>
+            <div className={styles.menuItem} onClick={handleCreateRetroNote}>Novo</div>
+            <div className={styles.menuItem} onClick={handleDeleteRetroNote}>Excluir</div>
+            <div className={styles.menuItem} onClick={handleSaveRetroNote}>Salvar</div>
+          </div>
+          <div className={`${styles.windowBody} ${styles.inset} !bg-white overflow-hidden flex flex-row`} style={{ padding: 0 }}>
+            {/* Notes List Sidebar */}
+            <div className="w-1/3 border-r border-gray-400 bg-gray-200 flex flex-col p-1 gap-1">
+              <div className="text-[10px] font-bold text-gray-700 px-1 py-0.5 border-b border-gray-300">Minhas Notas:</div>
+              <div className="flex-1 overflow-y-auto flex flex-col gap-0.5">
+                {retroNotes.map(rn => (
+                  <div
+                    key={rn.id}
+                    onClick={() => setActiveRetroNoteId(rn.id)}
+                    className={`p-1 text-[11px] cursor-pointer truncate ${activeRetroNoteId === rn.id ? 'bg-blue-900 text-white' : 'text-black hover:bg-gray-300'}`}
+                  >
+                    📝 {rn.title || 'Sem Título'}
+                  </div>
+                ))}
+                {retroNotes.length === 0 && (
+                  <div className="text-[10px] text-gray-500 p-2 italic">Nenhuma nota.</div>
+                )}
+              </div>
+            </div>
+
+            {/* Note Editor Area */}
+            <div className="w-2/3 flex flex-col bg-white">
+              {activeRetroNoteId && retroNotes.find(n => n.id === activeRetroNoteId) ? (
+                <div className="flex-1 flex flex-col p-2 gap-2 h-full">
+                  <input
+                    type="text"
+                    value={retroNotes.find(n => n.id === activeRetroNoteId).title || ''}
+                    onChange={(e) => handleUpdateRetroNoteTitle(e.target.value)}
+                    className="border border-gray-400 p-1 text-xs text-black font-semibold bg-gray-50 focus:outline-none"
+                    placeholder="Título da nota..."
+                  />
+                  <textarea
+                    value={retroNotes.find(n => n.id === activeRetroNoteId).content || ''}
+                    onChange={(e) => handleUpdateRetroNoteContent(e.target.value)}
+                    className="flex-1 border border-gray-400 p-1.5 text-xs text-black font-mono resize-none focus:outline-none"
+                    placeholder="Comece a digitar aqui..."
+                  />
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-center p-4">
+                  <div className="text-gray-500 text-xs">Selecione uma nota ou clique em Novo para começar.</div>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Status Bar */}
+          <div className="bg-gray-200 text-[10px] px-2 py-0.5 border-t border-gray-400 text-gray-600 flex justify-between">
+            <span>Total de notas: {retroNotes.length}</span>
+            <span>Axe Vault 97</span>
+          </div>
+        </div>
+      )}
+
       {/* ─── SYSTEM TASKBAR ────────────────────────────── */}
       <div className={`${styles.taskbar} ${styles.outset}`}>
         
@@ -1230,6 +1482,7 @@ export const HomeW97: React.FC = () => {
                 {win.id === 'neuralNetwork' && <Network size={12} className="text-purple-600" />}
                 {win.id === 'documents' && <FolderOpen size={12} className="text-yellow-600" />}
                 {win.id === 'systemAbout' && <Monitor size={12} className="text-blue-600" />}
+                {win.id === 'notes' && <FileText size={12} className="text-yellow-600" />}
                 <span>{win.title}</span>
               </button>
             );
@@ -1277,6 +1530,11 @@ export const HomeW97: React.FC = () => {
             <div className={styles.startMenuItem} onClick={() => openWindow('documents')}>
               <FolderOpen size={14} className="text-yellow-600" />
               <span>Meus Documentos</span>
+            </div>
+            
+            <div className={styles.startMenuItem} onClick={() => { openWindow('notes'); setStartMenuOpen(false); }}>
+              <FileText size={14} className="text-yellow-600" />
+              <span>Bloco de Notas</span>
             </div>
             
             <div className={styles.startMenuDivider} />

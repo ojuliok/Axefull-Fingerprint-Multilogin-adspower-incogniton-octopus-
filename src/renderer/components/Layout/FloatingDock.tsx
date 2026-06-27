@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     LayoutGrid, Settings, Eraser, Puzzle, Monitor, Network, Sun, Moon, CheckSquare, Home
 } from 'lucide-react';
@@ -31,8 +31,9 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
     onOpenExtensions,
     onOpenProxies
 }) => {
-    const { theme, toggleTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
     const isLight = theme === 'light';
+    const [showThemeMenu, setShowThemeMenu] = useState(false);
 
     return (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl flex items-center gap-4 transition-all duration-300 shadow-2xl border border-white/10
@@ -85,14 +86,48 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                     <Network size={18} />
                 </button>
 
-                {/* Theme Toggle */}
-                <button
-                    onClick={toggleTheme}
-                    title="Tema"
-                    className="w-10 h-10 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-theme-text hover:bg-white/5 transition-all hover:-translate-y-0.5"
-                >
-                    {isLight ? <Moon size={18} /> : <Sun size={18} />}
-                </button>
+                {/* Theme Toggle / Picker */}
+                <div className="relative flex items-center justify-center">
+                    <button
+                        onClick={() => setShowThemeMenu(!showThemeMenu)}
+                        title="Tema"
+                        className="w-10 h-10 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-theme-text hover:bg-white/5 transition-all hover:-translate-y-0.5"
+                    >
+                        {isLight ? <Moon size={18} /> : <Sun size={18} />}
+                    </button>
+                    {showThemeMenu && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setShowThemeMenu(false)} />
+                            <div className="absolute bottom-full mb-4 right-0 w-48 rounded-xl border border-white/10 shadow-2xl py-1 z-50 bg-[#15151b]/95 backdrop-blur-xl [data-theme='light']:bg-white [data-theme='light']:border-black/10">
+                                <div className="px-4 py-2 border-b border-white/10 [data-theme='light']:border-black/5">
+                                    <p className="text-xs font-semibold text-theme-text-muted">Selecionar Tema</p>
+                                </div>
+                                <div className="p-1 max-h-64 overflow-y-auto scrollbar-none relative z-50">
+                                    {[
+                                        { id: 'light',          label: 'Claro' },
+                                        { id: 'dark',           label: 'Escuro' },
+                                        { id: 'retro-vintage',  label: 'Retro Vintage' },
+                                        { id: 'cyber-retro',    label: 'Retro Cyber' },
+                                        { id: 'luxury-supreme', label: 'Luxury Supreme' },
+                                        { id: 'cool-tech',      label: 'Cool Tech' },
+                                        { id: 'pool-vibe',      label: 'Pool Vibe' },
+                                        { id: 'custom',         label: 'Personalizado' }
+                                    ].map(t => (
+                                        <button 
+                                            key={t.id}
+                                            onClick={() => { setTheme(t.id as any); setShowThemeMenu(false); }}
+                                            className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors
+                                                ${theme === t.id ? 'bg-violet-500/10 text-violet-500' : 'text-theme-text hover:bg-white/5 [data-theme="light"]:hover:bg-black/5'}
+                                            `}
+                                        >
+                                            {t.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>>
 
                 {/* Extensions */}
                 {!isWebMode() && (

@@ -35,9 +35,10 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
     onOpenProxies,
     runningProfilesCount
 }) => {
-    const { theme, toggleTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
     const { user, logout } = useAuth();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showThemeMenu, setShowThemeMenu] = useState(false);
 
     const isLight = theme === 'light';
     const textClass = 'text-theme-text';
@@ -105,14 +106,45 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                     <Network size={16} />
                 </button>
 
-                {/* Theme Toggle */}
-                <button
-                    onClick={toggleTheme}
-                    title="Tema"
-                    className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
-                >
-                    {isLight ? <Moon size={16} /> : <Sun size={16} />}
-                </button>
+                {/* Theme Toggle / Picker */}
+                <div className="relative">
+                    <button
+                        onClick={() => setShowThemeMenu(!showThemeMenu)}
+                        title="Tema"
+                        className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
+                    >
+                        {isLight ? <Moon size={16} /> : <Sun size={16} />}
+                    </button>
+                    {showThemeMenu && (
+                        <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-theme-border shadow-xl py-1 z-50 bg-theme-card">
+                            <div className="px-4 py-2 border-b border-theme-border">
+                                <p className="text-xs font-semibold text-theme-text-muted">Selecionar Tema</p>
+                            </div>
+                            <div className="p-1 max-h-64 overflow-y-auto scrollbar-none">
+                                {[
+                                    { id: 'light',          label: 'Claro' },
+                                    { id: 'dark',           label: 'Escuro' },
+                                    { id: 'retro-vintage',  label: 'Retro Vintage' },
+                                    { id: 'cyber-retro',    label: 'Retro Cyber' },
+                                    { id: 'luxury-supreme', label: 'Luxury Supreme' },
+                                    { id: 'cool-tech',      label: 'Cool Tech' },
+                                    { id: 'pool-vibe',      label: 'Pool Vibe' },
+                                    { id: 'custom',         label: 'Personalizado' }
+                                ].map(t => (
+                                    <button 
+                                        key={t.id}
+                                        onClick={() => { setTheme(t.id as any); setShowThemeMenu(false); }}
+                                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors
+                                            ${theme === t.id ? 'bg-violet-500/10 text-violet-500' : 'text-theme-text hover:bg-theme-border'}
+                                        `}
+                                    >
+                                        {t.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>>
 
                 {/* Extensions */}
                 <button
@@ -166,8 +198,8 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                 </div>
             </div>
 
-            {showProfileMenu && (
-                <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
+            {(showProfileMenu || showThemeMenu) && (
+                <div className="fixed inset-0 z-40" onClick={() => { setShowProfileMenu(false); setShowThemeMenu(false); }} />
             )}
         </header>
     );

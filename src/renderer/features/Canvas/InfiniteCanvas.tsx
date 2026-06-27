@@ -1254,7 +1254,8 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         addFreeTextAt, duplicateNode, bringToFront, sendToBack
     } = useCanvasNodes(
         containerRef, workspaceId, ownerId, canvasId, onCanvasCreated, 
-        setShowPickerPopover, setEditingNodeId, setContextMenu
+        setShowPickerPopover, setEditingNodeId, setContextMenu,
+        nodes, setNodes, strokes, viewport, saveData, setSelectedIds
     );
 
     const downloadNode = useCallback((id: string) => {

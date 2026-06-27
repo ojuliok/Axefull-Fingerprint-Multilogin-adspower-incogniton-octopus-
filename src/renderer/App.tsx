@@ -16,7 +16,6 @@ import TasksView from './features/Tasks/Tasks/TasksView';
 import LoginPage from './pages/LoginPage';
 import SalesPage from './pages/SalesPage';
 import DownloadPage from './pages/DownloadPage';
-import NavegadorMobile from './pages/NavegadorMobile';
 import VitrinePage from './pages/VitrinePage';
 import HomeW97 from './pages/HomeW97';
 import NotesPage from './pages/NotesPage';
@@ -72,7 +71,6 @@ const App: React.FC = () => {
                                         <Route path="tasks" element={<TasksView />} />
                                         <Route path="settings" element={<SettingsPage />} />
                                         <Route path="download" element={<DownloadPage />} />
-                                        <Route path="navegador" element={<NavegadorMobile />} />
                                         <Route path="vitrine" element={<VitrinePage />} />
                                         <Route path="notes" element={<NotesPage />} />
                                         </Route>

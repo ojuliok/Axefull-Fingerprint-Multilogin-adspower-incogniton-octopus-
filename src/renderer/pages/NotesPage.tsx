@@ -254,6 +254,9 @@ const NotesPage: React.FC = () => {
         saveNotesToStorage(updated);
         setActiveNoteId(newNote.id);
         setIsEditMode(false);
+        if (window.innerWidth < 768) {
+            setIsSidebarCollapsed(true);
+        }
     };
 
     const handleUpdateNoteContent = (content: string) => {
@@ -892,6 +895,9 @@ const NotesPage: React.FC = () => {
                                         onClick={() => {
                                             setActiveNoteId(note.id);
                                             setIsEditMode(false);
+                                            if (window.innerWidth < 768) {
+                                                setIsSidebarCollapsed(true);
+                                            }
                                         }}
                                         onContextMenu={(e) => handleNoteContextMenu(e, note.id)}
                                         className={`group relative flex flex-col gap-1 p-3 rounded-lg cursor-pointer transition-all border ${

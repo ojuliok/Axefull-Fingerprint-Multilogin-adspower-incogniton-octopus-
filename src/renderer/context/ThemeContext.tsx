@@ -41,7 +41,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-    theme: 'light',
+    theme: 'cyber-retro',
     layout: 'classic-sidebar',
     buttonStyle: 'default',
     customColors: defaultCustomColors,
@@ -55,7 +55,7 @@ const ThemeContext = createContext<ThemeContextValue>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setThemeState] = useState<Theme>(() => {
         const stored = localStorage.getItem('axe-theme') as Theme | null;
-        return stored || 'light';
+        return stored || 'cyber-retro';
     });
 
     const [layout, setLayoutState] = useState<Layout>(() => {

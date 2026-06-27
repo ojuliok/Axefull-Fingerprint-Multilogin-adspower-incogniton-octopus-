@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useCanvasContext } from './CanvasContext';
 import { CanvasNode, createCanvas } from '../canvasStorage';
 
 export const useCanvasNodes = (
@@ -10,9 +9,14 @@ export const useCanvasNodes = (
     onCanvasCreated?: () => void,
     setShowPickerPopover?: (v: boolean) => void,
     setEditingNodeId?: (id: string | null) => void,
-    setContextMenu?: (v: any) => void
+    setContextMenu?: (v: any) => void,
+    nodes: CanvasNode[],
+    setNodes: React.Dispatch<React.SetStateAction<CanvasNode[]>>,
+    strokes: any[],
+    viewport: any,
+    saveData: any,
+    setSelectedIds: React.Dispatch<React.SetStateAction<Set<string>>>
 ) => {
-    const { nodes, setNodes, strokes, viewport, saveData, setSelectedIds } = useCanvasContext();
 
     const maxZ = useCallback(() => nodes.reduce((m, n) => Math.max(m, n.zIndex || 0), 0), [nodes]);
     const genId = () => crypto.randomUUID();

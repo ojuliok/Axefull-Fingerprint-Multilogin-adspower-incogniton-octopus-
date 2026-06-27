@@ -403,3 +403,43 @@
   background-color: #8B5CF6; /* Vault theme primary */
   transition: width 0.1s linear;
 }
+
+/* Tab Control Windows 97 */
+.tabContainer {
+  display: flex;
+  background-color: #c0c0c0;
+  padding: 4px 6px 0 6px;
+  border-bottom: 2px solid #808080;
+  box-shadow: 0 1px 0 #ffffff;
+  z-index: 10;
+  gap: 2px;
+}
+
+.tab {
+  padding: 3px 12px;
+  background-color: #c0c0c0;
+  border-top: 1.5px solid #ffffff;
+  border-left: 1.5px solid #ffffff;
+  border-right: 1.5px solid #808080;
+  border-bottom: 1.5px solid #808080;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  font-size: 11px;
+  cursor: pointer;
+  color: #000000;
+  outline: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tabActive {
+  background-color: #c0c0c0;
+  border-bottom: 2px solid #c0c0c0 !important; /* overlap border-bottom of tabContainer */
+  margin-bottom: -2.5px;
+  font-weight: bold;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  z-index: 11;
+  box-shadow: none;
+}

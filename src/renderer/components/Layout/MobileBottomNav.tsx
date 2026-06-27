@@ -1,5 +1,5 @@
 import React from 'react';
-import { Monitor, CheckSquare, Globe, Home } from 'lucide-react';
+import { Monitor, CheckSquare, Home, StickyNote } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
 
@@ -13,7 +13,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentView, o
 
     const ITEMS = [
         { id: 'home', label: 'Início', icon: Home, colorClass: 'text-sky-500' },
-        { id: 'navegador', label: 'Navegador', icon: Globe, colorClass: 'text-indigo-500' },
+        { id: 'notes', label: 'Notas', icon: StickyNote, colorClass: 'text-amber-500' },
         { id: 'canvas', label: 'Tela', icon: Monitor, colorClass: 'text-amber-500' },
         { id: 'tasks', label: 'Tarefas', icon: CheckSquare, colorClass: 'text-blue-500' }
     ];
