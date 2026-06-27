@@ -1055,16 +1055,6 @@ const CanvasPage: React.FC = () => {
 
     return (
         <div className={styles.pageContainer}>
-            {/* ── Floating Expand Button ── */}
-            {!isSidebarExpanded && (
-                <button 
-                    className={styles.sidebarExpandFloat}
-                    onClick={() => setMenuMode('expanded')}
-                    title="Expandir Menu"
-                >
-                    <PanelLeftOpen size={16} />
-                </button>
-            )}
 
             {/* ── Mobile Overlay ── */}
             <div 
@@ -1088,36 +1078,15 @@ const CanvasPage: React.FC = () => {
                 )}
                 {/* Sidebar Header (ClickUp style) */}
                 <div className={styles.sidebarHeader}>
-                    {isSidebarExpanded ? (
-                        <>
-                            <div className={styles.headerActions} style={{ width: '100%', justifyContent: 'space-between' }}>
-                                <div style={{ display: 'flex', gap: '4px' }}>
-                                </div>
-                                <button 
-                                    className={styles.headerBtn} 
-                                    onClick={() => setMenuMode('collapsed')}
-                                    title="Recolher"
-                                >
-                                    <PanelLeftClose size={16} />
-                                </button>
-                                <button 
-                                    className={`${styles.headerBtn} ${isCreateMenuOpen ? styles.headerBtnActive : ''}`} 
-                                    onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)}
-                                    title="Criar"
-                                >
-                                    <Plus size={14} />
-                                    <ChevronDown size={10} style={{ marginLeft: 2 }} />
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                            <button
-                                className={styles.sidebarCollapseToggle}
-                                onClick={() => setMenuMode('expanded')}
-                                title="Expandir Menu"
+                    {isSidebarExpanded && (
+                        <div className={styles.headerActions} style={{ width: '100%', justifyContent: 'flex-end' }}>
+                            <button 
+                                className={`${styles.headerBtn} ${isCreateMenuOpen ? styles.headerBtnActive : ''}`} 
+                                onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)}
+                                title="Criar"
                             >
-                                <PanelLeftOpen size={18} />
+                                <Plus size={14} />
+                                <ChevronDown size={10} style={{ marginLeft: 2 }} />
                             </button>
                         </div>
                     )}
@@ -1354,10 +1323,7 @@ const CanvasPage: React.FC = () => {
 
                 {/* Breadcrumb */}
                 {viewState === 'canvas' && navigationStack.length > 0 && (
-                    <div 
-                        className={styles.breadcrumbBar}
-                        style={openTabs.length > 0 ? { top: '50px' } : undefined}
-                    >
+                    <div className={styles.breadcrumbBar}>
                         <span
                             className={styles.breadcrumbItem}
                             onClick={() => handleBreadcrumbClick(-1)}

@@ -9,15 +9,29 @@ import { useWorkspace } from '../context/WorkspaceContext';
 import NoteTiptapEditor from '../features/Notes/NoteTiptapEditor';
 import { encryptData, decryptData } from '../utils/crypto';
 
+export interface PassVault {
+    id: string;
+    name: string;
+    icon: string; // Emoji
+    created_at: string;
+}
+
 export interface PasswordEntry {
     id: string;
+    vaultId: string;
     title: string;
     username: string;
     password: string;
     url?: string;
     notes?: string;
+    isDeleted?: boolean;
     created_at: string;
     updated_at: string;
+}
+
+export interface PassVaultPayload {
+    vaults: PassVault[];
+    items: PasswordEntry[];
 }
 
 // Interfaces for our Note System
@@ -97,6 +111,9 @@ const NotesPage: React.FC = () => {
     const [passPasswordInput, setPassPasswordInput] = useState('');
     const [passType, setPassType] = useState<'pin' | 'text'>('pin');
     const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
+    const [vaults, setVaults] = useState<PassVault[]>([]);
+    const [selectedVaultId, setSelectedVaultId] = useState<string>('all'); // 'all', 'trash', or specific vault ID
+    const [selectedPassId, setSelectedPassId] = useState<string>(''); // selected credential for detail view
     const [searchPassQuery, setSearchPassQuery] = useState('');
     const [isPassIncorrect, setIsPassIncorrect] = useState(false);
     
@@ -108,6 +125,12 @@ const NotesPage: React.FC = () => {
     const [passFormPassword, setPassFormPassword] = useState('');
     const [passFormUrl, setPassFormUrl] = useState('');
     const [passFormNotes, setPassFormNotes] = useState('');
+    const [passFormVaultId, setPassFormVaultId] = useState<string>('');
+
+    // Create vault modal states
+    const [isCreateVaultModalOpen, setIsCreateVaultModalOpen] = useState(false);
+    const [newVaultName, setNewVaultName] = useState('');
+    const [newVaultIcon, setNewVaultIcon] = useState('💼');
 
     // Settings / Change Password states
     const [isPassSettingsOpen, setIsPassSettingsOpen] = useState(false);
@@ -485,6 +508,20 @@ const NotesPage: React.FC = () => {
 
     // ─── COFRE PASS VAULT ACTIONS ─────────────────────────────────
 
+    const saveVaultData = async (updatedItems: PasswordEntry[], updatedVaults: PassVault[]) => {
+        if (!vaultPassword) return;
+        try {
+            const payload: PassVaultPayload = { vaults: updatedVaults, items: updatedItems };
+            const encrypted = await encryptData(JSON.stringify(payload), vaultPassword);
+            localStorage.setItem('axe_pass_encrypted_data', encrypted);
+            setPasswords(updatedItems);
+            setVaults(updatedVaults);
+        } catch (err) {
+            toast.error('Erro ao Salvar', 'Não foi possível salvar os dados criptografados.');
+            console.error(err);
+        }
+    };
+
     const handleSetupPassVault = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newPassInput || newPassInput.length < 4) {
@@ -502,7 +539,20 @@ const NotesPage: React.FC = () => {
 
         try {
             const verificationEncrypted = await encryptData("AXEFULL_SECURE_VERIFICATION", newPassInput);
-            const emptyDataEncrypted = await encryptData("[]", newPassInput);
+            
+            const defaultVault: PassVault = {
+                id: 'vault-default',
+                name: 'Personal',
+                icon: '💼',
+                created_at: new Date().toISOString()
+            };
+            
+            const initialPayload: PassVaultPayload = {
+                vaults: [defaultVault],
+                items: []
+            };
+            
+            const emptyDataEncrypted = await encryptData(JSON.stringify(initialPayload), newPassInput);
 
             localStorage.setItem('axe_pass_verification', verificationEncrypted);
             localStorage.setItem('axe_pass_type', newPassType);
@@ -513,6 +563,9 @@ const NotesPage: React.FC = () => {
             setPassVaultConfigured(true);
             setIsPassUnlocked(true);
             setPasswords([]);
+            setVaults([defaultVault]);
+            setSelectedVaultId('all');
+            setSelectedPassId('');
 
             setNewPassInput('');
             setNewPassConfirm('');
@@ -536,13 +589,51 @@ const NotesPage: React.FC = () => {
                 setIsPassIncorrect(false);
                 setPassPasswordInput('');
 
-                // Load and decrypt passwords list
+                // Load and decrypt passwords/vaults list
                 const encryptedData = localStorage.getItem('axe_pass_encrypted_data');
                 if (encryptedData) {
-                    const decryptedListStr = await decryptData(encryptedData, passPasswordInput);
-                    setPasswords(JSON.parse(decryptedListStr));
+                    const decryptedPayloadStr = await decryptData(encryptedData, passPasswordInput);
+                    
+                    // Detect if old format (array of items)
+                    if (decryptedPayloadStr.trim().startsWith('[')) {
+                        // Migration path
+                        const oldItems: PasswordEntry[] = JSON.parse(decryptedPayloadStr);
+                        const defaultVault: PassVault = {
+                            id: 'vault-default',
+                            name: 'Personal',
+                            icon: '💼',
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        const migratedItems = oldItems.map(item => ({
+                            ...item,
+                            vaultId: item.vaultId || 'vault-default'
+                        }));
+                        
+                        setVaults([defaultVault]);
+                        setPasswords(migratedItems);
+                        setSelectedVaultId('all');
+                        setSelectedPassId('');
+                        
+                        // Resave in new format
+                        const payload: PassVaultPayload = { vaults: [defaultVault], items: migratedItems };
+                        const encrypted = await encryptData(JSON.stringify(payload), passPasswordInput);
+                        localStorage.setItem('axe_pass_encrypted_data', encrypted);
+                        
+                        toast.info('Dados Importados', 'Suas senhas foram migradas para o cofre "Personal".');
+                    } else {
+                        const parsed: PassVaultPayload = JSON.parse(decryptedPayloadStr);
+                        const loadedVaults = parsed.vaults || [];
+                        const loadedItems = parsed.items || [];
+                        
+                        setVaults(loadedVaults);
+                        setPasswords(loadedItems);
+                        setSelectedVaultId('all');
+                        setSelectedPassId('');
+                    }
                 } else {
                     setPasswords([]);
+                    setVaults([]);
                 }
                 toast.success('Desbloqueado', 'Acesso ao Cofre Pass liberado.');
             } else {
@@ -555,24 +646,85 @@ const NotesPage: React.FC = () => {
             console.error(err);
         }
     };
-
     const handleLockPassVault = () => {
         setIsPassUnlocked(false);
         setVaultPassword('');
         setPasswords([]);
+        setVaults([]);
+        setSelectedVaultId('all');
+        setSelectedPassId('');
         setPassPasswordInput('');
         toast.info('Cofre Bloqueado', 'Seu cofre de senhas foi bloqueado.');
     };
 
-    const savePasswordsToVault = async (updatedList: PasswordEntry[]) => {
-        if (!vaultPassword) return;
-        try {
-            const encrypted = await encryptData(JSON.stringify(updatedList), vaultPassword);
-            localStorage.setItem('axe_pass_encrypted_data', encrypted);
-            setPasswords(updatedList);
-        } catch (err) {
-            toast.error('Erro ao Salvar', 'Não foi possível salvar os dados criptografados.');
-            console.error(err);
+    const handleCreateVault = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newVaultName.trim()) {
+            toast.warning('Aviso', 'O nome do cofre não pode estar vazio.');
+            return;
+        }
+        const newVault: PassVault = {
+            id: `vault-${Date.now()}`,
+            name: newVaultName.trim(),
+            icon: newVaultIcon,
+            created_at: new Date().toISOString()
+        };
+        const updatedVaults = [...vaults, newVault];
+        await saveVaultData(passwords, updatedVaults);
+        setIsCreateVaultModalOpen(false);
+        setNewVaultName('');
+        setNewVaultIcon('💼');
+        toast.success('Cofre Criado', `Cofre "${newVault.name}" criado com sucesso.`);
+    };
+
+    const handleDeleteVault = async (vaultId: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        const vaultToDelete = vaults.find(v => v.id === vaultId);
+        if (!vaultToDelete) return;
+        
+        if (confirm(`Tem certeza que deseja excluir o cofre "${vaultToDelete.name}"? As senhas dentro dele serão movidas para a Lixeira.`)) {
+            const updatedVaults = vaults.filter(v => v.id !== vaultId);
+            const updatedItems = passwords.map(item => {
+                if (item.vaultId === vaultId) {
+                    return { ...item, isDeleted: true, updated_at: new Date().toISOString() };
+                }
+                return item;
+            });
+            await saveVaultData(updatedItems, updatedVaults);
+            if (selectedVaultId === vaultId) {
+                setSelectedVaultId('all');
+                setSelectedPassId('');
+            }
+            toast.info('Cofre Excluído', `O cofre "${vaultToDelete.name}" foi excluído.`);
+        }
+    };
+
+    const handleRestorePassword = async (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        const updatedItems = passwords.map(item => {
+            if (item.id === id) {
+                let targetVaultId = item.vaultId;
+                const vaultExists = vaults.some(v => v.id === targetVaultId);
+                if (!vaultExists && vaults.length > 0) {
+                    targetVaultId = vaults[0].id;
+                }
+                return { ...item, isDeleted: false, vaultId: targetVaultId, updated_at: new Date().toISOString() };
+            }
+            return item;
+        });
+        await saveVaultData(updatedItems, vaults);
+        toast.success('Restaurado', 'Item restaurado com sucesso.');
+    };
+
+    const handlePermanentDeletePassword = async (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (confirm('Tem certeza que deseja excluir esta senha PERMANENTEMENTE? Esta ação não pode ser desfeita.')) {
+            const updatedItems = passwords.filter(item => item.id !== id);
+            await saveVaultData(updatedItems, vaults);
+            if (selectedPassId === id) {
+                setSelectedPassId('');
+            }
+            toast.info('Excluído', 'Item excluído permanentemente.');
         }
     };
 
@@ -583,12 +735,18 @@ const NotesPage: React.FC = () => {
             return;
         }
 
+        let targetVaultId = passFormVaultId;
+        if (!targetVaultId) {
+            targetVaultId = vaults.length > 0 ? vaults[0].id : 'vault-default';
+        }
+
         let updatedList: PasswordEntry[] = [];
         if (editingPassEntry) {
             updatedList = passwords.map(entry => {
                 if (entry.id === editingPassEntry.id) {
                     return {
                         ...entry,
+                        vaultId: targetVaultId,
                         title: passFormTitle.trim(),
                         username: passFormUsername.trim(),
                         password: passFormPassword.trim(),
@@ -603,19 +761,22 @@ const NotesPage: React.FC = () => {
         } else {
             const newEntry: PasswordEntry = {
                 id: `pass-${Date.now()}`,
+                vaultId: targetVaultId,
                 title: passFormTitle.trim(),
                 username: passFormUsername.trim(),
                 password: passFormPassword.trim(),
                 url: passFormUrl.trim(),
                 notes: passFormNotes.trim(),
+                isDeleted: false,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
             updatedList = [newEntry, ...passwords];
+            setSelectedPassId(newEntry.id);
             toast.success('Adicionado', 'Nova senha salva com sucesso.');
         }
 
-        await savePasswordsToVault(updatedList);
+        await saveVaultData(updatedList, vaults);
         setIsPassModalOpen(false);
         setEditingPassEntry(null);
         setPassFormTitle('');
@@ -623,14 +784,23 @@ const NotesPage: React.FC = () => {
         setPassFormPassword('');
         setPassFormUrl('');
         setPassFormNotes('');
+        setPassFormVaultId('');
     };
 
     const handleDeletePassword = async (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
-        if (confirm('Tem certeza que deseja excluir esta senha permanentemente?')) {
-            const updated = passwords.filter(entry => entry.id !== id);
-            await savePasswordsToVault(updated);
-            toast.info('Excluído', 'A senha foi removida do cofre.');
+        if (confirm('Deseja mover esta senha para a Lixeira?')) {
+            const updated = passwords.map(item => {
+                if (item.id === id) {
+                    return { ...item, isDeleted: true, updated_at: new Date().toISOString() };
+                }
+                return item;
+            });
+            await saveVaultData(updated, vaults);
+            if (selectedPassId === id) {
+                setSelectedPassId('');
+            }
+            toast.info('Movido para a Lixeira', 'Item enviado para a Lixeira.');
         }
     };
 
@@ -643,6 +813,9 @@ const NotesPage: React.FC = () => {
             setIsPassUnlocked(false);
             setVaultPassword('');
             setPasswords([]);
+            setVaults([]);
+            setSelectedVaultId('all');
+            setSelectedPassId('');
             setPassPasswordInput('');
             setIsPassSettingsOpen(false);
             toast.warning('Redefinido', 'Cofre Pass apagado e redefinido para o padrão.');
@@ -1048,6 +1221,16 @@ const NotesPage: React.FC = () => {
 
         // CASE 3: VAULT UNLOCKED - PASSWORD DASHBOARD
         const filteredPasswords = passwords.filter(entry => {
+            // First filter by vault
+            if (selectedVaultId === 'trash') {
+                if (!entry.isDeleted) return false;
+            } else if (selectedVaultId === 'all') {
+                if (entry.isDeleted) return false;
+            } else {
+                if (entry.vaultId !== selectedVaultId || entry.isDeleted) return false;
+            }
+
+            // Then filter by search query
             if (!searchPassQuery.trim()) return true;
             const q = searchPassQuery.toLowerCase();
             return entry.title.toLowerCase().includes(q) || 
@@ -1055,228 +1238,447 @@ const NotesPage: React.FC = () => {
                    (entry.notes && entry.notes.toLowerCase().includes(q));
         });
 
-        return (
-            <div className="flex-1 flex flex-col h-full bg-theme-base overflow-hidden">
-                {/* Dashboard Header */}
-                <div className="h-14 border-b border-theme-border px-6 flex items-center justify-between bg-theme-surface/30 backdrop-blur-sm shrink-0 select-none">
-                    <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
-                            <Key size={16} />
-                        </div>
-                        <span className="font-bold text-sm text-theme-text">Cofre de Senhas</span>
-                    </div>
+        // Auto select first entry if selectedPassId is empty or not in the filtered list
+        let activeEntry = filteredPasswords.find(p => p.id === selectedPassId);
+        if (!activeEntry && filteredPasswords.length > 0) {
+            activeEntry = filteredPasswords[0];
+        }
 
-                    <div className="flex items-center gap-2">
+        const activeEntryVault = activeEntry ? vaults.find(v => v.id === activeEntry.vaultId) : null;
+        const activeEntryStrength = activeEntry ? (() => {
+            const pass = activeEntry.password;
+            if (pass.length >= 12 && /[A-Z]/.test(pass) && /[a-z]/.test(pass) && /[0-9]/.test(pass) && /[^A-Za-z0-9]/.test(pass)) {
+                return { label: 'Muito Forte', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' };
+            }
+            if (pass.length >= 8 && (/[A-Z]/.test(pass) || /[0-9]/.test(pass))) {
+                return { label: 'Forte', color: 'text-green-500 bg-green-500/10 border-green-500/20' };
+            }
+            return { label: 'Fraca', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20' };
+        })() : null;
+
+        return (
+            <div className="flex-1 flex h-full bg-theme-base overflow-hidden select-none">
+                {/* 1. LEFT PANEL: VAULTS COLUMN */}
+                <div className="w-[220px] border-r border-theme-border flex flex-col bg-theme-surface/10 shrink-0 select-none">
+                    <div className="h-14 border-b border-theme-border px-4 flex items-center justify-between bg-theme-surface/20 shrink-0">
+                        <span className="font-bold text-xs text-theme-text uppercase tracking-wider">Cofres</span>
                         <button
                             type="button"
                             onClick={() => {
-                                setIsPassModalOpen(true);
-                                setEditingPassEntry(null);
-                                setPassFormTitle('');
-                                setPassFormUsername('');
-                                setPassFormPassword('');
-                                setPassFormUrl('');
-                                setPassFormNotes('');
+                                setIsCreateVaultModalOpen(true);
+                                setNewVaultName('');
+                                setNewVaultIcon('💼');
                             }}
-                            className="p-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold transition-colors flex items-center gap-1.5 text-xs shadow-sm"
+                            className="p-1 rounded-lg text-theme-text-muted hover:text-amber-500 hover:bg-theme-card transition-all"
+                            title="Criar novo cofre"
                         >
-                            <Plus size={14} /> Nova Senha
+                            <Plus size={15} />
                         </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                        {/* Option: All Items */}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedVaultId('all');
+                                setSelectedPassId('');
+                            }}
+                            className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all ${
+                                selectedVaultId === 'all'
+                                    ? 'bg-amber-500/10 border border-amber-500/30 text-amber-500 font-bold'
+                                    : 'border border-transparent text-theme-text-muted hover:text-theme-text hover:bg-theme-card/50'
+                            }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Key size={13} className={selectedVaultId === 'all' ? 'text-amber-500' : 'text-theme-text-faint'} />
+                                <span>Todos os itens</span>
+                            </div>
+                            <span className="text-[10px] text-theme-text-faint bg-theme-card/60 px-1.5 py-0.5 rounded-full border border-theme-border/40">
+                                {passwords.filter(p => !p.isDeleted).length}
+                            </span>
+                        </button>
+
+                        {/* List of Custom Vaults */}
+                        {vaults.map(vault => {
+                            const vaultItemsCount = passwords.filter(p => p.vaultId === vault.id && !p.isDeleted).length;
+                            const isSelected = selectedVaultId === vault.id;
+                            return (
+                                <div
+                                    key={vault.id}
+                                    className="group relative flex items-center"
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedVaultId(vault.id);
+                                            setSelectedPassId('');
+                                        }}
+                                        className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all pr-8 ${
+                                            isSelected
+                                                ? 'bg-amber-500/10 border border-amber-500/30 text-amber-500 font-bold'
+                                                : 'border border-transparent text-theme-text-muted hover:text-theme-text hover:bg-theme-card/50'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2 truncate">
+                                            <span className="text-sm shrink-0">{vault.icon || '📁'}</span>
+                                            <span className="truncate">{vault.name}</span>
+                                        </div>
+                                        <span className="text-[10px] text-theme-text-faint bg-theme-card/60 px-1.5 py-0.5 rounded-full border border-theme-border/40 shrink-0">
+                                            {vaultItemsCount}
+                                        </span>
+                                    </button>
+
+                                    {/* Delete vault button (only show on hover, don't allow delete default) */}
+                                    {vault.id !== 'vault-default' && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleDeleteVault(vault.id, e)}
+                                            className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-theme-text-muted hover:text-red-500 hover:bg-theme-card rounded"
+                                            title="Excluir cofre"
+                                        >
+                                            <Trash2 size={10} />
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        <div className="border-t border-theme-border/30 my-2" />
+
+                        {/* Option: Trash */}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedVaultId('trash');
+                                setSelectedPassId('');
+                            }}
+                            className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all ${
+                                selectedVaultId === 'trash'
+                                    ? 'bg-amber-500/10 border border-amber-500/30 text-amber-500 font-bold'
+                                    : 'border border-transparent text-theme-text-muted hover:text-theme-text hover:bg-theme-card/50'
+                            }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Trash2 size={13} className={selectedVaultId === 'trash' ? 'text-amber-500' : 'text-theme-text-faint'} />
+                                <span>Lixeira</span>
+                            </div>
+                            <span className="text-[10px] text-theme-text-faint bg-theme-card/60 px-1.5 py-0.5 rounded-full border border-theme-border/40 font-semibold">
+                                {passwords.filter(p => p.isDeleted).length}
+                            </span>
+                        </button>
+                    </div>
+
+                    {/* Left Panel Footer */}
+                    <div className="p-2 border-t border-theme-border flex flex-col gap-1 bg-theme-surface/5 shrink-0">
                         <button
                             type="button"
                             onClick={handleLockPassVault}
-                            className="p-1.5 px-3 rounded-xl border border-theme-border bg-theme-card hover:bg-theme-border text-theme-text-muted hover:text-amber-500 transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                            className="w-full flex items-center gap-2 p-2 rounded-xl text-theme-text-muted hover:text-amber-500 hover:bg-theme-card transition-all text-xs font-semibold"
                         >
-                            <Lock size={12} /> Bloquear
+                            <Lock size={13} />
+                            <span>Bloquear Axefull Pass</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setIsPassSettingsOpen(true)}
-                            className="p-2 rounded-xl border border-theme-border bg-theme-card text-theme-text-muted hover:text-theme-text hover:bg-theme-border transition-all"
-                            title="Configurações do Cofre"
+                            className="w-full flex items-center gap-2 p-2 rounded-xl text-theme-text-muted hover:text-theme-text hover:bg-theme-card transition-all text-xs font-semibold"
                         >
-                            <Settings size={14} />
+                            <Settings size={13} />
+                            <span>Configurações</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Dashboard Content */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {/* Search Bar for Passwords */}
-                    <div className="relative max-w-md">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-faint" />
-                        <input
-                            type="text"
-                            placeholder="Buscar nos registros do cofre..."
-                            value={searchPassQuery}
-                            onChange={(e) => setSearchPassQuery(e.target.value)}
-                            className="w-full bg-theme-surface/50 border border-theme-border focus:border-amber-500 focus:outline-none rounded-xl py-2 pl-9 pr-4 text-xs text-theme-text placeholder-theme-text-faint transition-all"
-                        />
+                {/* 2. MIDDLE PANEL: ITEMS LIST */}
+                <div className="w-[280px] border-r border-theme-border flex flex-col bg-theme-surface/5 shrink-0 overflow-hidden">
+                    {/* Search and Filters Header */}
+                    <div className="p-3 border-b border-theme-border flex flex-col gap-2 shrink-0 bg-theme-surface/10">
+                        <div className="relative">
+                            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-theme-text-faint" />
+                            <input
+                                type="text"
+                                placeholder="Pesquisar itens..."
+                                value={searchPassQuery}
+                                onChange={(e) => setSearchPassQuery(e.target.value)}
+                                className="w-full bg-theme-surface/60 border border-theme-border focus:border-amber-500 focus:outline-none rounded-xl py-1.5 pl-8 pr-3 text-xs text-theme-text placeholder-theme-text-faint transition-all"
+                            />
+                        </div>
+                        <div className="flex gap-1.5">
+                            <button
+                                type="button"
+                                className="px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500 font-bold text-[9px] uppercase tracking-wider"
+                            >
+                                Todos
+                            </button>
+                            <button
+                                type="button"
+                                className="px-2.5 py-1 rounded text-theme-text-muted hover:text-theme-text font-semibold text-[9px] uppercase tracking-wider"
+                            >
+                                Recentes
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Passwords list */}
-                    {filteredPasswords.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-center select-none border border-dashed border-theme-border rounded-2xl bg-theme-surface/10">
-                            <Key size={32} className="text-theme-text-faint mb-3 animate-pulse" />
-                            <h4 className="font-bold text-sm text-theme-text">Nenhum registro encontrado</h4>
-                            <p className="text-xs text-theme-text-muted max-w-xs mt-1 leading-relaxed">
-                                {searchPassQuery.trim() 
-                                    ? "Nenhum item corresponde aos critérios de busca informados." 
-                                    : "Comece adicionando seu primeiro registro de conta ou senha clicando em Nova Senha."}
-                            </p>
-                            {!searchPassQuery.trim() && (
+                    {/* Items List */}
+                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                        <div className="flex justify-between items-center px-2 py-1 select-none">
+                            <span className="text-[10px] text-theme-text-faint uppercase font-bold tracking-wider">
+                                {selectedVaultId === 'trash' ? 'Lixeira' : 'Itens'} ({filteredPasswords.length})
+                            </span>
+                            {selectedVaultId !== 'trash' && (
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setIsPassModalOpen(true);
                                         setEditingPassEntry(null);
                                         setPassFormTitle('');
                                         setPassFormUsername('');
                                         setPassFormPassword('');
                                         setPassFormUrl('');
                                         setPassFormNotes('');
+                                        setPassFormVaultId(selectedVaultId !== 'all' ? selectedVaultId : (vaults.length > 0 ? vaults[0].id : ''));
+                                        setIsPassModalOpen(true);
                                     }}
-                                    className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                                    className="text-[10px] text-amber-500 hover:text-amber-600 font-bold flex items-center gap-0.5"
                                 >
-                                    <Plus size={14} /> Adicionar Senha
+                                    <Plus size={11} /> Novo
                                 </button>
                             )}
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {filteredPasswords.map(entry => {
-                                const showPass = !!visiblePasswordIds[entry.id];
+
+                        {filteredPasswords.length === 0 ? (
+                            <div className="py-12 px-4 text-center border border-dashed border-theme-border/60 rounded-xl bg-theme-surface/10 mt-2 select-none">
+                                <Key size={24} className="text-theme-text-faint mx-auto mb-2 opacity-50" />
+                                <span className="block text-[11px] font-bold text-theme-text-muted">Nenhum item</span>
+                                <span className="block text-[10px] text-theme-text-faint mt-0.5 leading-normal">
+                                    {searchPassQuery.trim() ? 'Nenhum resultado.' : 'Crie sua primeira senha.'}
+                                </span>
+                            </div>
+                        ) : (
+                            filteredPasswords.map(entry => {
+                                const isSelected = activeEntry?.id === entry.id;
                                 return (
-                                    <div 
-                                        key={entry.id} 
-                                        className="p-5 rounded-2xl border border-theme-border bg-theme-surface/40 hover:bg-theme-surface/70 transition-all flex flex-col justify-between gap-4 shadow-sm relative group"
+                                    <button
+                                        key={entry.id}
+                                        type="button"
+                                        onClick={() => setSelectedPassId(entry.id)}
+                                        className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center gap-3 relative ${
+                                            isSelected
+                                                ? 'bg-theme-card border-theme-border shadow-sm text-theme-text'
+                                                : 'border-transparent text-theme-text-muted hover:bg-theme-card/30 hover:text-theme-text'
+                                        }`}
                                     >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="flex items-center gap-2.5 overflow-hidden">
-                                                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 font-bold text-sm">
-                                                    {entry.title.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div className="overflow-hidden">
-                                                    <h4 className="font-bold text-xs text-theme-text truncate leading-snug">{entry.title}</h4>
-                                                    {entry.url && (
-                                                        <a 
-                                                            href={entry.url.startsWith('http') ? entry.url : 'http://' + entry.url} 
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer"
-                                                            className="text-[10px] text-amber-500/80 hover:text-amber-500 hover:underline flex items-center gap-0.5 mt-0.5 truncate"
-                                                        >
-                                                            {entry.url.replace(/^https?:\/\/(www\.)?/, '')}
-                                                            <ExternalLink size={8} />
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setEditingPassEntry(entry);
-                                                        setPassFormTitle(entry.title);
-                                                        setPassFormUsername(entry.username);
-                                                        setPassFormPassword(entry.password);
-                                                        setPassFormUrl(entry.url || '');
-                                                        setPassFormNotes(entry.notes || '');
-                                                        setIsPassModalOpen(true);
-                                                    }}
-                                                    className="p-1 rounded bg-theme-card border border-theme-border text-theme-text-muted hover:text-theme-text"
-                                                    title="Editar registro"
-                                                >
-                                                    <Edit3 size={11} />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => handleDeletePassword(entry.id, e)}
-                                                    className="p-1 rounded bg-theme-card border border-theme-border text-theme-text-muted hover:text-red-500 hover:border-red-500/20"
-                                                    title="Excluir registro"
-                                                >
-                                                    <Trash2 size={11} />
-                                                </button>
-                                            </div>
+                                        <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0 font-bold text-xs">
+                                            {entry.title.charAt(0).toUpperCase()}
                                         </div>
-
-                                        <div className="flex flex-col gap-2.5 bg-theme-base/40 p-3 rounded-xl border border-theme-border/50 text-[11px]">
-                                            {/* Username Field */}
-                                            <div className="flex items-center justify-between gap-1 overflow-hidden">
-                                                <div className="truncate flex-1">
-                                                    <span className="text-[9px] text-theme-text-faint block uppercase tracking-wider font-semibold">Usuário / E-mail</span>
-                                                    <span className="text-theme-text truncate block font-medium mt-0.5">{entry.username || 'Não informado'}</span>
-                                                </div>
-                                                {entry.username && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(entry.username);
-                                                            setCopiedPassId(entry.id + '_user');
-                                                            toast.success('Copiado', 'Usuário copiado.');
-                                                            setTimeout(() => setCopiedPassId(null), 2000);
-                                                        }}
-                                                        className="p-1 text-theme-text-muted hover:text-theme-text shrink-0"
-                                                        title="Copiar usuário"
-                                                    >
-                                                        {copiedPassId === entry.id + '_user' ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            {/* Password Field */}
-                                            <div className="flex items-center justify-between gap-1 overflow-hidden">
-                                                <div className="truncate flex-1">
-                                                    <span className="text-[9px] text-theme-text-faint block uppercase tracking-wider font-semibold">Senha</span>
-                                                    <span className="text-theme-text font-mono truncate block mt-0.5 text-xs font-semibold tracking-wider">
-                                                        {showPass ? entry.password : '••••••••••••'}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-0.5 shrink-0">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setVisiblePasswordIds(prev => ({
-                                                                ...prev,
-                                                                [entry.id]: !prev[entry.id]
-                                                            }));
-                                                        }}
-                                                        className="p-1 text-theme-text-muted hover:text-theme-text"
-                                                        title={showPass ? "Ocultar senha" : "Exibir senha"}
-                                                    >
-                                                        {showPass ? <EyeOff size={11} /> : <Eye size={11} />}
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(entry.password);
-                                                            setCopiedPassId(entry.id + '_pass');
-                                                            toast.success('Copiado', 'Senha copiada.');
-                                                            setTimeout(() => setCopiedPassId(null), 2000);
-                                                        }}
-                                                        className="p-1 text-theme-text-muted hover:text-theme-text"
-                                                        title="Copiar senha"
-                                                    >
-                                                        {copiedPassId === entry.id + '_pass' ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                        <div className="overflow-hidden flex-1 leading-normal">
+                                            <div className="font-bold text-xs truncate">{entry.title}</div>
+                                            <div className="text-[10px] text-theme-text-faint truncate mt-0.5">{entry.username || 'Sem usuário'}</div>
                                         </div>
+                                    </button>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
 
-                                        {entry.notes && (
-                                            <div className="text-[10px] text-theme-text-muted/90 bg-theme-card/30 p-2.5 rounded-lg border border-theme-border/30 line-clamp-2">
-                                                {entry.notes}
-                                            </div>
-                                        )}
+                {/* 3. RIGHT PANEL: DETAILS VIEW */}
+                <div className="flex-1 flex flex-col bg-theme-base overflow-hidden">
+                    {activeEntry ? (
+                        <div className="flex-1 flex flex-col h-full overflow-hidden">
+                            {/* Details Header */}
+                            <div className="h-14 border-b border-theme-border px-6 flex items-center justify-between bg-theme-surface/20 shrink-0 select-none">
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center font-bold text-sm shrink-0">
+                                        {activeEntry.title.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="overflow-hidden leading-normal">
+                                        <h3 className="font-bold text-sm text-theme-text truncate">{activeEntry.title}</h3>
+                                        <span className="inline-flex items-center gap-1 text-[9px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20 font-bold mt-0.5">
+                                            <span>{activeEntryVault?.icon || '📁'}</span>
+                                            <span>{activeEntryVault?.name || 'Personal'}</span>
+                                        </span>
+                                    </div>
+                                </div>
 
-                                        <div className="text-[8px] text-theme-text-faint text-right">
-                                            Atualizado em: {new Date(entry.updated_at).toLocaleDateString('pt-BR', {
-                                                hour: '2-digit', minute: '2-digit'
-                                            })}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    {activeEntry.isDeleted ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleRestorePassword(activeEntry!.id, e)}
+                                                className="p-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold transition-all text-xs flex items-center gap-1 shadow-sm"
+                                            >
+                                                Restaurar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handlePermanentDeletePassword(activeEntry!.id, e)}
+                                                className="p-1.5 px-3 rounded-xl border border-red-500/30 hover:border-red-500 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all text-xs font-semibold flex items-center gap-1"
+                                            >
+                                                Excluir Permanente
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setEditingPassEntry(activeEntry!);
+                                                    setPassFormTitle(activeEntry!.title);
+                                                    setPassFormUsername(activeEntry!.username);
+                                                    setPassFormPassword(activeEntry!.password);
+                                                    setPassFormUrl(activeEntry!.url || '');
+                                                    setPassFormNotes(activeEntry!.notes || '');
+                                                    setPassFormVaultId(activeEntry!.vaultId || 'vault-default');
+                                                    setIsPassModalOpen(true);
+                                                }}
+                                                className="p-1.5 px-3 rounded-xl border border-theme-border bg-theme-card hover:bg-theme-border text-theme-text-muted hover:text-theme-text transition-colors flex items-center gap-1 text-xs font-semibold"
+                                            >
+                                                <Edit3 size={11} /> Editar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleDeletePassword(activeEntry!.id, e)}
+                                                className="p-1.5 px-3 rounded-xl border border-theme-border bg-theme-card hover:border-red-500/20 hover:bg-red-500/10 text-theme-text-muted hover:text-red-500 transition-colors flex items-center gap-1 text-xs font-semibold"
+                                                title="Mover para a Lixeira"
+                                            >
+                                                <Trash2 size={11} /> Excluir
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Details Fields */}
+                            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                                {/* Field: Username */}
+                                <div className="bg-theme-surface/30 border border-theme-border/50 rounded-xl p-4 flex items-center justify-between gap-4 group">
+                                    <div className="overflow-hidden flex-1">
+                                        <span className="text-[9px] text-theme-text-faint uppercase font-bold tracking-wider block">Usuário / E-mail</span>
+                                        <span className="text-xs text-theme-text font-medium block mt-1 select-text truncate">{activeEntry.username || 'Não informado'}</span>
+                                    </div>
+                                    {activeEntry.username && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(activeEntry!.username);
+                                                setCopiedPassId(activeEntry!.id + '_user');
+                                                toast.success('Copiado', 'E-mail/Usuário copiado.');
+                                                setTimeout(() => setCopiedPassId(null), 2000);
+                                            }}
+                                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity p-2 hover:bg-theme-border rounded-lg text-theme-text-muted hover:text-theme-text shrink-0"
+                                            title="Copiar usuário"
+                                        >
+                                            {copiedPassId === activeEntry.id + '_user' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Field: Password */}
+                                <div className="bg-theme-surface/30 border border-theme-border/50 rounded-xl p-4 flex items-center justify-between gap-4 group">
+                                    <div className="overflow-hidden flex-1">
+                                        <span className="text-[9px] text-theme-text-faint uppercase font-bold tracking-wider block">Senha</span>
+                                        <div className="flex items-center gap-3 mt-1.5">
+                                            <span className="text-xs text-theme-text font-mono font-bold tracking-widest select-text truncate">
+                                                {visiblePasswordIds[activeEntry.id] ? activeEntry.password : '••••••••••••'}
+                                            </span>
+                                            {activeEntryStrength && (
+                                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${activeEntryStrength.color} shrink-0`}>
+                                                    {activeEntryStrength.label}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-                                );
-                            })}
+                                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setVisiblePasswordIds(prev => ({
+                                                    ...prev,
+                                                    [activeEntry!.id]: !prev[activeEntry!.id]
+                                                }));
+                                            }}
+                                            className="p-2 hover:bg-theme-border rounded-lg text-theme-text-muted hover:text-theme-text"
+                                            title={visiblePasswordIds[activeEntry.id] ? "Ocultar senha" : "Exibir senha"}
+                                        >
+                                            {visiblePasswordIds[activeEntry.id] ? <EyeOff size={13} /> : <Eye size={13} />}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(activeEntry!.password);
+                                                setCopiedPassId(activeEntry!.id + '_pass');
+                                                toast.success('Copiada', 'Senha copiada.');
+                                                setTimeout(() => setCopiedPassId(null), 2000);
+                                            }}
+                                            className="p-2 hover:bg-theme-border rounded-lg text-theme-text-muted hover:text-theme-text"
+                                            title="Copiar senha"
+                                        >
+                                            {copiedPassId === activeEntry.id + '_pass' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Field: Website */}
+                                <div className="bg-theme-surface/30 border border-theme-border/50 rounded-xl p-4 flex items-center justify-between gap-4 group">
+                                    <div className="overflow-hidden flex-1 leading-normal">
+                                        <span className="text-[9px] text-theme-text-faint uppercase font-bold tracking-wider block">Website</span>
+                                        {activeEntry.url ? (
+                                            <a
+                                                href={activeEntry.url.startsWith('http') ? activeEntry.url : 'http://' + activeEntry.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-amber-500 hover:text-amber-600 hover:underline font-medium inline-flex items-center gap-1 mt-1 truncate"
+                                            >
+                                                <span>{activeEntry.url}</span>
+                                                <ExternalLink size={10} />
+                                            </a>
+                                        ) : (
+                                            <span className="text-xs text-theme-text-muted block mt-1">Não informado</span>
+                                        )}
+                                    </div>
+                                    {activeEntry.url && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(activeEntry!.url || '');
+                                                setCopiedPassId(activeEntry!.id + '_url');
+                                                toast.success('Copiado', 'Link copiado.');
+                                                setTimeout(() => setCopiedPassId(null), 2000);
+                                            }}
+                                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity p-2 hover:bg-theme-border rounded-lg text-theme-text-muted hover:text-theme-text shrink-0"
+                                            title="Copiar URL"
+                                        >
+                                            {copiedPassId === activeEntry.id + '_url' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Field: Notes */}
+                                <div className="bg-theme-surface/30 border border-theme-border/50 rounded-xl p-4 flex flex-col gap-1.5">
+                                    <span className="text-[9px] text-theme-text-faint uppercase font-bold tracking-wider block">Nota</span>
+                                    <div className="text-xs text-theme-text leading-relaxed select-text font-medium whitespace-pre-wrap mt-0.5">
+                                        {activeEntry.notes || <span className="text-theme-text-muted italic">Nenhuma observação.</span>}
+                                    </div>
+                                </div>
+
+                                {/* Metadados */}
+                                <div className="border-t border-theme-border/30 pt-4 flex flex-col gap-1 text-[9px] text-theme-text-faint leading-normal font-semibold">
+                                    <span>Criado em: {new Date(activeEntry.created_at).toLocaleString('pt-BR')}</span>
+                                    <span>Última modificação: {new Date(activeEntry.updated_at).toLocaleString('pt-BR')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center select-none">
+                            <div className="w-16 h-16 rounded-full bg-amber-500/5 text-amber-500/40 border border-dashed border-amber-500/20 flex items-center justify-center mb-4">
+                                <Key size={28} />
+                            </div>
+                            <h4 className="font-bold text-sm text-theme-text">Nenhum item selecionado</h4>
+                            <p className="text-xs text-theme-text-muted max-w-xs mt-1.5 leading-relaxed">
+                                Selecione uma conta ou senha da coluna ao lado para visualizar os detalhes correspondentes.
+                            </p>
                         </div>
                     )}
                 </div>
@@ -1799,6 +2201,21 @@ const NotesPage: React.FC = () => {
                             </div>
 
                             <div>
+                                <label className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider block mb-1">Cofre de Destino</label>
+                                <select
+                                    value={passFormVaultId}
+                                    onChange={(e) => setPassFormVaultId(e.target.value)}
+                                    className="w-full bg-theme-base border border-theme-border focus:border-amber-500 focus:outline-none rounded-lg px-3 py-2 text-xs text-theme-text font-semibold"
+                                >
+                                    {vaults.map(vault => (
+                                        <option key={vault.id} value={vault.id}>
+                                            {vault.icon} {vault.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
                                 <label className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider block mb-1">Usuário / E-mail / Login</label>
                                 <input
                                     type="text"
@@ -1928,6 +2345,79 @@ const NotesPage: React.FC = () => {
                                 className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
                             >
                                 Salvar Registro
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* ─── MODAL: CREATE VAULT ───────────────────────── */}
+            {isCreateVaultModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none">
+                    <form 
+                        onSubmit={handleCreateVault}
+                        className="w-[380px] p-6 rounded-2xl border border-theme-border bg-theme-surface shadow-2xl flex flex-col gap-4 animate-slide-up relative"
+                    >
+                        <button 
+                            type="button"
+                            onClick={() => setIsCreateVaultModalOpen(false)}
+                            className="absolute top-4 right-4 text-theme-text-muted hover:text-theme-text transition-colors"
+                        >
+                            <X size={16} />
+                        </button>
+
+                        <h3 className="font-bold text-sm text-theme-text border-b border-theme-border pb-2 flex items-center gap-2">
+                            <span>💼</span> Criar Novo Cofre
+                        </h3>
+                        
+                        <div className="flex flex-col gap-3.5">
+                            <div>
+                                <label className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider block mb-1">Nome do Cofre *</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ex: Pessoal, Trabalho, Finanças"
+                                    value={newVaultName}
+                                    onChange={(e) => setNewVaultName(e.target.value)}
+                                    className="w-full bg-theme-base border border-theme-border focus:border-amber-500 focus:outline-none rounded-lg px-3 py-2 text-xs text-theme-text"
+                                    required
+                                    maxLength={24}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider block mb-1">Ícone / Emoji</label>
+                                <div className="grid grid-cols-6 gap-2">
+                                    {['💼', '🔒', '🏠', '💳', '📧', '🚀', '☁️', '🎮', '💡', '🎵', '🌐', '🛡️'].map(emoji => (
+                                        <button
+                                            key={emoji}
+                                            type="button"
+                                            onClick={() => setNewVaultIcon(emoji)}
+                                            className={`p-2 rounded-lg text-lg border transition-all ${
+                                                newVaultIcon === emoji 
+                                                    ? 'bg-amber-500/10 border-amber-500 scale-110' 
+                                                    : 'bg-theme-card border-theme-border hover:bg-theme-border'
+                                            }`}
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2.5 mt-2 justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setIsCreateVaultModalOpen(false)}
+                                className="px-4 py-2 border border-theme-border bg-theme-card hover:bg-theme-border rounded-xl text-xs font-semibold text-theme-text-muted transition-all"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
+                            >
+                                Criar Cofre
                             </button>
                         </div>
                     </form>

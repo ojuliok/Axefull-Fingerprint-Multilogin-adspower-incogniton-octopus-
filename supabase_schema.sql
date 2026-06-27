@@ -170,3 +170,54 @@ CREATE TABLE IF NOT EXISTS shared_items (
     role TEXT NOT NULL DEFAULT 'viewer',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 14. CRM Columns table
+CREATE TABLE IF NOT EXISTS crm_columns (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    title VARCHAR(100) NOT NULL,
+    order_index INT NOT NULL,
+    color VARCHAR(7) NOT NULL DEFAULT '#6b7280'
+);
+
+-- 15. CRM Cards table
+CREATE TABLE IF NOT EXISTS crm_cards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    column_id UUID NOT NULL REFERENCES crm_columns(id) ON DELETE CASCADE,
+    profile_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    priority VARCHAR(10) DEFAULT 'medium', -- 'low', 'medium', 'high'
+    time_spent_seconds INT DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 16. Onboarding Progress table
+CREATE TABLE IF NOT EXISTS onboarding_progress (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    first_profile_created BOOLEAN NOT NULL DEFAULT FALSE,
+    first_profile_launched BOOLEAN NOT NULL DEFAULT FALSE,
+    canvas_node_created BOOLEAN NOT NULL DEFAULT FALSE,
+    crm_card_moved BOOLEAN NOT NULL DEFAULT FALSE,
+    activation_achieved BOOLEAN NOT NULL DEFAULT FALSE,
+    completed_at TIMESTAMPTZ
+);
+
+-- 17. Product Events (Telemetry) table
+CREATE TABLE IF NOT EXISTS product_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+    event_name VARCHAR(100) NOT NULL,
+    payload JSONB NOT NULL,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Performance Indexes
+CREATE INDEX IF NOT EXISTS idx_crm_columns_workspace ON crm_columns(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_crm_cards_column ON crm_cards(column_id);
+CREATE INDEX IF NOT EXISTS idx_product_events_name_time ON product_events(event_name, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_product_events_user ON product_events(user_id);
+

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home, StickyNote
+    LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home, StickyNote, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -30,6 +30,23 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
     const { theme, layout } = useTheme();
     const { toast } = useToast();
     const isSplitPanel = layout === 'split-panel';
+
+    const [canvasSidebarExpanded, setCanvasSidebarExpanded] = React.useState(() => {
+        try {
+            const saved = localStorage.getItem('axe_canvas_menu_mode');
+            return saved !== 'collapsed';
+        } catch {
+            return true;
+        }
+    });
+
+    React.useEffect(() => {
+        const handleToggle = () => {
+            setCanvasSidebarExpanded(prev => !prev);
+        };
+        window.addEventListener('toggle-canvas-sidebar', handleToggle);
+        return () => window.removeEventListener('toggle-canvas-sidebar', handleToggle);
+    }, []);
 
     // Drag and Drop State
     const [itemOrder, setItemOrder] = useState<string[]>(() => {
@@ -210,6 +227,31 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                         </button>
                     );
                 })}
+
+                {/* Secondary Menu Toggle (Tela Sidebar) */}
+                {currentView === 'canvas' && (
+                    <button
+                        onClick={() => {
+                            window.dispatchEvent(new CustomEvent('toggle-canvas-sidebar'));
+                        }}
+                        className={`
+                            flex rounded-lg transition-all relative group text-theme-text-muted hover:bg-theme-border
+                            ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-2.5' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}
+                        `}
+                        title={canvasSidebarExpanded ? "Recolher Menu Lateral" : "Expandir Menu Lateral"}
+                    >
+                        <div className="relative flex items-center justify-center shrink-0">
+                            {canvasSidebarExpanded ? (
+                                <PanelLeftClose size={isSplitPanel ? 16 : 18} strokeWidth={2} className="group-hover:scale-105 transition-transform" />
+                            ) : (
+                                <PanelLeftOpen size={isSplitPanel ? 16 : 18} strokeWidth={2} className="group-hover:scale-105 transition-transform" />
+                            )}
+                        </div>
+                        <span className={`tracking-tight font-medium ${isSplitPanel ? 'text-xs' : 'text-[9px]'}`}>
+                            {canvasSidebarExpanded ? "Recolher" : "Menu"}
+                        </span>
+                    </button>
+                )}
 
                 {/* Extensions Button */}
                 {!isWebMode() && (
