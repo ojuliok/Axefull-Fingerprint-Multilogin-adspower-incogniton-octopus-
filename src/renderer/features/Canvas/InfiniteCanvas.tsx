@@ -1233,26 +1233,6 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
 
     // ── Node Operations ──
 
-    const addFreeTextAt = useCallback((canvasX: number, canvasY: number) => {
-        const newNode: CanvasNode = {
-            id: genId(),
-            type: 'freetext',
-            x: canvasX,
-            y: canvasY,
-            width: 220,
-            height: 36,
-            content: '',
-            textColor: '#e2e8f0',
-            zIndex: maxZ() + 1,
-        };
-        const updated = [...nodes, newNode];
-        setNodes(updated);
-        setSelectedIds(new Set([newNode.id]));
-        setEditingNodeId(newNode.id);
-        setShowFormatBar(true);
-        saveData(updated, strokes, viewport);
-    }, [nodes, strokes, viewport, saveData]);
-
     const addTextNode = useCallback((canvasX?: number, canvasY?: number) => {
         const cx = canvasX !== undefined ? canvasX : (-viewport.x + (containerRef.current?.clientWidth ?? 800) / 2) / viewport.zoom;
         const cy = canvasY !== undefined ? canvasY : (-viewport.y + (containerRef.current?.clientHeight ?? 600) / 2) / viewport.zoom;
