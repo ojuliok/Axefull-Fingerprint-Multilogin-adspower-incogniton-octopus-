@@ -127,7 +127,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                             </div>
                         </>
                     )}
-                </div>>
+                </div>
 
                 {/* Extensions */}
                 {!isWebMode() && (

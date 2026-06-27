@@ -144,7 +144,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                             </div>
                         </div>
                     )}
-                </div>>
+                </div>
 
                 {/* Extensions */}
                 <button
