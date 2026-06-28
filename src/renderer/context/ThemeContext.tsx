@@ -5,15 +5,7 @@ export type Layout = 'classic-sidebar' | 'top-navigation' | 'floating-dock' | 's
 export type ButtonStyle = 'default' | 'retro-striped' | 'gold-gradient' | 'cyber-neon' | 'glossy-pill' | 'glass-card';
 
 export interface CustomThemeColors {
-    '--bg-primary': string;
-    '--bg-secondary': string;
-    '--bg-tertiary': string;
-    '--bg-card': string;
-    '--text-primary': string;
-    '--text-secondary': string;
-    '--brand-primary': string;
-    '--border-default': string;
-    '--radius-md': string;
+    [key: string]: string;
 }
 
 export const defaultCustomColors: CustomThemeColors = {
@@ -21,10 +13,42 @@ export const defaultCustomColors: CustomThemeColors = {
     '--bg-secondary': '#F1F5F9',
     '--bg-tertiary': '#E2E8F0',
     '--bg-card': '#FFFFFF',
+    '--bg-card-hover': '#F8FAFC',
+    '--bg-elevated': '#FFFFFF',
+    '--bg-input': '#FFFFFF',
+    '--bg-overlay': 'rgba(15, 23, 42, 0.5)',
+    '--glass-bg': 'rgba(255, 255, 255, 0.8)',
+    '--glass-border': 'rgba(0, 0, 0, 0.07)',
+    '--glass-shadow': '0 8px 32px rgba(0, 0, 0, 0.12)',
     '--text-primary': '#0F172A',
     '--text-secondary': '#334155',
+    '--text-tertiary': '#64748B',
+    '--text-disabled': '#94A3B8',
+    '--text-inverse': '#FFFFFF',
+    '--border-default': 'rgba(0, 0, 0, 0.08)',
+    '--border-hover': 'rgba(0, 0, 0, 0.18)',
+    '--border-focus': 'rgba(124, 58, 237, 0.5)',
+    '--shadow-sm': '0 1px 2px rgba(0,0,0,0.07)',
+    '--shadow-md': '0 4px 12px rgba(0,0,0,0.10)',
+    '--shadow-lg': '0 10px 24px rgba(0,0,0,0.14)',
+    '--shadow-xl': '0 20px 48px rgba(0,0,0,0.18)',
+    '--shadow-glow': '0 0 24px rgba(124, 58, 237, 0.18)',
+    '--shadow-glow-sm': '0 0 12px rgba(124, 58, 237, 0.12)',
     '--brand-primary': '#8B5CF6',
-    '--border-default': '#E2E8F0',
+    '--brand-primary-light': '#A78BFA',
+    '--brand-primary-dark': '#6D28D9',
+    '--brand-secondary': '#3B82F6',
+    '--brand-secondary-light': '#60A5FA',
+    '--brand-accent': '#EC4899',
+    '--brand-accent-light': '#F472B6',
+    '--success': '#10B981',
+    '--success-light': 'rgba(16, 185, 129, 0.15)',
+    '--warning': '#F59E0B',
+    '--warning-light': 'rgba(245, 158, 11, 0.15)',
+    '--danger': '#EF4444',
+    '--danger-light': 'rgba(239, 68, 68, 0.15)',
+    '--info': '#3B82F6',
+    '--info-light': 'rgba(59, 130, 246, 0.15)',
     '--radius-md': '10px'
 };
 
@@ -42,7 +66,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({
     theme: 'cyber-retro',
-    layout: 'classic-sidebar',
+    layout: 'top-navigation',
     buttonStyle: 'default',
     customColors: defaultCustomColors,
     setTheme: () => {},
@@ -60,7 +84,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const [layout, setLayoutState] = useState<Layout>(() => {
         const stored = localStorage.getItem('axe-layout') as Layout | null;
-        return stored || 'classic-sidebar';
+        return stored || 'top-navigation';
     });
 
     const [buttonStyle, setButtonStyleState] = useState<ButtonStyle>(() => {

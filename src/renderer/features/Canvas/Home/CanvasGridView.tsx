@@ -64,6 +64,85 @@ export const CanvasGridView: React.FC<CanvasGridViewProps> = ({
         const hasColor = canvas.color && canvas.color.trim() !== '';
         const isRepositioning = repositioningId === canvas.id;
 
+        if (canvas.type === 'folder') {
+          return (
+            <div
+              key={canvas.id}
+              className={styles.folderCard}
+              onClick={() => !renamingId && setActivePreviewId(canvas.id)}
+              onContextMenu={(e) => handleContextMenu(e, canvas.id)}
+              onDoubleClick={() => startRename(canvas.id, canvas.name)}
+            >
+              {/* Folder Icon Illustration / Thumbnail */}
+              <div className={styles.folderIllustration}>
+                <div className={styles.folderBackdrop}>
+                  <FolderOpen size={32} className={styles.folderIllustrationIcon} />
+                </div>
+                {childCount > 0 && (
+                  <div className={styles.folderBadge}>
+                    {childCount}
+                  </div>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className={styles.folderInfo}>
+                {renamingId === canvas.id ? (
+                  <input
+                    autoFocus
+                    className={styles.renameInput}
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onBlur={commitRename}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') commitRename();
+                      if (e.key === 'Escape') setRenameValue('');
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                ) : (
+                  <>
+                    <h3 className={styles.folderTitle}>{canvas.name}</h3>
+                    <p className={styles.folderSubtitle}>
+                      {childCount} {childCount === 1 ? 'item' : 'itens'}
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Grid Actions */}
+              <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 3, display: 'flex', gap: 6, opacity: 0, transition: 'opacity 0.2s ease' }} className="gridActions">
+                <button
+                  className={styles.favoriteBtn}
+                  style={{ width: 26, height: 26, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px' }}
+                  onClick={(e) => { e.stopPropagation(); onSelectCanvas(canvas.id); }}
+                  title="Abrir editor diretamente"
+                >
+                  <FolderOpen size={13} />
+                </button>
+                <button
+                  className={`${styles.favoriteBtn} ${favorites[canvas.id] ? styles.favoriteBtnActive : ''}`}
+                  style={{ width: 26, height: 26, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: favorites[canvas.id] ? '#fbbf24' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px' }}
+                  onClick={(e) => toggleFavorite(e, canvas.id)}
+                >
+                  <Star size={13} fill={favorites[canvas.id] ? '#fbbf24' : 'none'} />
+                </button>
+                <button
+                  className={styles.cardMoreBtn}
+                  style={{ position: 'static', opacity: 1, width: 26, height: 26, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContextMenu(e, canvas.id);
+                  }}
+                >
+                  <MoreHorizontal size={14} />
+                </button>
+              </div>
+              <style>{`.${styles.folderCard}:hover .gridActions { opacity: 1 !important; }`}</style>
+            </div>
+          );
+        }
+
         return (
           <div
             key={canvas.id}

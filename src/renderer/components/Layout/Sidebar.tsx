@@ -4,7 +4,7 @@ import {
     Sun, Moon, Bell, ChevronDown, ChevronUp, Plus, Cloud, Database, LogOut, Check, Globe
 } from 'lucide-react';
 
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme, Theme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -29,8 +29,19 @@ const ALL_ITEMS: Record<string, { id: string; label: string; icon: React.FC<any>
 // Ordem Padrão solicitada
 const DEFAULT_ORDER = ['home', 'profiles', 'canvas', 'tasks', 'notes'];
 
+const THEME_LABELS: Record<Theme, string> = {
+    'light': 'Claro',
+    'dark': 'Escuro',
+    'cyber-retro': 'Retro Cyber',
+    'retro-vintage': 'Retro Vintage',
+    'luxury-supreme': 'Luxury Supreme',
+    'cool-tech': 'Cool Tech',
+    'pool-vibe': 'Pool Vibe',
+    'custom': 'Personalizado'
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExtensions }) => {
-    const { theme, toggleTheme, layout } = useTheme();
+    const { theme, setTheme, toggleTheme, layout } = useTheme();
     const { toast } = useToast();
     const { user, logout } = useAuth();
     const { workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace } = useWorkspace();
@@ -42,6 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
     const [storageMode, setStorageMode] = useState<'online' | 'offline'>(() => (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online');
     const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
     const [showStorageMenu, setShowStorageMenu] = useState(false);
+    const [showThemeMenu, setShowThemeMenu] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [ajustesHovered, setAjustesHovered] = useState(false);
 
@@ -57,6 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
             setAjustesHovered(false);
             setShowWorkspaceMenu(false);
             setShowStorageMenu(false);
+            setShowThemeMenu(false);
         }, 300);
     };
 
@@ -393,19 +406,44 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
 
                             <div className="w-full h-px bg-theme-border/40" />
 
-                            {/* Theme Toggle */}
+                            {/* Theme Selection */}
                             <div className="flex flex-col gap-1.5">
                                 <span className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider text-left">Aparência</span>
-                                <button
-                                    onClick={toggleTheme}
-                                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-theme-border/40 hover:bg-theme-border text-xs text-theme-text-muted hover:text-theme-text transition-colors"
-                                >
-                                    <div className="flex items-center gap-1.5">
-                                        {isLight ? <Moon size={12} /> : <Sun size={12} />}
-                                        <span className="font-medium">Alternar Tema</span>
-                                    </div>
-                                    <span className="text-[10px] text-theme-text-muted font-bold capitalize">{theme}</span>
-                                </button>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowThemeMenu(!showThemeMenu)}
+                                        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-theme-border/40 hover:bg-theme-border/60 transition-colors text-xs text-theme-text"
+                                    >
+                                        <div className="flex items-center gap-1.5">
+                                            {isLight ? <Sun size={12} /> : <Moon size={12} />}
+                                            <span className="font-medium">Alternar Tema</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-[10px] text-theme-text-muted font-bold capitalize">
+                                                {THEME_LABELS[theme] || theme}
+                                            </span>
+                                            <ChevronDown size={12} className="text-theme-text-muted shrink-0" />
+                                        </div>
+                                    </button>
+
+                                    {showThemeMenu && (
+                                        <div className="absolute bottom-full left-0 mb-1 w-full bg-theme-card border border-theme-border shadow-lg rounded-lg py-1.5 z-[1000] max-h-48 overflow-y-auto">
+                                            {(Object.keys(THEME_LABELS) as Theme[]).map(themeName => (
+                                                <button
+                                                    key={themeName}
+                                                    onClick={() => {
+                                                        setTheme(themeName);
+                                                        setShowThemeMenu(false);
+                                                    }}
+                                                    className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs transition-colors hover:bg-theme-border text-left ${theme === themeName ? 'text-[var(--brand-primary)] font-semibold' : 'text-theme-text'}`}
+                                                >
+                                                    <span className="truncate flex-1 text-left">{THEME_LABELS[themeName]}</span>
+                                                    {theme === themeName && <Check size={10} className="shrink-0 text-[var(--brand-primary)]" />}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

@@ -5,7 +5,8 @@ import {
     Plus, MoreHorizontal, Trash2, Edit3,
     Copy, Download, Upload, ChevronRight, ChevronDown,
     Home, PenTool, FileText, Notebook, Search, Folder, FolderPlus, MessageSquare, Settings2, Box,
-    PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass, Lock, Eye, Maximize2
+    PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass, Lock, Eye, Maximize2,
+    Menu, ChevronLeft
 } from 'lucide-react';
 import {
     CanvasInfo, CanvasData,
@@ -1296,6 +1297,49 @@ const CanvasPage: React.FC = () => {
                 {/* Tabs Bar with Integrated Breadcrumb */}
                 {openTabs.length > 0 && (
                     <div className={`${styles.tabBar} ${!isSidebarExpanded ? styles.tabBarCollapsed : ''}`}>
+                        {/* Integrated Breadcrumb & Sidebar Toggle (Left) */}
+                        <div className={styles.integratedBreadcrumb}>
+                            {/* Sidebar Toggle Button */}
+                            <button
+                                className={styles.sidebarToggleBtn}
+                                onClick={() => setMenuMode(prev => prev === 'expanded' ? 'collapsed' : 'expanded')}
+                                title={isSidebarExpanded ? "Recolher menu lateral" : "Abrir menu lateral"}
+                            >
+                                {isSidebarExpanded ? <ChevronLeft size={13} /> : <Menu size={13} />}
+                            </button>
+
+                            {/* Home / Início Button with highlight */}
+                            <button
+                                className={`${styles.homeBreadcrumbBtn} ${viewState === 'home' ? styles.homeBreadcrumbBtnActive : ''}`}
+                                onClick={() => handleBreadcrumbClick(-1)}
+                                title="Área principal / Início"
+                            >
+                                <Home size={12} className={styles.homeIcon} />
+                                <span className={styles.homeText}>Início</span>
+                            </button>
+
+                            {/* Breadcrumb Path (only if viewState is 'canvas' and there's a navigation path) */}
+                            {viewState === 'canvas' && navigationStack.length > 0 && (
+                                <>
+                                    <span className={styles.breadcrumbSeparator}>/</span>
+                                    {navigationStack.map((nav, index) => (
+                                        <React.Fragment key={nav.id}>
+                                            <span
+                                                className={`${styles.breadcrumbItem} ${index === navigationStack.length - 1 ? styles.active : ''}`}
+                                                onClick={() => handleBreadcrumbClick(index)}
+                                            >
+                                                {nav.name}
+                                            </span>
+                                            {index < navigationStack.length - 1 && <span className={styles.breadcrumbSeparator}>/</span>}
+                                        </React.Fragment>
+                                    ))}
+                                </>
+                            )}
+                            
+                            <span className={styles.breadcrumbSeparator}>|</span>
+                        </div>
+
+                        {/* Tabs List (Right of Breadcrumb) */}
                         <div className={styles.tabsList}>
                             {openTabs.map(tab => {
                                 const isActive = viewState === 'canvas' && activeTabId === tab.id;
@@ -1320,32 +1364,6 @@ const CanvasPage: React.FC = () => {
                                 );
                             })}
                         </div>
-
-                        {/* Integrated Breadcrumb */}
-                        {viewState === 'canvas' && navigationStack.length > 0 && (
-                            <div className={styles.integratedBreadcrumb}>
-                                <span className={styles.breadcrumbSeparator}>|</span>
-                                <span
-                                    className={styles.breadcrumbItem}
-                                    onClick={() => handleBreadcrumbClick(-1)}
-                                    title="Início"
-                                >
-                                    <Home size={12} />
-                                </span>
-                                <span className={styles.breadcrumbSeparator}>/</span>
-                                {navigationStack.map((nav, index) => (
-                                    <React.Fragment key={nav.id}>
-                                        <span
-                                            className={`${styles.breadcrumbItem} ${index === navigationStack.length - 1 ? styles.active : ''}`}
-                                            onClick={() => handleBreadcrumbClick(index)}
-                                        >
-                                            {nav.name}
-                                        </span>
-                                        {index < navigationStack.length - 1 && <span className={styles.breadcrumbSeparator}>/</span>}
-                                    </React.Fragment>
-                                ))}
-                            </div>
-                        )}
                     </div>
                 )}
 

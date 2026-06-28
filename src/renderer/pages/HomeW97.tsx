@@ -24,7 +24,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { getCanvasList, CanvasInfo } from '../features/Canvas/canvasStorage';
-import { getTasksData, TaskData } from '../features/Tasks/Tasks/tasksStorage';
+import { getTasksData, TaskData, createTask, updateTask } from '../features/Tasks/Tasks/tasksStorage';
 import styles from './HomeW97.module.css';
 import logoImg from '../logo.png';
 
@@ -263,6 +263,40 @@ export const HomeW97: React.FC = () => {
       }
       setSelectedNode(node);
     }
+  };
+
+  const handleToggleTask = (taskId: string) => {
+    const updatedTasks = tasks.map(t => {
+      if (t.id === taskId) {
+        const nextStatus = t.status === 'done' ? 'todo' : 'done';
+        updateTask(t.id, { status: nextStatus });
+        return { ...t, status: nextStatus };
+      }
+      return t;
+    });
+    setTasks(updatedTasks);
+  };
+
+  const handleAddTask = (title: string) => {
+    if (!title.trim()) return;
+    const newTask = createTask(title, currentWorkspace?.id || 'default');
+    setTasks(prev => [...prev, newTask]);
+  };
+
+  const handleCreateRetroNoteAndOpen = () => {
+    const newNote = {
+      id: `note-${Date.now()}`,
+      spaceId: 'space-2',
+      title: 'Nova Nota Retro',
+      content: 'Digite o conteúdo aqui...',
+      isStarred: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    const updated = [newNote, ...retroNotes];
+    saveRetroNotes(updated);
+    setActiveRetroNoteId(newNote.id);
+    openWindow('notes');
   };
 
   // ─── NEURAL GRAPH STATE ──────────────────────────────
@@ -960,6 +994,25 @@ export const HomeW97: React.FC = () => {
       {/* ─── DESKTOP SHORTCUTS GRID ────────────────────── */}
       <div className={styles.desktopGrid}>
         
+        {/* Axefull Profiles Shortcut */}
+        <div
+          className={`${styles.desktopIcon} ${selectedDesktopIcon === 'profiles' ? styles.desktopIconSelected : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isMobile) {
+              navigate('/profiles');
+            } else {
+              setSelectedDesktopIcon('profiles');
+            }
+          }}
+          onDoubleClick={() => navigate('/profiles')}
+        >
+          <div className="w-10 h-10 flex items-center justify-center bg-gray-300 rounded border border-gray-400 p-1 shadow-sm">
+            <img src={logoImg} alt="Axefull Logo" className="w-8 h-8 object-contain shrink-0" />
+          </div>
+          <span className={styles.iconLabel}>Axefull &gt;</span>
+        </div>
+
         {/* Meu Computador */}
         <div
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'myComputer' ? styles.desktopIconSelected : ''}`}
@@ -1011,23 +1064,6 @@ export const HomeW97: React.FC = () => {
           <span className={styles.iconLabel}>Rede Neural</span>
         </div>
 
-        {/* Profiles Shortcut */}
-        <div
-          className={`${styles.desktopIcon} ${selectedDesktopIcon === 'profiles' ? styles.desktopIconSelected : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isMobile) {
-              navigate('/profiles');
-            } else {
-              setSelectedDesktopIcon('profiles');
-            }
-          }}
-          onDoubleClick={() => navigate('/profiles')}
-        >
-          <User size={32} strokeWidth={1.5} className="text-violet-400" />
-          <span className={styles.iconLabel}>Perfis Multi</span>
-        </div>
-
         {/* Canvas Shortcut */}
         <div
           className={`${styles.desktopIcon} ${selectedDesktopIcon === 'canvas' ? styles.desktopIconSelected : ''}`}
@@ -1042,7 +1078,7 @@ export const HomeW97: React.FC = () => {
           onDoubleClick={() => navigate('/canvas')}
         >
           <Layers size={32} strokeWidth={1.5} className="text-amber-400" />
-          <span className={styles.iconLabel}>Telas Canvas</span>
+          <span className={styles.iconLabel}>Telas Canvas &gt;</span>
         </div>
 
         {/* Tasks Shortcut */}
@@ -1059,7 +1095,7 @@ export const HomeW97: React.FC = () => {
           onDoubleClick={() => navigate('/tasks')}
         >
           <CheckSquare size={32} strokeWidth={1.5} className="text-blue-400" />
-          <span className={styles.iconLabel}>Tarefas</span>
+          <span className={styles.iconLabel}>Tarefas &gt;</span>
         </div>
 
         {/* DadosClean Shortcut */}
@@ -1076,7 +1112,7 @@ export const HomeW97: React.FC = () => {
           onDoubleClick={() => navigate('/dadosclean')}
         >
           <Settings size={32} strokeWidth={1.5} className="text-emerald-400" />
-          <span className={styles.iconLabel}>MetaClean</span>
+          <span className={styles.iconLabel}>MetaClean &gt;</span>
         </div>
 
         {/* Bloco de Notas Shortcut */}
@@ -1097,6 +1133,93 @@ export const HomeW97: React.FC = () => {
         </div>
 
       </div>
+
+      {/* ─── RETRO ACTIVE DESKTOP WIDGETS ────────────────── */}
+      {!isMobile && (
+        <div className="absolute top-4 right-4 w-72 flex flex-col gap-4 z-[2] max-h-[80%] overflow-y-auto pointer-events-auto" onClick={e => e.stopPropagation()}>
+          
+          {/* WIDGET: TAREFAS */}
+          <div className={`${styles.window} w-full noActiveState`}>
+            <div className={`${styles.titleBar} px-2 py-1`}>
+              <div className={styles.titleText}>
+                <CheckSquare size={10} />
+                <span>AxeTarefas 97</span>
+              </div>
+            </div>
+            <div className="p-2 flex flex-col gap-2 bg-gray-200">
+              <div className={`${styles.inset} bg-white p-1 max-h-36 overflow-y-auto flex flex-col gap-1 text-[11px] text-black`}>
+                {tasks.filter(t => t.status !== 'done').map(t => (
+                  <div key={t.id} className="flex items-center justify-between p-0.5 hover:bg-gray-100">
+                    <label className="flex items-center cursor-pointer truncate max-w-[200px]">
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        onChange={() => handleToggleTask(t.id)}
+                        className="mr-1.5 cursor-pointer"
+                      />
+                      <span className="truncate">{t.title}</span>
+                    </label>
+                  </div>
+                ))}
+                {tasks.filter(t => t.status !== 'done').length === 0 && (
+                  <div className="text-[10px] text-gray-500 p-2 italic">Nenhuma tarefa pendente.</div>
+                )}
+              </div>
+              
+              {/* Quick Task Add Input */}
+              <div className="flex gap-1.5">
+                <input
+                  type="text"
+                  placeholder="Nova tarefa... [Enter]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddTask(e.currentTarget.value);
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                  className={`${styles.inset} w-full p-1 text-[11px] outline-none text-black bg-white`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* WIDGET: ANOTAÇÕES */}
+          <div className={`${styles.window} w-full noActiveState`}>
+            <div className={`${styles.titleBar} px-2 py-1`}>
+              <div className={styles.titleText}>
+                <FileText size={10} />
+                <span>AxeNotas 97</span>
+              </div>
+            </div>
+            <div className="p-2 flex flex-col gap-2 bg-gray-200">
+              <div className={`${styles.inset} bg-white p-1 max-h-36 overflow-y-auto flex flex-col gap-1 text-[11px] text-black`}>
+                {retroNotes.map(rn => (
+                  <div
+                    key={rn.id}
+                    onClick={() => {
+                      setActiveRetroNoteId(rn.id);
+                      openWindow('notes');
+                    }}
+                    className="p-1 hover:bg-blue-900 hover:text-white cursor-pointer truncate"
+                  >
+                    📝 {rn.title || 'Sem Título'}
+                  </div>
+                ))}
+                {retroNotes.length === 0 && (
+                  <div className="text-[10px] text-gray-500 p-2 italic">Nenhuma nota criada.</div>
+                )}
+              </div>
+              <button
+                onClick={handleCreateRetroNoteAndOpen}
+                className={`${styles.outset} w-full py-1 text-[10px] font-bold hover:bg-gray-100 flex items-center justify-center gap-1`}
+              >
+                <span>+ Criar Nota</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      )}
 
       {/* ─── RETRO WINDOW: ABOUT / MY COMPUTER ─────────── */}
       {windows.systemAbout.isOpen && (

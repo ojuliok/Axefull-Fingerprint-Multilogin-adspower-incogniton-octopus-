@@ -566,51 +566,6 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
       <NeuralBackground color={activeSpace?.color} />
       {/* Workspace Header */}
       <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderTop}>
-          <div className={styles.workspaceIcon}>
-            {activeSpace?.icon ? (
-              <DynamicIcon name={activeSpace.icon} size={24} />
-            ) : (
-              'Á'
-            )}
-            <div className={styles.workspaceIconBadge}>
-              <Home size={12} />
-            </div>
-          </div>
-          <div className={styles.workspaceTitleArea}>
-            <div className={styles.workspaceTitleRow}>
-              <h1>{activeSpace ? activeSpace.name : 'Área de trabalho principal'}</h1>
-              <ChevronDown size={18} className="text-theme-text-muted" />
-            </div>
-            <p className={styles.workspaceSubtitle}>
-              {activeSpace?.description || (activeSpace ? 'Espaço de trabalho' : 'Adicionar descrição da área de trabalho')}
-            </p>
-        </div>
-
-        {/* Desktop Workspace Actions */}
-        <div className={styles.workspaceActions}>
-          <button className={styles.workspaceActionBtn}>
-            <MessageSquare size={14} /> Feedback
-          </button>
-          <button className={styles.workspaceActionBtn}>
-            <Users size={14} /> Agentes
-          </button>
-          <button className={styles.workspaceActionBtn} onClick={() => setShowMembersManager(true)}>
-            Membros
-          </button>
-          <button className={styles.workspaceActionBtn} style={{ padding: '6px' }}>
-            <MoreHorizontal size={16} />
-          </button>
-        </div>
-
-        {/* Mobile-only compact actions */}
-        <div className={styles.workspaceHeaderMobileActions}>
-          <button className={styles.workspaceActionBtn} style={{ padding: '6px' }}>
-            <MoreHorizontal size={16} />
-          </button>
-        </div>
-        </div>
-
         <div className={styles.workspaceTabs}>
           <button className={`${styles.tab} ${activeTab === 'Visão Geral' ? styles.tabActive : ''}`} onClick={() => setActiveTab('Visão Geral')}>
             <LayoutDashboard size={16} /> Visão Geral

@@ -38,7 +38,8 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
     const { theme, setTheme } = useTheme();
     const { user, logout } = useAuth();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [showThemeMenu, setShowThemeMenu] = useState(false);
+    const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+    const [showSettingsThemeList, setShowSettingsThemeList] = useState(false);
 
     const isLight = theme === 'light';
     const textClass = 'text-theme-text';
@@ -97,90 +98,22 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                     </div>
                 )}
 
-                {/* Proxies */}
-                <button
-                    onClick={onOpenProxies}
-                    title="Proxies"
-                    className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
-                >
-                    <Network size={16} />
-                </button>
-
-                {/* Theme Toggle / Picker */}
-                <div className="relative">
-                    <button
-                        onClick={() => setShowThemeMenu(!showThemeMenu)}
-                        title="Tema"
-                        className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
-                    >
-                        {isLight ? <Moon size={16} /> : <Sun size={16} />}
-                    </button>
-                    {showThemeMenu && (
-                        <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-theme-border shadow-xl py-1 z-50 bg-theme-card">
-                            <div className="px-4 py-2 border-b border-theme-border">
-                                <p className="text-xs font-semibold text-theme-text-muted">Selecionar Tema</p>
-                            </div>
-                            <div className="p-1 max-h-64 overflow-y-auto scrollbar-none">
-                                {[
-                                    { id: 'light',          label: 'Claro' },
-                                    { id: 'dark',           label: 'Escuro' },
-                                    { id: 'retro-vintage',  label: 'Retro Vintage' },
-                                    { id: 'cyber-retro',    label: 'Retro Cyber' },
-                                    { id: 'luxury-supreme', label: 'Luxury Supreme' },
-                                    { id: 'cool-tech',      label: 'Cool Tech' },
-                                    { id: 'pool-vibe',      label: 'Pool Vibe' },
-                                    { id: 'custom',         label: 'Personalizado' }
-                                ].map(t => (
-                                    <button 
-                                        key={t.id}
-                                        onClick={() => { setTheme(t.id as any); setShowThemeMenu(false); }}
-                                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors
-                                            ${theme === t.id ? 'bg-violet-500/10 text-violet-500' : 'text-theme-text hover:bg-theme-border'}
-                                        `}
-                                    >
-                                        {t.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Extensions */}
-                <button
-                    onClick={onOpenExtensions}
-                    title="Extensões"
-                    className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-theme-text-muted hover:bg-theme-border"
-                >
-                    <Puzzle size={16} />
-                </button>
-
-                {/* Settings */}
-                <button
-                    onClick={() => onViewChange('settings')}
-                    title="Configurações"
-                    className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors
-                        ${currentView === 'settings' 
-                            ? 'bg-theme-border text-violet-500' 
-                            : 'text-theme-text-muted hover:bg-theme-border'}
-                    `}
-                >
-                    <Settings size={16} />
-                </button>
-
                 <div className="w-px h-5 mx-1 bg-theme-border" />
 
-                {/* User Dropdown */}
+                {/* User Dropdown / Profile */}
                 <div className="relative">
                     <button
-                        onClick={() => setShowProfileMenu(!showProfileMenu)}
-                        className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-theme-text text-xs font-bold shadow-sm transition-transform active:scale-95"
+                        onClick={() => {
+                            setShowProfileMenu(!showProfileMenu);
+                            setShowSettingsMenu(false);
+                        }}
+                        className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-theme-text text-xs font-bold shadow-sm transition-transform active:scale-95 hover:scale-105"
                     >
                         {initials}
                     </button>
 
                     {showProfileMenu && (
-                        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-theme-border shadow-xl py-1 z-50 bg-theme-card">
+                        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-theme-border shadow-xl py-1 z-50 bg-theme-card text-left">
                             <div className="px-4 py-3 border-b border-theme-border">
                                 <p className={`text-sm font-semibold truncate ${textClass}`}>{user?.email}</p>
                                 <p className="text-xs mt-0.5 text-theme-text-muted">Plano: {user?.plan_label || user?.plan}</p>
@@ -188,7 +121,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                             <div className="p-1">
                                 <button 
                                     onClick={logout}
-                                    className="w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-red-500 hover:bg-red-500/10"
+                                    className="w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors text-red-500 hover:bg-red-500/10 text-left"
                                 >
                                     Sair
                                 </button>
@@ -196,10 +129,88 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                         </div>
                     )}
                 </div>
+
+                {/* Settings Dropdown (right side of profile) */}
+                <div className="relative">
+                    <button
+                        onClick={() => {
+                            setShowSettingsMenu(!showSettingsMenu);
+                            setShowProfileMenu(false);
+                        }}
+                        title="Configurações"
+                        className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors
+                            ${showSettingsMenu || currentView === 'settings' 
+                                ? 'bg-theme-border text-violet-500' 
+                                : 'text-theme-text-muted hover:bg-theme-border'}
+                        `}
+                    >
+                        <Settings size={16} />
+                    </button>
+
+                    {showSettingsMenu && (
+                        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-theme-border shadow-xl py-2 z-50 bg-theme-card text-left">
+                            <button 
+                                onClick={() => {
+                                    onViewChange('settings');
+                                    setShowSettingsMenu(false);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-theme-text hover:bg-theme-border rounded-lg transition-colors text-left"
+                            >
+                                <Settings size={14} className="text-theme-text-muted shrink-0" />
+                                <span className="font-medium">Configurações Gerais</span>
+                            </button>
+
+                            <div className="w-full h-px bg-theme-border/60 my-1.5" />
+
+                            <div className="px-3 py-1 flex flex-col gap-1.5">
+                                <span className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider">Aparência</span>
+                                <button 
+                                    onClick={() => setShowSettingsThemeList(!showSettingsThemeList)}
+                                    className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-theme-text bg-theme-border/40 hover:bg-theme-border/85 rounded-lg transition-colors text-left"
+                                >
+                                    <span className="font-semibold">Selecionar Tema</span>
+                                    <span className="text-[10px] font-bold text-[var(--brand-primary)] bg-theme-border px-1.5 py-0.5 rounded capitalize">
+                                        {theme}
+                                    </span>
+                                </button>
+                                
+                                {showSettingsThemeList && (
+                                    <div className="mt-1 max-h-48 overflow-y-auto border border-theme-border/50 rounded-lg p-1 bg-theme-base/50 flex flex-col gap-0.5">
+                                        {[
+                                            { id: 'light',          label: 'Claro' },
+                                            { id: 'dark',           label: 'Escuro' },
+                                            { id: 'retro-vintage',  label: 'Retro Vintage' },
+                                            { id: 'cyber-retro',    label: 'Retro Cyber' },
+                                            { id: 'luxury-supreme', label: 'Luxury Supreme' },
+                                            { id: 'cool-tech',      label: 'Cool Tech' },
+                                            { id: 'pool-vibe',      label: 'Pool Vibe' },
+                                            { id: 'custom',         label: 'Personalizado' }
+                                        ].map(t => (
+                                            <button 
+                                                key={t.id}
+                                                onClick={() => {
+                                                    setTheme(t.id as any);
+                                                    setShowSettingsMenu(false);
+                                                    setShowSettingsThemeList(false);
+                                                }}
+                                                className={`w-full text-left px-2.5 py-1.5 text-xs rounded transition-colors flex items-center justify-between
+                                                    ${theme === t.id ? 'bg-violet-500/10 text-violet-500 font-medium' : 'text-theme-text hover:bg-theme-border/50'}
+                                                `}
+                                            >
+                                                <span>{t.label}</span>
+                                                {theme === t.id && <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {(showProfileMenu || showThemeMenu) && (
-                <div className="fixed inset-0 z-40" onClick={() => { setShowProfileMenu(false); setShowThemeMenu(false); }} />
+            {(showProfileMenu || showSettingsMenu) && (
+                <div className="fixed inset-0 z-40" onClick={() => { setShowProfileMenu(false); setShowSettingsMenu(false); setShowSettingsThemeList(false); }} />
             )}
         </header>
     );

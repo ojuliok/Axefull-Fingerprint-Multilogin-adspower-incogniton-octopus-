@@ -771,10 +771,10 @@ button:disabled,
   --glass-bg: rgba(18, 19, 18, 0.9);
   --glass-border: rgba(166, 125, 67, 0.2);
 
-  --text-primary: var(--text-primary);
-  --text-secondary: var(--text-tertiary);
-  --text-tertiary: var(--text-secondary);
-  --text-disabled: var(--text-secondary);
+  --text-primary: #F0E6D2;
+  --text-secondary: #A39682;
+  --text-tertiary: #665D50;
+  --text-disabled: #403A32;
   --text-inverse: #0A0A0A;
 
   --border-default: rgba(166, 125, 67, 0.2);
