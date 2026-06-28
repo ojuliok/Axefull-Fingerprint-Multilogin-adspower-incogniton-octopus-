@@ -472,23 +472,35 @@
     flex-direction: column;
 }
 
-/* ── Breadcrumb Navigation ── */
-.breadcrumbBar {
-    position: relative;
-    z-index: 10;
+/* ── Integrated Breadcrumbs Navigation (inside TabBar) ── */
+.tabsList {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.tabsList::-webkit-scrollbar {
+    display: none;
+}
+
+.integratedBreadcrumb {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--bg-secondary);
-    padding: 8px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    width: 100%;
-    box-sizing: border-box;
+    padding-bottom: 6px;
+    padding-left: 16px;
     flex-shrink: 0;
+    user-select: none;
+    height: 32px;
+}
+
+.breadcrumbSeparator {
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 11px;
 }
 
 .breadcrumbItem {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--text-tertiary);
     cursor: pointer;
     font-weight: 500;
@@ -505,12 +517,6 @@
     color: var(--text-primary);
     cursor: default;
     font-weight: 600;
-}
-
-
-.breadcrumbSeparator {
-    color: var(--text-secondary);
-    font-size: 12px;
 }
 
 /* ── Explore View ── */

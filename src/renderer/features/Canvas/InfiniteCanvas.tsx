@@ -17,6 +17,7 @@ import { Profile } from '../../types';
 import { ProfileAIScore } from '../AI/ProfileAIScore';
 import { LinearPageRenderer } from './LinearPageRenderer';
 import styles from './InfiniteCanvas.module.css';
+import { isWebMode } from '../../utils/env';
 
 import { CanvasContext } from './hooks/CanvasContext';
 import { useCanvasNodes } from './hooks/useCanvasNodes';
@@ -2107,6 +2108,11 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         setConnectionContextMenu(null);
         setCanvasContextMenu(null);
 
+        const targetNode = nodes.find(n => n.id === nodeId);
+        if (targetNode && targetNode.type === 'browser' && isWebMode()) {
+            return;
+        }
+
         const wasAlreadySelected = selectedIds.has(nodeId);
 
         if (e.shiftKey) {
@@ -2919,6 +2925,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                             onMouseLeave={() => setHoveredNodeId(null)}
                             onMouseDown={(e) => {
                                 if (isEditing && (e.target as HTMLElement).isContentEditable) return;
+                                if (isBrowserNode && isWebMode()) return;
                                 handleNodeMouseDown(e, node.id);
                             }}
                             onDoubleClick={(e) => handleNodeDoubleClick(e, node.id)}
@@ -3103,7 +3110,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                     
                                     {/* Tab Bar */}
                                     <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', padding: '4px 4px 0 4px', gap: '4px', borderBottom: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }}
-                                         onMouseDown={(e) => handleNodeMouseDown(e, node.id)}>
+                                         onMouseDown={(e) => { if (isWebMode()) return; handleNodeMouseDown(e, node.id); }}>
                                         {node.browserTabs?.map(tab => (
                                             <div key={tab.id} 
                                                  style={{ 

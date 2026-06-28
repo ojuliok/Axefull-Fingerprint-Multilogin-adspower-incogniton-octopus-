@@ -7,8 +7,10 @@ import Topbar from './Topbar';
 import { NavbarHorizontal } from './NavbarHorizontal';
 import { FloatingDock } from './FloatingDock';
 import { MobileBottomNav } from './MobileBottomNav';
+import { X } from 'lucide-react';
 import ExtensionsModal from '../../features/Extensions/ExtensionsModal';
 import ProxiesModal from '../../features/Proxies/ProxiesModal';
+import DadosClean from '../../pages/DadosClean';
 import GlobalTaskWidget from '../../features/Tasks/GlobalTaskWidget';
 import FloatingPomodoro from '../../features/Tasks/FloatingPomodoro';
 import FloatingNotes from '../../features/Notes/FloatingNotes';
@@ -30,7 +32,24 @@ export const LayoutManager: React.FC = () => {
 
     const [showExtensions, setShowExtensions] = useState(false);
     const [showProxiesModal, setShowProxiesModal] = useState(false);
+    const [showMetaCleanModal, setShowMetaCleanModal] = useState(false);
     const [runningProfiles, setRunningProfiles] = useState<Array<{ id: string; name: string }>>([]);
+
+    useEffect(() => {
+        const handleOpenExtensions = () => setShowExtensions(true);
+        const handleOpenProxies = () => setShowProxiesModal(true);
+        const handleOpenMetaClean = () => setShowMetaCleanModal(true);
+
+        window.addEventListener('open-extensions-modal', handleOpenExtensions);
+        window.addEventListener('open-proxies-modal', handleOpenProxies);
+        window.addEventListener('open-metaclean-modal', handleOpenMetaClean);
+
+        return () => {
+            window.removeEventListener('open-extensions-modal', handleOpenExtensions);
+            window.removeEventListener('open-proxies-modal', handleOpenProxies);
+            window.removeEventListener('open-metaclean-modal', handleOpenMetaClean);
+        };
+    }, []);
 
     useEffect(() => {
         const updateActiveProfiles = async () => {
@@ -112,11 +131,6 @@ export const LayoutManager: React.FC = () => {
                             onOpenExtensions={() => setShowExtensions(true)}
                         />
                         <div className="flex flex-col flex-1 overflow-hidden relative">
-                            <Topbar 
-                                runningProfilesCount={runningProfiles.length}
-                                onOpenActiveProfiles={() => {}}
-                                onOpenProxies={() => setShowProxiesModal(true)}
-                            />
                             <main className="flex-1 overflow-hidden relative bg-theme-base">
                                 <Outlet />
                             </main>
@@ -138,11 +152,6 @@ export const LayoutManager: React.FC = () => {
                 </div>
                 
                 <div className="flex flex-col flex-1 overflow-hidden relative">
-                    <Topbar 
-                        runningProfilesCount={runningProfiles.length}
-                        onOpenActiveProfiles={() => {}}
-                        onOpenProxies={() => setShowProxiesModal(true)}
-                    />
                     <main className="flex-1 overflow-hidden relative bg-theme-surface rounded-tl-[16px]">
                         <Outlet />
                     </main>
@@ -172,6 +181,22 @@ export const LayoutManager: React.FC = () => {
             )}
             {showProxiesModal && (
                 <ProxiesModal onClose={() => setShowProxiesModal(false)} />
+            )}
+            {showMetaCleanModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[1100] p-4 animate-fade-in">
+                    <div className="bg-theme-surface border border-theme-border rounded-xl shadow-2xl w-[900px] max-w-full h-[650px] max-h-full flex flex-col overflow-hidden relative">
+                        <button 
+                            className="absolute top-4 right-4 text-theme-text-muted hover:text-theme-text transition-colors z-50 bg-theme-border/20 hover:bg-theme-border/40 p-1.5 rounded-lg"
+                            onClick={() => setShowMetaCleanModal(false)}
+                            title="Fechar MetaClean"
+                        >
+                            <X size={16} />
+                        </button>
+                        <div className="flex-1 overflow-auto p-4 pt-10">
+                            <DadosClean />
+                        </div>
+                    </div>
+                </div>
             )}
 
             <GlobalTaskWidget />

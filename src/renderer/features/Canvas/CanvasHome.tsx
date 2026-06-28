@@ -139,6 +139,25 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
     return localStorage.getItem('axe_onboarding_minimized') === 'true';
   });
 
+  const [isOnboardingDismissed, setIsOnboardingDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('axe_onboarding_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleDismissOnboarding = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOnboardingDismissed(true);
+    localStorage.setItem('axe_onboarding_dismissed', 'true');
+  }, []);
+
+  const handleShowOnboarding = useCallback(() => {
+    setIsOnboardingDismissed(false);
+    localStorage.removeItem('axe_onboarding_dismissed');
+  }, []);
+
   const toggleOnboardingMinimize = useCallback(() => {
     setIsOnboardingMinimized(prev => {
       const next = !prev;
@@ -710,46 +729,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
       {/* Content */}
       <div className={styles.content} style={{ position: 'relative', zIndex: 1 }}>
-        {/* ── Onboarding Checklist Widget ── */}
-        {!activeSpaceId && !search && !isOnboardingCompleted && (
-          <div className={styles.onboardingWidget}>
-            <div className={styles.onboardingHeader} style={{ cursor: 'pointer', userSelect: 'none' }} onClick={toggleOnboardingMinimize}>
-              <div className={styles.onboardingHeaderInfo}>
-                <h3 className={styles.onboardingTitle} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  🎯 Configuração Inicial da Operação
-                  {isOnboardingMinimized ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-                </h3>
-                {!isOnboardingMinimized && (
-                  <p className={styles.onboardingSubtitle}>Complete a trilha essencial para ativar sua contingência de anúncios e ganhar bônus de proxy.</p>
-                )}
-              </div>
-              <div className={styles.onboardingProgressContainer}>
-                <div className={styles.onboardingProgressBar}>
-                  <div className={styles.onboardingProgressFill} style={{ width: `${(completedStepsCount / onboardingSteps.length) * 100}%` }} />
-                </div>
-                <span className={styles.onboardingProgressLabel}>{completedStepsCount} de {onboardingSteps.length} concluídas</span>
-              </div>
-            </div>
 
-            {!isOnboardingMinimized && (
-              <div className={styles.onboardingStepsList}>
-                {onboardingSteps.map((step) => (
-                  <div key={step.id} className={`${styles.onboardingStepItem} ${step.done ? styles.onboardingStepDone : ''}`}>
-                    <div className={styles.onboardingStepCheck}>
-                      <div className={styles.checkboxCircle}>
-                        {step.done && <Check size={12} strokeWidth={3} className={styles.checkIcon} />}
-                      </div>
-                    </div>
-                    <div className={styles.onboardingStepText}>
-                      <span className={styles.onboardingStepLabel}>{step.label}</span>
-                      <span className={styles.onboardingStepDesc}>{step.desc}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {!activeSpaceId && (
           <CanvasSpacesGrid
@@ -1003,6 +983,63 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           }}
           onClose={() => setPinSettingsItem(null)}
         />
+      )}
+      {/* ── Onboarding Checklist Widget (Floating Pop-up) ── */}
+      {!activeSpaceId && !search && !isOnboardingCompleted && (
+        isOnboardingDismissed ? (
+          <button 
+            className={styles.onboardingTriggerFloat}
+            onClick={handleShowOnboarding}
+            title="Ver checklist de configuração inicial"
+          >
+            <span className={styles.onboardingTriggerEmoji}>🎯</span>
+            <span className={styles.onboardingTriggerBadge}>{completedStepsCount}/{onboardingSteps.length}</span>
+          </button>
+        ) : (
+          <div className={styles.onboardingWidget}>
+            <div className={styles.onboardingHeader}>
+              <div className={styles.onboardingHeaderInfo} style={{ cursor: 'pointer', userSelect: 'none' }} onClick={toggleOnboardingMinimize}>
+                <h3 className={styles.onboardingTitle} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🎯 Configuração da Operação
+                  {isOnboardingMinimized ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                </h3>
+                {!isOnboardingMinimized && (
+                  <p className={styles.onboardingSubtitle}>Complete a trilha para ativar sua contingência de anúncios.</p>
+                )}
+              </div>
+              <button className={styles.onboardingCloseBtn} onClick={handleDismissOnboarding} title="Fechar">
+                <X size={14} />
+              </button>
+            </div>
+
+            {!isOnboardingMinimized && (
+              <>
+                <div className={styles.onboardingProgressContainer}>
+                  <div className={styles.onboardingProgressBar}>
+                    <div className={styles.onboardingProgressFill} style={{ width: `${(completedStepsCount / onboardingSteps.length) * 100}%` }} />
+                  </div>
+                  <span className={styles.onboardingProgressLabel}>{completedStepsCount} de {onboardingSteps.length} concluídas</span>
+                </div>
+
+                <div className={styles.onboardingStepsList}>
+                  {onboardingSteps.map((step) => (
+                    <div key={step.id} className={`${styles.onboardingStepItem} ${step.done ? styles.onboardingStepDone : ''}`}>
+                      <div className={styles.onboardingStepCheck}>
+                        <div className={styles.checkboxCircle}>
+                          {step.done && <Check size={10} strokeWidth={3} className={styles.checkIcon} />}
+                        </div>
+                      </div>
+                      <div className={styles.onboardingStepText}>
+                        <span className={styles.onboardingStepLabel}>{step.label}</span>
+                        <span className={styles.onboardingStepDesc}>{step.desc}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )
       )}
     </div>
   );

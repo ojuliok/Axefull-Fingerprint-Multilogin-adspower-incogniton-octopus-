@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network } from 'lucide-react';
+import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network, Eraser } from 'lucide-react';
 import CreateProfileModal from '../features/Profiles/ProfileEditor/CreateProfileModal';
 import PropertiesModal from '../features/Profiles/ProfileEditor/PropertiesModal';
 import ProfileDetailModal from '../features/Profiles/ProfileDetail/ProfileDetailModal';
@@ -1166,6 +1166,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 </button>
                                 <button className={styles.megaBtn} onClick={onOpenExtensions} title="Extensões">
                                     <Puzzle size={14} /> <span className={styles.btnText}>Extensões</span>
+                                </button>
+                                <button className={styles.megaBtn} onClick={() => window.dispatchEvent(new CustomEvent('open-metaclean-modal'))} title="MetaClean">
+                                    <Eraser size={14} /> <span className={styles.btnText}>MetaClean</span>
                                 </button>
                                 <button className={styles.megaBtn} onClick={onOpenProxies} title="Proxy">
                                     <Network size={14} /> <span className={styles.btnText}>Proxy</span>

@@ -65,7 +65,7 @@ const App: React.FC = () => {
                                         <Route path="/" element={<ProtectedRoute><LayoutManager /></ProtectedRoute>}>
                                         <Route index element={<Navigate to="/home" replace />} />
                                         <Route path="home" element={<HomeW97 />} />
-                                        <Route path="profiles" element={<Dashboard onOpenExtensions={() => {}} onOpenProxies={() => {}} />} />
+                                        <Route path="profiles" element={<Dashboard onOpenExtensions={() => window.dispatchEvent(new CustomEvent('open-extensions-modal'))} onOpenProxies={() => window.dispatchEvent(new CustomEvent('open-proxies-modal'))} />} />
                                         <Route path="dadosclean" element={<DadosClean />} />
                                         <Route path="canvas" element={<CanvasPage />} />
                                         <Route path="tasks" element={<TasksView />} />

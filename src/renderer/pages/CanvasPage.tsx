@@ -1293,55 +1293,59 @@ const CanvasPage: React.FC = () => {
 
             {/* ── Main Content Area ── */}
             <div className={styles.mainContent}>
-                {/* Tabs Bar */}
+                {/* Tabs Bar with Integrated Breadcrumb */}
                 {openTabs.length > 0 && (
                     <div className={`${styles.tabBar} ${!isSidebarExpanded ? styles.tabBarCollapsed : ''}`}>
-                        {openTabs.map(tab => {
-                            const isActive = viewState === 'canvas' && activeTabId === tab.id;
-                            return (
-                                <div
-                                    key={tab.id}
-                                    className={`${styles.tabItem} ${isActive ? styles.tabItemActive : ''}`}
-                                    onClick={() => handleSelectCanvas(tab.id)}
-                                    title={tab.name}
-                                >
-                                    <span className={styles.tabIcon}>
-                                        <DynamicIcon name={tab.icon || getDefaultIconForType(tab.type)} size={12} />
-                                    </span>
-                                    <span className={styles.tabTitle}>{tab.name}</span>
-                                    <button
-                                        className={styles.tabCloseBtn}
-                                        onClick={(e) => handleCloseTab(tab.id, e)}
+                        <div className={styles.tabsList}>
+                            {openTabs.map(tab => {
+                                const isActive = viewState === 'canvas' && activeTabId === tab.id;
+                                return (
+                                    <div
+                                        key={tab.id}
+                                        className={`${styles.tabItem} ${isActive ? styles.tabItemActive : ''}`}
+                                        onClick={() => handleSelectCanvas(tab.id)}
+                                        title={tab.name}
                                     >
-                                        <X size={12} />
-                                    </button>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+                                        <span className={styles.tabIcon}>
+                                            <DynamicIcon name={tab.icon || getDefaultIconForType(tab.type)} size={12} />
+                                        </span>
+                                        <span className={styles.tabTitle}>{tab.name}</span>
+                                        <button
+                                            className={styles.tabCloseBtn}
+                                            onClick={(e) => handleCloseTab(tab.id, e)}
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
 
-                {/* Breadcrumb */}
-                {viewState === 'canvas' && navigationStack.length > 0 && (
-                    <div className={styles.breadcrumbBar}>
-                        <span
-                            className={styles.breadcrumbItem}
-                            onClick={() => handleBreadcrumbClick(-1)}
-                        >
-                            <Home size={12} />
-                        </span>
-                        <span className={styles.breadcrumbSeparator}>/</span>
-                        {navigationStack.map((nav, index) => (
-                            <React.Fragment key={nav.id}>
+                        {/* Integrated Breadcrumb */}
+                        {viewState === 'canvas' && navigationStack.length > 0 && (
+                            <div className={styles.integratedBreadcrumb}>
+                                <span className={styles.breadcrumbSeparator}>|</span>
                                 <span
-                                    className={`${styles.breadcrumbItem} ${index === navigationStack.length - 1 ? styles.active : ''}`}
-                                    onClick={() => handleBreadcrumbClick(index)}
+                                    className={styles.breadcrumbItem}
+                                    onClick={() => handleBreadcrumbClick(-1)}
+                                    title="Início"
                                 >
-                                    {nav.name}
+                                    <Home size={12} />
                                 </span>
-                                {index < navigationStack.length - 1 && <span className={styles.breadcrumbSeparator}>/</span>}
-                            </React.Fragment>
-                        ))}
+                                <span className={styles.breadcrumbSeparator}>/</span>
+                                {navigationStack.map((nav, index) => (
+                                    <React.Fragment key={nav.id}>
+                                        <span
+                                            className={`${styles.breadcrumbItem} ${index === navigationStack.length - 1 ? styles.active : ''}`}
+                                            onClick={() => handleBreadcrumbClick(index)}
+                                        >
+                                            {nav.name}
+                                        </span>
+                                        {index < navigationStack.length - 1 && <span className={styles.breadcrumbSeparator}>/</span>}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
