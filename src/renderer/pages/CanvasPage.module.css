@@ -722,19 +722,14 @@
 }
 
 .sidebarHeaderTitle {
-    font-size: 18px;
+    font-size: 13.5px;
     font-weight: 600;
-    color: #fafafa;
+    color: var(--text-primary);
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.sidebar.sidebarExpanded .sidebarHeaderTitle {
-    opacity: 1;
+    letter-spacing: 0.01em;
 }
 
 .headerActions {
@@ -1273,28 +1268,27 @@
   background: var(--bg-secondary);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   overflow-x: auto;
-  padding: 6px 12px 0;
-  height: 38px;
-  align-items: flex-end;
-  gap: 4px;
+  padding: 0 16px;
+  height: 44px;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
   z-index: 100;
   transition: padding-left 0.25s ease;
 }
 
 .tabBarCollapsed {
-  padding-left: 56px; /* Offset to prevent overlap with floating expand button */
+  padding-left: 16px;
 }
 
 .tabItem {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px;
-  border-radius: 6px 6px 0 0;
+  padding: 6px 12px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-bottom: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
   max-width: 180px;
   min-width: 90px;
@@ -1302,6 +1296,7 @@
   color: var(--text-secondary);
   transition: all 0.15s ease;
   user-select: none;
+  font-size: 12.5px;
 }
 
 .tabItem:hover {
@@ -1310,13 +1305,10 @@
 }
 
 .tabItemActive {
-  background: var(--bg-primary);
-  border-color: rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid var(--bg-primary);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
   color: var(--text-primary);
   font-weight: 500;
-  z-index: 2;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tabIcon {
@@ -1464,6 +1456,312 @@
 @keyframes slideInRightDrawer {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
+}
+
+/* ── Refactored Sidebar Search Bar ── */
+.sidebarSearchWrapper {
+  position: relative;
+  margin: 8px 14px 10px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sidebarSearchIcon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-disabled);
+  pointer-events: none;
+}
+
+.sidebarSearchInput {
+  width: 100%;
+  height: 32px;
+  padding: 0 32px 0 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.sidebarSearchInput:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.12);
+}
+
+.sidebarSearchClear {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-disabled);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.sidebarSearchClear:hover {
+  color: var(--text-primary);
+}
+
+/* ── Sidebar Segmented Tabs ── */
+.sidebarTabsWrapper {
+  margin: 0 14px 12px;
+  flex-shrink: 0;
+}
+
+.sidebarTabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.sidebarTabBtn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-disabled);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.sidebarTabBtn:hover {
+  color: var(--text-tertiary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.sidebarTabBtnActive {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Sidebar Tags Tree View ── */
+.sidebarTagsContainer {
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tagSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tagHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.015);
+  border-left: 2px solid var(--brand-primary);
+}
+
+.tagName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.tagCount {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-disabled);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 5px;
+  border-radius: 10px;
+}
+
+.tagChildren {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 8px;
+  margin-top: 2px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.tagChildItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.tagChildItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+}
+
+.tagChildItemActive {
+  background: rgba(139, 92, 246, 0.08) !important;
+  color: var(--brand-primary) !important;
+  font-weight: 500;
+}
+
+.tagChildIcon {
+  display: flex;
+  align-items: center;
+  color: var(--text-disabled);
+}
+
+.tagChildItemActive .tagChildIcon {
+  color: var(--brand-primary);
+}
+
+.tagChildName {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Tab Divider & Add button ── */
+.tabDivider {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 14px;
+  user-select: none;
+  margin: 0 4px;
+}
+
+.tabAddBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-disabled);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.tabAddBtn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Navigation & Title Subbar (Second Row) ── */
+.subBar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 0 16px;
+  height: 38px;
+  flex-shrink: 0;
+  z-index: 99;
+  position: relative;
+  transition: padding-left 0.25s ease;
+}
+
+.subBarCollapsed {
+  padding-left: 16px;
+}
+
+.navArrows {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.arrowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.arrowBtn:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.arrowBtn:disabled {
+  color: var(--text-disabled);
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Centered Breadcrumb / Title Path ── */
+.centeredBreadcrumb {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breadcrumbRootItem {
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+  font-weight: 500;
+}
+
+.breadcrumbRootItem:hover {
+  color: var(--text-primary);
+}
+
+.breadcrumbItem {
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+  font-weight: 500;
+}
+
+.breadcrumbItem:hover {
+  color: var(--text-primary);
+}
+
+.breadcrumbItem.active {
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: default;
+}
+
+.breadcrumbSeparator {
+  color: var(--text-disabled);
+  font-size: 11px;
+  user-select: none;
 }
 
 

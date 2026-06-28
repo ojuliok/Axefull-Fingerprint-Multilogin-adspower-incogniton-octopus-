@@ -45,6 +45,15 @@ interface TabItem {
 
 const CanvasPage: React.FC = () => {
     const [canvasList, setCanvasList] = useState<CanvasInfo[]>([]);
+    const uniqueTags = useMemo(() => {
+        const tagsSet = new Set<string>();
+        canvasList.forEach(c => {
+            if (c.tags) {
+                c.tags.forEach(t => tagsSet.add(t));
+            }
+        });
+        return Array.from(tagsSet).sort();
+    }, [canvasList]);
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
     // Tabs States
@@ -103,11 +112,53 @@ const CanvasPage: React.FC = () => {
         return savedTabId ? 'canvas' : 'home';
     });
     const [transitionState, setTransitionState] = useState<'none' | 'closing' | 'opening'>('none');
+    const [navHistory, setNavHistory] = useState<string[]>([]);
+    const [navHistoryIndex, setNavHistoryIndex] = useState<number>(-1);
+    const isNavigatingHistory = useRef(false);
+
+    const handleGoBackHistory = useCallback(() => {
+        if (navHistoryIndex <= 0) return;
+        const prevIndex = navHistoryIndex - 1;
+        const prevTarget = navHistory[prevIndex];
+        
+        isNavigatingHistory.current = true;
+        setNavHistoryIndex(prevIndex);
+        
+        if (prevTarget === 'home') {
+            setActiveTabId(null);
+            setNavigationStack([]);
+            setActiveCanvasData(null);
+            setViewState('home');
+        } else {
+            handleSelectCanvas(prevTarget, true);
+        }
+    }, [navHistory, navHistoryIndex, handleSelectCanvas]);
+
+    const handleGoForwardHistory = useCallback(() => {
+        if (navHistoryIndex >= navHistory.length - 1) return;
+        const nextIndex = navHistoryIndex + 1;
+        const nextTarget = navHistory[nextIndex];
+        
+        isNavigatingHistory.current = true;
+        setNavHistoryIndex(nextIndex);
+        
+        if (nextTarget === 'home') {
+            setActiveTabId(null);
+            setNavigationStack([]);
+            setActiveCanvasData(null);
+            setViewState('home');
+        } else {
+            handleSelectCanvas(nextTarget, true);
+        }
+    }, [navHistory, navHistoryIndex, handleSelectCanvas]);
+
     const [sidebarEmojiPicker, setSidebarEmojiPicker] = useState<{ x: number; y: number; canvasId: string } | null>(null);
     const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
     const [sidebarCreateMenu, setSidebarCreateMenu] = useState<{ x: number; y: number; parentId?: string } | null>(null);
     const [showCreateModal, setShowCreateModal] = useState<{ type: 'canvas' | 'folder' | 'page' | 'table' | 'space'; parentId?: string } | null>(null);
     const [createModalName, setCreateModalName] = useState('');
+    const [sidebarSearch, setSidebarSearch] = useState('');
+    const [sidebarFilterTab, setSidebarFilterTab] = useState<'folders' | 'tags'>('folders');
     
 
 
@@ -196,6 +247,29 @@ const CanvasPage: React.FC = () => {
     useEffect(() => {
         localStorage.setItem('axe_canvas_menu_mode', menuMode);
     }, [menuMode]);
+
+    // Track navigation history
+    useEffect(() => {
+        if (isNavigatingHistory.current) {
+            isNavigatingHistory.current = false;
+            return;
+        }
+        
+        const currentTarget = viewState === 'home' ? 'home' : (activeTabId || 'home');
+        
+        setNavHistory(prev => {
+            if (navHistoryIndex >= 0 && prev[navHistoryIndex] === currentTarget) {
+                return prev;
+            }
+            const newHistory = prev.slice(0, navHistoryIndex + 1);
+            newHistory.push(currentTarget);
+            
+            setTimeout(() => {
+                setNavHistoryIndex(newHistory.length - 1);
+            }, 0);
+            return newHistory;
+        });
+    }, [activeTabId, viewState]);
 
     // Auto-expand parents when active canvas changes
     useEffect(() => {
@@ -911,9 +985,17 @@ const CanvasPage: React.FC = () => {
     }, [expandedFolders, checkPinAndProceed]);
 
     const renderCanvasTree = useCallback((parentId: string | undefined = undefined, depth: number = 0) => {
+        if (sidebarSearch.trim() !== '' && parentId !== undefined) {
+            return null;
+        }
+
         const items = canvasList.filter(c => {
             if (isTrashView ? !c.isDeleted : c.isDeleted) return false;
             
+            if (sidebarSearch.trim() !== '') {
+                return c.name.toLowerCase().includes(sidebarSearch.toLowerCase().trim());
+            }
+
             if (activeFilter !== 'all') {
                 // When filtering, ignore parentId (flatten the tree) and only show matching types
                 if (activeFilter === 'canvas' && (!c.type || c.type === 'canvas')) return true;
@@ -1052,7 +1134,7 @@ const CanvasPage: React.FC = () => {
                 </div>
             );
         });
-    }, [canvasList, expandedFolders, activeCanvasId, renamingId, renameValue, isSidebarExpanded, isTrashView, handleSelectCanvas, handleContextMenu, handleConfirmRename, handleRenameKeyDown, toggleFolder, handleOpenSidebarEmojiPicker, draggedId, dragOverId, dropPosition, handleDragStart, handleDragOver, handleDragLeave, handleDrop, handleDragEnd, activeFilter]);
+    }, [canvasList, expandedFolders, activeCanvasId, renamingId, renameValue, isSidebarExpanded, isTrashView, handleSelectCanvas, handleContextMenu, handleConfirmRename, handleRenameKeyDown, toggleFolder, handleOpenSidebarEmojiPicker, draggedId, dragOverId, dropPosition, handleDragStart, handleDragOver, handleDragLeave, handleDrop, handleDragEnd, activeFilter, sidebarSearch]);
 
     return (
         <div className={styles.pageContainer}>
@@ -1078,18 +1160,37 @@ const CanvasPage: React.FC = () => {
                     />
                 )}
                 {/* Sidebar Header (ClickUp style) */}
+                {/* Sidebar Header matching Reference mockup */}
                 <div className={styles.sidebarHeader}>
-                    {isSidebarExpanded && (
-                        <div className={styles.headerActions} style={{ width: '100%', justifyContent: 'flex-end' }}>
-                            <button 
-                                className={`${styles.headerBtn} ${isCreateMenuOpen ? styles.headerBtnActive : ''}`} 
-                                onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)}
-                                title="Criar"
-                            >
-                                <Plus size={14} />
-                                <ChevronDown size={10} style={{ marginLeft: 2 }} />
-                            </button>
-                        </div>
+                    {isSidebarExpanded ? (
+                        <>
+                            <span className={styles.sidebarHeaderTitle}>Base de Conhecimento</span>
+                            <div className={styles.headerActions}>
+                                <button 
+                                    className={`${styles.headerBtn} ${isCreateMenuOpen ? styles.headerBtnActive : ''}`} 
+                                    onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)}
+                                    title="Criar novo item"
+                                >
+                                    <Plus size={14} />
+                                </button>
+                                <button 
+                                    className={styles.headerBtn}
+                                    onClick={() => setMenuMode('collapsed')}
+                                    title="Recolher menu lateral"
+                                >
+                                    <ChevronLeft size={14} />
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <button 
+                            className={styles.headerBtn}
+                            onClick={() => setMenuMode('expanded')}
+                            title="Expandir menu lateral"
+                            style={{ margin: '0 auto' }}
+                        >
+                            <Menu size={14} />
+                        </button>
                     )}
                 </div>
 
@@ -1123,6 +1224,48 @@ const CanvasPage: React.FC = () => {
                     </>
                 )}
 
+                {/* Search Bar matching Reference mockup */}
+                {isSidebarExpanded && (
+                    <div className={styles.sidebarSearchWrapper}>
+                        <Search size={14} className={styles.sidebarSearchIcon} />
+                        <input
+                            type="text"
+                            placeholder="Buscar..."
+                            className={styles.sidebarSearchInput}
+                            value={sidebarSearch}
+                            onChange={(e) => setSidebarSearch(e.target.value)}
+                        />
+                        {sidebarSearch && (
+                            <button 
+                                className={styles.sidebarSearchClear}
+                                onClick={() => setSidebarSearch('')}
+                            >
+                                <X size={12} />
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Filter Tabs (Folders / Tags) matching Reference mockup */}
+                {isSidebarExpanded && (
+                    <div className={styles.sidebarTabsWrapper}>
+                        <div className={styles.sidebarTabs}>
+                            <button
+                                className={`${styles.sidebarTabBtn} ${sidebarFilterTab === 'folders' ? styles.sidebarTabBtnActive : ''}`}
+                                onClick={() => setSidebarFilterTab('folders')}
+                            >
+                                Pastas
+                            </button>
+                            <button
+                                className={`${styles.sidebarTabBtn} ${sidebarFilterTab === 'tags' ? styles.sidebarTabBtnActive : ''}`}
+                                onClick={() => setSidebarFilterTab('tags')}
+                            >
+                                Tags
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Top Nav Links */}
                 <div className={styles.sidebarTop}>
                     <button
@@ -1137,146 +1280,182 @@ const CanvasPage: React.FC = () => {
                         <MessageSquare size={14} />
                         {isSidebarExpanded && <span>Caixa de entrada</span>}
                     </button>
-
                 </div>
 
                 <div className={styles.sidebarDivider} />
 
-                {/* Dynamic Sections */}
+                {/* Dynamic Sections / Tree / Tags View */}
                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto' }}>
-                    {sectionOrder.map((sectionId, idx) => {
-                        if (sectionId === 'favorites') {
-                            const favs = canvasList.filter(c => c.isFavorite && !c.isDeleted);
-                            if (favs.length === 0) return null; // Auto-hide empty favorites
-
-                            return (
-                                <div 
-                                    key="favorites"
-                                    className={styles.sidebarList} 
-                                    draggable 
-                                    onDragStart={(e) => handleSectionDragStart(e, 'favorites')}
-                                    onDragOver={(e) => handleSectionDragOver(e, 'favorites')}
-                                    onDragEnd={handleSectionDragEnd}
-                                    style={{ flex: 'none', paddingBottom: 0 }}
-                                >
-                                    {isSidebarExpanded && (
-                                        <div className={`${styles.sectionHeader} ${styles.draggableSectionHeader}`}>
-                                            <span className={styles.sidebarSectionTitle}>Favoritos</span>
-                                        </div>
-                                    )}
-                                    {favs.map(canvas => (
-                                        <div
-                                            key={`fav-${canvas.id}`}
-                                            className={`${styles.treeNode}`}
-                                            onClick={() => handleSelectCanvas(canvas.id)}
-                                            onContextMenu={(e) => handleContextMenu(e, canvas.id)}
-                                        >
-                                            <div className={`${styles.canvasItem} ${activeCanvasId === canvas.id ? styles.active : ''}`} style={{ paddingLeft: '20px' }} title={canvas.name}>
-                                                <span className={styles.canvasItemIcon}>
-                                                    <DynamicIcon name={canvas.icon || getDefaultIconForType(canvas.type)} size={14} />
-                                                </span>
-                                                {isSidebarExpanded && <span className={styles.canvasItemName}>{canvas.name}</span>}
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <div className={styles.sidebarDivider} style={{ margin: '8px 12px 0' }} />
+                    {isSidebarExpanded && sidebarFilterTab === 'tags' ? (
+                        <div className={styles.sidebarTagsContainer}>
+                            {uniqueTags.length === 0 ? (
+                                <div className={styles.sidebarEmpty} style={{ textAlign: 'center', marginTop: '16px' }}>
+                                    Nenhuma tag criada
                                 </div>
-                            );
-                        }
-
-                        if (sectionId === 'spaces') {
-                            return (
-                                <div 
-                                    key="spaces"
-                                    className={styles.sidebarList}
-                                    draggable 
-                                    onDragStart={(e) => handleSectionDragStart(e, 'spaces')}
-                                    onDragOver={(e) => handleSectionDragOver(e, 'spaces')}
-                                    onDragEnd={handleSectionDragEnd}
-                                >
-                                    {isSidebarExpanded && (
-                                        <div className={`${styles.sectionHeader} ${styles.draggableSectionHeader}`}>
-                                            <span className={styles.sidebarSectionTitle}>Espaços</span>
-                                            <div className={styles.filterBarHorizontal} style={{ marginLeft: 'auto', marginRight: '4px' }}>
-                                                <button 
-                                                    className={`${styles.filterBtn} ${activeFilter === 'all' ? styles.active : ''}`}
-                                                    onClick={() => setActiveFilter('all')}
-                                                    title="Todos"
-                                                >
-                                                    <Search size={11} />
-                                                </button>
-                                                <button 
-                                                    className={`${styles.filterBtn} ${activeFilter === 'page' ? styles.active : ''}`}
-                                                    onClick={() => setActiveFilter('page')}
-                                                    title="Páginas"
-                                                >
-                                                    <FileText size={11} />
-                                                </button>
-                                                <button 
-                                                    className={`${styles.filterBtn} ${activeFilter === 'canvas' ? styles.active : ''}`}
-                                                    onClick={() => setActiveFilter('canvas')}
-                                                    title="Canvas"
-                                                >
-                                                    <LayoutDashboard size={11} />
-                                                </button>
-                                                <button 
-                                                    className={`${styles.filterBtn} ${activeFilter === 'table' ? styles.active : ''}`}
-                                                    onClick={() => setActiveFilter('table')}
-                                                    title="Tabelas"
-                                                >
-                                                    <KanbanSquare size={11} />
-                                                </button>
+                            ) : (
+                                uniqueTags.map(tag => {
+                                    const itemsWithTag = canvasList.filter(c => c.tags?.includes(tag) && !c.isDeleted);
+                                    if (itemsWithTag.length === 0) return null;
+                                    return (
+                                        <div key={tag} className={styles.tagSection}>
+                                            <div className={styles.tagHeader}>
+                                                <span className={styles.tagName}>#{tag}</span>
+                                                <span className={styles.tagCount}>{itemsWithTag.length}</span>
                                             </div>
-                                            <button className={styles.sectionAddBtn} onClick={(e) => {
-                                                e.stopPropagation();
-                                                setShowCreateModal({ type: 'space' });
-                                                setCreateModalName('');
-                                            }} title="Novo Espaço">
-                                                <Plus size={12} />
-                                            </button>
+                                            <div className={styles.tagChildren}>
+                                                {itemsWithTag.map(item => (
+                                                    <div 
+                                                        key={item.id} 
+                                                        className={`${styles.tagChildItem} ${activeCanvasId === item.id ? styles.tagChildItemActive : ''}`} 
+                                                        onClick={() => handleSelectCanvas(item.id)}
+                                                    >
+                                                        <span className={styles.tagChildIcon}>
+                                                            <DynamicIcon name={item.icon || getDefaultIconForType(item.type)} size={12} />
+                                                        </span>
+                                                        <span className={styles.tagChildName}>{item.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    )}
-                                    {renderCanvasTree(undefined, 0)}
+                                    );
+                                })
+                            )}
+                        </div>
+                    ) : (
+                        sectionOrder.map((sectionId, idx) => {
+                            if (sectionId === 'favorites') {
+                                const favs = canvasList.filter(c => c.isFavorite && !c.isDeleted);
+                                if (favs.length === 0) return null; // Auto-hide empty favorites
 
-                                    {canvasList.filter(c => !c.isDeleted && !c.parentId).length === 0 && isSidebarExpanded && (
-                                        <div className={styles.sidebarEmpty}>
-                                            Nenhum espaço criado
-                                        </div>
-                                    )}
-                                    
-                                    {isSidebarExpanded && (
-                                        <div style={{ padding: '8px 14px' }}>
-                                            <button 
-                                                className={styles.sidebarBtn} 
-                                                style={{ width: '100%', padding: '6px 8px', color: 'var(--text-secondary)' }}
-                                                onClick={(e) => { 
+                                return (
+                                    <div 
+                                        key="favorites"
+                                        className={styles.sidebarList} 
+                                        draggable 
+                                        onDragStart={(e) => handleSectionDragStart(e, 'favorites')}
+                                        onDragOver={(e) => handleSectionDragOver(e, 'favorites')}
+                                        onDragEnd={handleSectionDragEnd}
+                                        style={{ flex: 'none', paddingBottom: 0 }}
+                                    >
+                                        {isSidebarExpanded && (
+                                            <div className={`${styles.sectionHeader} ${styles.draggableSectionHeader}`}>
+                                                <span className={styles.sidebarSectionTitle}>Favoritos</span>
+                                            </div>
+                                        )}
+                                        {favs.map(canvas => (
+                                            <div
+                                                key={`fav-${canvas.id}`}
+                                                className={`${styles.treeNode}`}
+                                                onClick={() => handleSelectCanvas(canvas.id)}
+                                                onContextMenu={(e) => handleContextMenu(e, canvas.id)}
+                                            >
+                                                <div className={`${styles.canvasItem} ${activeCanvasId === canvas.id ? styles.active : ''}`} style={{ paddingLeft: '20px' }} title={canvas.name}>
+                                                    <span className={styles.canvasItemIcon}>
+                                                        <DynamicIcon name={canvas.icon || getDefaultIconForType(canvas.type)} size={14} />
+                                                    </span>
+                                                    {isSidebarExpanded && <span className={styles.canvasItemName}>{canvas.name}</span>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className={styles.sidebarDivider} style={{ margin: '8px 12px 0' }} />
+                                    </div>
+                                );
+                            }
+
+                            if (sectionId === 'spaces') {
+                                return (
+                                    <div 
+                                        key="spaces"
+                                        className={styles.sidebarList}
+                                        draggable 
+                                        onDragStart={(e) => handleSectionDragStart(e, 'spaces')}
+                                        onDragOver={(e) => handleSectionDragOver(e, 'spaces')}
+                                        onDragEnd={handleSectionDragEnd}
+                                    >
+                                        {isSidebarExpanded && (
+                                            <div className={`${styles.sectionHeader} ${styles.draggableSectionHeader}`}>
+                                                <span className={styles.sidebarSectionTitle}>Espaços</span>
+                                                <div className={styles.filterBarHorizontal} style={{ marginLeft: 'auto', marginRight: '4px' }}>
+                                                    <button 
+                                                        className={`${styles.filterBtn} ${activeFilter === 'all' ? styles.active : ''}`}
+                                                        onClick={() => setActiveFilter('all')}
+                                                        title="Todos"
+                                                    >
+                                                        <Search size={11} />
+                                                    </button>
+                                                    <button 
+                                                        className={`${styles.filterBtn} ${activeFilter === 'page' ? styles.active : ''}`}
+                                                        onClick={() => setActiveFilter('page')}
+                                                        title="Páginas"
+                                                    >
+                                                        <FileText size={11} />
+                                                    </button>
+                                                    <button 
+                                                        className={`${styles.filterBtn} ${activeFilter === 'canvas' ? styles.active : ''}`}
+                                                        onClick={() => setActiveFilter('canvas')}
+                                                        title="Canvas"
+                                                    >
+                                                        <LayoutDashboard size={11} />
+                                                    </button>
+                                                    <button 
+                                                        className={`${styles.filterBtn} ${activeFilter === 'table' ? styles.active : ''}`}
+                                                        onClick={() => setActiveFilter('table')}
+                                                        title="Tabelas"
+                                                    >
+                                                        <KanbanSquare size={11} />
+                                                    </button>
+                                                </div>
+                                                <button className={styles.sectionAddBtn} onClick={(e) => {
                                                     e.stopPropagation();
                                                     setShowCreateModal({ type: 'space' });
                                                     setCreateModalName('');
-                                                }}
-                                            >
-                                                <Plus size={14} /> 
-                                                Novo Espaço
-                                            </button>
-                                            <button 
-                                                className={styles.sidebarBtn} 
-                                                style={{ width: '100%', padding: '6px 8px', color: 'var(--text-secondary)', marginTop: '4px' }}
-                                                onClick={(e) => { 
-                                                    e.stopPropagation();
-                                                    const rect = e.currentTarget.getBoundingClientRect();
-                                                    setSidebarCreateMenu({ x: rect.left + 16, y: rect.bottom + 4, parentId: undefined });
-                                                }}
-                                            >
-                                                <Plus size={14} /> 
-                                                Novo Objeto
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        }
-                        return null;
-                    })}
+                                                }} title="Novo Espaço">
+                                                    <Plus size={12} />
+                                                </button>
+                                            </div>
+                                        )}
+                                        {renderCanvasTree(undefined, 0)}
+
+                                        {canvasList.filter(c => !c.isDeleted && !c.parentId).length === 0 && isSidebarExpanded && (
+                                            <div className={styles.sidebarEmpty}>
+                                                Nenhum espaço criado
+                                            </div>
+                                        )}
+                                        
+                                        {isSidebarExpanded && (
+                                            <div style={{ padding: '8px 14px' }}>
+                                                <button 
+                                                    className={styles.sidebarBtn} 
+                                                    style={{ width: '100%', padding: '6px 8px', color: 'var(--text-secondary)' }}
+                                                    onClick={(e) => { 
+                                                        e.stopPropagation();
+                                                        setShowCreateModal({ type: 'space' });
+                                                        setCreateModalName('');
+                                                    }}
+                                                >
+                                                    <Plus size={14} /> 
+                                                    Novo Espaço
+                                                </button>
+                                                <button 
+                                                    className={styles.sidebarBtn} 
+                                                    style={{ width: '100%', padding: '6px 8px', color: 'var(--text-secondary)', marginTop: '4px' }}
+                                                    onClick={(e) => { 
+                                                        e.stopPropagation();
+                                                        const rect = e.currentTarget.getBoundingClientRect();
+                                                        setSidebarCreateMenu({ x: rect.left + 16, y: rect.bottom + 4, parentId: undefined });
+                                                    }}
+                                                >
+                                                    <Plus size={14} /> 
+                                                    Novo Objeto
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })
+                    )}
                 </div>
 
                 {/* Bottom Actions */}
@@ -1294,78 +1473,101 @@ const CanvasPage: React.FC = () => {
 
             {/* ── Main Content Area ── */}
             <div className={styles.mainContent}>
-                {/* Tabs Bar with Integrated Breadcrumb */}
-                {openTabs.length > 0 && (
-                    <div className={`${styles.tabBar} ${!isSidebarExpanded ? styles.tabBarCollapsed : ''}`}>
-                        {/* Integrated Breadcrumb & Sidebar Toggle (Left) */}
-                        <div className={styles.integratedBreadcrumb}>
-                            {/* Sidebar Toggle Button */}
-                            <button
-                                className={styles.sidebarToggleBtn}
-                                onClick={() => setMenuMode(prev => prev === 'expanded' ? 'collapsed' : 'expanded')}
-                                title={isSidebarExpanded ? "Recolher menu lateral" : "Abrir menu lateral"}
-                            >
-                                {isSidebarExpanded ? <ChevronLeft size={13} /> : <Menu size={13} />}
-                            </button>
+                {/* ── Tabs Bar & Navigation (Mockup matching) ── */}
+                <div className={`${styles.tabBar} ${!isSidebarExpanded ? styles.tabBarCollapsed : ''}`}>
+                    {/* Sidebar Toggle Button */}
+                    <button
+                        className={styles.sidebarToggleBtn}
+                        onClick={() => setMenuMode(prev => prev === 'expanded' ? 'collapsed' : 'expanded')}
+                        title={isSidebarExpanded ? "Recolher menu lateral" : "Abrir menu lateral"}
+                    >
+                        {isSidebarExpanded ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+                    </button>
 
-                            {/* Home / Início Button with highlight */}
-                            <button
-                                className={`${styles.homeBreadcrumbBtn} ${viewState === 'home' ? styles.homeBreadcrumbBtnActive : ''}`}
-                                onClick={() => handleBreadcrumbClick(-1)}
-                                title="Área principal / Início"
-                            >
-                                <Home size={12} className={styles.homeIcon} />
-                                <span className={styles.homeText}>Início</span>
-                            </button>
+                    <span className={styles.tabDivider}>|</span>
 
-                            {/* Breadcrumb Path (only if viewState is 'canvas' and there's a navigation path) */}
-                            {viewState === 'canvas' && navigationStack.length > 0 && (
-                                <>
-                                    <span className={styles.breadcrumbSeparator}>/</span>
-                                    {navigationStack.map((nav, index) => (
-                                        <React.Fragment key={nav.id}>
-                                            <span
-                                                className={`${styles.breadcrumbItem} ${index === navigationStack.length - 1 ? styles.active : ''}`}
-                                                onClick={() => handleBreadcrumbClick(index)}
-                                            >
-                                                {nav.name}
-                                            </span>
-                                            {index < navigationStack.length - 1 && <span className={styles.breadcrumbSeparator}>/</span>}
-                                        </React.Fragment>
-                                    ))}
-                                </>
-                            )}
-                            
-                            <span className={styles.breadcrumbSeparator}>|</span>
-                        </div>
-
-                        {/* Tabs List (Right of Breadcrumb) */}
-                        <div className={styles.tabsList}>
-                            {openTabs.map(tab => {
-                                const isActive = viewState === 'canvas' && activeTabId === tab.id;
-                                return (
-                                    <div
-                                        key={tab.id}
-                                        className={`${styles.tabItem} ${isActive ? styles.tabItemActive : ''}`}
-                                        onClick={() => handleSelectCanvas(tab.id)}
-                                        title={tab.name}
+                    {/* Tabs List */}
+                    <div className={styles.tabsList}>
+                        {openTabs.map(tab => {
+                            const isActive = viewState === 'canvas' && activeTabId === tab.id;
+                            return (
+                                <div
+                                    key={tab.id}
+                                    className={`${styles.tabItem} ${isActive ? styles.tabItemActive : ''}`}
+                                    onClick={() => handleSelectCanvas(tab.id)}
+                                    title={tab.name}
+                                >
+                                    <span className={styles.tabTitle}>{tab.name}</span>
+                                    <button
+                                        className={styles.tabCloseBtn}
+                                        onClick={(e) => handleCloseTab(tab.id, e)}
                                     >
-                                        <span className={styles.tabIcon}>
-                                            <DynamicIcon name={tab.icon || getDefaultIconForType(tab.type)} size={12} />
-                                        </span>
-                                        <span className={styles.tabTitle}>{tab.name}</span>
-                                        <button
-                                            className={styles.tabCloseBtn}
-                                            onClick={(e) => handleCloseTab(tab.id, e)}
-                                        >
-                                            <X size={12} />
-                                        </button>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            );
+                        })}
+                        {/* New Tab Button (+) */}
+                        <button
+                            className={styles.tabAddBtn}
+                            onClick={() => {
+                                setShowCreateModal({ type: 'page' });
+                                setCreateModalName('');
+                            }}
+                            title="Nova página"
+                        >
+                            <Plus size={14} />
+                        </button>
                     </div>
-                )}
+                </div>
+
+                {/* ── Subbar with Navigation Arrows & Centered Breadcrumb ── */}
+                <div className={`${styles.subBar} ${!isSidebarExpanded ? styles.subBarCollapsed : ''}`}>
+                    {/* Navigation Arrows */}
+                    <div className={styles.navArrows}>
+                        <button
+                            className={styles.arrowBtn}
+                            onClick={handleGoBackHistory}
+                            disabled={navHistoryIndex <= 0}
+                            title="Voltar"
+                        >
+                            <ChevronLeft size={14} />
+                        </button>
+                        <button
+                            className={styles.arrowBtn}
+                            onClick={handleGoForwardHistory}
+                            disabled={navHistoryIndex >= navHistory.length - 1}
+                            title="Avançar"
+                        >
+                            <ChevronRight size={14} />
+                        </button>
+                    </div>
+
+                    {/* Centered Breadcrumb / Title Path */}
+                    <div className={styles.centeredBreadcrumb}>
+                        <span 
+                            className={styles.breadcrumbItem}
+                            onClick={() => handleBreadcrumbClick(-1)}
+                        >
+                            Início
+                        </span>
+                        {viewState === 'canvas' && navigationStack.length > 0 && (
+                            <>
+                                {navigationStack.map((nav, index) => (
+                                    <React.Fragment key={nav.id}>
+                                        <span className={styles.breadcrumbSeparator}>/</span>
+                                        <span
+                                            className={`${styles.breadcrumbItem} ${index === navigationStack.length - 1 ? styles.active : ''}`}
+                                            onClick={() => handleBreadcrumbClick(index)}
+                                        >
+                                            {nav.name}
+                                        </span>
+                                    </React.Fragment>
+                                ))}
+                            </>
+                        )}
+                    </div>
+                </div>
 
                 {viewState === 'home' ? (
                     <CanvasHome
