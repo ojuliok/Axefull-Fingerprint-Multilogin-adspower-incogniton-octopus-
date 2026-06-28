@@ -116,41 +116,6 @@ const CanvasPage: React.FC = () => {
     const [navHistoryIndex, setNavHistoryIndex] = useState<number>(-1);
     const isNavigatingHistory = useRef(false);
 
-    const handleGoBackHistory = useCallback(() => {
-        if (navHistoryIndex <= 0) return;
-        const prevIndex = navHistoryIndex - 1;
-        const prevTarget = navHistory[prevIndex];
-        
-        isNavigatingHistory.current = true;
-        setNavHistoryIndex(prevIndex);
-        
-        if (prevTarget === 'home') {
-            setActiveTabId(null);
-            setNavigationStack([]);
-            setActiveCanvasData(null);
-            setViewState('home');
-        } else {
-            handleSelectCanvas(prevTarget, true);
-        }
-    }, [navHistory, navHistoryIndex, handleSelectCanvas]);
-
-    const handleGoForwardHistory = useCallback(() => {
-        if (navHistoryIndex >= navHistory.length - 1) return;
-        const nextIndex = navHistoryIndex + 1;
-        const nextTarget = navHistory[nextIndex];
-        
-        isNavigatingHistory.current = true;
-        setNavHistoryIndex(nextIndex);
-        
-        if (nextTarget === 'home') {
-            setActiveTabId(null);
-            setNavigationStack([]);
-            setActiveCanvasData(null);
-            setViewState('home');
-        } else {
-            handleSelectCanvas(nextTarget, true);
-        }
-    }, [navHistory, navHistoryIndex, handleSelectCanvas]);
 
     const [sidebarEmojiPicker, setSidebarEmojiPicker] = useState<{ x: number; y: number; canvasId: string } | null>(null);
     const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
@@ -605,6 +570,42 @@ const CanvasPage: React.FC = () => {
             }
         });
     }, [canvasList, checkPinAndProceed]);
+
+    const handleGoBackHistory = useCallback(() => {
+        if (navHistoryIndex <= 0) return;
+        const prevIndex = navHistoryIndex - 1;
+        const prevTarget = navHistory[prevIndex];
+        
+        isNavigatingHistory.current = true;
+        setNavHistoryIndex(prevIndex);
+        
+        if (prevTarget === 'home') {
+            setActiveTabId(null);
+            setNavigationStack([]);
+            setActiveCanvasData(null);
+            setViewState('home');
+        } else {
+            handleSelectCanvas(prevTarget, true);
+        }
+    }, [navHistory, navHistoryIndex, handleSelectCanvas]);
+
+    const handleGoForwardHistory = useCallback(() => {
+        if (navHistoryIndex >= navHistory.length - 1) return;
+        const nextIndex = navHistoryIndex + 1;
+        const nextTarget = navHistory[nextIndex];
+        
+        isNavigatingHistory.current = true;
+        setNavHistoryIndex(nextIndex);
+        
+        if (nextTarget === 'home') {
+            setActiveTabId(null);
+            setNavigationStack([]);
+            setActiveCanvasData(null);
+            setViewState('home');
+        } else {
+            handleSelectCanvas(nextTarget, true);
+        }
+    }, [navHistory, navHistoryIndex, handleSelectCanvas]);
 
     const handleGoHome = useCallback(() => {
         // Do not touch openTabs, just de-activate the active tab and go home
