@@ -9,6 +9,7 @@ import TasksCalendarTimeline from './TasksCalendarTimeline';
 import TasksCalendarMonthView from './TasksCalendarMonthView';
 import TasksKanbanView from './TasksKanbanView';
 import CustomDatePicker from './CustomDatePicker';
+import CreateTaskCalendarModal from './CreateTaskCalendarModal';
 import { usePomodoro } from '../../../context/PomodoroContext';
 
 const TasksView: React.FC = () => {
@@ -25,6 +26,10 @@ const TasksView: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth > 768);
     const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     const [contextMenu, setContextMenu] = useState<{ type: 'task' | 'space', id: string, x: number, y: number } | null>(null);
+
+    const [isCreateCalendarOpen, setIsCreateCalendarOpen] = useState(false);
+    const [calendarCreateDate, setCalendarCreateDate] = useState<Date>(new Date());
+    const [calendarCreateHour, setCalendarCreateHour] = useState<number | undefined>(undefined);
 
     const [isCreatingInline, setIsCreatingInline] = useState(false);
     const [inlineTaskTitle, setInlineTaskTitle] = useState('');
@@ -62,12 +67,37 @@ const TasksView: React.FC = () => {
     } = usePomodoro();
 
     useEffect(() => {
+        // Load initial local data
         setTasks(getTasksData());
         const loadedSpaces = getTasksSpaces();
         setSpaces(loadedSpaces);
         if (loadedSpaces.length > 0) {
             setActiveSpaceId(loadedSpaces[0].id);
         }
+
+        // Sync from Supabase asynchronously
+        import('./tasksStorage').then(async (storage) => {
+            const syncedTasks = await storage.syncTasksFromSupabase();
+            const syncedSpaces = await storage.syncTaskSpacesFromSupabase();
+            setTasks(syncedTasks);
+            setSpaces(syncedSpaces);
+            if (syncedSpaces.length > 0) {
+                const spaceIds = syncedSpaces.map(s => s.id);
+                setActiveSpaceId(prev => spaceIds.includes(prev) ? prev : syncedSpaces[0].id);
+            }
+        });
+    }, []);
+
+    // Listen for switch-tasks-tab event
+    useEffect(() => {
+        const handleSwitchTab = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            if (customEvent.detail === 'timeline') {
+                setActiveTab('timeline');
+            }
+        };
+        window.addEventListener('switch-tasks-tab', handleSwitchTab);
+        return () => window.removeEventListener('switch-tasks-tab', handleSwitchTab);
     }, []);
 
     useEffect(() => {
@@ -129,26 +159,34 @@ const TasksView: React.FC = () => {
     };
 
     const handleCreateTaskFromCalendar = (date: Date, hour?: number) => {
-        setPromptDialog({
-            isOpen: true,
-            title: hour !== undefined ? `Nova tarefa para ${format(date, 'dd/MM/yyyy')} às ${hour}h` : `Nova tarefa para ${format(date, 'dd/MM/yyyy')}`,
-            placeholder: 'Digite o nome da tarefa...',
-            defaultValue: '',
-            onSubmit: (title) => {
-                const targetSpace = activeSpaceId === 'all' ? (spaces[0]?.id || 'default') : activeSpaceId;
-                const newTask = createTask(title, targetSpace, date.getTime(), 'todo');
-                
-                if (hour !== undefined) {
-                    const startTime = `${hour.toString().padStart(2, '0')}:00`;
-                    const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
-                    newTask.startTime = startTime;
-                    newTask.endTime = endTime;
-                    import('./tasksStorage').then(m => m.updateTask(newTask.id, { startTime, endTime }));
-                }
-                
-                setTasks(prev => [...prev, newTask]);
-            }
-        });
+        setCalendarCreateDate(date);
+        setCalendarCreateHour(hour);
+        setIsCreateCalendarOpen(true);
+    };
+
+    const handleSaveCalendarItem = (data: {
+        title: string;
+        type: 'task' | 'event';
+        date: Date;
+        startTime: string;
+        endTime: string;
+        description: string;
+        guests: string[];
+        spaceId: string;
+    }) => {
+        const newTask = createTask(
+            data.title, 
+            data.spaceId, 
+            data.date.getTime(), 
+            'todo',
+            data.type,
+            data.description,
+            data.startTime,
+            data.endTime,
+            data.guests
+        );
+        setTasks(prev => [...prev, newTask]);
+        setIsCreateCalendarOpen(false);
     };
 
     const handleNext = () => {
@@ -820,6 +858,16 @@ const TasksView: React.FC = () => {
                     onUpdate={handleUpdateTaskTime}
                 />
             )}
+
+            <CreateTaskCalendarModal
+                isOpen={isCreateCalendarOpen}
+                initialDate={calendarCreateDate}
+                initialHour={calendarCreateHour}
+                spaces={spaces}
+                activeSpaceId={activeSpaceId}
+                onClose={() => setIsCreateCalendarOpen(false)}
+                onSave={handleSaveCalendarItem}
+            />
 
             {promptDialog && promptDialog.isOpen && (
                 <PromptModal 

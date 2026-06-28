@@ -13,6 +13,7 @@ import ProxiesPage from './pages/ProxiesPage';
 import SettingsPage from './pages/SettingsPage';
 import CanvasPage from './pages/CanvasPage';
 import TasksView from './features/Tasks/Tasks/TasksView';
+import AgendaView from './features/Tasks/Tasks/AgendaView';
 import LoginPage from './pages/LoginPage';
 import SalesPage from './pages/SalesPage';
 import DownloadPage from './pages/DownloadPage';
@@ -69,6 +70,7 @@ const App: React.FC = () => {
                                         <Route path="dadosclean" element={<DadosClean />} />
                                         <Route path="canvas" element={<CanvasPage />} />
                                         <Route path="tasks" element={<TasksView />} />
+                                        <Route path="agenda" element={<AgendaView />} />
                                         <Route path="settings" element={<SettingsPage />} />
                                         <Route path="download" element={<DownloadPage />} />
                                         <Route path="vitrine" element={<VitrinePage />} />

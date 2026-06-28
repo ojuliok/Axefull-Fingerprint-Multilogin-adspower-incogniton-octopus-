@@ -21,7 +21,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentView, o
     return (
         <div className="md:hidden flex items-center justify-around w-full h-[64px] border-t shrink-0 z-50 pb-safe backdrop-blur-xl bg-theme-surface/80 border-theme-border/50">
             {ITEMS.map(item => {
-                const isActive = currentView === item.id;
+                const isActive = currentView === item.id || (item.id === 'tasks' && currentView === 'agenda');
                 const Icon = item.icon;
                 return (
                     <button

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
     LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home, StickyNote, PanelLeftClose, PanelLeftOpen,
-    Sun, Moon, Bell, ChevronDown, ChevronUp, Plus, Cloud, Database, LogOut, Check, Globe
+    Sun, Moon, Bell, ChevronDown, ChevronUp, Plus, Cloud, Database, LogOut, Check, Globe, Calendar as CalendarIcon, List as ListIcon
 } from 'lucide-react';
 
 import { useTheme, Theme } from '../../context/ThemeContext';
@@ -56,6 +56,26 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
     const [showThemeMenu, setShowThemeMenu] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [ajustesHovered, setAjustesHovered] = useState(false);
+    const [isCalendarSpinning, setIsCalendarSpinning] = useState(false);
+    const [isAgendaSpinning, setIsAgendaSpinning] = useState(false);
+
+    const handleCalendarClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsCalendarSpinning(true);
+        setTimeout(() => setIsCalendarSpinning(false), 700);
+        
+        onViewChange('tasks');
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('switch-tasks-tab', { detail: 'timeline' }));
+        }, 100);
+    };
+
+    const handleAgendaClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsAgendaSpinning(true);
+        setTimeout(() => setIsAgendaSpinning(false), 700);
+        onViewChange('agenda');
+    };
 
     const hoverTimeoutRef = useRef<any>(null);
 
@@ -168,58 +188,97 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                         const item = ALL_ITEMS[key];
                         if (!item) return null;
 
-                        const isActive = currentView === item.id;
+                        const isTasksFamilyActive = (item.id === 'tasks' && (currentView === 'tasks' || currentView === 'agenda'));
+                        const isBtnActive = currentView === item.id || isTasksFamilyActive;
                         const IconComponent = item.icon;
                         const isDragging = draggedItem === item.id;
 
                     return (
-                        <button
-                            key={item.id}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, item.id)}
-                            onDragOver={(e) => handleDragOver(e, item.id)}
-                            onDrop={handleDrop}
-                            onDragEnd={handleDragEnd}
-                            onClick={() => {
-                                if (isActive) {
-                                    if (item.id === 'canvas') {
-                                        window.dispatchEvent(new CustomEvent('toggle-canvas-sidebar'));
-                                    } else if (item.id === 'tasks') {
-                                        window.dispatchEvent(new CustomEvent('toggle-tasks-sidebar'));
+                        <React.Fragment key={item.id}>
+                            <button
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, item.id)}
+                                onDragOver={(e) => handleDragOver(e, item.id)}
+                                onDrop={handleDrop}
+                                onDragEnd={handleDragEnd}
+                                onClick={() => {
+                                    if (isBtnActive) {
+                                        if (item.id === 'canvas') {
+                                            window.dispatchEvent(new CustomEvent('toggle-canvas-sidebar'));
+                                        } else if (item.id === 'tasks') {
+                                            window.dispatchEvent(new CustomEvent('toggle-tasks-sidebar'));
+                                        }
+                                    } else {
+                                        onViewChange(item.id);
                                     }
-                                } else {
-                                    onViewChange(item.id);
-                                }
-                            }}
-                            className={`
-                                flex rounded-lg transition-all relative group
-                                ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-3' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}
-                                ${isDragging ? 'opacity-30' : 'opacity-100'}
-                                ${isActive ? 'bg-theme-card shadow-sm text-theme-text' : 'text-theme-text-muted hover:bg-theme-border'}
-                            `}
-                        >
-                            {/* Destaque lateral moderno para item ativo com glow premium */}
-                            {isActive && (
-                                <>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-primary)]/10 to-transparent rounded-lg pointer-events-none" />
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-[var(--brand-primary)] rounded-r-md shadow-[0_0_10px_var(--brand-primary)]" />
-                                </>
-                            )}
+                                }}
+                                className={`
+                                    flex rounded-lg transition-all relative group
+                                    ${isSplitPanel ? 'w-full flex-row items-center justify-start gap-3 px-3.5 py-3' : 'w-full flex-col items-center justify-center gap-1 py-2.5'}
+                                    ${isDragging ? 'opacity-30' : 'opacity-100'}
+                                    ${isBtnActive ? 'bg-theme-card shadow-sm text-theme-text' : 'text-theme-text-muted hover:bg-theme-border'}
+                                `}
+                            >
+                                {/* Destaque lateral moderno para item ativo com glow premium */}
+                                {isBtnActive && (
+                                    <>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-primary)]/10 to-transparent rounded-lg pointer-events-none" />
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-[var(--brand-primary)] rounded-r-md shadow-[0_0_10px_var(--brand-primary)]" />
+                                    </>
+                                )}
 
-                            <div className="relative flex items-center justify-center shrink-0">
-                                <IconComponent 
-                                    size={isSplitPanel ? 18 : 20} 
-                                    strokeWidth={isActive ? 2.5 : 2} 
-                                    className={`relative z-10 transition-transform duration-200
-                                        ${isActive ? item.colorClass : 'group-hover:scale-105 group-hover:text-theme-text'}
-                                    `} 
-                                />
-                            </div>
-                            {/* Fonte super minimalista */}
-                            <span className={`tracking-tight transition-colors ${isSplitPanel ? 'text-xs' : 'text-[9px]'} ${isActive ? 'font-bold' : 'font-medium'}`}>
-                                {item.label}
-                            </span>
-                        </button>
+                                <div className="relative flex items-center justify-center shrink-0">
+                                    <IconComponent 
+                                        size={isSplitPanel ? 18 : 20} 
+                                        strokeWidth={isBtnActive ? 2.5 : 2} 
+                                        className={`relative z-10 transition-transform duration-200
+                                            ${isBtnActive ? (item.id === 'tasks' ? 'rotate-360-icon ' + item.colorClass : item.colorClass) : 'group-hover:scale-105 group-hover:text-theme-text'}
+                                        `} 
+                                    />
+                                </div>
+                                {/* Fonte super minimalista */}
+                                <span className={`tracking-tight transition-colors ${isSplitPanel ? 'text-xs' : 'text-[9px]'} ${isBtnActive ? 'font-bold' : 'font-medium'}`}>
+                                    {item.label}
+                                </span>
+                            </button>
+
+                            {/* Submenu de Tarefas com efeito de giro no calendário */}
+                            {item.id === 'tasks' && isTasksFamilyActive && (
+                                <div className={`flex flex-col gap-1 w-full ${isSplitPanel ? 'pl-6' : 'items-center'} transition-all duration-300 animate-slide-down`}>
+                                    <button
+                                        onClick={handleCalendarClick}
+                                        className={`
+                                            flex rounded-lg transition-all relative group items-center
+                                            ${isSplitPanel ? 'w-full flex-row gap-3 px-3 py-2' : 'w-10 h-10 justify-center'}
+                                            text-theme-text-muted hover:bg-theme-border/50 hover:text-theme-text
+                                        `}
+                                        title="Calendário"
+                                    >
+                                        <CalendarIcon 
+                                            size={15} 
+                                            className={`transition-transform duration-500 ${isCalendarSpinning ? 'animate-spin-once' : 'group-hover:rotate-12'}`} 
+                                        />
+                                        {isSplitPanel && <span className="text-[11px] font-medium">Calendário</span>}
+                                    </button>
+
+                                    <button
+                                        onClick={handleAgendaClick}
+                                        className={`
+                                            flex rounded-lg transition-all relative group items-center
+                                            ${isSplitPanel ? 'w-full flex-row gap-3 px-3 py-2' : 'w-10 h-10 justify-center'}
+                                            ${currentView === 'agenda' ? 'bg-theme-card text-[var(--brand-primary)] font-bold' : 'text-theme-text-muted hover:bg-theme-border/50 hover:text-theme-text'}
+                                        `}
+                                        title="Visualizar Agenda"
+                                    >
+                                        <ListIcon 
+                                            size={15} 
+                                            className={`transition-transform duration-500 ${isAgendaSpinning ? 'animate-spin-once' : 'group-hover:scale-110'}`} 
+                                        />
+                                        {isSplitPanel && <span className="text-[11px] font-medium">Agenda</span>}
+                                    </button>
+                                </div>
+                            )}
+                        </React.Fragment>
                     );
                 })}
             </nav>
