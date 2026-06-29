@@ -14,7 +14,7 @@ const statusConfig: Record<ProfileStatus, { label: string; color: string; bgColo
     running: { label: 'RUNNING', color: 'text-blue-400', bgColor: 'bg-blue-500/20', dotColor: 'bg-blue-500' },
     banned: { label: 'BANNED', color: 'text-red-400', bgColor: 'bg-red-500/20', dotColor: 'bg-red-500' },
     warning: { label: 'WARNING', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20', dotColor: 'bg-yellow-500' },
-    new: { label: 'NEW', color: 'text-purple-400', bgColor: 'bg-purple-500/20', dotColor: 'bg-purple-500' },
+    new: { label: 'NEW', color: 'text-blue-400', bgColor: 'bg-blue-500/20', dotColor: 'bg-blue-500' },
     farming: { label: 'FARMING', color: 'text-orange-400', bgColor: 'bg-orange-500/20', dotColor: 'bg-orange-500' },
 };
 

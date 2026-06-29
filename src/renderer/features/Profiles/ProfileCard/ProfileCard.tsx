@@ -84,7 +84,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
             {/* Header */}
             <div className="flex items-start gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500/20 to-purple-500/20 flex items-center justify-center text-2xl">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500/20 to-blue-500/20 flex items-center justify-center text-2xl">
                     {getPlatformIcon()}
                 </div>
                 <div className="flex-1 min-w-0">

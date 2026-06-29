@@ -1039,7 +1039,7 @@ export const HomeW97: React.FC = () => {
           onDoubleClick={() => navigate('/profiles')}
         >
           <div className="w-10 h-10 flex items-center justify-center bg-gray-300 rounded border border-gray-400 p-1 shadow-sm">
-            <Monitor size={32} className="text-purple-600" />
+            <Monitor size={32} className="text-blue-600" />
           </div>
           <span className={styles.iconLabel}>Axefull &gt;</span>
         </div>
@@ -1091,7 +1091,7 @@ export const HomeW97: React.FC = () => {
           }}
           onDoubleClick={() => openWindow('neuralNetwork')}
         >
-          <Network size={32} strokeWidth={1.5} className="text-purple-400 animate-pulse-slow" />
+          <Network size={32} strokeWidth={1.5} className="text-blue-400 animate-pulse-slow" />
           <span className={styles.iconLabel}>Rede Neural</span>
         </div>
 
@@ -1278,7 +1278,7 @@ export const HomeW97: React.FC = () => {
           </div>
           <div className={styles.windowBody}>
             <div className="flex gap-4 items-start">
-              <Monitor size={48} className="text-purple-600" />
+              <Monitor size={48} className="text-blue-600" />
               <div>
                 <h2 className="text-sm font-bold">Axe Vault Browser — Space OS 97</h2>
                 <div className="text-[10px] text-gray-700 mt-1">Versão 1.0.0 (Build 9726)</div>
@@ -1403,7 +1403,7 @@ export const HomeW97: React.FC = () => {
                   }}
                   onDoubleClick={() => handleDocumentItemClick(p.id)}
                 >
-                  <User size={18} className="text-purple-500" />
+                  <User size={18} className="text-blue-500" />
                   <div className="flex flex-col">
                     <span className="font-bold text-[11px] truncate max-w-[150px]">{p.name}</span>
                     <span className="text-[9px] text-gray-500">Perfil de Navegação</span>
@@ -1550,7 +1550,7 @@ export const HomeW97: React.FC = () => {
                     <div className="flex items-center gap-1.5">
                       {selectedNode.type === 'canvas' && <Layers size={14} className="text-amber-500" />}
                       {selectedNode.type === 'task' && <CheckSquare size={14} className="text-blue-500" />}
-                      {selectedNode.type === 'profile' && <User size={14} className="text-purple-500" />}
+                      {selectedNode.type === 'profile' && <User size={14} className="text-blue-500" />}
                       {selectedNode.type === 'document' && <FileText size={14} className="text-emerald-500" />}
                       <span className="font-bold text-gray-900 break-all">{selectedNode.label}</span>
                     </div>
@@ -1579,7 +1579,7 @@ export const HomeW97: React.FC = () => {
                               className="p-1 hover:bg-gray-200 cursor-pointer rounded border border-gray-300 bg-gray-100 flex flex-col"
                             >
                               <span className="font-bold text-[9px] text-gray-800 truncate">{item.node?.label}</span>
-                              <span className="text-[8px] text-purple-600">{item.reason}</span>
+                              <span className="text-[8px] text-blue-600">{item.reason}</span>
                             </div>
                           ))}
                         </div>
@@ -1722,7 +1722,7 @@ export const HomeW97: React.FC = () => {
                 className={`${styles.taskbarTab} ${styles.outset} ${isActive ? styles.taskbarTabActive : ''}`}
                 style={isMobile ? { maxWidth: '32px', minWidth: '32px', justifyContent: 'center', padding: '2px' } : undefined}
               >
-                {win.id === 'neuralNetwork' && <Network size={12} className="text-purple-600" />}
+                {win.id === 'neuralNetwork' && <Network size={12} className="text-blue-600" />}
                 {win.id === 'documents' && <FolderOpen size={12} className="text-yellow-600" />}
                 {win.id === 'systemAbout' && <Monitor size={12} className="text-blue-600" />}
                 {win.id === 'notes' && <FileText size={12} className="text-yellow-600" />}
@@ -1748,7 +1748,7 @@ export const HomeW97: React.FC = () => {
           </div>
           <div className={styles.startMenuItems}>
             <div className={styles.startMenuItem} onClick={() => { navigate('/profiles'); setStartMenuOpen(false); }}>
-              <User size={14} className="text-purple-600" />
+              <User size={14} className="text-blue-600" />
               <span>Multi Perfis</span>
             </div>
             <div className={styles.startMenuItem} onClick={() => { navigate('/canvas'); setStartMenuOpen(false); }}>
@@ -1767,7 +1767,7 @@ export const HomeW97: React.FC = () => {
             <div className={styles.startMenuDivider} />
 
             <div className={styles.startMenuItem} onClick={() => openWindow('neuralNetwork')}>
-              <Network size={14} className="text-purple-500" />
+              <Network size={14} className="text-blue-500" />
               <span>Rede de Conexões</span>
             </div>
             <div className={styles.startMenuItem} onClick={() => openWindow('documents')}>
