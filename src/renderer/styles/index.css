@@ -11,13 +11,13 @@
 /* ---- CSS Variables ---- */
 :root {
   /* Brand Colors */
-  --brand-primary: #8B5CF6;
-  --brand-primary-light: #A78BFA;
-  --brand-primary-dark: #6D28D9;
-  --brand-secondary: #3B82F6;
-  --brand-secondary-light: #60A5FA;
-  --brand-accent: #EC4899;
-  --brand-accent-light: #F472B6;
+  --brand-primary: #3B82F6;
+  --brand-primary-light: #60A5FA;
+  --brand-primary-dark: #2563EB;
+  --brand-secondary: #0EA5E9;
+  --brand-secondary-light: #38BDF8;
+  --brand-accent: #3B82F6;
+  --brand-accent-light: #60A5FA;
 
   /* Semantic Colors */
   --success: #10B981;
@@ -54,7 +54,7 @@
   /* Borders */
   --border-default: var(--bg-secondary);
   --border-hover: var(--bg-secondary);
-  --border-focus: rgba(139, 92, 246, 0.5);
+  --border-focus: rgba(59, 130, 246, 0.5);
   --border-error: var(--danger);
 
   /* Shadows */
@@ -62,8 +62,8 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.6);
   --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.25);
-  --shadow-glow-sm: 0 0 12px rgba(139, 92, 246, 0.15);
+  --shadow-glow: 0 0 24px rgba(59, 130, 246, 0.25);
+  --shadow-glow-sm: 0 0 12px rgba(59, 130, 246, 0.15);
 
   /* Spacing */
   --space-xs: 4px;
