@@ -188,6 +188,14 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
     catch { return true; }
   });
 
+  const toggleCreateSpace = useCallback(() => {
+    setShowCreateSpace(prev => {
+      const next = !prev;
+      localStorage.setItem('axe_canvas_show_create_space', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const [layoutMode, setLayoutMode] = useState<'right' | 'left' | 'bottom' | 'full-main' | 'full-side'>(() => {
     try { return localStorage.getItem('axe_canvas_layout_mode') as any || 'right'; }
     catch { return 'right'; }
