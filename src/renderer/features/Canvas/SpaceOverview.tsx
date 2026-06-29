@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CanvasInfo, CanvasData, getCanvasData, saveCanvasData } from './canvasStorage';
+import { CanvasInfo, CanvasData, getCanvasData, saveCanvasData, getCachedCanvasData } from './canvasStorage';
 import InfiniteCanvas from './InfiniteCanvas';
 import CanvasRichText from './CanvasRichText';
 import { Tag, Plus, X, List, LayoutDashboard, Settings } from 'lucide-react';
@@ -20,7 +20,15 @@ const SpaceOverview: React.FC<SpaceOverviewProps> = ({ activeSpace, onUpdate }) 
 
     useEffect(() => {
         if (mode === 'canvas') {
-            getCanvasData(activeSpace.id).then(data => setCanvasData(data));
+            const cached = getCachedCanvasData(activeSpace.id);
+            if (cached) {
+                setCanvasData(cached);
+            } else {
+                setCanvasData(null);
+            }
+            getCanvasData(activeSpace.id).then(data => {
+                if (data) setCanvasData(data);
+            });
         }
     }, [activeSpace.id, mode]);
 

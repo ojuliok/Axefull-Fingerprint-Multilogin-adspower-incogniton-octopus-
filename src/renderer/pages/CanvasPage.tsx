@@ -14,7 +14,7 @@ import {
     softDeleteCanvas, restoreCanvas, updateCanvasInfo,
     duplicateCanvas, getCanvasData, flushPendingSave,
     exportBackupData, importBackupData, exportCanvas, importCanvas,
-    createFolder, moveCanvasItem
+    createFolder, moveCanvasItem, getCachedCanvasData
 } from '../features/Canvas/canvasStorage';
 import InfiniteCanvas from '../features/Canvas/InfiniteCanvas';
 import CanvasHome from '../features/Canvas/CanvasHome';
@@ -158,7 +158,9 @@ const CanvasPage: React.FC = () => {
 
         const getFirstLockedAncestor = (canvasId: string): CanvasInfo | null => {
             let current = canvasList.find(c => c.id === canvasId);
-            while (current) {
+            const visited = new Set<string>();
+            while (current && !visited.has(current.id)) {
+                visited.add(current.id);
                 const pinVal = current.properties?.pin;
                 if (pinVal && !unlockedItemsRef.current.has(current.id)) {
                     return current;
@@ -244,9 +246,11 @@ const CanvasPage: React.FC = () => {
                 let currentId = activeCanvasId;
                 let canvas = canvasList.find(c => c.id === currentId);
                 let added = false;
+                const visited = new Set<string>();
                 
                 // Traverse up the parent chain
-                while (canvas && canvas.parentId) {
+                while (canvas && canvas.parentId && !visited.has(canvas.parentId)) {
+                    visited.add(canvas.parentId);
                     if (!next.has(canvas.parentId)) {
                         next.add(canvas.parentId);
                         added = true;
@@ -303,9 +307,17 @@ const CanvasPage: React.FC = () => {
         if (activeCanvasId) {
             const canvas = canvasList.find(c => c.id === activeCanvasId);
             if (canvas && (canvas.type === 'canvas' || !canvas.type)) {
+                // SWR Cache optimization
+                const cached = getCachedCanvasData(activeCanvasId);
+                if (cached) {
+                    setActiveCanvasData(cached);
+                } else {
+                    setActiveCanvasData(null);
+                }
+
                 getCanvasData(activeCanvasId).then(data => {
-                    if (!cancelled) {
-                        setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    if (!cancelled && data) {
+                        setActiveCanvasData(data);
                     }
                 }).catch(err => {
                     if (!cancelled) {

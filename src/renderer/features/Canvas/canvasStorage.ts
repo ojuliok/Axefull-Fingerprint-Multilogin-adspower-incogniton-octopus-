@@ -388,15 +388,24 @@ export async function duplicateCanvas(id: string, workspaceId: string, ownerId: 
     }
 }
 
-// ── Canvas Data Operations ──
+// In-memory cache for canvas data to allow instantaneous loading (SWR)
+const canvasDataCache: Record<string, CanvasData> = {};
+
+export function getCachedCanvasData(id: string): CanvasData | null {
+    return canvasDataCache[id] || null;
+}
 
 export async function getCanvasData(id: string): Promise<CanvasData | null> {
     if (getStorageMode() === 'offline') {
         const origDataStr = localStorage.getItem(`axe_offline_canvas_data_${id}`);
         if (origDataStr) {
-            return JSON.parse(origDataStr);
+            const data = JSON.parse(origDataStr);
+            canvasDataCache[id] = data;
+            return data;
         }
-        return { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+        const defaultData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+        canvasDataCache[id] = defaultData;
+        return defaultData;
     }
 
     const cleanId = sanitizeUUID(id);
@@ -406,9 +415,13 @@ export async function getCanvasData(id: string): Promise<CanvasData | null> {
         if (error) throw error;
         
         if (data && data.data) {
-            return data.data as CanvasData;
+            const canvasData = data.data as CanvasData;
+            canvasDataCache[id] = canvasData;
+            return canvasData;
         }
-        return { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+        const defaultData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+        canvasDataCache[id] = defaultData;
+        return defaultData;
     } catch (err) {
         console.error('Error fetching canvas data', err);
         return null;
@@ -416,6 +429,7 @@ export async function getCanvasData(id: string): Promise<CanvasData | null> {
 }
 
 export async function saveCanvasData(id: string, data: CanvasData): Promise<void> {
+    canvasDataCache[id] = data;
     if (getStorageMode() === 'offline') {
         localStorage.setItem(`axe_offline_canvas_data_${id}`, JSON.stringify(data));
         const offlineCanvases = localStorage.getItem('axe_offline_canvases');
