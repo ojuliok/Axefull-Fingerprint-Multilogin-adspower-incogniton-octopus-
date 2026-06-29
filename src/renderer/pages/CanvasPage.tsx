@@ -536,11 +536,15 @@ const CanvasPage: React.FC = () => {
             // Restore navigation stack
             setOpenTabs(currentTabs => {
                 const existingTab = currentTabs.find(t => t.id === id);
-                if (existingTab) {
-                    setNavigationStack(existingTab.navigationStack || [{ id, name: canvas.name }]);
-                } else {
-                    setNavigationStack([{ id, name: canvas.name }]);
-                }
+                setTimeout(() => {
+                    if (existingTab) {
+                        setNavigationStack(existingTab.navigationStack || [{ id, name: canvas.name }]);
+                    } else {
+                        setNavigationStack([{ id, name: canvas.name }]);
+                    }
+                    setActiveCanvasData({ nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    setViewState('canvas');
+                }, 0);
                 return currentTabs;
             });
 
@@ -647,20 +651,22 @@ const CanvasPage: React.FC = () => {
             
             // If the closed tab was the active one, we need to choose a new active tab
             if (activeTabId === tabId) {
-                if (nextTabs.length > 0) {
-                    // Try to activate the tab next to the closed one, or the last one
-                    const closedIndex = prev.findIndex(t => t.id === tabId);
-                    const newActiveIndex = Math.min(closedIndex, nextTabs.length - 1);
-                    const nextActiveTab = nextTabs[newActiveIndex];
-                    
-                    setActiveTabId(nextActiveTab.id);
-                    setNavigationStack(nextActiveTab.navigationStack);
-                    setViewState('canvas');
-                } else {
-                    setActiveTabId(null);
-                    setNavigationStack([]);
-                    setViewState('home');
-                }
+                setTimeout(() => {
+                    if (nextTabs.length > 0) {
+                        // Try to activate the tab next to the closed one, or the last one
+                        const closedIndex = prev.findIndex(t => t.id === tabId);
+                        const newActiveIndex = Math.min(closedIndex, nextTabs.length - 1);
+                        const nextActiveTab = nextTabs[newActiveIndex];
+                        
+                        setActiveTabId(nextActiveTab.id);
+                        setNavigationStack(nextActiveTab.navigationStack);
+                        setViewState('canvas');
+                    } else {
+                        setActiveTabId(null);
+                        setNavigationStack([]);
+                        setViewState('home');
+                    }
+                }, 0);
             }
             
             return nextTabs;
@@ -1534,6 +1540,9 @@ const CanvasPage: React.FC = () => {
                                     onClick={() => handleSelectCanvas(tab.id)}
                                     title={tab.name}
                                 >
+                                    <span className={styles.tabIcon} style={{ display: 'flex', alignItems: 'center', opacity: 0.7, marginRight: 6 }}>
+                                        <DynamicIcon name={tab.icon || getDefaultIconForType(tab.type)} size={12} />
+                                    </span>
                                     <span className={styles.tabTitle}>{tab.name}</span>
                                     <button
                                         className={styles.tabCloseBtn}
