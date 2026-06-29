@@ -445,10 +445,26 @@ export function debouncedSaveCanvasData(id: string, data: CanvasData, delay = 50
     if (saveTimers[id]) {
         clearTimeout(saveTimers[id]);
     }
+    // Store the pending data so it can be flushed
+    pendingSaveData[id] = data;
     saveTimers[id] = setTimeout(() => {
         saveCanvasData(id, data);
         delete saveTimers[id];
+        delete pendingSaveData[id];
     }, delay);
+}
+
+const pendingSaveData: Record<string, CanvasData> = {};
+
+export function flushPendingSave(id: string): void {
+    if (saveTimers[id]) {
+        clearTimeout(saveTimers[id]);
+        delete saveTimers[id];
+    }
+    if (pendingSaveData[id]) {
+        saveCanvasData(id, pendingSaveData[id]);
+        delete pendingSaveData[id];
+    }
 }
 
 // Vault methods are disabled/placeholder for now since we use Supabase

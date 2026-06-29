@@ -28,7 +28,6 @@
 
 .sidebar.sidebarExpanded {
     /* Width is controlled via inline styles dynamically */
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
 }
 
 .sidebarExpandFloat {
@@ -355,6 +354,56 @@
 .treeChildren {
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+.treeChildrenConnected {
+    margin-left: 18px;
+    padding-left: 10px;
+    border-left: 1.5px solid rgba(139, 92, 246, 0.15);
+}
+
+.treeChildrenConnected > .treeNode::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 16px;
+    width: 10px;
+    height: 1.5px;
+    background: rgba(139, 92, 246, 0.15);
+}
+
+.treeChildrenConnected > .treeNode {
+    position: relative;
+}
+
+.treeChildrenConnected > .treeNode:last-child::after {
+    content: '';
+    position: absolute;
+    left: -11.5px;
+    top: 16px;
+    bottom: 0;
+    width: 2px;
+    background: var(--bg-secondary);
+}
+
+.addItemRow {
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.addItemRow:hover {
+    opacity: 1;
+}
+
+.spaceNodeRoot {
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+.spaceNodeRoot:first-child {
+    margin-top: 0;
 }
 
 .folderToggle {

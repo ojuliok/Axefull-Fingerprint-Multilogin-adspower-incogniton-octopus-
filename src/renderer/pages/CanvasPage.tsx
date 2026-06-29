@@ -12,7 +12,7 @@ import {
     CanvasInfo, CanvasData,
     getCanvasList, createCanvas, deleteCanvas, renameCanvas,
     softDeleteCanvas, restoreCanvas, updateCanvasInfo,
-    duplicateCanvas, getCanvasData,
+    duplicateCanvas, getCanvasData, flushPendingSave,
     exportBackupData, importBackupData, exportCanvas, importCanvas,
     createFolder, moveCanvasItem
 } from '../features/Canvas/canvasStorage';
@@ -140,7 +140,7 @@ const CanvasPage: React.FC = () => {
     });
     const [draggedSection, setDraggedSection] = useState<'favorites' | 'spaces' | null>(null);
 
-    const [activeFilter, setActiveFilter] = useState<'all' | 'page' | 'canvas' | 'table'>('all');
+    const [activeFilter, setActiveFilter] = useState<'all' | 'page' | 'canvas' | 'table' | 'folder'>('all');
 
     // Security PIN States
     const [unlockedItems, setUnlockedItems] = useState<Set<string>>(new Set());
@@ -299,34 +299,46 @@ const CanvasPage: React.FC = () => {
 
     // Load active canvas data when activeCanvasId changes
     useEffect(() => {
+        let cancelled = false;
         if (activeCanvasId) {
             const canvas = canvasList.find(c => c.id === activeCanvasId);
             if (canvas && (canvas.type === 'canvas' || !canvas.type)) {
                 getCanvasData(activeCanvasId).then(data => {
-                    setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    if (!cancelled) {
+                        setActiveCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    }
                 }).catch(err => {
-                    console.error("Error loading active canvas data:", err);
+                    if (!cancelled) {
+                        console.error("Error loading active canvas data:", err);
+                    }
                 });
             }
         } else {
             setActiveCanvasData(null);
         }
+        return () => { cancelled = true; };
     }, [activeCanvasId, canvasList]);
 
     // Load preview canvas data when previewItemId changes
     useEffect(() => {
+        let cancelled = false;
         if (previewItemId) {
             const canvas = canvasList.find(c => c.id === previewItemId);
             if (canvas && (canvas.type === 'canvas' || !canvas.type)) {
                 getCanvasData(previewItemId).then(data => {
-                    setPreviewCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    if (!cancelled) {
+                        setPreviewCanvasData(data || { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    }
                 }).catch(err => {
-                    console.error("Error loading preview canvas data:", err);
+                    if (!cancelled) {
+                        console.error("Error loading preview canvas data:", err);
+                    }
                 });
             }
         } else {
             setPreviewCanvasData(null);
         }
+        return () => { cancelled = true; };
     }, [previewItemId, canvasList]);
 
     // Listen for toggle-canvas-sidebar event from MobileBottomNav
@@ -495,6 +507,10 @@ const CanvasPage: React.FC = () => {
     }, []);
 
     const handleSelectCanvas = useCallback(async (id: string, skipClosing = false) => {
+        // Flush any pending debounced save for the current canvas before switching
+        if (activeTabId && activeTabId !== id) {
+            flushPendingSave(activeTabId);
+        }
         checkPinAndProceed(id, async () => {
             const canvas = canvasList.find(c => c.id === id);
             if (!canvas) return;
@@ -569,7 +585,7 @@ const CanvasPage: React.FC = () => {
                 }, 400);
             }
         });
-    }, [canvasList, checkPinAndProceed]);
+    }, [canvasList, checkPinAndProceed, activeTabId]);
 
     const handleGoBackHistory = useCallback(() => {
         if (navHistoryIndex <= 0) return;
@@ -1000,6 +1016,7 @@ const CanvasPage: React.FC = () => {
             if (activeFilter !== 'all') {
                 // When filtering, ignore parentId (flatten the tree) and only show matching types
                 if (activeFilter === 'canvas' && (!c.type || c.type === 'canvas')) return true;
+                if (activeFilter === 'folder' && (c.type === 'folder' || c.type === 'space')) return true;
                 if (activeFilter === c.type) return true;
                 return false;
             }
@@ -1033,10 +1050,12 @@ const CanvasPage: React.FC = () => {
                               canvas.type === 'space' ? '161, 161, 170' : // Cinza Neutro / Preto leve
                               '250, 204, 21';                             // Amarelo (Folders)
 
+            const isSpace = canvas.type === 'space';
+
             return (
                 <div 
                     key={canvas.id} 
-                    className={`${styles.treeNode} ${isDragged ? styles.draggedNode : ''} ${depth === 0 ? styles.spaceNode : ''}`}
+                    className={`${styles.treeNode} ${isDragged ? styles.draggedNode : ''} ${depth === 0 ? styles.spaceNode : ''} ${isSpace ? styles.spaceNodeRoot : ''}`}
                     draggable={!isTrashView}
                     onDragStart={(e) => handleDragStart(e, canvas.id)}
                     onDragOver={(e) => handleDragOver(e, canvas.id, isFolder)}
@@ -1111,11 +1130,11 @@ const CanvasPage: React.FC = () => {
                     </div>
 
                     {((hasChildren && isFolderExpanded) || isFolderExpanded) && isSidebarExpanded && (
-                        <div className={styles.treeChildren}>
+                        <div className={`${styles.treeChildren} ${styles.treeChildrenConnected}`} style={{ '--tree-depth': depth } as React.CSSProperties}>
                             {renderCanvasTree(canvas.id, depth + 1)}
                             <div 
-                                className={styles.canvasItem} 
-                                style={{ paddingLeft: `${(depth + 1) * 12 + 8}px`, opacity: 0.7, cursor: 'pointer' }}
+                                className={`${styles.canvasItem} ${styles.addItemRow}`} 
+                                style={{ paddingLeft: `${(depth + 1) * 12 + 8}px` }}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     const rect = e.currentTarget.getBoundingClientRect();
@@ -1125,10 +1144,10 @@ const CanvasPage: React.FC = () => {
                                 <div className={styles.chevronWrapper}>
                                     <div className={styles.folderTogglePlaceholder} />
                                 </div>
-                                <span className={styles.canvasItemIcon} style={{ background: 'transparent' }}>
-                                    <Plus size={14} />
+                                <span className={styles.canvasItemIcon} style={{ background: 'transparent', color: 'var(--text-disabled)' }}>
+                                    <Plus size={12} />
                                 </span>
-                                <span className={styles.canvasItemName} style={{ fontSize: '11px' }}>Novo Item</span>
+                                <span className={styles.canvasItemName} style={{ fontSize: '11px', color: 'var(--text-disabled)' }}>Novo Item</span>
                             </div>
                         </div>
                     )}
@@ -1397,6 +1416,13 @@ const CanvasPage: React.FC = () => {
                                                         title="Canvas"
                                                     >
                                                         <LayoutDashboard size={11} />
+                                                    </button>
+                                                    <button 
+                                                        className={`${styles.filterBtn} ${activeFilter === 'folder' ? styles.active : ''}`}
+                                                        onClick={() => setActiveFilter('folder')}
+                                                        title="Pastas e Espaços"
+                                                    >
+                                                        <Folder size={11} />
                                                     </button>
                                                     <button 
                                                         className={`${styles.filterBtn} ${activeFilter === 'table' ? styles.active : ''}`}
