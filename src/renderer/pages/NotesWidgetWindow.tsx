@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { GripHorizontal, X, StickyNote } from 'lucide-react';
 import { ThemeProvider } from '../context/ThemeContext';
 
+declare global {
+  interface Window {
+    electron: any;
+  }
+}
+
 const NotesWidgetWindow: React.FC = () => {
     // Basic state for the standalone widget
     const [notes, setNotes] = useState<any[]>([]);

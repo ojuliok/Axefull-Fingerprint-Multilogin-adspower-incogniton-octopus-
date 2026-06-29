@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreHorizontal, Layers, Folder, Plus } from 'lucide-react';
+import { MoreHorizontal, Layers, Folder, Plus, Eye, EyeOff } from 'lucide-react';
 import { CanvasInfo } from '../canvasStorage';
 import { DynamicIcon, getDefaultIconForType } from '../CanvasIcons';
 import styles from './CanvasSpaces.module.css';
@@ -22,6 +22,8 @@ interface CanvasSpacesGridProps {
   commitDescEdit: () => void;
   startDescEdit: (id: string, desc: string) => void;
   onCreateSpace?: () => void;
+  showCreateSpace?: boolean;
+  onToggleCreateSpace?: () => void;
 }
 
 export const CanvasSpacesGrid: React.FC<CanvasSpacesGridProps> = ({
@@ -30,14 +32,27 @@ export const CanvasSpacesGrid: React.FC<CanvasSpacesGridProps> = ({
   setActivePreviewId, onSelectCanvas, handleContextMenu, openEmojiPicker,
   getChildCount,
   editingDescId, descValue, setDescValue, commitDescEdit, startDescEdit,
-  onCreateSpace
+  onCreateSpace,
+  showCreateSpace,
+  onToggleCreateSpace
 }) => {
 
   return (
     <div style={{ marginBottom: '32px' }}>
-      <h2 className={styles.sectionTitle}>
-        <Folder size={18} /> Meus Espaços
-      </h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h2 className={styles.sectionTitle} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Folder size={18} /> Meus Espaços
+        </h2>
+        {onToggleCreateSpace && (
+          <button 
+            onClick={onToggleCreateSpace}
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            title={showCreateSpace !== false ? "Ocultar Criar Espaço" : "Mostrar Criar Espaço"}
+          >
+            {showCreateSpace !== false ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        )}
+      </div>
       <div className={styles.spacesGrid}>
         {spaces.map((space) => {
           const childCount = getChildCount(space.id);
@@ -154,7 +169,7 @@ export const CanvasSpacesGrid: React.FC<CanvasSpacesGridProps> = ({
         })}
 
         {/* Card for creating a new space directly in the grid */}
-        {onCreateSpace && (
+        {onCreateSpace && showCreateSpace !== false && (
           <div className={styles.createFolderCard} onClick={onCreateSpace}>
             <div className={styles.createFolderTab}></div>
             <div className={styles.createFolderBody}>

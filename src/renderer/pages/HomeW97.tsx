@@ -26,7 +26,6 @@ import { useWorkspace } from '../context/WorkspaceContext';
 import { getCanvasList, CanvasInfo } from '../features/Canvas/canvasStorage';
 import { getTasksData, TaskData, createTask, updateTask } from '../features/Tasks/Tasks/tasksStorage';
 import styles from './HomeW97.module.css';
-import logoImg from '../logo.png';
 
 // ─── TYPES FOR RETRO WINDOW SYSTEM ───────────────────
 interface RetroWindow {
@@ -84,7 +83,7 @@ const MOCK_DOCUMENTS = [
     id: 'doc-3',
     name: 'Ideias_Campanha_Marketing.txt',
     type: 'document',
-    content: 'Ideias de marketing: Focar em agências de tráfego pago, automação de tarefas repetitivas e facilidade de gerenciar múltiplos perfis de redes sociais (Facebook, Instagram, Google) sem sofrer shadowban.',
+    content: 'Ideias de marketing: Focar em agências de tráfego pago, automação de tarefas repetitivas e facilidade de gerenciar múltiplos perfis de redes sociais (Facebook, Instagram, Google) sem shadowban.',
     tags: ['marketing', 'redes-sociais', 'automação'],
     createdAt: Date.now() - 1000 * 60 * 60 * 24 * 1
   }
@@ -108,7 +107,17 @@ export const HomeW97: React.FC = () => {
   }, []);
 
   // ─── STATE FOR SYSTEM BOOT SCREEN ────────────────────
-  const [booting, setBooting] = useState(true);
+  const [bootConfigEnabled, setBootConfigEnabled] = useState(() => {
+    return localStorage.getItem('axe_boot_enabled') !== 'false';
+  });
+  const [bootConfigDuration, setBootConfigDuration] = useState(() => {
+    const val = localStorage.getItem('axe_boot_duration');
+    return val ? parseFloat(val) : 0.3;
+  });
+
+  const [booting, setBooting] = useState(() => {
+    return localStorage.getItem('axe_boot_enabled') !== 'false';
+  });
   const [bootProgress, setBootProgress] = useState(0);
   const [bootLogs, setBootLogs] = useState<string[]>([]);
 
@@ -265,16 +274,16 @@ export const HomeW97: React.FC = () => {
     }
   };
 
-  const handleToggleTask = (taskId: string) => {
+    const handleToggleTask = (taskId: string) => {
     const updatedTasks = tasks.map(t => {
       if (t.id === taskId) {
-        const nextStatus = t.status === 'done' ? 'todo' : 'done';
+        const nextStatus = (t.status === 'done' ? 'todo' : 'done') as any; // Cast as any or TaskStatus
         updateTask(t.id, { status: nextStatus });
         return { ...t, status: nextStatus };
       }
       return t;
     });
-    setTasks(updatedTasks);
+    setTasks(updatedTasks as any[]);
   };
 
   const handleAddTask = (title: string) => {
@@ -297,6 +306,16 @@ export const HomeW97: React.FC = () => {
     saveRetroNotes(updated);
     setActiveRetroNoteId(newNote.id);
     openWindow('notes');
+  };
+
+  const handleToggleBootConfig = (enabled: boolean) => {
+    setBootConfigEnabled(enabled);
+    localStorage.setItem('axe_boot_enabled', String(enabled));
+  };
+
+  const handleUpdateBootDuration = (duration: number) => {
+    setBootConfigDuration(duration);
+    localStorage.setItem('axe_boot_duration', String(duration));
   };
 
   // ─── NEURAL GRAPH STATE ──────────────────────────────
@@ -323,6 +342,8 @@ export const HomeW97: React.FC = () => {
 
   // ─── BOOT BIOS EMULATION ANIMATION ───────────────────
   useEffect(() => {
+    if (!booting) return;
+
     const logs = [
       'AxeVault v1.0.0 BIOS v4.97...',
       'CPU: Antigravity Multi-Core 3.5 GHz...',
@@ -335,6 +356,10 @@ export const HomeW97: React.FC = () => {
       'System ready.'
     ];
 
+    const totalMs = bootConfigDuration * 1000;
+    const progressStepMs = totalMs / 20; // 20 steps to reach 100
+    const logStepMs = totalMs / (logs.length + 1);
+
     let logIndex = 0;
     const logInterval = setInterval(() => {
       if (logIndex < logs.length) {
@@ -343,24 +368,24 @@ export const HomeW97: React.FC = () => {
       } else {
         clearInterval(logInterval);
       }
-    }, 70);
+    }, logStepMs);
 
     const progressInterval = setInterval(() => {
       setBootProgress(prev => {
         if (prev >= 100) {
           clearInterval(progressInterval);
-          setTimeout(() => setBooting(false), 200);
+          setTimeout(() => setBooting(false), Math.max(20, totalMs * 0.05));
           return 100;
         }
         return prev + 5;
       });
-    }, 40);
+    }, progressStepMs);
 
     return () => {
       clearInterval(logInterval);
       clearInterval(progressInterval);
     };
-  }, []);
+  }, [booting, bootConfigDuration]);
 
   // ─── LOAD DATA FOR NEURAL MAP ────────────────────────
   useEffect(() => {
@@ -979,7 +1004,13 @@ export const HomeW97: React.FC = () => {
           <div className={styles.biosProgress}>
             <div className={styles.biosProgressBar} style={{ width: `${bootProgress}%` }} />
           </div>
-          <div style={{ marginTop: '4px', fontSize: '10px', color: '#94a3b8' }}>Axe Vault Inc. (C) 1997-2026</div>
+          <div className="flex items-center gap-3 w-64 pt-2">
+            <Monitor className="w-8 h-8 text-blue-400" />
+            <div>
+              <div className="text-[14px] font-bold text-white tracking-widest drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">AXE VAULT</div>
+              <div className="text-[10px] text-blue-200 uppercase tracking-widest">v0.9.8-beta</div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -1008,7 +1039,7 @@ export const HomeW97: React.FC = () => {
           onDoubleClick={() => navigate('/profiles')}
         >
           <div className="w-10 h-10 flex items-center justify-center bg-gray-300 rounded border border-gray-400 p-1 shadow-sm">
-            <img src={logoImg} alt="Axefull Logo" className="w-8 h-8 object-contain shrink-0" />
+            <Monitor size={32} className="text-purple-600" />
           </div>
           <span className={styles.iconLabel}>Axefull &gt;</span>
         </div>
@@ -1247,7 +1278,7 @@ export const HomeW97: React.FC = () => {
           </div>
           <div className={styles.windowBody}>
             <div className="flex gap-4 items-start">
-              <img src={logoImg} alt="Axe Logo" className="w-12 h-12 object-contain shrink-0" />
+              <Monitor size={48} className="text-purple-600" />
               <div>
                 <h2 className="text-sm font-bold">Axe Vault Browser — Space OS 97</h2>
                 <div className="text-[10px] text-gray-700 mt-1">Versão 1.0.0 (Build 9726)</div>
@@ -1255,6 +1286,38 @@ export const HomeW97: React.FC = () => {
                   Este sistema emula uma interface clássica para oferecer navegação rápida, segura e visualização holística de conexões de textos, documentos, perfis e tarefas.
                 </div>
                 <div className="mt-4 text-[10px] text-gray-600">Desenvolvido pela equipe Axe Vault.</div>
+
+                {/* CONFIGURAÇÃO DE BOOT (INICIALIZAÇÃO) */}
+                <div className={`${styles.outset} p-2.5 mt-4 flex flex-col gap-2 bg-gray-200 text-black border border-gray-400`}>
+                  <div className="font-bold text-[11px] border-b border-gray-400 pb-1">
+                    <span>Configurações de Inicialização (Boot)</span>
+                  </div>
+                  
+                  <label className="flex items-center gap-2 text-[11px] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={bootConfigEnabled}
+                      onChange={(e) => handleToggleBootConfig(e.target.checked)}
+                      className="cursor-pointer"
+                    />
+                    <span>Ativar tela de carregamento (BIOS)</span>
+                  </label>
+
+                  <div className="flex items-center gap-2 text-[11px]">
+                    <span>Tempo de boot (segundos):</span>
+                    <input
+                      type="number"
+                      min="0.1"
+                      max="10"
+                      step="0.1"
+                      value={bootConfigDuration}
+                      onChange={(e) => handleUpdateBootDuration(parseFloat(e.target.value) || 0.3)}
+                      disabled={!bootConfigEnabled}
+                      className={`${styles.inset} w-16 p-0.5 text-center bg-white text-black text-xs border border-gray-400 outline-none`}
+                    />
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>

@@ -164,7 +164,7 @@ const CanvasPage: React.FC = () => {
                     return current;
                 }
                 if (current.parentId) {
-                    current = canvasList.find(c => c.id === current.parentId);
+                    current = canvasList.find(c => c.id === current!.parentId);
                 } else {
                     break;
                 }
@@ -478,7 +478,7 @@ const CanvasPage: React.FC = () => {
             const newTab: TabItem = {
                 id: info.id,
                 name: info.name,
-                type: info.type,
+                type: (info.type || 'canvas') as any,
                 icon: info.icon,
                 navigationStack: [{ id: info.id, name: info.name }]
             };
@@ -523,7 +523,7 @@ const CanvasPage: React.FC = () => {
                 const newTab: TabItem = {
                     id: canvas.id,
                     name: canvas.name,
-                    type: canvas.type,
+                    type: (canvas.type || 'canvas') as any,
                     icon: canvas.icon,
                     navigationStack: [{ id: canvas.id, name: canvas.name }]
                 };

@@ -9,7 +9,8 @@ import KanbanBoard from '../features/Marketing/KanbanBoard';
 import CRMList from '../features/Marketing/CRMList';
 import LeadDetailModal from '../features/Marketing/LeadDetailModal';
 import { CRMProvider, useCRMState } from '../features/Marketing/CRMContext';
-import { MarketingSpace, MarketingFolder, MarketingBoard } from '../features/Marketing/marketingStorage';
+import { MarketingSpace, MarketingFolder, MarketingBoard, MarketingCardData, MarketingGroup } from '../features/Marketing/marketingStorage';
+import SpreadsheetImportModal, { ImportMapping } from '../features/Marketing/SpreadsheetImportModal';
 
 // ==========================================
 // CUSTOM POPUPS & MODALS (ClickUp Inspired)
@@ -287,7 +288,7 @@ const TreeNodeBoard = ({
     depth?: number; 
     onAddClick: (type: 'group' | 'task', boardId: string) => void;
 }) => {
-    const { activeBoardId, setActiveBoardId, updateBoard, deleteBoard } = useCRMState();
+    const { activeBoardId, setActiveBoardId, updateBoard, deleteBoard } = useCRMState() as any;
     const isActive = activeBoardId === board.id;
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(board.title);
@@ -465,7 +466,7 @@ const TreeNodeFolder = ({
     onAddClick: (type: 'folder' | 'board' | 'group' | 'task', spaceId: string, folderId: string | null, boardId?: string) => void;
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const { updateFolder, deleteFolder } = useCRMState();
+    const { updateFolder, deleteFolder } = useCRMState() as any;
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(folder.title);
     const [showMenu, setShowMenu] = useState(false);
@@ -608,7 +609,7 @@ const TreeNodeSpace = ({
     space: MarketingSpace; 
     onAddClick: (type: 'folder' | 'board' | 'group' | 'task', spaceId: string, folderId: string | null, boardId?: string) => void;
 }) => {
-    const { folders, boards, updateSpace, deleteSpace } = useCRMState();
+    const { folders, boards, updateSpace, deleteSpace } = useCRMState() as any as { folders: MarketingFolder[], boards: MarketingBoard[], updateSpace: any, deleteSpace: any };
     const [isExpanded, setIsExpanded] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(space.title);
@@ -805,7 +806,7 @@ const TreeNodeSpace = ({
 };
 
 const MarketingSidebar = ({ isCollapsed, setIsCollapsed }: { isCollapsed: boolean, setIsCollapsed: (v: boolean) => void }) => {
-    const { spaces, addSpace, addFolder, addBoard, addGroup, addLead, groups } = useCRMState();
+    const { spaces, addSpace, addFolder, addBoard, addGroup, addLead, groups } = useCRMState() as any as { spaces: MarketingSpace[], groups: MarketingGroup[], addSpace: any, addFolder: any, addBoard: any, addGroup: any, addLead: any };
     const [showCreateSpace, setShowCreateSpace] = useState(false);
     
     // Custom prompt modal state
@@ -944,6 +945,7 @@ const MarketingPageContent = () => {
         addImportedData
     } = useCRMState();
     
+    const [importModalData, setImportModalData] = useState<{ headers: string[], rows: any[] } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -956,88 +958,94 @@ const MarketingPageContent = () => {
                 skipEmptyLines: true,
                 complete: (results) => {
                     const data = results.data as any[];
-                    if (data.length === 0) return;
-                    
-                    const headers = Object.keys(data[0]);
-                    const newColumns: string[] = [];
-                    const newCustomColumnNames: Record<string, string> = {};
-                    const newGroups: import('../features/Marketing/marketingStorage').MarketingGroup[] = [];
-                    const newLeads: import('../features/Marketing/marketingStorage').MarketingCardData[] = [];
-                    
-                    // Identify columns
-                    headers.forEach(header => {
-                        const lower = header.toLowerCase();
-                        if (['title', 'nome', 'título'].includes(lower)) return;
-                        if (['status', 'fase', 'etapa'].includes(lower)) return;
-                        
-                        let isNumber = true;
-                        const uniqueValues = new Set();
-                        data.forEach(row => {
-                            const val = row[header];
-                            if (val !== undefined && val !== null && val !== '') {
-                                if (isNaN(Number(val))) isNumber = false;
-                                uniqueValues.add(val);
-                            }
-                        });
-                        
-                        let type = 'text';
-                        if (isNumber) type = 'number';
-                        else if (uniqueValues.size > 0 && uniqueValues.size <= 10) type = 'dropdown';
-                        
-                        const colId = `custom_${type}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-                        newColumns.push(colId);
-                        newCustomColumnNames[colId] = header;
-                    });
-                    
-                    let defaultGroupId = activeGroups.length > 0 ? activeGroups[0].id : `group_${Date.now()}`;
-                    if (activeGroups.length === 0) {
-                        newGroups.push({ id: defaultGroupId, boardId: activeBoard.id, title: 'Importados', color: '#64748b', order: 0 });
+                    if (data.length === 0) {
+                        alert('Planilha vazia.');
+                        return;
                     }
-                    
-                    data.forEach((row: any) => {
-                        const titleKey = headers.find(h => ['title', 'nome', 'título'].includes(h.toLowerCase())) || headers[0];
-                        const statusKey = headers.find(h => ['status', 'fase', 'etapa'].includes(h.toLowerCase()));
-                        
-                        let statusVal = statusKey ? row[statusKey] : 'Novo';
-                        if (!statusVal) statusVal = 'Novo';
-                        
-                        let group = activeGroups.find(g => g.title.toLowerCase() === String(statusVal).toLowerCase()) || newGroups.find(g => g.title.toLowerCase() === String(statusVal).toLowerCase());
-                        if (!group) {
-                            group = { id: `group_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, boardId: activeBoard.id, title: String(statusVal), color: '#0ea5e9', order: activeGroups.length + newGroups.length };
-                            newGroups.push(group);
-                        }
-                        
-                        const lead: import('../features/Marketing/marketingStorage').MarketingCardData = {
-                            id: `lead_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                            boardId: activeBoard.id,
-                            groupId: group.id,
-                            title: row[titleKey] || 'Lead Importado',
-                            description: '',
-                            status: group.title,
-                            createdAt: Date.now(),
-                            updatedAt: Date.now(),
-                            assignee: 'Não atribuído'
-                        };
-                        
-                        newColumns.forEach(colId => {
-                            const header = newCustomColumnNames[colId];
-                            const val = row[header];
-                            if (colId.startsWith('custom_number_')) {
-                                (lead as any)[colId] = val ? Number(val) : 0;
-                            } else {
-                                (lead as any)[colId] = val || '';
-                            }
-                        });
-                        
-                        newLeads.push(lead);
-                    });
-                    
-                    addImportedData(activeBoard.id, newColumns, newCustomColumnNames, newGroups, newLeads);
+                    const headers = Object.keys(data[0]);
+                    setImportModalData({ headers, rows: data });
                 }
             });
         });
         
         if (e.target) e.target.value = '';
+    };
+
+    const handleConfirmImport = (mappings: ImportMapping[], data: any[]) => {
+        if (!activeBoard) return;
+        
+        const newColumns: string[] = [];
+        const newCustomColumnNames: Record<string, string> = {};
+        const newGroups: MarketingGroup[] = [];
+        const newLeads: MarketingCardData[] = [];
+        
+        // Prepare custom columns
+        mappings.forEach(mapping => {
+            if (mapping.targetField === 'custom') {
+                const colId = `custom_${mapping.customType}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                newColumns.push(colId);
+                newCustomColumnNames[colId] = mapping.csvHeader;
+                // Add an internal reference to the mapping object so we know where to save it
+                (mapping as any)._colId = colId;
+            }
+        });
+        
+        // Find title mapping
+        const titleMapping = mappings.find(m => m.targetField === 'title');
+        const statusMapping = mappings.find(m => m.targetField === 'status');
+        const assigneeMapping = mappings.find(m => m.targetField === 'assignee');
+        const priorityMapping = mappings.find(m => m.targetField === 'priority');
+        const budgetMapping = mappings.find(m => m.targetField === 'budget');
+        
+        // Prepare default group if no status mapping or missing status
+        let defaultGroupId = activeGroups.length > 0 ? activeGroups[0].id : `group_${Date.now()}`;
+        if (activeGroups.length === 0) {
+            newGroups.push({ id: defaultGroupId, boardId: activeBoard.id, title: 'Importados', color: '#64748b', order: 0 });
+        }
+        
+        data.forEach((row: any) => {
+            const titleVal = titleMapping ? row[titleMapping.csvHeader] : 'Lead Importado';
+            let statusVal = statusMapping ? row[statusMapping.csvHeader] : 'Novo';
+            if (!statusVal) statusVal = 'Novo';
+            
+            let group = activeGroups.find(g => g.title.toLowerCase() === String(statusVal).toLowerCase()) || newGroups.find(g => g.title.toLowerCase() === String(statusVal).toLowerCase());
+            if (!group) {
+                group = { id: `group_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, boardId: activeBoard.id, title: String(statusVal), color: '#0ea5e9', order: activeGroups.length + newGroups.length };
+                newGroups.push(group);
+            }
+            
+            const lead: MarketingCardData = {
+                id: `lead_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                boardId: activeBoard.id,
+                groupId: group.id,
+                title: titleVal || 'Lead Importado',
+                description: '',
+                status: group.title,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                assignee: assigneeMapping ? (row[assigneeMapping.csvHeader] || 'Não atribuído') : 'Não atribuído',
+                priority: priorityMapping ? (row[priorityMapping.csvHeader] || 'Média') : 'Média',
+                budget: budgetMapping ? (Number(row[budgetMapping.csvHeader]) || 0) : 0,
+            };
+            
+            // Apply custom columns
+            mappings.forEach(mapping => {
+                if (mapping.targetField === 'custom') {
+                    const colId = (mapping as any)._colId;
+                    const val = row[mapping.csvHeader];
+                    if (mapping.customType === 'number') {
+                        (lead as any)[colId] = val ? Number(val) : 0;
+                    } else {
+                        (lead as any)[colId] = val || '';
+                    }
+                }
+            });
+            
+            newLeads.push(lead);
+        });
+        
+        addImportedData(activeBoard.id, newColumns, newCustomColumnNames, newGroups, newLeads);
+        setImportModalData(null);
     };
 
     if (!activeBoard) return <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>Nenhum quadro selecionado.</div>;
@@ -1167,6 +1175,14 @@ const MarketingPageContent = () => {
 
             {viewMode === 'board' ? <KanbanBoard /> : <CRMList />}
             <LeadDetailModal />
+            
+            <SpreadsheetImportModal 
+                isOpen={!!importModalData}
+                csvData={importModalData}
+                onClose={() => setImportModalData(null)}
+                onConfirm={handleConfirmImport}
+                existingColumns={activeBoard.columns}
+            />
         </div>
     );
 };

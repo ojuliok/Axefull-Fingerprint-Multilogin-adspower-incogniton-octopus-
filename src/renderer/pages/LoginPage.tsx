@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Fingerprint, Eye, EyeOff, Loader2, WifiOff, RefreshCw, ArrowLeft, Phone } from 'lucide-react';
-import logoImg from '../logo.png';
+import { Fingerprint, Eye, EyeOff, Loader2, WifiOff, RefreshCw, ArrowLeft, Phone, Monitor } from 'lucide-react';
 
 export type FormMode = 'login' | 'register' | 'forgot-password';
 
@@ -344,7 +343,7 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
             {/* Left panel — branding */}
             <div className="hidden lg:flex flex-col justify-between w-2/5 bg-zinc-900 border-r border-zinc-800/60 p-10">
                 <div className="flex items-center gap-2.5">
-                    <img src={logoImg} alt="Axe Logo" className="w-7 h-7 object-contain" />
+                    <Monitor className="w-7 h-7 text-blue-500" />
                     <span className="text-theme-text font-bold text-lg tracking-tight">Axe MultiLogin</span>
                 </div>
 
@@ -391,7 +390,7 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
                 <div className="w-full max-w-sm">
                     {/* Mobile logo */}
                     <div className="flex lg:hidden items-center gap-2 justify-center mb-8">
-                        <img src={logoImg} alt="Axe Logo" className="w-7 h-7 object-contain" />
+                        <Monitor className="w-7 h-7 text-blue-500" />
                         <span className="text-theme-text font-bold text-lg tracking-tight">Axe MultiLogin</span>
                     </div>
 

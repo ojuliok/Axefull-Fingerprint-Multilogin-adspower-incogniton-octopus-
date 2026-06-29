@@ -26,6 +26,9 @@ interface CRMContextType {
     updateGroup: (id: string, updates: Partial<MarketingGroup>) => void;
     deleteGroup: (id: string) => void;
 
+    // Boards
+    updateBoard: (id: string, updates: Partial<MarketingBoard>) => void;
+
     // Leads
     addLead: (boardId: string, groupId: string, title: string) => void;
     updateLead: (id: string, updates: Partial<MarketingCardData>) => void;
@@ -160,6 +163,25 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
         saveStateToSupabase(newGroups, newLeads);
     };
 
+    // Board Actions
+    const updateBoard = (id: string, updates: Partial<MarketingBoard>) => {
+        if (id !== activeBoardId) return;
+        
+        let newColumns = columns;
+        let newCustomNames = customColumnNames;
+        
+        if (updates.columns !== undefined) {
+            newColumns = updates.columns;
+            setColumns(newColumns);
+        }
+        if (updates.customColumnNames !== undefined) {
+            newCustomNames = updates.customColumnNames;
+            setCustomColumnNames(newCustomNames);
+        }
+        
+        saveStateToSupabase(groups, leads, newColumns, newCustomNames);
+    };
+
     // Lead Actions
     const addLead = (boardId: string, groupId: string, title: string) => {
         const newCard: MarketingCardData = {
@@ -260,6 +282,7 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
             searchQuery, setSearchQuery,
             filterAssignee, setFilterAssignee,
             filterPriority, setFilterPriority,
+            updateBoard,
             addGroup, updateGroup, deleteGroup,
             addLead, updateLead, deleteLead, moveLead,
             addImportedData,

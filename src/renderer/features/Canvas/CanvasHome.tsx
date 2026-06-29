@@ -37,7 +37,8 @@ import {
   EyeOff,
   Box,
   Lock,
-  Check
+  Check,
+  ArrowLeftRight
 } from 'lucide-react';
 import { CanvasInfo, getCanvasData } from './canvasStorage';
 import { CANVAS_ICONS, DynamicIcon } from './CanvasIcons';
@@ -180,6 +181,32 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   });
   const [previewLayout, setPreviewLayout] = useState<'center' | 'side'>('center');
   const [isCreationOpen, setIsCreationOpen] = useState(true);
+
+  const [showCreateSpace, setShowCreateSpace] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('axe_canvas_show_create_space') ?? 'true'); }
+    catch { return true; }
+  });
+
+  const [sidebarPosition, setSidebarPosition] = useState<'right' | 'left'>(() => {
+    try { return localStorage.getItem('axe_canvas_sidebar_pos') as 'right' | 'left' || 'right'; }
+    catch { return 'right'; }
+  });
+
+  const toggleCreateSpace = useCallback(() => {
+    setShowCreateSpace(prev => {
+      const next = !prev;
+      localStorage.setItem('axe_canvas_show_create_space', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const toggleSidebarPosition = useCallback(() => {
+    setSidebarPosition(prev => {
+      const next = prev === 'right' ? 'left' : 'right';
+      localStorage.setItem('axe_canvas_sidebar_pos', next);
+      return next;
+    });
+  }, []);
 
   // ── Space Entrance Animation ──
   const [isEnteringSpace, setIsEnteringSpace] = useState<boolean>(false);
@@ -684,7 +711,10 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
       {/* Content */}
       <div className={styles.content} style={{ position: 'relative', zIndex: 1 }}>
-
+        <div style={{ display: 'flex', gap: '24px', flexDirection: sidebarPosition === 'right' ? 'row' : 'row-reverse', alignItems: 'flex-start' }}>
+          
+          {/* Main Column */}
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
         {!activeSpaceId && (
           <CanvasSpacesGrid
@@ -705,10 +735,12 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
             commitDescEdit={commitDescEdit}
             startDescEdit={startDescEdit}
             onCreateSpace={() => onCreateItem && onCreateItem('space')}
+            showCreateSpace={showCreateSpace}
+            onToggleCreateSpace={toggleCreateSpace}
           />
         )}
 
-        {otherItems.length === 0 && spaces.length === 0 && folders.length === 0 ? (
+        {otherItems.length === 0 && spaces.length === 0 && folders.length === 0 && (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>
               <FileText size={32} />
@@ -766,27 +798,33 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
               </div>
             )}
           </div>
-        ) : (folders.length > 0 || regularItems.length > 0) && (
+        )}
+        
+        {folders.length > 0 && (
           <>
-            {folders.length > 0 && (
-              <>
-                <h2 className={styles.sectionTitle} style={{ marginTop: activeSpaceId ? '0px' : '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  <FolderOpen size={18} /> Pastas
-                </h2>
-                {renderItemList(folders)}
-              </>
-            )}
-            
-            {regularItems.length > 0 && (
-              <>
-                <h2 className={styles.sectionTitle} style={{ marginTop: '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  <FileText size={18} /> {folders.length > 0 || activeSpaceId ? 'Conteúdo' : 'Outros Arquivos'}
-                </h2>
-                {renderItemList(regularItems)}
-              </>
-            )}
+            <h2 className={styles.sectionTitle} style={{ marginTop: activeSpaceId ? '0px' : '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
+              <FolderOpen size={18} /> Pastas
+            </h2>
+            {renderItemList(folders)}
           </>
         )}
+          </div>
+          
+          {/* Sidebar Column */}
+          {regularItems.length > 0 && (
+            <div style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: activeSpaceId ? '0px' : '24px', marginBottom: '16px' }}>
+                <h2 className={styles.sectionTitle} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <FileText size={18} /> {folders.length > 0 || activeSpaceId ? 'Conteúdo' : 'Outros Arquivos'}
+                </h2>
+                <button onClick={toggleSidebarPosition} title="Mover Coluna" style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                  <ArrowLeftRight size={16} />
+                </button>
+              </div>
+              {renderItemList(regularItems)}
+            </div>
+          )}
+        </div>
       </div>
       </>
       ) : (
