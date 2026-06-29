@@ -251,11 +251,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   const [isEnteringSpace, setIsEnteringSpace] = useState<boolean>(false);
 
   const handleSpaceEnter = useCallback((id: string) => {
-    setIsEnteringSpace(true);
-    setTimeout(() => {
-      onSelectCanvas(id, true);
-      setIsEnteringSpace(false);
-    }, 400);
+    onSelectCanvas(id, true);
   }, [onSelectCanvas]);
   const [showMembersManager, setShowMembersManager] = useState(false);
   const [pinSettingsItem, setPinSettingsItem] = useState<CanvasInfo | null>(null);

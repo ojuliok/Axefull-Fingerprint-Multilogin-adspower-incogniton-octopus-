@@ -621,46 +621,13 @@ const CanvasPage: React.FC = () => {
                 return currentTabs;
             });
 
-            const isSpace = canvas.type === 'space';
-
-            if (!isSpace) {
-                setRenamingId(null);
-                setViewState('canvas');
-                setIsHovered(false);
-                if (isMobileViewport()) {
-                    setMenuMode('collapsed');
-                }
-                setTransitionState('none');
-                return;
+            setRenamingId(null);
+            setViewState('canvas');
+            setIsHovered(false);
+            if (isMobileViewport()) {
+                setMenuMode('collapsed');
             }
-
-            // For spaces, run transitions if we want
-            if (skipClosing) {
-                setRenamingId(null);
-                setViewState('canvas');
-                setIsHovered(false);
-                if (isMobileViewport()) {
-                    setMenuMode('collapsed');
-                }
-                setTransitionState('opening');
-                setTimeout(() => {
-                    setTransitionState('none');
-                }, 400);
-            } else {
-                setTransitionState('closing');
-                setTimeout(async () => {
-                    setRenamingId(null);
-                    setViewState('canvas');
-                    setIsHovered(false);
-                    if (isMobileViewport()) {
-                        setMenuMode('collapsed');
-                    }
-                    setTransitionState('opening');
-                    setTimeout(() => {
-                        setTransitionState('none');
-                    }, 400);
-                }, 400);
-            }
+            setTransitionState('none');
         });
     }, [canvasList, checkPinAndProceed, activeTabId]);
 
