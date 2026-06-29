@@ -72,16 +72,21 @@ const DadosClean: React.FC = () => {
     const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [isCleaningAll, setIsCleaningAll] = useState(false);
     const dropRef = useRef<HTMLDivElement>(null);
+    const isMountedRef = useRef(true);
 
     const selected = files.find(f => f.id === selectedId) ?? null;
 
     useEffect(() => {
+        isMountedRef.current = true;
         loadHistory();
+        return () => {
+            isMountedRef.current = false;
+        };
     }, []);
 
     const loadHistory = async () => {
         const res = await (window.api as any).metaClean.getHistory();
-        if (res.success) setHistory(res.data as HistoryEntry[]);
+        if (isMountedRef.current && res.success) setHistory(res.data as HistoryEntry[]);
     };
 
     // ─── File ingestion ───────────────────────────────────────────────────────
@@ -152,6 +157,7 @@ const DadosClean: React.FC = () => {
         setFiles(prev => prev.map(f => f.id === fileId ? { ...f, status: 'cleaning' } : f));
 
         const res = await (window.api as any).metaClean.cleanFile(file.path);
+        if (!isMountedRef.current) return;
         const result = res.data ?? res;
 
         setFiles(prev => prev.map(f =>
@@ -174,7 +180,10 @@ const DadosClean: React.FC = () => {
         const targets = files.filter(f => f.status === 'ready');
         if (!targets.length) return;
         setIsCleaningAll(true);
-        for (const f of targets) await cleanFile(f.id);
+        for (const f of targets) {
+            await cleanFile(f.id);
+            if (!isMountedRef.current) return;
+        }
         setIsCleaningAll(false);
     };
 
@@ -193,7 +202,9 @@ const DadosClean: React.FC = () => {
 
     const clearHistory = async () => {
         await (window.api as any).metaClean.clearHistory();
-        setHistory([]);
+        if (isMountedRef.current) {
+            setHistory([]);
+        }
     };
 
     // ─── Render helpers ───────────────────────────────────────────────────────

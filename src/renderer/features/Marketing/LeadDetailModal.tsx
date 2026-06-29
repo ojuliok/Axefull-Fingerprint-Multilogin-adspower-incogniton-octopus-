@@ -13,6 +13,16 @@ import { useCRMState } from './CRMContext';
 
 const PRIORITIES: MarketingPriority[] = ['Alta', 'Média', 'Baixa'];
 
+const AVAILABLE_COLUMNS = [
+    { id: 'status', label: 'Status' },
+    { id: 'assignee', label: 'Pessoas' },
+    { id: 'deadline', label: 'Data' },
+    { id: 'priority', label: 'Prioridade' },
+    { id: 'notes', label: 'Texto (Notas)' },
+    { id: 'budget', label: 'Números (Orçamento)' },
+    { id: 'files', label: 'Arquivos' }
+];
+
 const LeadDetailModal: React.FC = () => {
     const { theme } = useTheme();
     const isLight = theme === 'light';
@@ -969,6 +979,87 @@ Próximos Passos:
                                 </div>
                             </div>
                         </div>
+
+                        {/* Custom Columns rendering */}
+                        {(() => {
+                            const customCols = (activeBoard?.columns || []).filter(col => 
+                                col.startsWith('custom_') || col === 'budget'
+                            );
+                            if (customCols.length === 0) return null;
+
+                            return (
+                                <div style={{
+                                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px',
+                                    paddingBottom: '16px', borderBottom: '1px solid var(--border-default)'
+                                }}>
+                                    {customCols.map(col => {
+                                        const label = activeBoard?.customColumnNames?.[col] || 
+                                                      AVAILABLE_COLUMNS.find(c => c.id === col)?.label || col;
+                                        const value = selectedLead[col];
+
+                                        return (
+                                            <div key={col} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <Layout size={14} /> {label}
+                                                </span>
+                                                {col.startsWith('custom_status_') || col.startsWith('custom_dropdown_') ? (
+                                                    <input 
+                                                        value={value || ''}
+                                                        onChange={(e) => updateLead(selectedLead.id, { [col]: e.target.value })}
+                                                        placeholder="Definir..."
+                                                        style={{
+                                                            background: 'transparent', border: '1px solid transparent',
+                                                            padding: '4px 8px', fontSize: '12px', color: 'var(--text-primary)',
+                                                            outline: 'none', width: '100%', borderRadius: '4px'
+                                                        }}
+                                                        onFocus={(e) => e.target.style.border = '1px solid var(--border-default)'}
+                                                        onBlur={(e) => e.target.style.border = '1px solid transparent'}
+                                                    />
+                                                ) : col === 'budget' || col.startsWith('custom_number_') ? (
+                                                    <input 
+                                                        type="number"
+                                                        value={value || ''}
+                                                        onChange={(e) => updateLead(selectedLead.id, { [col]: parseFloat(e.target.value) || 0 })}
+                                                        placeholder="0"
+                                                        style={{
+                                                            background: 'transparent', border: '1px solid transparent',
+                                                            padding: '4px 8px', fontSize: '12px', color: 'var(--text-primary)',
+                                                            outline: 'none', width: '100%', borderRadius: '4px'
+                                                        }}
+                                                        onFocus={(e) => e.target.style.border = '1px solid var(--border-default)'}
+                                                        onBlur={(e) => e.target.style.border = '1px solid transparent'}
+                                                    />
+                                                ) : col.startsWith('custom_date_') ? (
+                                                    <input 
+                                                        type="date"
+                                                        value={value ? new Date(value).toISOString().split('T')[0] : ''}
+                                                        onChange={(e) => updateLead(selectedLead.id, { [col]: e.target.value ? new Date(e.target.value).getTime() : null })}
+                                                        style={{
+                                                            background: 'var(--bg-secondary)', border: '1px solid var(--border-default)',
+                                                            padding: '4px 8px', fontSize: '11px', color: 'var(--text-primary)',
+                                                            outline: 'none', width: '100%', borderRadius: '4px'
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <input 
+                                                        value={value || ''}
+                                                        onChange={(e) => updateLead(selectedLead.id, { [col]: e.target.value })}
+                                                        placeholder="Adicionar..."
+                                                        style={{
+                                                            background: 'transparent', border: '1px solid transparent',
+                                                            padding: '4px 8px', fontSize: '12px', color: 'var(--text-primary)',
+                                                            outline: 'none', width: '100%', borderRadius: '4px'
+                                                        }}
+                                                        onFocus={(e) => e.target.style.border = '1px solid var(--border-default)'}
+                                                        onBlur={(e) => e.target.style.border = '1px solid transparent'}
+                                                    />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })()}
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>

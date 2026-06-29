@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Settings, User, CreditCard, Palette, Database, Info, LogOut, Download, Copy, Check, ChevronRight, Zap, LifeBuoy, MessageCircle, ExternalLink, BookOpen, Activity, Users, Crown, Shield, UserCheck, Loader2, UserPlus, UserMinus, LogIn, LayoutGrid, Layout as LayoutIcon, PanelLeft, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -24,6 +24,7 @@ const PLAN_COLORS: Record<string, { bg: string; text: string }> = {
 
 const SettingsPage: React.FC = () => {
     const { user, logout } = useAuth();
+    const isMountedRef = useRef(true);
     const { toast } = useToast();
     const { theme, layout, buttonStyle, setTheme, setLayout, setButtonStyle } = useTheme();
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
@@ -52,20 +53,25 @@ const SettingsPage: React.FC = () => {
     const [passInput, setPassInput] = useState(secondPassword || '');
 
     useEffect(() => {
+        isMountedRef.current = true;
         window.api.app.info().then(res => {
-            if (res.success) setAppInfo(res.data as AppInfo);
+            if (isMountedRef.current && res.success) setAppInfo(res.data as AppInfo);
         });
         window.api.app.localApiPort().then(res => {
-            if (res.success && res.data) {
+            if (isMountedRef.current && res.success && res.data) {
                 setLocalApiPort((res.data as { port: number }).port);
             }
         });
+        return () => {
+            isMountedRef.current = false;
+        };
     }, []);
 
     const loadTeam = async () => {
         setTeamLoading(true);
         setTeamError(null);
         const res = await window.api.team.me();
+        if (!isMountedRef.current) return;
         setTeamLoading(false);
         if (res.success) setTeam((res.data as any)?.team ?? null);
         else setTeamError(res.error ?? 'Erro ao carregar equipe');
@@ -80,6 +86,7 @@ const SettingsPage: React.FC = () => {
         setTeamAction(true);
         setTeamError(null);
         const res = await window.api.team.create(teamName.trim());
+        if (!isMountedRef.current) return;
         setTeamAction(false);
         if (res.success) {
             setTeamName('');
@@ -95,6 +102,7 @@ const SettingsPage: React.FC = () => {
         setTeamAction(true);
         setTeamError(null);
         const res = await window.api.team.invite(inviteEmail.trim());
+        if (!isMountedRef.current) return;
         setTeamAction(false);
         if (res.success) {
             setInviteEmail('');
@@ -106,12 +114,14 @@ const SettingsPage: React.FC = () => {
 
     const handleRemoveMember = async (memberId: string) => {
         const res = await window.api.team.removeMember(memberId);
+        if (!isMountedRef.current) return;
         if (res.success) { toast.success('Membro removido'); loadTeam(); }
         else toast.error(res.error ?? 'Erro ao remover membro');
     };
 
     const handleLeaveTeam = async () => {
         const res = await window.api.team.leave();
+        if (!isMountedRef.current) return;
         if (res.success) { toast.success('Você saiu do time'); setTeam(null); }
         else toast.error(res.error ?? 'Erro ao sair do time');
     };

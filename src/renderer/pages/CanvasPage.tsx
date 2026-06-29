@@ -20,7 +20,7 @@ import InfiniteCanvas from '../features/Canvas/InfiniteCanvas';
 import CanvasHome from '../features/Canvas/CanvasHome';
 import CanvasRichText from '../features/Canvas/CanvasRichText';
 import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES, getDefaultIconForType } from '../features/Canvas/CanvasIcons';
-import { CRMCanvasView } from './MarketingPage';
+import { PipelineCanvasView } from './PipelinePage';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useAuth } from '../context/AuthContext';
 import { ItemPinModal } from '../features/Canvas/ItemPinModal';
@@ -287,7 +287,7 @@ const CanvasPage: React.FC = () => {
                             ...tab,
                             name: canvas.name,
                             icon: canvas.icon || tab.icon,
-                            type: canvas.type
+                            type: canvas.type as any
                         };
                     }
                     return tab;
@@ -1654,7 +1654,7 @@ const CanvasPage: React.FC = () => {
                             }}
                         />
                     ) : activeCanvasType === 'table' ? (
-                        <CRMCanvasView key={activeCanvasId} boardId={activeCanvasId} />
+                        <PipelineCanvasView key={activeCanvasId} pipelineId={activeCanvasId} />
                     ) : activeCanvasType === 'page' && activeCanvasInfo ? (
                         <CanvasRichText 
                             key={activeCanvasId} 
@@ -1725,7 +1725,7 @@ const CanvasPage: React.FC = () => {
                             </div>
                             <div className={styles.drawerContent}>
                                 {previewItemInfo.type === 'table' ? (
-                                    <CRMCanvasView key={`preview-${previewItemId}`} boardId={previewItemId} />
+                                    <PipelineCanvasView key={`preview-${previewItemId}`} pipelineId={previewItemId} />
                                 ) : previewItemInfo.type === 'page' ? (
                                     <CanvasRichText 
                                         key={`preview-${previewItemId}`} 

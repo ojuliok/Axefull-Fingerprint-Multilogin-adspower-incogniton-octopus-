@@ -108,7 +108,7 @@ export const webApiBridge: ElectronAPI = {
                     status: 'active',
                     session_status: 'closed',
                     tags: tagsArray,
-                    group_name: input.category || 'all',
+                    group_name: (input as any).category || 'all',
                     custom_fields: {
                         os,
                         country: 'BR',
@@ -391,13 +391,14 @@ export const webApiBridge: ElectronAPI = {
     license: { set: async () => unsupported('Licença'), get: async () => unsupported('Licença'), remove: async () => unsupported('Licença'), validateOnline: async () => unsupported('Licença'), issueOnline: async () => unsupported('Licença'), deviceHwid: async () => success('web-browser') },
     metaClean: { openDialog: async () => unsupported('MetaClean'), readMetadata: async () => unsupported('MetaClean'), cleanFile: async () => unsupported('MetaClean'), getHistory: async () => success([]), clearHistory: async () => unsupported('MetaClean') },
     extensions: { list: async () => success([]), install: async () => unsupported('Extensões'), delete: async () => unsupported('Extensões') },
-    app: { info: async () => success({ version: 'Web', electronVersion: 'Web', chromiumVersion: 'Web', dataDir: 'Web' }), localApiPort: async () => success(null) },
+    app: { info: async () => success({ version: 'Web', electronVersion: 'Web', chromiumVersion: 'Web', dataDir: 'Web' }), localApiPort: async () => success(null), setWebviewProxy: async () => unsupported('Proxy'), openNotesWidget: async () => unsupported('Notes'), closeNotesWidget: async () => unsupported('Notes') },
     templates: { list: async () => success([]), save: async () => unsupported('Templates'), delete: async () => unsupported('Templates'), createProfile: async () => unsupported('Templates'), bulkCreate: async () => unsupported('Templates') },
     proxyPool: { list: async () => success([]), add: async () => unsupported('Proxy Pool'), bulkImport: async () => unsupported('Proxy Pool'), remove: async () => unsupported('Proxy Pool'), test: async () => unsupported('Proxy Pool'), assign: async () => unsupported('Proxy Pool'), unassign: async () => unsupported('Proxy Pool') },
     team: { me: async () => unsupported('Team'), create: async () => unsupported('Team'), invite: async () => unsupported('Team'), removeMember: async () => unsupported('Team'), changeRole: async () => unsupported('Team'), leave: async () => unsupported('Team') },
     warmup: { start: async () => unsupported('Warmup'), onProgress: () => () => {}, onComplete: () => () => {} },
     ai: { predictScore: async () => unsupported('AI'), submitFeedback: async () => unsupported('AI'), getAuditLogs: async () => success([]) },
     cards: { save: async () => unsupported('Cards'), get: async () => unsupported('Cards') },
+    email: { send: async () => unsupported('Email') },
     bulkVideo: { startRender: async () => unsupported('Bulk Video'), cancelJob: async () => unsupported('Bulk Video'), openOutputFolder: async () => unsupported('Bulk Video'), saveProject: async () => unsupported('Bulk Video'), getProjects: async () => success([]), deleteProject: async () => unsupported('Bulk Video'), pickFile: async () => unsupported('Bulk Video'), onProgress: () => () => {}, pickFolder: async () => unsupported('Bulk Video'), scanFolder: async () => unsupported('Bulk Video'), generateThumbnail: async () => unsupported('Bulk Video'), generateThumbnailsBatch: async () => unsupported('Bulk Video'), getVideoMetadata: async () => unsupported('Bulk Video'), startBulkEdit: async () => unsupported('Bulk Video'), onBulkEditProgress: () => () => {}, cancelBulkEdit: async () => unsupported('Bulk Video'), onThumbnailsProgress: () => () => {} }
 };
 

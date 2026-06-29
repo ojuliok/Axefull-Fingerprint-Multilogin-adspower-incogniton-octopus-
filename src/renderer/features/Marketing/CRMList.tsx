@@ -1087,7 +1087,7 @@ const CRMList: React.FC = () => {
         } catch {}
         
         return {
-            'task': '50%',
+            'task': '250px',
             'status': '120px',
             'assignee': '100px',
             'deadline': '110px',
@@ -1171,7 +1171,7 @@ const CRMList: React.FC = () => {
     
     if (!activeBoard) return null;
 
-    const columns = activeBoard.columns || ['status'];
+    const columns = (activeBoard.columns || ['status']).filter(Boolean);
 
     const addColumn = (colId: string) => {
         if (!columns.includes(colId)) {

@@ -34,6 +34,15 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }) => {
     const { toast } = useToast();
+    const isMountedRef = useRef(true);
+
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
+
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -173,18 +182,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
     const loadProfiles = async () => {
         try {
             const result = await window.api.profiles.list();
+            if (!isMountedRef.current) return;
             if (result.success) {
                 setProfiles(result.data as Profile[]);
             }
             
             const foldersResult = await window.api.profiles.listFolders();
+            if (!isMountedRef.current) return;
             if (foldersResult.success) {
                 setFolders(foldersResult.data as Folder[]);
             }
         } catch (error) {
             console.error('Error loading profiles:', error);
         } finally {
-            setLoading(false);
+            if (isMountedRef.current) {
+                setLoading(false);
+            }
         }
     };
 
