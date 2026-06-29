@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
-    LayoutGrid, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home, StickyNote, PanelLeftClose, PanelLeftOpen,
+    LayoutGrid, LayoutDashboard, Settings, Eraser, Puzzle, Monitor, CheckSquare, Home, StickyNote, PanelLeftClose, PanelLeftOpen,
     Sun, Moon, Bell, ChevronDown, ChevronUp, Plus, Cloud, Database, LogOut, Check, Globe, Calendar as CalendarIcon, List as ListIcon
 } from 'lucide-react';
 
@@ -18,7 +18,8 @@ interface SidebarProps {
 }
 
 const ALL_ITEMS: Record<string, { id: string; label: string; icon: React.FC<any>; colorClass: string }> = {
-    home:       { id: 'home',       label: 'Início',    icon: Home,        colorClass: 'text-sky-500' },
+    overview:   { id: 'overview',   label: 'Início',    icon: Home,        colorClass: 'text-sky-500' },
+    home:       { id: 'home',       label: '97',        icon: LayoutDashboard, colorClass: 'text-purple-500' },
     profiles:   { id: 'profiles',   label: 'Multi',     icon: LayoutGrid,  colorClass: 'text-violet-500' },
     canvas:     { id: 'canvas',     label: 'Tela',      icon: Monitor,     colorClass: 'text-amber-500' },
     tasks:      { id: 'tasks',      label: 'Tarefas',   icon: CheckSquare, colorClass: 'text-blue-500' },
@@ -27,7 +28,7 @@ const ALL_ITEMS: Record<string, { id: string; label: string; icon: React.FC<any>
 };
 
 // Ordem Padrão solicitada
-const DEFAULT_ORDER = ['home', 'profiles', 'canvas', 'tasks', 'notes'];
+const DEFAULT_ORDER = ['overview', 'notes', 'canvas', 'tasks', 'home', 'profiles'];
 
 const THEME_LABELS: Record<Theme, string> = {
     'light': 'Claro',

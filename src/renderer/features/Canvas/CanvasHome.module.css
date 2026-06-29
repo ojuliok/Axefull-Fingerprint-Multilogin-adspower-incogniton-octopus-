@@ -2007,7 +2007,72 @@
   gap: 8px;
   max-height: 240px;
   overflow-y: auto;
-  padding-right: 4px;
+  margin-right: -4px;
+}
+
+/* ── Layout & Responsive Classes ── */
+
+.layoutWrapper {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.layout-right {
+    flex-direction: row;
+}
+
+.layout-left {
+    flex-direction: row-reverse;
+}
+
+.layout-bottom {
+    flex-direction: column;
+}
+
+.layout-full-main {
+    /* Only main column is rendered */
+}
+
+.layout-full-side {
+    /* Only side column is rendered */
+}
+
+.columnResizer {
+    width: 8px;
+    margin: 0 -4px;
+    cursor: col-resize;
+    background: transparent;
+    transition: background 0.2s;
+    z-index: 10;
+    align-self: stretch;
+}
+
+.columnResizer:hover, .columnResizer:active {
+    background: var(--border-color);
+}
+
+.fullTextWrap .title { /* Assuming there is a title class or similar, we target it */
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+/* On small screens, force vertical layout regardless of user choice */
+@media (max-width: 768px) {
+    .layoutWrapper {
+        flex-direction: column !important;
+    }
+    
+    .sidebarColumn {
+        width: 100% !important;
+    }
+
+    .columnResizer {
+        display: none;
+    }
 }
 
 .onboardingStepsList::-webkit-scrollbar {

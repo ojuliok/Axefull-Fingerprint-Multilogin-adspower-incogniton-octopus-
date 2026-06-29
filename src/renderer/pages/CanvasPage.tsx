@@ -6,8 +6,9 @@ import {
     Copy, Download, Upload, ChevronRight, ChevronDown,
     Home, PenTool, FileText, Notebook, Search, Folder, FolderPlus, MessageSquare, Settings2, Box,
     PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass, Lock, Eye, Maximize2,
-    Menu, ChevronLeft
+    Menu, ChevronLeft, Columns
 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
     CanvasInfo, CanvasData,
     getCanvasList, createCanvas, deleteCanvas, renameCanvas,
@@ -88,6 +89,10 @@ const CanvasPage: React.FC = () => {
     const activeCanvasInfo = activeCanvasId ? canvasList.find(c => c.id === activeCanvasId) : null;
     const activeCanvasType = activeCanvasInfo?.type || 'canvas';
     const [activeCanvasData, setActiveCanvasData] = useState<CanvasData | null>(null);
+    const [splitTabId, setSplitTabId] = useState<string | null>(null);
+    const [splitCanvasData, setSplitCanvasData] = useState<CanvasData | null>(null);
+    const [showNewTabMenu, setShowNewTabMenu] = useState(false);
+    const [showSelectCanvasModal, setShowSelectCanvasModal] = useState(false);
     const [previewItemId, setPreviewItemId] = useState<string | null>(null);
     const [previewCanvasData, setPreviewCanvasData] = useState<CanvasData | null>(null);
     const previewItemInfo = previewItemId ? canvasList.find(c => c.id === previewItemId) : null;
@@ -107,10 +112,23 @@ const CanvasPage: React.FC = () => {
     const [renamingId, setRenamingId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasId: string } | null>(null);
+    const location = useLocation();
+    
     const [viewState, setViewState] = useState<ViewState>(() => {
+        if (location.pathname === '/overview') return 'home';
         const savedTabId = localStorage.getItem('axe_canvas_active_tab_id');
         return savedTabId ? 'canvas' : 'home';
     });
+
+    useEffect(() => {
+        if (location.pathname === '/overview') {
+            setActiveTabId(null);
+            setNavigationStack([]);
+            setActiveCanvasData(null);
+            setViewState('home');
+        }
+    }, [location.pathname]);
+
     const [transitionState, setTransitionState] = useState<'none' | 'closing' | 'opening'>('none');
     const [navHistory, setNavHistory] = useState<string[]>([]);
     const [navHistoryIndex, setNavHistoryIndex] = useState<number>(-1);
@@ -347,6 +365,32 @@ const CanvasPage: React.FC = () => {
         }
         return () => { cancelled = true; };
     }, [activeCanvasId, canvasList]);
+
+    // Load split canvas data when splitTabId changes
+    useEffect(() => {
+        let cancelled = false;
+        if (splitTabId) {
+            const canvas = canvasList.find(c => c.id === splitTabId);
+            if (canvas && (canvas.type === 'canvas' || !canvas.type)) {
+                const cached = getCachedCanvasData(splitTabId);
+                if (cached) {
+                    setSplitCanvasData(cached);
+                } else {
+                    setSplitCanvasData(null);
+                }
+                getCanvasData(splitTabId).then(data => {
+                    if (!cancelled && data) {
+                        setSplitCanvasData(data);
+                    }
+                }).catch(err => {
+                    if (!cancelled) console.error("Error loading split canvas data:", err);
+                });
+            }
+        } else {
+            setSplitCanvasData(null);
+        }
+        return () => { cancelled = true; };
+    }, [splitTabId, canvasList]);
 
     // Load preview canvas data when previewItemId changes
     useEffect(() => {
@@ -797,7 +841,21 @@ const CanvasPage: React.FC = () => {
     const handleContextMenu = useCallback((e: React.MouseEvent, canvasId: string) => {
         e.preventDefault();
         e.stopPropagation();
-        setContextMenu({ x: e.clientX, y: e.clientY, canvasId });
+        
+        const menuHeight = 400;
+        const menuWidth = 200;
+        let x = e.clientX;
+        let y = e.clientY;
+        
+        if (y + menuHeight > window.innerHeight) {
+            y = window.innerHeight - menuHeight - 20;
+            if (y < 10) y = 10;
+        }
+        if (x + menuWidth > window.innerWidth) {
+            x = window.innerWidth - menuWidth - 20;
+        }
+
+        setContextMenu({ x, y, canvasId });
     }, []);
 
     const handleDataChange = useCallback((data: CanvasData) => {
@@ -1201,6 +1259,85 @@ const CanvasPage: React.FC = () => {
         });
     }, [canvasList, expandedFolders, activeCanvasId, renamingId, renameValue, isSidebarExpanded, isTrashView, handleSelectCanvas, handleContextMenu, handleConfirmRename, handleRenameKeyDown, toggleFolder, handleOpenSidebarEmojiPicker, draggedId, dragOverId, dropPosition, handleDragStart, handleDragOver, handleDragLeave, handleDrop, handleDragEnd, activeFilter, sidebarSearch]);
 
+    const renderCanvasPane = (paneCanvasId: string | null, paneCanvasData: CanvasData | null) => {
+        if (!paneCanvasId) {
+            return (
+                <CanvasHome
+                    canvasList={canvasList}
+                    onSelectCanvas={handleSelectCanvas}
+                    onCreateCanvas={handleCreateCanvas}
+                    onCreateItem={(type) => {
+                        setShowCreateModal({ type });
+                        setCreateModalName('');
+                    }}
+                    onDeleteCanvas={handleSoftDeleteCanvas}
+                    onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
+                    onDuplicateCanvas={handleDuplicate}
+                    onUpdateCanvasInfo={handleUpdateCanvasInfo}
+                />
+            );
+        }
+
+        const paneCanvasInfo = canvasList.find(c => c.id === paneCanvasId) || null;
+        const paneCanvasType = paneCanvasInfo?.type || 'canvas';
+
+        if (paneCanvasType === 'space' || paneCanvasType === 'folder') {
+            return (
+                <CanvasHome
+                    activeSpaceId={paneCanvasId}
+                    canvasList={canvasList}
+                    onSelectCanvas={handleSelectCanvas}
+                    onCreateCanvas={handleCreateCanvas}
+                    onCreateItem={(type) => {
+                        setShowCreateModal({ type, parentId: paneCanvasId });
+                        setCreateModalName('');
+                    }}
+                    onDeleteCanvas={handleSoftDeleteCanvas}
+                    onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
+                    onDuplicateCanvas={handleDuplicate}
+                    onUpdateCanvasInfo={handleUpdateCanvasInfo}
+                    onMoveCanvasItem={(sourceId, targetId, position) => {
+                        moveCanvasItem(sourceId, targetId, position, currentWorkspace?.id || '');
+                        reloadCanvasList();
+                    }}
+                />
+            );
+        }
+
+        if (paneCanvasType === 'table') {
+            return <PipelineCanvasView key={paneCanvasId} pipelineId={paneCanvasId} />;
+        }
+
+        if (paneCanvasType === 'page' && paneCanvasInfo) {
+            return (
+                <CanvasRichText 
+                    key={paneCanvasId} 
+                    canvasInfo={paneCanvasInfo} 
+                    onUpdate={() => reloadCanvasList()} 
+                    onSelectCanvas={handleSelectCanvas}
+                />
+            );
+        }
+
+        if (paneCanvasData) {
+            return (
+                <InfiniteCanvas
+                    key={paneCanvasId}
+                    canvasId={paneCanvasId}
+                    data={paneCanvasData}
+                    onDataChange={handleDataChange}
+                    onOpenPage={handleOpenPage}
+                    onCanvasCreated={() => reloadCanvasList()}
+                    onNodesDeleted={handleNodesDeleted}
+                    workspaceId={currentWorkspace?.id || ''}
+                    ownerId={user?.id || ''}
+                />
+            );
+        }
+
+        return <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>Carregando dados...</div>;
+    };
+
     return (
         <div className={styles.pageContainer}>
 
@@ -1573,9 +1710,26 @@ const CanvasPage: React.FC = () => {
                                         <DynamicIcon name={tab.icon || getDefaultIconForType(tab.type)} size={12} />
                                     </span>
                                     <span className={styles.tabTitle}>{tab.name}</span>
+                                    {isActive && (
+                                        <button
+                                            className={styles.tabCloseBtn}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSplitTabId(prev => prev ? null : activeTabId);
+                                            }}
+                                            title="Dividir Janela"
+                                            style={{ marginRight: 2 }}
+                                        >
+                                            <Columns size={12} />
+                                        </button>
+                                    )}
                                     <button
                                         className={styles.tabCloseBtn}
-                                        onClick={(e) => handleCloseTab(tab.id, e)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleCloseTab(tab.id, e);
+                                            if (splitTabId === tab.id) setSplitTabId(null);
+                                        }}
                                     >
                                         <X size={12} />
                                     </button>
@@ -1583,16 +1737,25 @@ const CanvasPage: React.FC = () => {
                             );
                         })}
                         {/* New Tab Button (+) */}
-                        <button
-                            className={styles.tabAddBtn}
-                            onClick={() => {
-                                setShowCreateModal({ type: 'page' });
-                                setCreateModalName('');
-                            }}
-                            title="Nova página"
-                        >
-                            <Plus size={14} />
-                        </button>
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                            <button
+                                className={styles.tabAddBtn}
+                                onClick={() => setShowNewTabMenu(prev => !prev)}
+                                title="Nova aba"
+                            >
+                                <Plus size={14} />
+                            </button>
+                            {showNewTabMenu && (
+                                <div className={styles.newTabMenuContainer}>
+                                    <button className={styles.newTabMenuItem} onClick={() => { setShowCreateModal({ type: 'page' }); setCreateModalName(''); setShowNewTabMenu(false); }}>
+                                        <Plus size={14} /> Criar Novo
+                                    </button>
+                                    <button className={styles.newTabMenuItem} onClick={() => { setShowSelectCanvasModal(true); setShowNewTabMenu(false); }}>
+                                        <Folder size={14} /> Selecionar Existente
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -1645,81 +1808,21 @@ const CanvasPage: React.FC = () => {
                 </div>
 
                 {viewState === 'home' ? (
-                    <CanvasHome
-                        canvasList={canvasList}
-                        onSelectCanvas={handleSelectCanvas}
-                        onCreateCanvas={handleCreateCanvas}
-                        onCreateItem={(type) => {
-                            setShowCreateModal({ type });
-                            setCreateModalName('');
-                        }}
-                        onDeleteCanvas={handleSoftDeleteCanvas}
-                        onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
-                        onDuplicateCanvas={handleDuplicate}
-                        onUpdateCanvasInfo={handleUpdateCanvasInfo}
-                        onMoveCanvasItem={(sourceId, targetId, position) => {
-                            moveCanvasItem(sourceId, targetId, position, currentWorkspace?.id || '');
-                            reloadCanvasList();
-                        }}
-                    />
-                ) : activeCanvasId ? (
-                    (activeCanvasType === 'space' || activeCanvasType === 'folder') ? (
-                        <CanvasHome
-                            activeSpaceId={activeCanvasId}
-                            canvasList={canvasList}
-                            onSelectCanvas={handleSelectCanvas}
-                            onCreateCanvas={handleCreateCanvas}
-                            onCreateItem={(type) => {
-                                setShowCreateModal({ type, parentId: activeCanvasId });
-                                setCreateModalName('');
-                            }}
-                            onDeleteCanvas={handleSoftDeleteCanvas}
-                            onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
-                            onDuplicateCanvas={handleDuplicate}
-                            onUpdateCanvasInfo={handleUpdateCanvasInfo}
-                            onMoveCanvasItem={(sourceId, targetId, position) => {
-                                moveCanvasItem(sourceId, targetId, position, currentWorkspace?.id || '');
-                                reloadCanvasList();
-                            }}
-                        />
-                    ) : activeCanvasType === 'table' ? (
-                        <PipelineCanvasView key={activeCanvasId} pipelineId={activeCanvasId} />
-                    ) : activeCanvasType === 'page' && activeCanvasInfo ? (
-                        <CanvasRichText 
-                            key={activeCanvasId} 
-                            canvasInfo={activeCanvasInfo} 
-                            onUpdate={() => reloadCanvasList()} 
-                            onSelectCanvas={handleSelectCanvas}
-                        />
-                    ) : activeCanvasData ? (
-                        <InfiniteCanvas
-                            key={activeCanvasId}
-                            canvasId={activeCanvasId}
-                            data={activeCanvasData}
-                            onDataChange={handleDataChange}
-                            onOpenPage={handleOpenPage}
-                            onCanvasCreated={() => reloadCanvasList()}
-                            onNodesDeleted={handleNodesDeleted}
-                            workspaceId={currentWorkspace?.id || ''}
-                            ownerId={user?.id || ''}
-                        />
-                    ) : (
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>Carregando dados...</div>
-                    )
+                    renderCanvasPane(null, null)
                 ) : (
-                    <CanvasHome
-                        canvasList={canvasList}
-                        onSelectCanvas={handleSelectCanvas}
-                        onCreateCanvas={handleCreateCanvas}
-                        onCreateItem={(type) => {
-                            setShowCreateModal({ type });
-                            setCreateModalName('');
-                        }}
-                        onDeleteCanvas={handleSoftDeleteCanvas}
-                        onRenameCanvas={(id, name) => { renameCanvas(id, name); reloadCanvasList(); }}
-                        onDuplicateCanvas={handleDuplicate}
-                        onUpdateCanvasInfo={handleUpdateCanvasInfo}
-                    />
+                    <div className={styles.splitContainer}>
+                        <div className={styles.splitPane}>
+                            {renderCanvasPane(activeCanvasId, activeCanvasData)}
+                        </div>
+                        {splitTabId && (
+                            <>
+                                <div className={styles.splitDivider} />
+                                <div className={styles.splitPane}>
+                                    {renderCanvasPane(splitTabId, splitCanvasData)}
+                                </div>
+                            </>
+                        )}
+                    </div>
                 )}
 
 
@@ -1856,6 +1959,10 @@ const CanvasPage: React.FC = () => {
                                 <Download size={14} /> Exportar (.axecanvas)
                             </button>
                             <div className={styles.contextMenuDivider} />
+                            <button className={`${styles.contextMenuItem} ${styles.danger}`} onClick={() => handleSoftDeleteCanvas(contextMenu.canvasId)}>
+                                <Trash2 size={14} /> Mover para Lixeira
+                            </button>
+                            <div className={styles.contextMenuDivider} />
                             <div className={styles.contextMenuColors}>
                                 <div className={styles.contextMenuColorTitle}>Cores</div>
                                 <div className={styles.contextMenuColorGrid}>
@@ -1870,10 +1977,6 @@ const CanvasPage: React.FC = () => {
                                     <button className={`${styles.colorSwatch}`} style={{ background: 'rgba(244,114,182,1)' }} onClick={() => handleUpdateColor(contextMenu.canvasId, '244, 114, 182')} title="Rosa" />
                                 </div>
                             </div>
-                            <div className={styles.contextMenuDivider} />
-                            <button className={`${styles.contextMenuItem} ${styles.danger}`} onClick={() => handleSoftDeleteCanvas(contextMenu.canvasId)}>
-                                <Trash2 size={14} /> Mover para Lixeira
-                            </button>
                         </>
                     )}
                 </div>
@@ -2025,6 +2128,41 @@ const CanvasPage: React.FC = () => {
                 </div>
                 );
             })()}
+
+            {/* Select Canvas Modal */}
+            {showSelectCanvasModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowSelectCanvasModal(false)}>
+                    <div className={styles.modalPremium} onClick={e => e.stopPropagation()} style={{ width: '400px', maxWidth: '90vw' }}>
+                        <div className={styles.modalHeader}>
+                            <div>
+                                <h3 className={styles.modalTitle} style={{ color: 'var(--text-primary)' }}>Selecionar Objeto</h3>
+                                <p className={styles.modalSubtitle}>Escolha um item existente para abrir em nova aba</p>
+                            </div>
+                            <button className={styles.modalCloseBtn} style={{ alignSelf: 'flex-start' }} onClick={() => setShowSelectCanvasModal(false)}>
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className={styles.modalBody} style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {canvasList.filter(c => !c.isDeleted).map(c => (
+                                <div
+                                    key={c.id}
+                                    className={styles.tagChildItem}
+                                    style={{ padding: '8px 12px' }}
+                                    onClick={() => {
+                                        handleSelectCanvas(c.id);
+                                        setShowSelectCanvasModal(false);
+                                    }}
+                                >
+                                    <span className={styles.tagChildIcon}>
+                                        <DynamicIcon name={c.icon || getDefaultIconForType(c.type)} size={14} />
+                                    </span>
+                                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{c.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Hidden file input */}
             <input

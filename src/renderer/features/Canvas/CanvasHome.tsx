@@ -50,6 +50,7 @@ import { CanvasListView } from './Home/CanvasListView';
 import { CanvasSpacesGrid } from './Home/CanvasSpacesGrid';
 import { useToast } from '../../context/ToastContext';
 import SpaceOverview from './SpaceOverview';
+import { GlobalOverview } from './GlobalOverview';
 import { MembersManager } from './MembersManager';
 import { ItemPinModal } from './ItemPinModal';
 import styles from './CanvasHome.module.css';
@@ -187,26 +188,56 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
     catch { return true; }
   });
 
-  const [sidebarPosition, setSidebarPosition] = useState<'right' | 'left'>(() => {
-    try { return localStorage.getItem('axe_canvas_sidebar_pos') as 'right' | 'left' || 'right'; }
+  const [layoutMode, setLayoutMode] = useState<'right' | 'left' | 'bottom' | 'full-main' | 'full-side'>(() => {
+    try { return localStorage.getItem('axe_canvas_layout_mode') as any || 'right'; }
     catch { return 'right'; }
   });
 
-  const toggleCreateSpace = useCallback(() => {
-    setShowCreateSpace(prev => {
-      const next = !prev;
-      localStorage.setItem('axe_canvas_show_create_space', JSON.stringify(next));
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+
+  const toggleLayoutMode = useCallback(() => {
+    setLayoutMode(prev => {
+      const order = ['right', 'left', 'bottom', 'full-main', 'full-side'];
+      const nextIdx = (order.indexOf(prev) + 1) % order.length;
+      const next = order[nextIdx] as any;
+      localStorage.setItem('axe_canvas_layout_mode', next);
       return next;
     });
   }, []);
 
-  const toggleSidebarPosition = useCallback(() => {
-    setSidebarPosition(prev => {
-      const next = prev === 'right' ? 'left' : 'right';
-      localStorage.setItem('axe_canvas_sidebar_pos', next);
-      return next;
+  const [fullTextWrap, setFullTextWrap] = useState(() => {
+    try { return localStorage.getItem('axe_canvas_full_wrap') === 'true'; }
+    catch { return false; }
+  });
+
+  const toggleFullTextWrap = useCallback(() => {
+    setFullTextWrap(prev => {
+      localStorage.setItem('axe_canvas_full_wrap', String(!prev));
+      return !prev;
     });
   }, []);
+
+  const handleResizeDrag = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      let newWidth = layoutMode === 'right' ? startWidth - deltaX : startWidth + deltaX;
+      if (newWidth < 200) newWidth = 200;
+      if (newWidth > 800) newWidth = 800;
+      setSidebarWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [sidebarWidth, layoutMode]);
 
   // ── Space Entrance Animation ──
   const [isEnteringSpace, setIsEnteringSpace] = useState<boolean>(false);
@@ -696,6 +727,21 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
                 >
                   <Table2 size={15} />
                 </button>
+                <div className={styles.viewSeparator} />
+                <button
+                  className={`${styles.viewToggle} ${fullTextWrap ? styles.viewToggleActive : ''}`}
+                  onClick={toggleFullTextWrap}
+                  title="Texto por inteiro"
+                >
+                  <List size={15} />
+                </button>
+                <button
+                  className={styles.viewToggle}
+                  onClick={toggleLayoutMode}
+                  title={`Alternar Layout: ${layoutMode}`}
+                >
+                  <Layout size={15} />
+                </button>
               </div>
             </div>
           </div>
@@ -710,11 +756,12 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           </div>
 
       {/* Content */}
-      <div className={styles.content} style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', gap: '24px', flexDirection: sidebarPosition === 'right' ? 'row' : 'row-reverse', alignItems: 'flex-start' }}>
+      <div className={`${styles.content} ${fullTextWrap ? styles.fullTextWrap : ''}`} style={{ position: 'relative', zIndex: 1 }}>
+        <div className={`${styles.layoutWrapper} ${styles[`layout-${layoutMode}`]}`}>
           
           {/* Main Column */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          {layoutMode !== 'full-side' && (
+            <div className={styles.mainColumn} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
         {!activeSpaceId && (
           <CanvasSpacesGrid
@@ -809,16 +856,33 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
           </>
         )}
           </div>
+          )}
           
+          {/* Resizer */}
+          {layoutMode !== 'bottom' && layoutMode !== 'full-main' && layoutMode !== 'full-side' && (
+            <div 
+              className={styles.columnResizer} 
+              onMouseDown={handleResizeDrag}
+            />
+          )}
+
           {/* Sidebar Column */}
-          {regularItems.length > 0 && (
-            <div style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          {regularItems.length > 0 && layoutMode !== 'full-main' && (
+            <div 
+               className={styles.sidebarColumn} 
+               style={{ 
+                 width: layoutMode === 'bottom' || layoutMode === 'full-side' ? '100%' : `${sidebarWidth}px`, 
+                 flexShrink: 0, 
+                 display: 'flex', 
+                 flexDirection: 'column' 
+               }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: activeSpaceId ? '0px' : '24px', marginBottom: '16px' }}>
                 <h2 className={styles.sectionTitle} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
                   <FileText size={18} /> {folders.length > 0 || activeSpaceId ? 'Conteúdo' : 'Outros Arquivos'}
                 </h2>
-                <button onClick={toggleSidebarPosition} title="Mover Coluna" style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                  <ArrowLeftRight size={16} />
+                <button onClick={toggleLayoutMode} title="Alternar Layout" style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                  <Layout size={16} />
                 </button>
               </div>
               {renderItemList(regularItems)}
@@ -828,19 +892,11 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
       </div>
       </>
       ) : (
-        <div className={styles.content}>
-          <div className={styles.emptyState}>
-             <div className={styles.emptyIcon}>
-              <Layout size={32} />
-            </div>
-            <h3 className={styles.emptyTitle}>
-              {activeTab} em construção
-            </h3>
-            <p className={styles.emptySubtitle}>
-              Esta área está reservada para futuras funcionalidades da área de trabalho.
-            </p>
-          </div>
-        </div>
+        <GlobalOverview 
+            canvasList={canvasList} 
+            onSelectCanvas={handleItemClick} 
+            setActivePreviewId={setActivePreviewId} 
+        />
       )}
 
       {/* Context Menu */}
