@@ -39,15 +39,21 @@ export const LayoutManager: React.FC = () => {
         const handleOpenExtensions = () => setShowExtensions(true);
         const handleOpenProxies = () => setShowProxiesModal(true);
         const handleOpenMetaClean = () => setShowMetaCleanModal(true);
+        const handleNavigateTo = (e: Event) => {
+            const path = (e as CustomEvent).detail;
+            if (path) navigate(path);
+        };
 
         window.addEventListener('open-extensions-modal', handleOpenExtensions);
         window.addEventListener('open-proxies-modal', handleOpenProxies);
         window.addEventListener('open-metaclean-modal', handleOpenMetaClean);
+        window.addEventListener('navigate-to', handleNavigateTo);
 
         return () => {
             window.removeEventListener('open-extensions-modal', handleOpenExtensions);
             window.removeEventListener('open-proxies-modal', handleOpenProxies);
             window.removeEventListener('open-metaclean-modal', handleOpenMetaClean);
+            window.removeEventListener('navigate-to', handleNavigateTo);
         };
     }, []);
 

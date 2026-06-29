@@ -1016,7 +1016,29 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
                 <div className={styles.onboardingStepsList}>
                   {onboardingSteps.map((step) => (
-                    <div key={step.id} className={`${styles.onboardingStepItem} ${step.done ? styles.onboardingStepDone : ''}`}>
+                    <div 
+                      key={step.id} 
+                      className={`${styles.onboardingStepItem} ${step.done ? styles.onboardingStepDone : ''}`}
+                      onClick={() => {
+                        if (step.done) return;
+                        switch (step.id) {
+                          case 'canvas':
+                            onCreateCanvas();
+                            break;
+                          case 'crm':
+                            if (onCreateItem) onCreateItem('table');
+                            break;
+                          case 'proxy':
+                            window.dispatchEvent(new Event('open-proxies-modal'));
+                            break;
+                          case 'profile':
+                            // Navigate to profiles page
+                            window.dispatchEvent(new CustomEvent('navigate-to', { detail: '/profiles' }));
+                            break;
+                        }
+                      }}
+                      style={{ cursor: step.done ? 'default' : 'pointer' }}
+                    >
                       <div className={styles.onboardingStepCheck}>
                         <div className={styles.checkboxCircle}>
                           {step.done && <Check size={10} strokeWidth={3} className={styles.checkIcon} />}

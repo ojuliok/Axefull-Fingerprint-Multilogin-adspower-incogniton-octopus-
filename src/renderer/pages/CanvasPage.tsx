@@ -210,6 +210,23 @@ const CanvasPage: React.FC = () => {
         reloadCanvasList();
     }, [reloadCanvasList]);
 
+    // Flush pending canvas saves on unmount or window close to prevent data loss
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            if (activeTabId) {
+                flushPendingSave(activeTabId);
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            // Flush on unmount (navigating away from CanvasPage)
+            if (activeTabId) {
+                flushPendingSave(activeTabId);
+            }
+        };
+    }, [activeTabId]);
+
     // Save menuMode preference
     useEffect(() => {
         localStorage.setItem('axe_canvas_menu_mode', menuMode);
