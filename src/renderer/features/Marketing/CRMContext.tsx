@@ -1,30 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { 
-    MarketingSpace,
-    MarketingFolder,
-    MarketingBoard,
-    MarketingGroup,
-    MarketingCardData,
-    getMarketingData, 
-    createSpace as createStorageSpace,
-    updateSpace as updateStorageSpace,
-    deleteSpace as deleteStorageSpace,
-    createFolder as createStorageFolder,
-    updateFolder as updateStorageFolder,
-    deleteFolder as deleteStorageFolder,
-    createBoard as createStorageBoard,
-    updateBoard as updateStorageBoard,
-    deleteBoard as deleteStorageBoard,
-    createGroup as createStorageGroup,
-    updateGroup as updateStorageGroup,
-    deleteGroup as deleteStorageGroup,
-    createMarketingCard as createStorageCard, 
-    updateMarketingCard as updateStorageCard,
-    deleteMarketingCard as deleteStorageCard,
-    moveMarketingCard as moveStorageCard
-} from './marketingStorage';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { MarketingSpace, MarketingFolder, MarketingBoard, MarketingGroup, MarketingCardData } from './marketingStorage';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { getCanvasList, CanvasInfo } from '../Canvas/canvasStorage';
+import { getCanvasList, getCanvasData, saveCanvasData, CanvasInfo } from '../Canvas/canvasStorage';
 
 interface CRMContextType {
     spaces: MarketingSpace[];
@@ -43,21 +21,6 @@ interface CRMContextType {
     selectedLeadId: string | null;
     setSelectedLeadId: (id: string | null) => void;
     
-    // Spaces
-    addSpace: (title: string, description?: string, color?: string, isPrivate?: boolean) => void;
-    updateSpace: (id: string, updates: Partial<MarketingSpace>) => void;
-    deleteSpace: (id: string) => void;
-
-    // Folders
-    addFolder: (spaceId: string, title: string) => void;
-    updateFolder: (id: string, updates: Partial<MarketingFolder>) => void;
-    deleteFolder: (id: string) => void;
-
-    // Boards
-    addBoard: (spaceId: string, folderId: string | null, title: string) => void;
-    updateBoard: (id: string, updates: Partial<MarketingBoard>) => void;
-    deleteBoard: (id: string) => void;
-    
     // Groups
     addGroup: (boardId: string, title: string, color: string) => void;
     updateGroup: (id: string, updates: Partial<MarketingGroup>) => void;
@@ -69,6 +32,9 @@ interface CRMContextType {
     deleteLead: (id: string) => void;
     moveLead: (id: string, groupId: string) => void;
     
+    // Spreadsheets / Columns
+    addImportedData: (boardId: string, newColumns: string[], newCustomColumnNames: Record<string, string>, newGroups: MarketingGroup[], newLeads: MarketingCardData[]) => void;
+
     searchQuery: string;
     setSearchQuery: (query: string) => void;
     filterAssignee: string | null;
@@ -90,144 +56,167 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
     const { currentWorkspace } = useWorkspace();
     const [canvasList, setCanvasList] = useState<CanvasInfo[]>([]);
 
-    useEffect(() => {
-        if (currentWorkspace?.id) {
-            getCanvasList(currentWorkspace.id).then(list => setCanvasList(list));
-        }
-    }, [currentWorkspace?.id]);
-
-    const [spaces, setSpaces] = useState<MarketingSpace[]>([]);
-    const [folders, setFolders] = useState<MarketingFolder[]>([]);
-    const [boards, setBoards] = useState<MarketingBoard[]>([]);
     const [groups, setGroups] = useState<MarketingGroup[]>([]);
     const [leads, setLeads] = useState<MarketingCardData[]>([]);
+    const [columns, setColumns] = useState<string[]>(['status', 'assignee', 'deadline', 'priority', 'notes', 'budget', 'files']);
+    const [customColumnNames, setCustomColumnNames] = useState<Record<string, string>>({});
     
     const [activeSpaceId, setActiveSpaceId] = useState<string | null>(null);
-    const [activeBoardId, setActiveBoardId] = useState<string | null>(null);
+    const [activeBoardId, setActiveBoardId] = useState<string | null>(forcedBoardId || null);
     const [viewMode, setViewMode] = useState<'board' | 'list'>('list');
     const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [filterAssignee, setFilterAssignee] = useState<string | null>(null);
     const [filterPriority, setFilterPriority] = useState<string | null>(null);
 
+    // Track initialization to prevent saving default data back to Supabase unnecessarily
+    const isInitialized = useRef(false);
+
     useEffect(() => {
-        const payload = getMarketingData();
-        setSpaces(payload.spaces);
-        setFolders(payload.folders);
-        setBoards(payload.boards);
-        setGroups(payload.groups);
-        setLeads(payload.leads);
-        
-        if (payload.spaces.length > 0) {
-            setActiveSpaceId(payload.spaces[0].id);
+        if (currentWorkspace?.id) {
+            getCanvasList(currentWorkspace.id).then(list => setCanvasList(list));
         }
+    }, [currentWorkspace?.id]);
+
+    useEffect(() => {
         if (forcedBoardId) {
             setActiveBoardId(forcedBoardId);
-        } else if (payload.boards.length > 0) {
-            setActiveBoardId(payload.boards[0].id);
         }
     }, [forcedBoardId]);
 
-    // Space Actions
-    const addSpace = (title: string, description?: string, color?: string, isPrivate?: boolean) => {
-        const newSpace = createStorageSpace(title, description, color, isPrivate);
-        setSpaces(prev => [...prev, newSpace]);
-        setActiveSpaceId(newSpace.id);
-    };
-    const updateSpaceAction = (id: string, updates: Partial<MarketingSpace>) => {
-        updateStorageSpace(id, updates);
-        setSpaces(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-    };
-    const deleteSpaceAction = (id: string) => {
-        deleteStorageSpace(id);
-        setSpaces(prev => prev.filter(s => s.id !== id));
-        setFolders(prev => prev.filter(f => f.spaceId !== id));
-        const deletedBoards = boards.filter(b => b.spaceId === id).map(b => b.id);
-        setBoards(prev => prev.filter(b => b.spaceId !== id));
-        setGroups(prev => prev.filter(g => !deletedBoards.includes(g.boardId)));
-        setLeads(prev => prev.filter(l => !deletedBoards.includes(l.boardId)));
-        if (activeSpaceId === id) setActiveSpaceId(null);
-    };
+    useEffect(() => {
+        if (!activeBoardId) return;
 
-    // Folder Actions
-    const addFolder = (spaceId: string, title: string) => {
-        const newFolder = createStorageFolder(spaceId, title);
-        setFolders(prev => [...prev, newFolder]);
-    };
-    const updateFolderAction = (id: string, updates: Partial<MarketingFolder>) => {
-        updateStorageFolder(id, updates);
-        setFolders(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
-    };
-    const deleteFolderAction = (id: string) => {
-        deleteStorageFolder(id);
-        setFolders(prev => prev.filter(f => f.id !== id));
-        const deletedBoards = boards.filter(b => b.folderId === id).map(b => b.id);
-        setBoards(prev => prev.filter(b => b.folderId !== id));
-        setGroups(prev => prev.filter(g => !deletedBoards.includes(g.boardId)));
-        setLeads(prev => prev.filter(l => !deletedBoards.includes(l.boardId)));
-    };
+        let isMounted = true;
+        isInitialized.current = false;
 
-    // Board Actions
-    const addBoard = (spaceId: string, folderId: string | null, title: string) => {
-        const newBoard = createStorageBoard(spaceId, folderId, title);
-        const payload = getMarketingData(); // Reload to get the default group
-        setBoards(payload.boards);
-        setGroups(payload.groups);
-        setActiveBoardId(newBoard.id);
-        setActiveSpaceId(spaceId);
-    };
-    const updateBoardAction = (id: string, updates: Partial<MarketingBoard>) => {
-        updateStorageBoard(id, updates);
-        setBoards(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
-    };
-    const deleteBoardAction = (id: string) => {
-        deleteStorageBoard(id);
-        setBoards(prev => prev.filter(b => b.id !== id));
-        setGroups(prev => prev.filter(g => g.boardId !== id));
-        setLeads(prev => prev.filter(l => l.boardId !== id));
-        if (activeBoardId === id) setActiveBoardId(null);
+        getCanvasData(activeBoardId).then(data => {
+            if (!isMounted) return;
+
+            if (data && data.groups && data.groups.length > 0) {
+                setGroups(data.groups);
+                setLeads(data.leads || []);
+                setColumns(data.columns || ['status', 'assignee', 'deadline', 'priority', 'notes', 'budget', 'files']);
+                setCustomColumnNames(data.customColumnNames || {});
+            } else {
+                // Initialize default
+                const defaultGroups: MarketingGroup[] = [
+                    { id: 'group-novo', boardId: activeBoardId, title: 'Novo', color: '#0ea5e9', order: 0 },
+                    { id: 'group-contato', boardId: activeBoardId, title: 'Em Contato', color: '#f59e0b', order: 1 },
+                    { id: 'group-proposta', boardId: activeBoardId, title: 'Proposta', color: '#8b5cf6', order: 2 },
+                    { id: 'group-parado', boardId: activeBoardId, title: 'Parado', color: '#ef4444', order: 3 },
+                    { id: 'group-ganho', boardId: activeBoardId, title: 'Ganho', color: '#10b981', order: 4 },
+                ];
+                setGroups(defaultGroups);
+                setLeads([]);
+                setColumns(['status', 'assignee', 'deadline', 'priority', 'notes', 'budget', 'files']);
+                setCustomColumnNames({});
+                
+                // Immediately save the defaults to Supabase
+                saveCanvasData(activeBoardId, {
+                    ...data,
+                    groups: defaultGroups,
+                    leads: [],
+                    columns: ['status', 'assignee', 'deadline', 'priority', 'notes', 'budget', 'files'],
+                    customColumnNames: {}
+                });
+            }
+            isInitialized.current = true;
+        });
+
+        return () => { isMounted = false; };
+    }, [activeBoardId]);
+
+    const saveStateToSupabase = (newGroups: MarketingGroup[], newLeads: MarketingCardData[], newColumns?: string[], newCustomColumnNames?: Record<string, string>) => {
+        if (!activeBoardId || !isInitialized.current) return;
+        getCanvasData(activeBoardId).then(data => {
+            saveCanvasData(activeBoardId, {
+                ...data,
+                groups: newGroups,
+                leads: newLeads,
+                columns: newColumns || columns,
+                customColumnNames: newCustomColumnNames || customColumnNames
+            });
+        });
     };
 
     // Group Actions
     const addGroup = (boardId: string, title: string, color: string) => {
-        const newGroup = createStorageGroup(boardId, title, color);
-        setGroups(prev => [...prev, newGroup]);
+        const newGroup = { id: uuidv4(), boardId, title, color, order: groups.length };
+        const newGroups = [...groups, newGroup];
+        setGroups(newGroups);
+        saveStateToSupabase(newGroups, leads);
     };
-    const updateGroupAction = (id: string, updates: Partial<MarketingGroup>) => {
-        updateStorageGroup(id, updates);
-        setGroups(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
+    const updateGroup = (id: string, updates: Partial<MarketingGroup>) => {
+        const newGroups = groups.map(g => g.id === id ? { ...g, ...updates } : g);
+        setGroups(newGroups);
+        saveStateToSupabase(newGroups, leads);
     };
-    const deleteGroupAction = (id: string) => {
-        deleteStorageGroup(id);
-        setGroups(prev => prev.filter(g => g.id !== id));
-        setLeads(prev => prev.filter(l => l.groupId !== id));
+    const deleteGroup = (id: string) => {
+        const newGroups = groups.filter(g => g.id !== id);
+        const newLeads = leads.filter(l => l.groupId !== id);
+        setGroups(newGroups);
+        setLeads(newLeads);
+        saveStateToSupabase(newGroups, newLeads);
     };
 
     // Lead Actions
     const addLead = (boardId: string, groupId: string, title: string) => {
-        const newCard = createStorageCard(boardId, groupId, title);
-        setLeads(prev => [...prev, newCard]);
+        const newCard: MarketingCardData = {
+            id: uuidv4(), boardId, groupId, title, description: '', status: 'Novo', priority: 'Média',
+            deadline: null, budget: 0, notes: '', assignee: 'Não atribuído', createdAt: Date.now(), updatedAt: Date.now()
+        };
+        const newLeads = [...leads, newCard];
+        setLeads(newLeads);
+        saveStateToSupabase(groups, newLeads);
     };
-    const updateLeadAction = (id: string, updates: Partial<MarketingCardData>) => {
-        updateStorageCard(id, updates);
-        setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, ...updates, updatedAt: Date.now() } : lead));
+    const updateLead = (id: string, updates: Partial<MarketingCardData>) => {
+        const newLeads = leads.map(lead => lead.id === id ? { ...lead, ...updates, updatedAt: Date.now() } : lead);
+        setLeads(newLeads);
+        saveStateToSupabase(groups, newLeads);
     };
-    const deleteLeadAction = (id: string) => {
-        deleteStorageCard(id);
-        setLeads(prev => prev.filter(lead => lead.id !== id));
+    const deleteLead = (id: string) => {
+        const newLeads = leads.filter(lead => lead.id !== id);
+        setLeads(newLeads);
         if (selectedLeadId === id) setSelectedLeadId(null);
+        saveStateToSupabase(groups, newLeads);
     };
-    const moveLeadAction = (id: string, groupId: string) => {
-        moveStorageCard(id, groupId);
-        setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, groupId, updatedAt: Date.now() } : lead));
+    const moveLead = (id: string, groupId: string) => {
+        const newLeads = leads.map(lead => lead.id === id ? { ...lead, groupId, updatedAt: Date.now() } : lead);
+        setLeads(newLeads);
+        saveStateToSupabase(groups, newLeads);
+    };
+
+    // Spreadsheet Import
+    const addImportedData = (boardId: string, newColumns: string[], newCustomColumnNames: Record<string, string>, newGroups: MarketingGroup[], newLeads: MarketingCardData[]) => {
+        const updatedColumns = Array.from(new Set([...columns, ...newColumns]));
+        const updatedCustomColumnNames = { ...customColumnNames, ...newCustomColumnNames };
+        
+        // Merge groups by title (or just add new ones)
+        const updatedGroups = [...groups];
+        for (const ng of newGroups) {
+            if (!updatedGroups.find(g => g.title === ng.title)) {
+                updatedGroups.push(ng);
+            }
+        }
+        
+        const updatedLeads = [...leads, ...newLeads];
+        
+        setColumns(updatedColumns);
+        setCustomColumnNames(updatedCustomColumnNames);
+        setGroups(updatedGroups);
+        setLeads(updatedLeads);
+        
+        saveStateToSupabase(updatedGroups, updatedLeads, updatedColumns, updatedCustomColumnNames);
     };
 
     const selectedLead = leads.find(l => l.id === selectedLeadId);
-    const activeSpace = spaces.find(s => s.id === activeSpaceId);
-    let activeBoard = boards.find(b => b.id === activeBoardId);
     
-    // Fallback to Canvas Storage if this is a CRM/Table canvas
-    if (!activeBoard && activeBoardId) {
+    // Mapped from CanvasList
+    let activeBoard: MarketingBoard | undefined = undefined;
+    let activeSpace: MarketingSpace | undefined = undefined;
+    
+    if (activeBoardId) {
         const canvas = canvasList.find(c => c.id === activeBoardId);
         if (canvas) {
             activeBoard = {
@@ -236,8 +225,21 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
                 spaceId: canvas.parentId || '',
                 folderId: null,
                 createdAt: canvas.createdAt,
-                updatedAt: canvas.updatedAt
+                columns: columns,
+                customColumnNames: customColumnNames,
+                updatedAt: canvas.updatedAt || canvas.createdAt
             };
+            
+            if (canvas.parentId) {
+                const spaceCanvas = canvasList.find(c => c.id === canvas.parentId);
+                if (spaceCanvas) {
+                    activeSpace = {
+                        id: spaceCanvas.id,
+                        title: spaceCanvas.name,
+                        createdAt: spaceCanvas.createdAt
+                    };
+                }
+            }
         }
     }
 
@@ -250,7 +252,7 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
 
     return (
         <CRMContext.Provider value={{
-            spaces, folders, boards, groups, leads,
+            spaces: [], folders: [], boards: activeBoard ? [activeBoard] : [], groups, leads,
             activeSpaceId, setActiveSpaceId,
             activeBoardId, setActiveBoardId,
             viewMode, setViewMode,
@@ -258,11 +260,9 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
             searchQuery, setSearchQuery,
             filterAssignee, setFilterAssignee,
             filterPriority, setFilterPriority,
-            addSpace, updateSpace: updateSpaceAction, deleteSpace: deleteSpaceAction,
-            addFolder, updateFolder: updateFolderAction, deleteFolder: deleteFolderAction,
-            addBoard, updateBoard: updateBoardAction, deleteBoard: deleteBoardAction,
-            addGroup, updateGroup: updateGroupAction, deleteGroup: deleteGroupAction,
-            addLead, updateLead: updateLeadAction, deleteLead: deleteLeadAction, moveLead: moveLeadAction,
+            addGroup, updateGroup, deleteGroup,
+            addLead, updateLead, deleteLead, moveLead,
+            addImportedData,
             selectedLead, activeSpace, activeBoard, activeGroups, activeLeads
         }}>
             {children}

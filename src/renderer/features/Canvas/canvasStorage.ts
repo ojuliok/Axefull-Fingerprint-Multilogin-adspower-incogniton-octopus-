@@ -50,7 +50,7 @@ export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> 
             createdAt: new Date(row.created_at).getTime(),
             updatedAt: new Date(row.updated_at).getTime(),
             parentId: row.parent_id,
-            type: row.type as any,
+            type: row.properties?.subtype === 'table' ? 'table' : (row.type as any),
             color: row.color,
             isDeleted: row.is_deleted,
             deletedAt: row.deleted_at ? new Date(row.deleted_at).getTime() : undefined,
@@ -107,13 +107,17 @@ export async function createCanvas(workspaceId: string, ownerId: string, name: s
     const emptyData: CanvasData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
     
     try {
+        const actualType = type === 'table' ? 'canvas' : type;
+        const properties = type === 'table' ? { subtype: 'table' } : {};
+        
         const { data, error } = await supabase.from('canvases').insert([{
             id,
             workspace_id: sanitizeUUID(workspaceId),
             owner_id: sanitizeUUID(ownerId),
             parent_id: sanitizeUUID(parentId),
             name,
-            type,
+            type: actualType,
+            properties,
             data: emptyData
         }]).select().single();
         if (error) throw error;
@@ -124,7 +128,7 @@ export async function createCanvas(workspaceId: string, ownerId: string, name: s
             createdAt: new Date(data.created_at).getTime(),
             updatedAt: new Date(data.updated_at).getTime(),
             parentId: data.parent_id,
-            type: data.type as any
+            type: data.properties?.subtype === 'table' ? 'table' : (data.type as any)
         };
     } catch (err) {
         console.error('Error creating canvas', err);

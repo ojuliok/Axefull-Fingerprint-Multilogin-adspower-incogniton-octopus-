@@ -785,9 +785,19 @@ const CanvasPage: React.FC = () => {
 
     const handleDragStart = useCallback((e: React.DragEvent, id: string) => {
         setDraggedId(id);
+        const item = canvasList.find(c => c.id === id);
+        if (item) {
+            e.dataTransfer.setData('application/axe-canvas-item', JSON.stringify({
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                color: item.color,
+                icon: item.icon
+            }));
+        }
         e.dataTransfer.setData('text/plain', id);
-        e.dataTransfer.effectAllowed = 'move';
-    }, []);
+        e.dataTransfer.effectAllowed = 'copyMove';
+    }, [canvasList]);
 
     const handleDragOver = useCallback((e: React.DragEvent, targetId: string, isFolder: boolean) => {
         e.preventDefault();

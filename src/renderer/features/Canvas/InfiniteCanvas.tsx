@@ -2354,6 +2354,39 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const handleDragLeave = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragOver(false); }, []);
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault(); e.stopPropagation(); setIsDragOver(false);
+
+        const canvasItemStr = e.dataTransfer.getData('application/axe-canvas-item');
+        if (canvasItemStr) {
+            try {
+                const itemData = JSON.parse(canvasItemStr);
+                const rect = containerRef.current?.getBoundingClientRect();
+                if (rect) {
+                    const cx = (e.clientX - rect.left - viewport.x) / viewport.zoom;
+                    const cy = (e.clientY - rect.top - viewport.y) / viewport.zoom;
+                    
+                    const newNode: CanvasNode = {
+                        id: genId(),
+                        type: 'page', // Using 'page' to represent a linked mention
+                        x: cx,
+                        y: cy,
+                        width: 180,
+                        height: 50,
+                        content: itemData.name,
+                        targetCanvasId: itemData.id,
+                        zIndex: maxZ() + 1,
+                        color: itemData.color || (itemData.type === 'table' ? '74, 222, 128' : itemData.type === 'page' ? '96, 165, 250' : '192, 132, 252')
+                    };
+                    const updated = [...nodes, newNode];
+                    setNodes(updated);
+                    setSelectedIds(new Set([newNode.id]));
+                    saveData(updated, strokes, viewport);
+                }
+            } catch (err) {
+                console.error("Error dropping canvas item:", err);
+            }
+            return;
+        }
+
         Array.from(e.dataTransfer.files).forEach(file => {
             const r = new FileReader();
             r.onload = () => {
@@ -2363,7 +2396,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
             };
             r.readAsDataURL(file);
         });
-    }, [addImageNode, addDocumentNode]);
+    }, [addImageNode, addDocumentNode, nodes, viewport, maxZ, saveData]);
 
     // ── Grid Style ──
     const gridSize = (24 * (viewport?.zoom || 1)) || 24;
