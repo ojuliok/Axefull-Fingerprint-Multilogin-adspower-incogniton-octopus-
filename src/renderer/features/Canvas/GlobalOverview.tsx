@@ -54,7 +54,13 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
         }
     };
 
-    const renderItem = (item: CanvasInfo, depth: number = 0) => {
+    const renderItem = (item: CanvasInfo, depth: number = 0, visited: Set<string> = new Set()) => {
+        if (visited.has(item.id)) {
+            return null; // Cycle prevention
+        }
+        const nextVisited = new Set(visited);
+        nextVisited.add(item.id);
+
         const children = getChildren(item.id);
         const hasChildren = children.length > 0;
         const isExpanded = expandedIds[item.id];
@@ -99,7 +105,7 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
 
                 {isExpanded && hasChildren && (
                     <div className={styles.childrenContainer}>
-                        {children.map(child => renderItem(child, depth + 1))}
+                        {children.map(child => renderItem(child, depth + 1, nextVisited))}
                     </div>
                 )}
             </div>

@@ -1071,7 +1071,7 @@ const CanvasPage: React.FC = () => {
         }
     }, [expandedFolders, checkPinAndProceed]);
 
-    const renderCanvasTree = useCallback((parentId: string | undefined = undefined, depth: number = 0) => {
+    const renderCanvasTree = useCallback((parentId: string | undefined = undefined, depth: number = 0, visited: Set<string> = new Set()) => {
         if (sidebarSearch.trim() !== '' && parentId !== undefined) {
             return null;
         }
@@ -1098,6 +1098,12 @@ const CanvasPage: React.FC = () => {
         if (items.length === 0) return null;
 
         return items.map(canvas => {
+            if (visited.has(canvas.id)) {
+                return null; // Cycle prevention
+            }
+            const nextVisited = new Set(visited);
+            nextVisited.add(canvas.id);
+
             const hasChildren = canvasList.some(c => c.parentId === canvas.id);
             const isFolderExpanded = expandedFolders.has(canvas.id);
             const isActive = activeCanvasId === canvas.id;
@@ -1201,7 +1207,7 @@ const CanvasPage: React.FC = () => {
 
                     {((hasChildren && isFolderExpanded) || isFolderExpanded) && isSidebarExpanded && (
                         <div className={`${styles.treeChildren} ${styles.treeChildrenConnected}`} style={{ '--tree-depth': depth } as React.CSSProperties}>
-                            {renderCanvasTree(canvas.id, depth + 1)}
+                            {renderCanvasTree(canvas.id, depth + 1, nextVisited)}
                             <div 
                                 className={`${styles.canvasItem} ${styles.addItemRow}`} 
                                 style={{ paddingLeft: `${(depth + 1) * 12 + 8}px` }}
@@ -1211,13 +1217,8 @@ const CanvasPage: React.FC = () => {
                                     setSidebarCreateMenu({ x: rect.left + 20, y: rect.bottom, parentId: canvas.id });
                                 }}
                             >
-                                <div className={styles.chevronWrapper}>
-                                    <div className={styles.folderTogglePlaceholder} />
-                                </div>
-                                <span className={styles.canvasItemIcon} style={{ background: 'transparent', color: 'var(--text-disabled)' }}>
-                                    <Plus size={12} />
-                                </span>
-                                <span className={styles.canvasItemName} style={{ fontSize: '11px', color: 'var(--text-disabled)' }}>Novo Item</span>
+                                <Plus size={12} className={styles.addItemIcon} />
+                                <span>Adicionar item</span>
                             </div>
                         </div>
                     )}

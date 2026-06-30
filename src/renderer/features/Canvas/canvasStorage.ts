@@ -284,12 +284,25 @@ export async function moveCanvasItem(id: string, targetId: string, position: 'be
             const list = JSON.parse(offlineCanvases);
             const found = list.find((c: any) => c.id === id);
             const target = list.find((c: any) => c.id === targetId);
-            if (found) {
-                if (position === 'inside') {
-                    found.parentId = targetId;
-                } else {
-                    found.parentId = target ? target.parentId : null;
+            if (found && target) {
+                const newParentId = position === 'inside' ? targetId : target.parentId;
+                
+                // Prevent circular references
+                const isDescendantOffline = (parent: string, child: string): boolean => {
+                    let current = list.find((c: any) => c.id === parent);
+                    while (current && current.parentId) {
+                        if (current.parentId === child) return true;
+                        current = list.find((c: any) => c.id === current.parentId);
+                    }
+                    return false;
+                };
+
+                if (newParentId === id || (newParentId && isDescendantOffline(newParentId, id))) {
+                    console.warn("Prevented circular reference move in offline mode.");
+                    return;
                 }
+
+                found.parentId = newParentId;
                 found.updatedAt = Date.now();
                 localStorage.setItem('axe_offline_canvases', JSON.stringify(list));
             }
@@ -312,6 +325,36 @@ export async function moveCanvasItem(id: string, targetId: string, position: 'be
             }
         }
         
+        if (newParentId === cleanId) {
+            console.warn("Prevented circular reference move: cannot make item its own parent.");
+            return;
+        }
+
+        // Fetch all canvases in workspace to check descendants
+        if (newParentId) {
+            const { data: allCanvases } = await supabase
+                .from('canvases')
+                .select('id, parent_id')
+                .eq('workspace_id', workspaceId)
+                .eq('is_deleted', false);
+            
+            if (allCanvases) {
+                const isDescendantOnline = (parent: string, child: string): boolean => {
+                    let current = allCanvases.find((c: any) => c.id === parent);
+                    while (current && current.parent_id) {
+                        if (current.parent_id === child) return true;
+                        current = allCanvases.find((c: any) => c.id === current.parent_id);
+                    }
+                    return false;
+                };
+
+                if (isDescendantOnline(newParentId, cleanId)) {
+                    console.warn("Prevented circular reference move: cannot move parent inside/next to its own descendant.");
+                    return;
+                }
+            }
+        }
+
         await supabase.from('canvases').update({
             parent_id: newParentId,
             updated_at: new Date().toISOString()
