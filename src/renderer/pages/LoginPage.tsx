@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Fingerprint, Eye, EyeOff, Loader2, WifiOff, RefreshCw, ArrowLeft, Phone, Monitor } from 'lucide-react';
+import { Fingerprint, Eye, EyeOff, Loader2, WifiOff, RefreshCw, ArrowLeft, Phone, Monitor, Mail } from 'lucide-react';
 
 export type FormMode = 'login' | 'register' | 'forgot-password';
 
@@ -63,9 +63,10 @@ function Field({ label, icon, ...props }: InputProps) {
 interface FormProps {
     mode: FormMode;
     onChangeMode: (mode: FormMode) => void;
+    onRegisterPendingConfirmation?: (name: string, email: string, message: string) => void;
 }
 
-function AuthForm({ mode, onChangeMode }: FormProps) {
+function AuthForm({ mode, onChangeMode, onRegisterPendingConfirmation }: FormProps) {
     const { login, register } = useAuth();
 
     const [name, setName] = useState('');
@@ -139,7 +140,15 @@ function AuthForm({ mode, onChangeMode }: FormProps) {
                 : await register(email, password, name || undefined);
 
             if (!result.success) {
-                setError(result.error ?? 'Ocorreu um erro');
+                if (mode === 'register' && result.error === 'Confirme seu email para ativar a conta.') {
+                    if (onRegisterPendingConfirmation) {
+                        onRegisterPendingConfirmation(name || email.split('@')[0], email, result.error);
+                    } else {
+                        setError(result.error);
+                    }
+                } else {
+                    setError(result.error ?? 'Ocorreu um erro');
+                }
             }
         } finally {
             setLoading(false);
@@ -321,6 +330,11 @@ export interface LoginPageProps {
 export default function LoginPage({ initialMode = 'login', onBack }: LoginPageProps) {
     const { state, retryConnection } = useAuth();
     const [mode, setMode] = useState<FormMode>(initialMode);
+    const [pendingEmailVerification, setPendingEmailVerification] = useState<{
+        name: string;
+        email: string;
+        message: string;
+    } | null>(null);
 
     const getTitle = () => {
         switch (mode) {
@@ -399,18 +413,114 @@ export default function LoginPage({ initialMode = 'login', onBack }: LoginPagePr
                     {state === 'offline' && <OfflineScreen onRetry={retryConnection} />}
 
                     {(state === 'unauthenticated') && (
-                        <div className="flex flex-col gap-6">
-                            <div>
-                                <h2 className="text-xl font-bold text-theme-text">
-                                    {getTitle()}
-                                </h2>
-                                <p className="text-sm text-zinc-400 mt-1">
-                                    {getSubtitle()}
-                                </p>
-                            </div>
+                        pendingEmailVerification ? (
+                            <div className="flex flex-col items-center text-center gap-5 w-full animate-fade-in">
+                                <div className="w-16 h-16 rounded-full bg-blue-600/10 flex items-center justify-center border border-blue-500/20 animate-pulse shadow-inner shadow-blue-500/10">
+                                    <Mail className="w-8 h-8 text-blue-400" />
+                                </div>
+                                
+                                <div>
+                                    <h2 className="text-xl font-bold text-theme-text">
+                                        Olá, {pendingEmailVerification.name}!
+                                    </h2>
+                                    <p className="text-sm text-zinc-400 mt-1 max-w-xs mx-auto">
+                                        {pendingEmailVerification.message}
+                                    </p>
+                                </div>
 
-                            <AuthForm mode={mode} onChangeMode={setMode} />
-                        </div>
+                                <div className="w-48 h-48 my-2 rounded-2xl overflow-hidden shadow-lg shadow-blue-500/5 border border-zinc-800 flex items-center justify-center bg-zinc-900/50">
+                                    <img src="./mail_sent.png" alt="Confirmar Email" className="w-full h-full object-cover" />
+                                </div>
+
+                                <div className="flex flex-col gap-2 w-full">
+                                    <span className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">
+                                        Verificar caixa de entrada:
+                                    </span>
+                                    <div className="flex flex-wrap justify-center gap-2 mt-1">
+                                        {[
+                                            {
+                                                name: 'Gmail',
+                                                color: 'hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 text-zinc-400 border-zinc-800/60 bg-zinc-900/40',
+                                                url: 'https://mail.google.com',
+                                                icon: (
+                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.573l8.073-6.08c1.618-1.214 3.927-.059 3.927 1.964z"/>
+                                                    </svg>
+                                                )
+                                            },
+                                            {
+                                                name: 'Outlook',
+                                                color: 'hover:bg-blue-500/10 hover:border-blue-500/30 hover:text-blue-400 text-zinc-400 border-zinc-800/60 bg-zinc-900/40',
+                                                url: 'https://outlook.live.com',
+                                                icon: (
+                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M0 2.25A.75.75 0 0 1 .75 1.5h14.5a.75.75 0 0 1 .75.75v3.25l7.553 4.532a.75.75 0 0 1 .447.668v8.6a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1-.75-.75V2.25zm16 4.65v8.7l6.5-3.9v-8.7L16 6.9z"/>
+                                                    </svg>
+                                                )
+                                            },
+                                            {
+                                                name: 'Yahoo',
+                                                color: 'hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-400 text-zinc-400 border-zinc-800/60 bg-zinc-900/40',
+                                                url: 'https://mail.yahoo.com',
+                                                icon: (
+                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.07 14.18L7.5 7.5h2.15l2.45 6.02 2.45-6.02h2.15l-3.43 8.68-1.07 2.76h-1.3l-1.07-2.76z"/>
+                                                    </svg>
+                                                )
+                                            },
+                                            {
+                                                name: 'Proton',
+                                                color: 'hover:bg-violet-500/10 hover:border-violet-500/30 hover:text-violet-400 text-zinc-400 border-zinc-800/60 bg-zinc-900/40',
+                                                url: 'https://mail.proton.me',
+                                                icon: (
+                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.55 12.82c-.15.45-.49.81-.95.96L12 16.5l-2.6-1.72c-.46-.15-.8-.51-.95-.96L7.3 9.87c-.15-.45.05-.95.46-1.16L12 6.5l4.24 2.21c.41.21.61.71.46 1.16l-1.15 3.95z"/>
+                                                    </svg>
+                                                )
+                                            }
+                                        ].map(p => (
+                                            <button
+                                                key={p.name}
+                                                type="button"
+                                                onClick={() => window.api.openExternal && window.api.openExternal(p.url)}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all duration-200 hover:scale-[1.03] ${p.color}`}
+                                            >
+                                                {p.icon}
+                                                <span>{p.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setPendingEmailVerification(null)}
+                                    className="mt-2 text-xs text-zinc-500 hover:text-theme-text font-medium transition-colors flex items-center gap-1.5 group font-semibold"
+                                >
+                                    <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
+                                    Alterar dados
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-6 animate-fade-in">
+                                <div>
+                                    <h2 className="text-xl font-bold text-theme-text">
+                                        {getTitle()}
+                                    </h2>
+                                    <p className="text-sm text-zinc-400 mt-1">
+                                        {getSubtitle()}
+                                    </p>
+                                </div>
+
+                                <AuthForm 
+                                    mode={mode} 
+                                    onChangeMode={setMode} 
+                                    onRegisterPendingConfirmation={(name, email, message) => {
+                                        setPendingEmailVerification({ name, email, message });
+                                    }}
+                                />
+                            </div>
+                        )
                     )}
                 </div>
             </div>

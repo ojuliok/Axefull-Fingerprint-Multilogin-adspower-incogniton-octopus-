@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { CanvasNode, CanvasData, Stroke, CanvasConnection, debouncedSaveCanvasData } from '../canvasStorage';
 
-export type ActiveTool = 'select' | 'hand' | 'rectangle' | 'diamond' | 'ellipse' | 'line' | 'arrow' | 'triangle' | 'blockArrow' | 'elbowArrow' | 'pen' | 'arrowPen';
+export type ActiveTool = 'select' | 'hand' | 'rectangle' | 'diamond' | 'ellipse' | 'line' | 'arrow' | 'triangle' | 'blockArrow' | 'elbowArrow' | 'pen' | 'arrowPen' | 'freetext' | 'frame';
 
 interface CanvasStateContextType {
     canvasId: string;

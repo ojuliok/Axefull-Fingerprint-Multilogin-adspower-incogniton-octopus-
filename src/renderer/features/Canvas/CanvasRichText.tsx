@@ -64,7 +64,7 @@ const CanvasRichText: React.FC<CanvasRichTextProps> = ({ canvasInfo, onUpdate, o
             try {
                 const result = await window.api.profiles.list();
                 if (result && result.success) {
-                    setProfiles(result.data);
+                    setProfiles(result.data as any[]);
                 }
             } catch (err) {
                 console.error("Error loading profiles in Rich Text editor:", err);

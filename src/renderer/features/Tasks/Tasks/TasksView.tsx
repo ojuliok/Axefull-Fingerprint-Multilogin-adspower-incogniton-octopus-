@@ -11,8 +11,12 @@ import TasksKanbanView from './TasksKanbanView';
 import CustomDatePicker from './CustomDatePicker';
 import CreateTaskCalendarModal from './CreateTaskCalendarModal';
 import { usePomodoro } from '../../../context/PomodoroContext';
+import { useWorkspace } from '../../../context/WorkspaceContext';
 
 const TasksView: React.FC = () => {
+    const { currentWorkspace } = useWorkspace();
+    const workspaceId = currentWorkspace?.id || 'default-workspace';
+    
     const [tasks, setTasks] = useState<TaskData[]>([]);
     const [spaces, setSpaces] = useState<TaskSpace[]>([]);
     const [activeSpaceId, setActiveSpaceId] = useState<string>('all');
@@ -63,13 +67,13 @@ const TasksView: React.FC = () => {
     const { 
         pomodoroMode, pomodoroSeconds, isPomodoroRunning, setIsPomodoroRunning, setPomodoroMode,
         activeTask, setActiveTask, handleModeChange, getSecondsForMode, formatPomodoroTime,
-        isFloating, setIsFloating
+        isFloating, setIsFloating, setPomodoroSeconds
     } = usePomodoro();
 
     useEffect(() => {
         // Load initial local data
-        setTasks(getTasksData());
-        const loadedSpaces = getTasksSpaces();
+        setTasks(getTasksData(workspaceId));
+        const loadedSpaces = getTasksSpaces(workspaceId);
         setSpaces(loadedSpaces);
         if (loadedSpaces.length > 0) {
             setActiveSpaceId(loadedSpaces[0].id);
@@ -77,8 +81,8 @@ const TasksView: React.FC = () => {
 
         // Sync from Supabase asynchronously
         import('./tasksStorage').then(async (storage) => {
-            const syncedTasks = await storage.syncTasksFromSupabase();
-            const syncedSpaces = await storage.syncTaskSpacesFromSupabase();
+            const syncedTasks = await storage.syncTasksFromSupabase(workspaceId);
+            const syncedSpaces = await storage.syncTaskSpacesFromSupabase(workspaceId);
             setTasks(syncedTasks);
             setSpaces(syncedSpaces);
             if (syncedSpaces.length > 0) {
@@ -86,7 +90,7 @@ const TasksView: React.FC = () => {
                 setActiveSpaceId(prev => spaceIds.includes(prev) ? prev : syncedSpaces[0].id);
             }
         });
-    }, []);
+    }, [workspaceId]);
 
     // Listen for switch-tasks-tab event
     useEffect(() => {
@@ -130,7 +134,7 @@ const TasksView: React.FC = () => {
         if (!inlineTaskTitle.trim()) return;
         const targetSpace = activeSpaceId === 'all' ? (spaces[0]?.id || 'default') : activeSpaceId;
         
-        const newTask = createTask(inlineTaskTitle.trim(), targetSpace, inlineTaskDate);
+        const newTask = createTask(inlineTaskTitle.trim(), targetSpace, inlineTaskDate, 'todo', 'task', '', null, null, [], workspaceId);
         setTasks([...tasks, newTask]);
         
         setIsCreatingInline(false);
@@ -152,7 +156,7 @@ const TasksView: React.FC = () => {
             defaultValue: '',
             onSubmit: (title) => {
                 const targetSpace = activeSpaceId === 'all' ? (spaces[0]?.id || 'default') : activeSpaceId;
-                const newTask = createTask(title, targetSpace, null, status);
+                const newTask = createTask(title, targetSpace, null, status, 'task', '', null, null, [], workspaceId);
                 setTasks(prev => [...prev, newTask]);
             }
         });
@@ -181,9 +185,10 @@ const TasksView: React.FC = () => {
             'todo',
             data.type,
             data.description,
-            data.startTime,
-            data.endTime,
-            data.guests
+            data.startTime || null,
+            data.endTime || null,
+            data.guests || [],
+            workspaceId
         );
         setTasks(prev => [...prev, newTask]);
         setIsCreateCalendarOpen(false);
@@ -202,14 +207,14 @@ const TasksView: React.FC = () => {
     const goToday = () => setCurrentDate(new Date());
 
     const handleUpdateTaskTime = (taskId: string, updates: Partial<TaskData>) => {
-        updateTask(taskId, updates);
+        updateTask(taskId, updates, workspaceId);
         setTasks(prevTasks => prevTasks.map(t => t.id === taskId ? { ...t, ...updates } : t));
     };
 
     const handleToggleTaskStatus = (task: TaskData, e: React.MouseEvent) => {
         e.stopPropagation();
         const newStatus = task.status === 'done' ? 'todo' : 'done';
-        updateTask(task.id, { status: newStatus });
+        updateTask(task.id, { status: newStatus }, workspaceId);
         setTasks(tasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
     };
 
@@ -253,7 +258,7 @@ const TasksView: React.FC = () => {
                                     placeholder: 'Digite o nome do projeto...',
                                     defaultValue: '',
                                     onSubmit: (title) => {
-                                        const ns = createSpace(title);
+                                        const ns = createSpace(title, '#8b5cf6', workspaceId);
                                         setSpaces(prev => [...prev, ns]);
                                         setActiveSpaceId(ns.id);
                                     }
@@ -289,7 +294,7 @@ const TasksView: React.FC = () => {
                                         placeholder: 'Digite o nome do projeto...',
                                         defaultValue: space.title,
                                         onSubmit: (newName) => {
-                                            updateSpace(space.id, { title: newName });
+                                            updateSpace(space.id, { title: newName }, workspaceId);
                                             setSpaces(prev => prev.map(s => s.id === space.id ? { ...s, title: newName } : s));
                                         }
                                     });
@@ -458,7 +463,7 @@ const TasksView: React.FC = () => {
                                                     placeholder: 'Digite o nome do projeto...',
                                                     defaultValue: currentSpace.title,
                                                     onSubmit: (newName) => {
-                                                        updateSpace(activeSpaceId, { title: newName });
+                                                        updateSpace(activeSpaceId, { title: newName }, workspaceId);
                                                         setSpaces(prev => prev.map(s => s.id === activeSpaceId ? { ...s, title: newName } : s));
                                                     }
                                                 });
@@ -544,7 +549,7 @@ const TasksView: React.FC = () => {
                             tasks={filteredTasks} 
                             onTaskClick={setSelectedTask}
                             onUpdate={(updated) => {
-                                updateTask(updated.id, updated);
+                                updateTask(updated.id, updated, workspaceId);
                                 setTasks(tasks.map(t => t.id === updated.id ? updated : t));
                             }}
                             onAddTask={handleCreateTaskInColumn}
@@ -647,7 +652,7 @@ const TasksView: React.FC = () => {
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             if(window.confirm('Excluir tarefa?')) {
-                                                                import('./tasksStorage').then(m => m.deleteTask(task.id));
+                                                                import('./tasksStorage').then(m => m.deleteTask(task.id, workspaceId));
                                                                 setTasks(tasks.filter(t => t.id !== task.id));
                                                             }
                                                         }}
@@ -818,7 +823,7 @@ const TasksView: React.FC = () => {
                     <div className={styles.contextMenuDivider} />
                     <div className={styles.contextMenuItem} onClick={() => {
                         if(window.confirm('Excluir tarefa?')) {
-                            import('./tasksStorage').then(m => m.deleteTask(contextMenu.id));
+                            import('./tasksStorage').then(m => m.deleteTask(contextMenu.id, workspaceId));
                             setTasks(tasks.filter(t => t.id !== contextMenu.id));
                         }
                     }}>🗑️ Excluir Tarefa</div>
@@ -836,7 +841,7 @@ const TasksView: React.FC = () => {
                                                 placeholder: 'Digite o nome do projeto...',
                                                 defaultValue: spaceToRename.title,
                                                 onSubmit: (newName) => {
-                                                    updateSpace(contextMenu.id, { title: newName });
+                                                    updateSpace(contextMenu.id, { title: newName }, workspaceId);
                                                     setSpaces(prev => prev.map(s => s.id === contextMenu.id ? { ...s, title: newName } : s));
                                                 }
                                             });
@@ -844,7 +849,7 @@ const TasksView: React.FC = () => {
                                     }}>✏️ Renomear</div>
                                     <div className={styles.contextMenuItem} onClick={() => {
                                         if(window.confirm('Excluir lista?')) {
-                                            deleteSpace(contextMenu.id);
+                                            deleteSpace(contextMenu.id, workspaceId);
                                             setSpaces(spaces.filter(s => s.id !== contextMenu.id));
                                         }
                                     }}>🗑️ Excluir Lista</div>

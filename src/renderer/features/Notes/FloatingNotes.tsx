@@ -47,7 +47,7 @@ const FloatingNotes: React.FC = () => {
     const handleExpandToOS = async () => {
         setIsNotesFloating(false);
         try {
-            await window.electron.app.openNotesWidget();
+            await window.api.app.openNotesWidget();
         } catch (error) {
             console.error('Failed to open Notes OS widget', error);
         }

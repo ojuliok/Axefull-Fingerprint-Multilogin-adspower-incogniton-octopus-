@@ -59,7 +59,7 @@ export const FloatingBulkActions: React.FC<FloatingBulkActionsProps> = ({
                     <span>Nova FP</span>
                 </button>
                 <button onClick={onMoveToFolder} className="flex items-center gap-2 px-3 py-1.5 hover:bg-theme-border text-theme-text-muted hover:text-theme-text rounded-lg transition-colors text-sm font-medium" title="Mover para Pasta">
-                    <FolderInput size={16} />
+                    <FolderIcon size={16} />
                     <span>Mover</span>
                 </button>
                 <button onClick={onExport} className="flex items-center gap-2 px-3 py-1.5 hover:bg-theme-border text-theme-text-muted hover:text-theme-text rounded-lg transition-colors text-sm font-medium" title="Exportar">

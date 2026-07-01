@@ -2,7 +2,7 @@ import initSqlJs, { Database as SqlJsDatabase, SqlValue } from 'sql.js';
 import path from 'path';
 import fs from 'fs';
 import { app } from 'electron';
-import { getSupabase } from '../supabase-client';
+import { getSupabase } from './supabase-client';
 
 let db: SqlJsDatabase | null = null;
 let dbPath: string = '';

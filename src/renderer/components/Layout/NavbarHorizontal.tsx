@@ -72,7 +72,7 @@ export const NavbarHorizontal: React.FC<NavbarHorizontalProps> = ({
                                         window.dispatchEvent(new CustomEvent('toggle-tasks-sidebar'));
                                     }
                                 } else {
-                                    onViewChange(item.id as ViewType);
+                                    onViewChange(item.id);
                                 }
                             }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all

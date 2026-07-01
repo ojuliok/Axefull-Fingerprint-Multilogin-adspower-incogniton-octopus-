@@ -4,23 +4,25 @@ import { addDays, addWeeks, addMonths, addYears } from 'date-fns';
 import { supabase } from '../../../lib/supabase';
 
 // Helper for pushing to Supabase
-async function pushTaskSpaceToSupabase(space: TaskSpace, action: 'insert' | 'update' | 'remove') {
+async function pushTaskSpaceToSupabase(space: TaskSpace, action: 'insert' | 'update' | 'remove', workspaceId?: string) {
+    if (getStorageMode() === 'offline') return;
     try {
         if (action === 'insert') {
-            await supabase.from('task_spaces').insert([{ 
-                id: space.id, title: space.title, color: space.color, icon: space.icon, created_at: new Date(space.createdAt).toISOString()
+            await supabase.from('nodes').insert([{ 
+                id: space.id, title: space.title, color: space.color, icon: space.icon, type: 'task_board', created_at: new Date(space.createdAt).toISOString(), workspace_id: workspaceId
             }]);
         } else if (action === 'update') {
-            await supabase.from('task_spaces').update({
+            await supabase.from('nodes').update({
                 title: space.title, color: space.color, icon: space.icon
             }).eq('id', space.id);
         } else if (action === 'remove') {
-            await supabase.from('task_spaces').delete().eq('id', space.id);
+            await supabase.from('nodes').delete().eq('id', space.id);
         }
     } catch(e) { console.error('Supabase Sync Error:', e); }
 }
 
-async function pushTaskToSupabase(task: TaskData, action: 'insert' | 'update' | 'remove') {
+async function pushTaskToSupabase(task: TaskData, action: 'insert' | 'update' | 'remove', workspaceId?: string) {
+    if (getStorageMode() === 'offline') return;
     try {
         if (action === 'insert' || action === 'update') {
             task.customFields = {
@@ -33,19 +35,19 @@ async function pushTaskToSupabase(task: TaskData, action: 'insert' | 'update' | 
         if (action === 'insert') {
             await supabase.from('tasks').insert([{
                 id: task.id, title: task.title, description: task.description, status: task.status, priority: task.priority,
-                date: task.date, end_date: task.endDate, start_time: task.startTime, end_time: task.endTime,
-                crm_contact_id: task.crmContactId, space_id: task.spaceId, time_spent: task.timeSpent,
-                google_event_id: task.googleEventId, linked_canvas_ids: task.linkedCanvasIds,
-                custom_fields: task.customFields, tags: task.tags, created_at: new Date(task.createdAt).toISOString(),
-                updated_at: new Date(task.updatedAt).toISOString()
+                node_id: task.spaceId, time_spent_seconds: task.timeSpent,
+                tags: task.tags, created_at: new Date(task.createdAt).toISOString(),
+                updated_at: new Date(task.updatedAt).toISOString(),
+                workspace_id: workspaceId,
+                metadata: { date: task.date, endDate: task.endDate, startTime: task.startTime, endTime: task.endTime, crmContactId: task.crmContactId, googleEventId: task.googleEventId, linkedCanvasIds: task.linkedCanvasIds, customFields: task.customFields, comments: task.comments, recurringRule: task.recurringRule }
             }]);
         } else if (action === 'update') {
             await supabase.from('tasks').update({
                 title: task.title, description: task.description, status: task.status, priority: task.priority,
-                date: task.date, end_date: task.endDate, start_time: task.startTime, end_time: task.endTime,
-                crm_contact_id: task.crmContactId, space_id: task.spaceId, time_spent: task.timeSpent,
-                google_event_id: task.googleEventId, linked_canvas_ids: task.linkedCanvasIds,
-                custom_fields: task.customFields, tags: task.tags, updated_at: new Date(task.updatedAt).toISOString()
+                node_id: task.spaceId, time_spent_seconds: task.timeSpent,
+                tags: task.tags, updated_at: new Date(task.updatedAt).toISOString(),
+                workspace_id: workspaceId,
+                metadata: { date: task.date, endDate: task.endDate, startTime: task.startTime, endTime: task.endTime, crmContactId: task.crmContactId, googleEventId: task.googleEventId, linkedCanvasIds: task.linkedCanvasIds, customFields: task.customFields, comments: task.comments, recurringRule: task.recurringRule }
             }).eq('id', task.id);
         } else if (action === 'remove') {
             await supabase.from('tasks').delete().eq('id', task.id);
@@ -53,6 +55,30 @@ async function pushTaskToSupabase(task: TaskData, action: 'insert' | 'update' | 
     } catch(e) { console.error('Supabase Sync Error:', e); }
 }
 
+
+function getStorageMode(): 'online' | 'offline' {
+    try {
+        return (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online';
+    } catch {
+        return 'online';
+    }
+}
+
+const getStorageKeys = (workspaceId?: string) => {
+    const mode = getStorageMode();
+    const wsSuffix = workspaceId ? `_${workspaceId}` : '_default-workspace';
+    if (mode === 'offline') {
+        return {
+            tasks: `axe_offline_tasks_data_v2${wsSuffix}`,
+            spaces: `axe_offline_tasks_spaces_v1${wsSuffix}`
+        };
+    } else {
+        return {
+            tasks: `axe_tasks_data_v2${wsSuffix}`,
+            spaces: `axe_tasks_spaces_v1${wsSuffix}`
+        };
+    }
+};
 
 export type TaskStatus = 'todo' | 'in-progress' | 'in-review' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
@@ -119,9 +145,9 @@ const STORAGE_KEY = 'axe_tasks_data_v2';
 const SPACES_KEY = 'axe_tasks_spaces_v1';
 const PINNED_TASK_KEY = 'axe_pinned_task_id';
 
-export const getTasksSpaces = (): TaskSpace[] => {
+export const getTasksSpaces = (workspaceId?: string): TaskSpace[] => {
     try {
-        const data = localStorage.getItem(SPACES_KEY);
+        const data = localStorage.getItem(getStorageKeys(workspaceId).spaces);
         if (data) {
             return JSON.parse(data);
         }
@@ -130,12 +156,12 @@ export const getTasksSpaces = (): TaskSpace[] => {
     return [{ id: 'default', title: 'Geral', color: '#8b5cf6', icon: 'List', createdAt: Date.now() }];
 };
 
-export const saveTasksSpaces = (spaces: TaskSpace[]) => {
-    localStorage.setItem(SPACES_KEY, JSON.stringify(spaces));
+export const saveTasksSpaces = (spaces: TaskSpace[], workspaceId?: string) => {
+    localStorage.setItem(getStorageKeys(workspaceId).spaces, JSON.stringify(spaces));
 };
 
-export const createSpace = (title: string, color: string = '#8b5cf6'): TaskSpace => {
-    const spaces = getTasksSpaces();
+export const createSpace = (title: string, color: string = '#8b5cf6', workspaceId?: string): TaskSpace => {
+    const spaces = getTasksSpaces(workspaceId);
     const newSpace: TaskSpace = {
         id: uuidv4(),
         title,
@@ -144,27 +170,27 @@ export const createSpace = (title: string, color: string = '#8b5cf6'): TaskSpace
         createdAt: Date.now()
     };
     spaces.push(newSpace);
-    saveTasksSpaces(spaces);
-    pushTaskSpaceToSupabase(newSpace, 'insert');
+    saveTasksSpaces(spaces, workspaceId);
+    pushTaskSpaceToSupabase(newSpace, 'insert', workspaceId);
     return newSpace;
 };
 
-export const updateSpace = (id: string, updates: Partial<TaskSpace>) => {
-    const spaces = getTasksSpaces();
+export const updateSpace = (id: string, updates: Partial<TaskSpace>, workspaceId?: string) => {
+    const spaces = getTasksSpaces(workspaceId);
     const index = spaces.findIndex(s => s.id === id);
     if (index !== -1) {
         spaces[index] = { ...spaces[index], ...updates };
-        saveTasksSpaces(spaces);
-        pushTaskSpaceToSupabase(spaces[index], 'update');
+        saveTasksSpaces(spaces, workspaceId);
+        pushTaskSpaceToSupabase(spaces[index], 'update', workspaceId);
     }
 };
 
-export const deleteSpace = (id: string) => {
-    const spaces = getTasksSpaces();
-    saveTasksSpaces(spaces.filter(s => s.id !== id));
-    const tasks = getTasksData();
-    saveTasksData(tasks.filter(t => t.spaceId !== id));
-    pushTaskSpaceToSupabase({id} as TaskSpace, 'remove');
+export const deleteSpace = (id: string, workspaceId?: string) => {
+    const spaces = getTasksSpaces(workspaceId);
+    saveTasksSpaces(spaces.filter(s => s.id !== id), workspaceId);
+    const tasks = getTasksData(workspaceId);
+    saveTasksData(tasks.filter(t => t.spaceId !== id), workspaceId);
+    pushTaskSpaceToSupabase({id} as TaskSpace, 'remove', workspaceId);
 };
 
 export const getPinnedTaskId = (): string | null => {
@@ -188,9 +214,9 @@ export const setPinnedTaskId = (taskId: string | null) => {
     }
 };
 
-export const getTasksData = (): TaskData[] => {
+export const getTasksData = (workspaceId?: string): TaskData[] => {
     try {
-        const data = localStorage.getItem(STORAGE_KEY);
+        const data = localStorage.getItem(getStorageKeys(workspaceId).tasks);
         if (data) {
             return JSON.parse(data);
         }
@@ -200,9 +226,9 @@ export const getTasksData = (): TaskData[] => {
     return [];
 };
 
-export const saveTasksData = (tasks: TaskData[]) => {
+export const saveTasksData = (tasks: TaskData[], workspaceId?: string) => {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+        localStorage.setItem(getStorageKeys(workspaceId).tasks, JSON.stringify(tasks));
     } catch (e) {
         console.error('Error saving tasks data', e);
     }
@@ -217,9 +243,10 @@ export const createTask = (
     description: string = '',
     startTime: string | null = null,
     endTime: string | null = null,
-    guests: string[] = []
+    guests: string[] = [],
+    workspaceId?: string
 ): TaskData => {
-    const tasks = getTasksData();
+    const tasks = getTasksData(workspaceId);
     const newTask: TaskData = {
         id: uuidv4(),
         title,
@@ -248,13 +275,13 @@ export const createTask = (
         updatedAt: Date.now()
     };
     tasks.push(newTask);
-    saveTasksData(tasks);
-    pushTaskToSupabase(newTask, 'insert');
+    saveTasksData(tasks, workspaceId);
+    pushTaskToSupabase(newTask, 'insert', workspaceId);
     return newTask;
 };
 
-export const updateTask = (id: string, updates: Partial<TaskData>) => {
-    const tasks = getTasksData();
+export const updateTask = (id: string, updates: Partial<TaskData>, workspaceId?: string) => {
+    const tasks = getTasksData(workspaceId);
     const index = tasks.findIndex(t => t.id === id);
     if (index !== -1) {
         const oldTask = tasks[index];
@@ -276,23 +303,23 @@ export const updateTask = (id: string, updates: Partial<TaskData>) => {
                 subtasks: oldTask.subtasks?.map(s => ({ ...s, completed: false }))
             };
             tasks.push(nextTask);
-            pushTaskToSupabase(nextTask, 'insert');
+            pushTaskToSupabase(nextTask, 'insert', workspaceId);
         }
 
         tasks[index] = { ...oldTask, ...updates, updatedAt: Date.now() };
-        saveTasksData(tasks);
-        pushTaskToSupabase(tasks[index], 'update');
+        saveTasksData(tasks, workspaceId);
+        pushTaskToSupabase(tasks[index], 'update', workspaceId);
     }
 };
 
-export const deleteTask = (id: string) => {
-    const tasks = getTasksData();
-    saveTasksData(tasks.filter(t => t.id !== id));
-    pushTaskToSupabase({id} as TaskData, 'remove');
+export const deleteTask = (id: string, workspaceId?: string) => {
+    const tasks = getTasksData(workspaceId);
+    saveTasksData(tasks.filter(t => t.id !== id), workspaceId);
+    pushTaskToSupabase({id} as TaskData, 'remove', workspaceId);
 };
 
-export const addTaskComment = (taskId: string, content: string, author: string = 'User') => {
-    const tasks = getTasksData();
+export const addTaskComment = (taskId: string, content: string, author: string = 'User', workspaceId?: string) => {
+    const tasks = getTasksData(workspaceId);
     const index = tasks.findIndex(t => t.id === taskId);
     if (index !== -1) {
         const comment: TaskComment = {
@@ -303,77 +330,83 @@ export const addTaskComment = (taskId: string, content: string, author: string =
         };
         tasks[index].comments.push(comment);
         tasks[index].updatedAt = Date.now();
-        saveTasksData(tasks);
+        saveTasksData(tasks, workspaceId);
+        pushTaskToSupabase(tasks[index], 'update', workspaceId);
     }
 };
 
-export const getTasksByCrmContact = (crmContactId: string): TaskData[] => {
-    const tasks = getTasksData();
+export const getTasksByCrmContact = (crmContactId: string, workspaceId?: string): TaskData[] => {
+    const tasks = getTasksData(workspaceId);
     return tasks.filter(t => t.crmContactId === crmContactId);
 };
 
-export const getTasksByCanvasId = (canvasId: string): TaskData[] => {
-    const tasks = getTasksData();
+export const getTasksByCanvasId = (canvasId: string, workspaceId?: string): TaskData[] => {
+    const tasks = getTasksData(workspaceId);
     return tasks.filter(t => t.linkedCanvasIds?.includes(canvasId));
 };
 
-export const linkTaskToCanvas = (taskId: string, canvasId: string) => {
-    const tasks = getTasksData();
+export const linkTaskToCanvas = (taskId: string, canvasId: string, workspaceId?: string) => {
+    const tasks = getTasksData(workspaceId);
     const index = tasks.findIndex(t => t.id === taskId);
     if (index !== -1) {
         if (!tasks[index].linkedCanvasIds) tasks[index].linkedCanvasIds = [];
         if (!tasks[index].linkedCanvasIds.includes(canvasId)) {
             tasks[index].linkedCanvasIds.push(canvasId);
             tasks[index].updatedAt = Date.now();
-            saveTasksData(tasks);
+            saveTasksData(tasks, workspaceId);
+            pushTaskToSupabase(tasks[index], 'update', workspaceId);
         }
     }
 };
 
-export const unlinkTaskFromCanvas = (taskId: string, canvasId: string) => {
-    const tasks = getTasksData();
+export const unlinkTaskFromCanvas = (taskId: string, canvasId: string, workspaceId?: string) => {
+    const tasks = getTasksData(workspaceId);
     const index = tasks.findIndex(t => t.id === taskId);
     if (index !== -1) {
         if (tasks[index].linkedCanvasIds) {
             tasks[index].linkedCanvasIds = tasks[index].linkedCanvasIds.filter(id => id !== canvasId);
             tasks[index].updatedAt = Date.now();
-            saveTasksData(tasks);
+            saveTasksData(tasks, workspaceId);
+            pushTaskToSupabase(tasks[index], 'update', workspaceId);
         }
     }
 };
 
-export const syncTasksFromSupabase = async (): Promise<TaskData[]> => {
+export const syncTasksFromSupabase = async (workspaceId?: string): Promise<TaskData[]> => {
+    if (getStorageMode() === 'offline') return getTasksData(workspaceId);
     try {
-        const { data, error } = await supabase
-            .from('tasks')
-            .select('*');
+        let query = supabase.from('tasks').select('*');
+        if (workspaceId) {
+            query = query.eq('workspace_id', workspaceId);
+        }
+        const { data, error } = await query;
         if (error) {
             console.error('Error fetching tasks from Supabase:', error);
-            return getTasksData();
+            return getTasksData(workspaceId);
         }
         if (data && Array.isArray(data)) {
             const syncedTasks: TaskData[] = data.map((row: any) => {
-                const type = row.custom_fields?.type || 'task';
-                const guests = row.custom_fields?.guests || [];
+                const type = row.metadata?.customFields?.type || 'task';
+                const guests = row.metadata?.customFields?.guests || [];
                 return {
                     id: row.id,
                     title: row.title,
                     description: row.description || '',
                     status: row.status || 'todo',
                     priority: row.priority || 'medium',
-                    date: row.date,
-                    endDate: row.end_date,
-                    startTime: row.start_time,
-                    endTime: row.end_time,
-                    crmContactId: row.crm_contact_id,
-                    spaceId: row.space_id || 'default',
-                    timeSpent: row.time_spent || 0,
-                    comments: row.comments || [],
-                    googleEventId: row.google_event_id,
-                    linkedCanvasIds: row.linked_canvas_ids || [],
-                    customFields: row.custom_fields || {},
+                    date: row.metadata?.date || null,
+                    endDate: row.metadata?.endDate || null,
+                    startTime: row.metadata?.startTime || null,
+                    endTime: row.metadata?.endTime || null,
+                    crmContactId: row.metadata?.crmContactId || null,
+                    spaceId: row.node_id || 'default',
+                    timeSpent: row.time_spent_seconds || 0,
+                    comments: row.metadata?.comments || [],
+                    googleEventId: row.metadata?.googleEventId || null,
+                    linkedCanvasIds: row.metadata?.linkedCanvasIds || [],
+                    customFields: row.metadata?.customFields || {},
                     tags: row.tags || [],
-                    recurringRule: row.recurring_rule || 'none',
+                    recurringRule: row.metadata?.recurringRule || 'none',
                     type,
                     guests,
                     createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
@@ -381,7 +414,7 @@ export const syncTasksFromSupabase = async (): Promise<TaskData[]> => {
                 };
             });
             
-            const localTasks = getTasksData();
+            const localTasks = getTasksData(workspaceId);
             const localMap = new Map(localTasks.map(t => [t.id, t]));
             
             syncedTasks.forEach(synced => {
@@ -392,21 +425,26 @@ export const syncTasksFromSupabase = async (): Promise<TaskData[]> => {
             });
             
             const merged = Array.from(localMap.values());
-            saveTasksData(merged);
+            saveTasksData(merged, workspaceId);
             return merged;
         }
     } catch (e) {
         console.error('Supabase Sync Error:', e);
     }
-    return getTasksData();
+    return getTasksData(workspaceId);
 };
 
-export const syncTaskSpacesFromSupabase = async (): Promise<TaskSpace[]> => {
+export const syncTaskSpacesFromSupabase = async (workspaceId?: string): Promise<TaskSpace[]> => {
+    if (getStorageMode() === 'offline') return getTasksSpaces(workspaceId);
     try {
-        const { data, error } = await supabase.from('task_spaces').select('*');
+        let query = supabase.from('nodes').select('*').eq('type', 'task_board');
+        if (workspaceId) {
+            query = query.eq('workspace_id', workspaceId);
+        }
+        const { data, error } = await query;
         if (error) {
             console.error('Error fetching task spaces from Supabase:', error);
-            return getTasksSpaces();
+            return getTasksSpaces(workspaceId);
         }
         if (data && Array.isArray(data)) {
             const syncedSpaces: TaskSpace[] = data.map((row: any) => ({
@@ -417,18 +455,18 @@ export const syncTaskSpacesFromSupabase = async (): Promise<TaskSpace[]> => {
                 createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now()
             }));
             
-            const localSpaces = getTasksSpaces();
+            const localSpaces = getTasksSpaces(workspaceId);
             const localMap = new Map(localSpaces.map(s => [s.id, s]));
             syncedSpaces.forEach(synced => {
                 localMap.set(synced.id, synced);
             });
             
             const merged = Array.from(localMap.values());
-            saveTasksSpaces(merged);
+            saveTasksSpaces(merged, workspaceId);
             return merged;
         }
     } catch (e) {
         console.error('Supabase Space Sync Error:', e);
     }
-    return getTasksSpaces();
+    return getTasksSpaces(workspaceId);
 };

@@ -35,6 +35,7 @@ export interface CanvasNode {
     browserTabs?: BrowserTab[];
     activeTabId?: string;
     browserProxy?: string;
+    browserResolution?: string;
     opacity?: number;
     borderRadius?: number;
     borderWidth?: number;
@@ -76,6 +77,7 @@ export interface CanvasData {
 export interface CanvasInfo {
     id: string;
     name: string;
+    title?: string;
     createdAt: number;
     updatedAt: number;
     parentId?: string;
@@ -85,6 +87,7 @@ export interface CanvasInfo {
     deletedAt?: number;
     isFavorite?: boolean;
     coverImage?: string;
+    coverPosition?: number;
     description?: string;
     icon?: string;
     properties?: Record<string, string>;

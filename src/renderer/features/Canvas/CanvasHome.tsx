@@ -114,7 +114,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
     if (window.api && window.api.profiles && window.api.profiles.list) {
       window.api.profiles.list().then(res => {
         if (res && res.success) {
-          setProfiles(res.data || []);
+          setProfiles((res.data as any[]) || []);
         }
       }).catch(err => console.error('Failed to load profiles for checklist:', err));
     }
@@ -189,7 +189,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   });
 
   const toggleCreateSpace = useCallback(() => {
-    setShowCreateSpace(prev => {
+    setShowCreateSpace((prev: boolean) => {
       const next = !prev;
       localStorage.setItem('axe_canvas_show_create_space', JSON.stringify(next));
       return next;

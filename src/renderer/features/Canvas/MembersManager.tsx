@@ -26,8 +26,9 @@ export const MembersManager: React.FC<MembersManagerProps> = ({ onClose }) => {
         setTeamLoading(true);
         try {
             const res = await window.api.team.me();
-            if (res.success && res.data && res.data.members) {
-                setTeamMembers(res.data.members);
+            const data = res.data as any;
+            if (res.success && data && data.members) {
+                setTeamMembers(data.members);
             }
         } catch (err) {
             console.error('Error fetching team members:', err);

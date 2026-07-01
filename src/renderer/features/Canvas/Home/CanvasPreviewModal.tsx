@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Trash2, FolderOpen, Maximize2, Minimize2, X } from 'lucide-react';
-import { CanvasInfo, getCanvasData } from '../canvasStorage';
+import { CanvasInfo, getCanvasData, CanvasData } from '../canvasStorage';
 import { DynamicIcon, getDefaultIconForType } from '../CanvasIcons';
 import styles from '../CanvasHome.module.css';
 
@@ -165,7 +165,7 @@ export const CanvasPreviewModal: React.FC<CanvasPreviewModalProps> = ({
                       <em style={{ color: 'var(--text-tertiary)', fontSize: '12px' }}>Canvas vazio</em>
                     ) : (
                       <div style={{ position: 'relative', width: '100%', height: '100%', transform: 'scale(0.3)', transformOrigin: 'center' }}>
-                        {canvasData.nodes.map(n => (
+                        {canvasData.nodes.map((n: any) => (
                           <div 
                             key={n.id} 
                             style={{ 

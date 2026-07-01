@@ -16,7 +16,7 @@ export const ProfileAIScore: React.FC<ProfileAIScoreProps> = ({ profileId, size 
       try {
         const result = await window.api.ai.predictScore(profileId);
         if (isMounted && result.success && result.data) {
-          setScore(result.data.score);
+          setScore((result.data as any).score);
         }
       } catch (err) {
         console.error('Error fetching AI score:', err);

@@ -21,7 +21,7 @@ import InfiniteCanvas from '../features/Canvas/InfiniteCanvas';
 import CanvasHome from '../features/Canvas/CanvasHome';
 import CanvasRichText from '../features/Canvas/CanvasRichText';
 import { DynamicIcon, CANVAS_ICONS, ICON_CATEGORIES, getDefaultIconForType } from '../features/Canvas/CanvasIcons';
-import { PipelineCanvasView } from './PipelinePage';
+import { CRMCanvasView } from './CRMPage';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useAuth } from '../context/AuthContext';
 import { ItemPinModal } from '../features/Canvas/ItemPinModal';
@@ -1273,7 +1273,7 @@ const CanvasPage: React.FC = () => {
         }
 
         if (paneCanvasType === 'table') {
-            return <PipelineCanvasView key={paneCanvasId} pipelineId={paneCanvasId} />;
+            return <CRMCanvasView key={paneCanvasId} boardId={paneCanvasId} />;
         }
 
         if (paneCanvasType === 'page' && paneCanvasInfo) {
@@ -1825,7 +1825,7 @@ const CanvasPage: React.FC = () => {
                             </div>
                             <div className={styles.drawerContent}>
                                 {previewItemInfo.type === 'table' ? (
-                                    <PipelineCanvasView key={`preview-${previewItemId}`} pipelineId={previewItemId} />
+                                    <CRMCanvasView key={`preview-${previewItemId}`} boardId={previewItemId} />
                                 ) : previewItemInfo.type === 'page' ? (
                                     <CanvasRichText 
                                         key={`preview-${previewItemId}`} 

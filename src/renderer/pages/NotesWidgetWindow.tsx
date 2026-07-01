@@ -25,7 +25,7 @@ const NotesWidgetWindow: React.FC = () => {
 
     const handleClose = async () => {
         try {
-            await window.electron.app.closeNotesWidget();
+            await window.api.app.closeNotesWidget();
         } catch (e) {
             console.error('Failed to close widget window', e);
         }

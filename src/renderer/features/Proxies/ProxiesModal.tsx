@@ -76,7 +76,7 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 setAllProfiles(profiles.filter(p => p.category !== 'trash'));
                 const withProxy = profiles
                     .filter(p => p.proxy && p.category !== 'trash')
-                    .map(p => ({ profileId: p.id, profileName: p.name, proxy: p.proxy!, testState: 'idle' as const }));
+                    .map(p => ({ profileId: p.id, profileName: p.name, proxy: p.proxy! as any, testState: 'idle' as const }));
                 setEntries(withProxy);
             }
         } catch {

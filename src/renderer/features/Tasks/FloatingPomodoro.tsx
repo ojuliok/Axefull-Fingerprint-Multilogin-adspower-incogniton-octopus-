@@ -42,7 +42,7 @@ const FloatingPomodoro: React.FC = () => {
     const handleSelectTask = (task: TaskData) => {
         setActiveTask(task);
         setIsPomodoroRunning(true);
-        setPomodoroMode('work');
+        handleModeChange('work');
         setSearchQuery('');
         setIsSearching(false);
     };
@@ -52,7 +52,7 @@ const FloatingPomodoro: React.FC = () => {
         const newTask = createTask(searchQuery.trim());
         setActiveTask(newTask);
         setIsPomodoroRunning(true);
-        setPomodoroMode('work');
+        handleModeChange('work');
         setSearchQuery('');
         setIsSearching(false);
     };
@@ -112,7 +112,7 @@ const FloatingPomodoro: React.FC = () => {
                 const task = JSON.parse(taskDataStr);
                 setActiveTask(task);
                 setIsPomodoroRunning(true);
-                setPomodoroMode('work');
+                handleModeChange('work');
             }
         } catch (err) {
             console.error('Failed to parse dropped task', err);

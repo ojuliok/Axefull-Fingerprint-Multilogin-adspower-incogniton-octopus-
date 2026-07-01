@@ -129,6 +129,7 @@ export interface AppAPI {
     setWebviewProxy: (partitionId: string, proxyUrl: string) => Promise<APIResponse>;
     openNotesWidget: () => Promise<APIResponse>;
     closeNotesWidget: () => Promise<APIResponse>;
+    openExternal: (url: string) => Promise<APIResponse>;
 }
 
 export interface TemplatesAPI {
@@ -241,6 +242,7 @@ export interface ElectronAPI {
     ai: AIAPI;
     cards: CardAPI;
     bulkVideo: BulkVideoAPI;
+    openExternal?: (url: string) => Promise<APIResponse>;
 }
 
 export interface CardAPI {
@@ -396,6 +398,7 @@ contextBridge.exposeInMainWorld('api', {
         setWebviewProxy: (partitionId: string, proxyUrl: string) => ipcRenderer.invoke('app:set-webview-proxy', partitionId, proxyUrl),
         openNotesWidget: () => ipcRenderer.invoke('app:open-notes-widget'),
         closeNotesWidget: () => ipcRenderer.invoke('app:close-notes-widget'),
+        openExternal: (url: string) => ipcRenderer.invoke('app:open-external', url),
     },
     templates: {
         list: () => ipcRenderer.invoke('template:list'),
@@ -479,6 +482,7 @@ contextBridge.exposeInMainWorld('api', {
             return () => ipcRenderer.removeListener('bulk-video:thumbnails-progress', handler);
         },
     },
+    openExternal: (url: string) => ipcRenderer.invoke('app:open-external', url),
 } as ElectronAPI);
 
 // Declare for TypeScript

@@ -19,7 +19,8 @@ import {
   HelpCircle,
   Clock,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Heart
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -170,8 +171,22 @@ export const HomeW97: React.FC = () => {
       width: 550,
       height: 400,
       zIndex: 13
+    },
+    donate: {
+      id: 'donate',
+      title: 'Apoiar o Axe Vault 97',
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      x: 180,
+      y: 100,
+      width: 460,
+      height: 380,
+      zIndex: 14
     }
   });
+
+  const [copiedPix, setCopiedPix] = useState(false);
 
   // ─── START MENU & SELECTED ICON STATE ───────────────
   const [startMenuOpen, setStartMenuOpen] = useState(false);
@@ -316,6 +331,12 @@ export const HomeW97: React.FC = () => {
   const handleUpdateBootDuration = (duration: number) => {
     setBootConfigDuration(duration);
     localStorage.setItem('axe_boot_duration', String(duration));
+  };
+
+  const handleCopyPix = () => {
+    navigator.clipboard.writeText('11988103804');
+    setCopiedPix(true);
+    setTimeout(() => setCopiedPix(false), 2500);
   };
 
   // ─── NEURAL GRAPH STATE ──────────────────────────────
@@ -1163,6 +1184,23 @@ export const HomeW97: React.FC = () => {
           <span className={styles.iconLabel}>Bloco de Notas</span>
         </div>
 
+        {/* Doação / Gratificação Shortcut */}
+        <div
+          className={`${styles.desktopIcon} ${selectedDesktopIcon === 'donate' ? styles.desktopIconSelected : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isMobile) {
+              openWindow('donate');
+            } else {
+              setSelectedDesktopIcon('donate');
+            }
+          }}
+          onDoubleClick={() => openWindow('donate')}
+        >
+          <Heart size={32} strokeWidth={1.5} className="text-red-400 fill-red-400/20" />
+          <span className={styles.iconLabel}>Apoiar Projeto</span>
+        </div>
+
       </div>
 
       {/* ─── RETRO ACTIVE DESKTOP WIDGETS ────────────────── */}
@@ -1686,6 +1724,88 @@ export const HomeW97: React.FC = () => {
         </div>
       )}
 
+      {/* ─── RETRO WINDOW: CONTRIBUIÇÃO / GRATIFICAÇÃO ───── */}
+      {windows.donate.isOpen && (
+        <div
+          className={`${styles.window} ${activeWindowId === 'donate' ? styles.windowActive : ''}`}
+          style={{
+            left: (windows.donate.isMaximized || isMobile) ? 0 : windows.donate.x,
+            top: (windows.donate.isMaximized || isMobile) ? 0 : windows.donate.y,
+            width: (windows.donate.isMaximized || isMobile) ? '100%' : windows.donate.width,
+            height: (windows.donate.isMaximized || isMobile) ? 'calc(100% - 32px)' : windows.donate.height,
+            display: windows.donate.isMinimized ? 'none' : 'flex'
+          }}
+          onClick={() => focusWindow('donate')}
+        >
+          <div className={`${styles.titleBar} ${activeWindowId !== 'donate' ? styles.titleBarInactive : ''}`} onMouseDown={(e) => handleWindowMouseDown('donate', e)}>
+            <div className={styles.titleText}>
+              <Heart size={12} className="text-red-500 fill-red-500" />
+              <span>Contribuição & Gratificação - Axe 97</span>
+            </div>
+            <div className={styles.titleControls}>
+              <button className={styles.titleButton} onClick={(e) => minimizeWindow('donate', e)}>_</button>
+              <button className={styles.titleButton} onClick={(e) => toggleMaximizeWindow('donate', e)}>□</button>
+              <button className={styles.titleButton} onClick={(e) => closeWindow('donate', e)}>X</button>
+            </div>
+          </div>
+          <div className={`${styles.windowBody} overflow-y-auto bg-gray-200 text-black p-3 flex flex-col md:flex-row gap-4 h-full`}>
+            
+            {/* Left side: Pix Key & QR Code */}
+            <div className="flex flex-col items-center gap-3 p-3 bg-white border border-gray-400 w-full md:w-[190px] shrink-0 justify-center">
+              <div className="text-[10px] font-bold text-center text-gray-700 tracking-tight uppercase">Escaneie o QR Code</div>
+              
+              <img 
+                src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=11988103804" 
+                alt="Pix QR Code" 
+                className="w-36 h-36 border border-gray-300 p-1"
+              />
+
+              <div className="w-full flex flex-col items-center gap-1.5 mt-1">
+                <span className="text-[9px] text-gray-500 font-bold uppercase">Chave PIX Celular:</span>
+                <span className="text-xs font-mono font-bold bg-gray-100 border border-gray-300 px-2 py-0.5 rounded select-all text-center w-full truncate">
+                  11988103804
+                </span>
+                <button
+                  onClick={handleCopyPix}
+                  className={`${styles.outset} w-full py-1 text-[10px] font-bold mt-1 bg-gray-300 hover:bg-gray-100 transition-colors flex items-center justify-center gap-1 active:bg-gray-400`}
+                >
+                  {copiedPix ? '✓ Copiado!' : 'Copiar Chave Pix'}
+                </button>
+              </div>
+            </div>
+
+            {/* Right side: Emotional Copy */}
+            <div className="flex-1 flex flex-col gap-2.5 justify-center leading-relaxed">
+              <h3 className="text-sm font-bold text-blue-900 flex items-center gap-1.5">
+                <span>Apoie o Axe Vault</span>
+                <Heart size={14} className="text-red-500 fill-red-500 animate-pulse" />
+              </h3>
+              
+              <p className="text-[11px] text-gray-800 font-medium">
+                Esta plataforma é e sempre será <strong>100% gratuita</strong>, sem anúncios intrusivos e sem comercializar seus dados.
+              </p>
+              
+              <p className="text-[11px] text-gray-700">
+                Construir esta réplica nostálgica do Windows 97 integrada com mapas neurais e dashboards sincronizados exigiu <strong>centenas de horas</strong> de planejamento de interface, design visual pixelado e código minucioso.
+              </p>
+
+              <p className="text-[11px] text-gray-700">
+                Se a nossa ferramenta ajuda a organizar sua rotina de tarefas, documentos de canvas ou gerenciar perfis com facilidade, considere realizar uma contribuição financeira. 
+              </p>
+
+              <p className="text-[11px] text-gray-700">
+                Qualquer valor apoia diretamente o pagamento dos servidores em nuvem do banco de dados e estimula o desenvolvimento constante de novos recursos. Muito obrigado pelo seu suporte!
+              </p>
+
+              <div className="text-[9px] text-right font-bold text-gray-500 mt-1">
+                — Criado com ❤️ pela Equipe Axe Vault
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {/* ─── SYSTEM TASKBAR ────────────────────────────── */}
       <div className={`${styles.taskbar} ${styles.outset}`}>
         
@@ -1726,6 +1846,7 @@ export const HomeW97: React.FC = () => {
                 {win.id === 'documents' && <FolderOpen size={12} className="text-yellow-600" />}
                 {win.id === 'systemAbout' && <Monitor size={12} className="text-blue-600" />}
                 {win.id === 'notes' && <FileText size={12} className="text-yellow-600" />}
+                {win.id === 'donate' && <Heart size={12} className="text-red-500 fill-red-500/20" />}
                 {!isMobile && <span>{win.title}</span>}
               </button>
             );
@@ -1749,19 +1870,19 @@ export const HomeW97: React.FC = () => {
           <div className={styles.startMenuItems}>
             <div className={styles.startMenuItem} onClick={() => { navigate('/profiles'); setStartMenuOpen(false); }}>
               <User size={14} className="text-blue-600" />
-              <span>Multi Perfis</span>
+              <span>Multi Perfis &gt;</span>
             </div>
             <div className={styles.startMenuItem} onClick={() => { navigate('/canvas'); setStartMenuOpen(false); }}>
               <Layers size={14} className="text-amber-500" />
-              <span>Tela Canvas</span>
+              <span>Tela Canvas &gt;</span>
             </div>
             <div className={styles.startMenuItem} onClick={() => { navigate('/tasks'); setStartMenuOpen(false); }}>
               <CheckSquare size={14} className="text-blue-500" />
-              <span>Tarefas</span>
+              <span>Tarefas &gt;</span>
             </div>
             <div className={styles.startMenuItem} onClick={() => { navigate('/dadosclean'); setStartMenuOpen(false); }}>
               <Settings size={14} className="text-emerald-500" />
-              <span>MetaClean</span>
+              <span>MetaClean &gt;</span>
             </div>
 
             <div className={styles.startMenuDivider} />
@@ -1779,19 +1900,24 @@ export const HomeW97: React.FC = () => {
               <FileText size={14} className="text-yellow-600" />
               <span>Bloco de Notas</span>
             </div>
+
+            <div className={styles.startMenuItem} onClick={() => { openWindow('donate'); setStartMenuOpen(false); }}>
+              <Heart size={14} className="text-red-500 fill-red-500/20" />
+              <span>Apoiar Projeto</span>
+            </div>
             
             <div className={styles.startMenuDivider} />
 
             <div className={styles.startMenuItem} onClick={() => { navigate('/settings'); setStartMenuOpen(false); }}>
               <Settings size={14} className="text-gray-600" />
-              <span>Configurações</span>
+              <span>Configurações &gt;</span>
             </div>
 
             <div className={styles.startMenuDivider} />
 
             <div className={styles.startMenuItem} onClick={() => logout()}>
               <LogOut size={14} className="text-red-600" />
-              <span>Desligar (Sair)</span>
+              <span>Desligar (Sair) &gt;</span>
             </div>
           </div>
         </div>

@@ -6,9 +6,12 @@ import { TaskData, getTasksData, updateTask, deleteTask, syncTasksFromSupabase }
 import TaskDetailModal from './TaskDetailModal';
 import styles from './AgendaView.module.css';
 import { useNavigate } from 'react-router-dom';
+import { useWorkspace } from '../../../context/WorkspaceContext';
 
 const AgendaView: React.FC = () => {
     const navigate = useNavigate();
+    const { currentWorkspace } = useWorkspace();
+    const workspaceId = currentWorkspace?.id || 'default-workspace';
     const [tasks, setTasks] = useState<TaskData[]>([]);
     const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
@@ -23,25 +26,25 @@ const AgendaView: React.FC = () => {
 
     useEffect(() => {
         // Load initial local data
-        setTasks(getTasksData());
+        setTasks(getTasksData(workspaceId));
 
         // Perform Supabase Sync
         setLoadingSync(true);
-        syncTasksFromSupabase().then((synced) => {
+        syncTasksFromSupabase(workspaceId).then((synced) => {
             setTasks(synced);
             setLoadingSync(false);
         }).catch(() => setLoadingSync(false));
-    }, []);
+    }, [workspaceId]);
 
     const handleUpdateTask = (taskId: string, updates: Partial<TaskData>) => {
-        updateTask(taskId, updates);
+        updateTask(taskId, updates, workspaceId);
         setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...updates } : t));
     };
 
     const handleDeleteTask = (taskId: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm('Tem certeza que deseja excluir esta agenda?')) {
-            deleteTask(taskId);
+            deleteTask(taskId, workspaceId);
             setTasks(prev => prev.filter(t => t.id !== taskId));
         }
     };

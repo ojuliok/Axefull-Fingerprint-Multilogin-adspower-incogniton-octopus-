@@ -128,9 +128,9 @@ const PageTasksSidebar: React.FC<PageTasksSidebarProps> = ({ canvasId, canvasNam
                 <TaskDetailModal 
                     task={selectedTask}
                     onClose={() => setSelectedTask(null)}
-                    onUpdate={(updated) => {
+                    onUpdate={(taskId, updates) => {
                         loadData();
-                        setSelectedTask(updated);
+                        setSelectedTask(prev => prev && prev.id === taskId ? { ...prev, ...updates } : prev);
                     }}
                 />
             )}

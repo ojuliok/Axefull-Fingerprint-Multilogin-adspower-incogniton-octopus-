@@ -1,0 +1,4 @@
+project_id = "axefull-project"
+
+[functions.hello-world]
+verify_jwt = false

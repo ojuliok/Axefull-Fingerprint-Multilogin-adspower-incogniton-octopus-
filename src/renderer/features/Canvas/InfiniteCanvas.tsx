@@ -338,6 +338,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     // Pasting and Webview Execution States
     const [pasteLinkDialog, setPasteLinkDialog] = useState<{ url: string; x: number; y: number } | null>(null);
     const [runningWebviews, setRunningWebviews] = useState<Set<string>>(new Set());
+    const [fullscreenBrowserId, setFullscreenBrowserId] = useState<string | null>(null);
     const [editingUrlNodeId, setEditingUrlNodeId] = useState<string | null>(null);
     const [editingUrlValue, setEditingUrlValue] = useState('');
 
@@ -366,7 +367,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const [gridSnap, setGridSnap] = useState(false);
 
     // Excalidraw-like Drawing Tool States
-    type ActiveTool = 'select' | 'hand' | 'rectangle' | 'diamond' | 'ellipse' | 'line' | 'arrow' | 'triangle' | 'blockArrow' | 'elbowArrow' | 'pen' | 'arrowPen';
+    type ActiveTool = 'select' | 'hand' | 'rectangle' | 'diamond' | 'ellipse' | 'line' | 'arrow' | 'triangle' | 'blockArrow' | 'elbowArrow' | 'pen' | 'arrowPen' | 'freetext' | 'frame';
     const [activeTool, setActiveTool] = useState<ActiveTool>('select');
     const [isToolLocked, setIsToolLocked] = useState(false);
 
@@ -527,11 +528,12 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         if (window.api && window.api.cards) {
             window.api.cards.get(activeCardId).then(res => {
                 if (res.success && res.data) {
+                    const card = res.data as any;
                     setCardData({
-                        title: res.data.title || 'Novo Card',
-                        content: res.data.content || '',
-                        comments: res.data.comments || [],
-                        checklist: res.data.checklist || []
+                        title: card.title || 'Novo Card',
+                        content: card.content || '',
+                        comments: card.comments || [],
+                        checklist: card.checklist || []
                     });
                 }
             }).catch(err => console.error("Error loading card:", err));
@@ -774,7 +776,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
             try {
                 const result = await window.api.profiles.list();
                 if (result.success) {
-                    setProfiles(result.data);
+                    setProfiles(result.data as any[]);
                 }
             } catch (error) {
                 console.error('Error loading profiles in Canvas:', error);
@@ -2934,6 +2936,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     const isCardNode = node.type === 'card';
                     const isShape = node.type === 'shape';
                     const isBrowserNode = node.type === 'browser';
+                    const isFullscreen = isBrowserNode && fullscreenBrowserId === node.id;
 
                     let nodeClass = styles.nodeCard;
                     if (isFreeText) nodeClass = styles.freeTextNode;
@@ -2951,8 +2954,12 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                             key={node.id}
                             className={`${styles.nodeWrapper} ${isSelected ? styles.selectedWrapper : ''}`}
                             style={{
-                                left: node.x, top: node.y, width: node.width, height: node.height,
-                                zIndex: node.zIndex,
+                                left: isFullscreen ? -viewport.x / viewport.zoom : node.x, 
+                                top: isFullscreen ? -viewport.y / viewport.zoom : node.y, 
+                                width: isFullscreen ? ((containerRef.current?.clientWidth || window.innerWidth) / viewport.zoom) : node.width, 
+                                height: isFullscreen ? ((containerRef.current?.clientHeight || window.innerHeight) / viewport.zoom) : node.height,
+                                zIndex: isFullscreen ? 999999 : node.zIndex,
+                                transition: 'all 0.2s ease-in-out',
                             }}
                             onMouseEnter={() => setHoveredNodeId(node.id)}
                             onMouseLeave={() => setHoveredNodeId(null)}
@@ -3074,7 +3081,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                 placeholder="Página Sem Título"
                                                 autoFocus={isEditing}
                                                 editable={isEditing && !node.isLocked}
-                                                singleLine={true}
+
                                                 style={{ padding: 0, minHeight: 'auto', color: 'inherit' }}
                                             />
                                         </div>
@@ -3200,6 +3207,12 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                             <Lucide.RotateCw size={12} />
                                         </button>
                                         
+                                        <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: '2px', opacity: 0.7 }}
+                                            onClick={(e) => { e.stopPropagation(); setFullscreenBrowserId(fullscreenBrowserId === node.id ? null : node.id); }}
+                                            title="Tela Cheia">
+                                            {fullscreenBrowserId === node.id ? <Lucide.Minimize2 size={12} /> : <Lucide.Maximize2 size={12} />}
+                                        </button>
+                                        
                                         <input 
                                             type="text" 
                                             key={node.activeTabId} /* Remount on tab change to show correct url */
@@ -3213,34 +3226,35 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                     const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserTabs: newTabs } : n);
                                                     setNodes(newNodes);
                                                     saveData(newNodes, strokes, viewport);
-                                                    const wv = document.getElementById(`webview-${node.id}-${node.activeTabId}`) as any;
-                                                    if (wv && wv.loadURL) wv.loadURL(val);
+                                                    // React's src attribute update will handle navigation natively, avoiding ERR_ABORTED race conditions.
                                                 }
                                             }}
                                             onMouseDown={(e) => e.stopPropagation()}
                                             style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-default)', color: '#fff', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', outline: 'none' }}
                                         />
 
-                                        {/* Proxy Button */}
+                                        {/* Settings & Proxy Button */}
                                         <div style={{ position: 'relative' }}>
                                             <button style={{ background: node.browserProxy ? 'rgba(34,197,94,0.2)' : 'transparent', border: '1px solid ' + (node.browserProxy ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)'), color: node.browserProxy ? '#4ade80' : '#a1a1aa', cursor: 'pointer', display: 'flex', padding: '4px 6px', borderRadius: '4px', fontSize: '10px', alignItems: 'center', gap: '4px' }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setProxyConfiguringId(proxyConfiguringId === node.id ? null : node.id);
                                                 }}>
-                                                <Lucide.Shield size={12} /> {node.browserProxy ? 'Proxy ON' : 'Proxy OFF'}
+                                                <Lucide.Settings size={12} /> Config e IP {node.browserProxy ? '(ON)' : ''}
                                             </button>
                                             
                                             {proxyConfiguringId === node.id && (
-                                                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: '#1e293b', border: '1px solid var(--border-default)', borderRadius: '6px', padding: '8px', zIndex: 100, display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '200px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+                                                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: '#1e293b', border: '1px solid var(--border-default)', borderRadius: '6px', padding: '12px', zIndex: 100, display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '240px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
                                                      onMouseDown={(e) => e.stopPropagation()}>
-                                                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600 }}>Configurar Proxy</div>
+                                                    <div style={{ fontSize: '11px', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}><Lucide.Shield size={14} color="#a78bfa" /> Configurações e Fingerprint</div>
+                                                    
+                                                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '4px' }}>Proxy / IP Personalizado:</div>
                                                     <input 
                                                         id={`proxy-input-${node.id}`}
                                                         type="text" 
                                                         defaultValue={node.browserProxy || ''}
-                                                        placeholder="http://ip:porta"
-                                                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-default)', color: '#fff', padding: '4px 6px', borderRadius: '4px', fontSize: '11px', outline: 'none' }}
+                                                        placeholder="http://ip:porta ou vazio"
+                                                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-default)', color: '#fff', padding: '6px', borderRadius: '4px', fontSize: '11px', outline: 'none' }}
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Enter') {
                                                                 e.stopPropagation();
@@ -3256,17 +3270,33 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                             }
                                                         }}
                                                     />
-                                                    <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
-                                                        <button style={{ background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', cursor: 'pointer' }}
+                                                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '8px' }}>Resolução de Tela:</div>
+                                                    <select 
+                                                        id={`resolution-input-${node.id}`}
+                                                        defaultValue={node.browserResolution || 'auto'}
+                                                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-default)', color: '#fff', padding: '6px', borderRadius: '4px', fontSize: '11px', outline: 'none' }}
+                                                    >
+                                                        <option value="auto">Automática (Responsiva)</option>
+                                                        <option value="1920x1080">1920x1080 (Desktop Full HD)</option>
+                                                        <option value="1366x768">1366x768 (Laptop)</option>
+                                                        <option value="1280x720">1280x720 (Desktop HD)</option>
+                                                        <option value="390x844">390x844 (iPhone 12/13/14)</option>
+                                                        <option value="360x800">360x800 (Android Comum)</option>
+                                                    </select>
+
+                                                    <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                                                        <button style={{ background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}
                                                                 onClick={(e) => { e.stopPropagation(); setProxyConfiguringId(null); }}>
                                                             Cancelar
                                                         </button>
-                                                        <button style={{ background: '#a78bfa', border: 'none', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', cursor: 'pointer' }}
+                                                        <button style={{ background: '#a78bfa', border: 'none', color: '#fff', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    const input = document.getElementById(`proxy-input-${node.id}`) as HTMLInputElement;
-                                                                    const newProxy = input ? input.value : '';
-                                                                    const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserProxy: newProxy } : n);
+                                                                    const proxyInput = document.getElementById(`proxy-input-${node.id}`) as HTMLInputElement;
+                                                                    const resInput = document.getElementById(`resolution-input-${node.id}`) as HTMLSelectElement;
+                                                                    const newProxy = proxyInput ? proxyInput.value : '';
+                                                                    const newRes = resInput ? resInput.value : 'auto';
+                                                                    const newNodes = nodes.map(n => n.id === node.id ? { ...n, browserProxy: newProxy, browserResolution: newRes } : n);
                                                                     setNodes(newNodes);
                                                                     saveData(newNodes, strokes, viewport);
                                                                     if (window.api && window.api.app && window.api.app.setWebviewProxy) {
@@ -3284,15 +3314,33 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
 
                                     {/* Webviews */}
                                     <div style={{ flex: 1, position: 'relative', width: '100%', height: '100%', background: '#fff' }}>
-                                        {node.browserTabs?.map(tab => (
-                                            <webview 
-                                                key={tab.id}
-                                                id={`webview-${node.id}-${tab.id}`}
-                                                src={tab.url} 
-                                                partition={`persist:browser-${node.id}`}
-                                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: tab.id === node.activeTabId ? 'flex' : 'none' }}
-                                            />
-                                        ))}
+                                        {node.browserTabs?.map(tab => {
+                                            const isCustomRes = node.browserResolution && node.browserResolution !== 'auto' && node.browserResolution.includes('x');
+                                            const resW = isCustomRes ? parseInt(node.browserResolution!.split('x')[0]) : null;
+                                            const resH = isCustomRes ? parseInt(node.browserResolution!.split('x')[1]) : null;
+                                            const scaleX = (isCustomRes && resW) ? (isFullscreen ? (window.innerWidth / viewport.zoom) / resW : node.width / resW) : 1;
+                                            const scaleY = (isCustomRes && resH) ? (isFullscreen ? (window.innerHeight / viewport.zoom) / resH : node.height / resH) : 1;
+                                            
+                                            return (
+                                                <webview 
+                                                    key={tab.id}
+                                                    id={`webview-${node.id}-${tab.id}`}
+                                                    src={tab.url} 
+                                                    partition={`persist:browser-${node.id}`}
+                                                    useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                                                    style={{ 
+                                                        position: 'absolute', 
+                                                        top: 0, left: 0, 
+                                                        width: isCustomRes ? `${resW}px` : '100%', 
+                                                        height: isCustomRes ? `${resH}px` : '100%', 
+                                                        border: 'none', 
+                                                        display: tab.id === node.activeTabId ? 'flex' : 'none',
+                                                        transform: isCustomRes ? `scale(${scaleX}, ${scaleY})` : 'none',
+                                                        transformOrigin: 'top left'
+                                                    }}
+                                                />
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -4892,7 +4940,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setNodes(prev => {
-                                                const updated = prev.map(n => n.id === ctxNode.id ? { ...n, type: 'document', fileType: 'link' } : n);
+                                                const updated = prev.map(n => n.id === ctxNode.id ? { ...n, type: 'document' as const, fileType: 'link' } : n);
                                                 debouncedSaveCanvasData(canvasId, { nodes: updated, strokes, connections, viewport });
                                                 return updated;
                                             });
@@ -4938,7 +4986,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setNodes(prev => {
-                                            const updated = prev.map(n => n.id === ctxNode.id ? { ...n, type: 'embed' } : n);
+                                            const updated = prev.map(n => n.id === ctxNode.id ? { ...n, type: 'embed' as const } : n);
                                             debouncedSaveCanvasData(canvasId, { nodes: updated, strokes, connections, viewport });
                                             return updated;
                                         });
@@ -5060,7 +5108,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                             type: 'confirm',
                                             message: "Deseja realmente excluir este elemento do canvas?",
                                             onConfirm: () => {
-                                                deleteSelectedElements(new Set([ctxNode.id]));
+                                                if (ctxNode) deleteSelectedElements(new Set([ctxNode.id]));
                                             },
                                             onCancel: () => {}
                                         });

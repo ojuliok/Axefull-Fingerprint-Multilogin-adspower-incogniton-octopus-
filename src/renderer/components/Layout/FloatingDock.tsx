@@ -50,7 +50,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                     return (
                         <button
                             key={item.id}
-                            onClick={() => onViewChange(item.id as ViewType)}
+                            onClick={() => onViewChange(item.id)}
                             className={`relative w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-200 hover:-translate-y-1 hover:scale-110 group
                                 ${item.color}
                                 ${isActive ? 'bg-white/10 scale-105' : 'text-theme-text-muted'}

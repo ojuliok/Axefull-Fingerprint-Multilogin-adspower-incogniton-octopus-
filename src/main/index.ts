@@ -7,23 +7,24 @@ dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 dotenv.config({ path: path.join(__dirname, '..', '..', '..', 'Axefull - CRM', '.env.local') });
 
 import { initDatabase, closeDatabase } from './database/db';
+import { registerAuthHandlers } from './ipc/authIpc';
+import { registerProfileIpcHandlers } from './ipc/profileIpc';
+import { registerBrowserIpcHandlers } from './ipc/browserIpc';
+import { registerDataHandlers } from './ipc/dataIpc';
+import { registerLicenseHandlers } from './ipc/licenseIpc';
+import { registerAiHandlers } from './ipc/aiIpc';
 import {
-    registerIpcHandlers,
-    registerLicenseHandlers,
-    registerAuthHandlers,
-    registerDataHandlers,
-    registerExtensionHandlers,
-    registerTeamHandlers,
-    registerAiHandlers,
-    registerCardHandlers,
     registerAppHandlers,
+    registerExtensionHandlers,
     registerTemplateHandlers,
-    registerProxyPoolHandlers
-} from './ipc-handlers';
-import { registerBulkVideoHandlers } from './ipc/bulkVideoHandlers';
-import { closeAllProfiles } from './browser/browser-engine';
-import { startSupabaseListener, stopSupabaseListener } from './supabase-listener';
-import { startLocalApiServer, stopLocalApiServer } from './local-api/local-api-server';
+    registerProxyPoolHandlers,
+    registerTeamHandlers,
+    registerCardHandlers
+} from './ipc/appIpc';
+import { registerBulkVideoHandlers } from './ipc/bulkVideoIpc';
+import { closeAllProfiles } from './features/browser/browser-engine';
+import { startSupabaseListener, stopSupabaseListener } from './services/supabase-listener';
+import { startLocalApiServer, stopLocalApiServer } from './features/local-api/local-api-server';
 
 let tray: Tray | null = null;
 let mainWindow: BrowserWindow | null = null;
@@ -192,7 +193,8 @@ async function init(): Promise<void> {
 
     // Register IPC handlers
     registerAuthHandlers();
-    registerIpcHandlers();
+    registerProfileIpcHandlers();
+    registerBrowserIpcHandlers();
     registerLicenseHandlers();
     registerDataHandlers();
     registerExtensionHandlers();

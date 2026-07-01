@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import styles from './TaskDetailModal.module.css';
 import { TaskData, updateTask, addTaskComment, setPinnedTaskId, Subtask, RecurringRule } from './tasksStorage';
-import { getMarketingData } from '../../Marketing/marketingStorage';
+import { getMarketingData } from '../../CRM/crmStorage';
 import { useWorkspace } from '../../../context/WorkspaceContext';
 import { getCanvasList, CanvasInfo } from '../../Canvas/canvasStorage';
 import CustomDatePicker from './CustomDatePicker';
@@ -218,7 +218,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpda
                                 onChange={e => setCrmContactId(e.target.value)}
                             >
                                 <option value="">Sem Contato CRM</option>
-                                {leads.map(lead => (
+                                {leads.map((lead: any) => (
                                     <option key={lead.id} value={lead.id}>{lead.title}</option>
                                 ))}
                             </select>

@@ -93,7 +93,7 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
                         )}
                     </div>
                     <div className={styles.itemIcon}>
-                        {getIcon(item.type)}
+                        {getIcon(item.type || 'canvas')}
                     </div>
                     <div className={styles.itemName}>
                         {item.name}
