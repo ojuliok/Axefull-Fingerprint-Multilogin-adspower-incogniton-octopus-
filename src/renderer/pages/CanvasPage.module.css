@@ -1877,3 +1877,121 @@
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
 }
+
+/* Workspace Selector styling */
+.workspaceSelectorWrapper {
+  position: relative;
+  padding: 12px 14px 4px;
+  width: 100%;
+}
+
+.workspaceSelectorBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.workspaceSelectorBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.workspaceIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--brand-primary, #8b5cf6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.workspaceName {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspaceChevron {
+  color: var(--text-tertiary);
+}
+
+.workspaceDropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 14px;
+  right: 14px;
+  margin-top: 4px;
+  background: #18181b;
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  padding: 4px;
+}
+
+.workspaceDropdownItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.workspaceDropdownItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.activeWorkspace {
+  background: rgba(139, 92, 246, 0.1) !important;
+  color: #c4b5fd !important;
+  font-weight: 600;
+}
+
+.workspaceIconMini {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 9px;
+}
+
+.activeWorkspace .workspaceIconMini {
+  background: var(--brand-primary, #8b5cf6);
+}
+
+.workspaceDropdownText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

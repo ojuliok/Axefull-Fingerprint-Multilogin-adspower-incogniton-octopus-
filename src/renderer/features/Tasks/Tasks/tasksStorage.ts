@@ -2,58 +2,97 @@ import { v4 as uuidv4 } from 'uuid';
 import { addDays, addWeeks, addMonths, addYears } from 'date-fns';
 
 import { supabase } from '../../../lib/supabase';
+import { addToSyncQueue } from '../../../lib/syncManager';
 
 // Helper for pushing to Supabase
 async function pushTaskSpaceToSupabase(space: TaskSpace, action: 'insert' | 'update' | 'remove', workspaceId?: string) {
     if (getStorageMode() === 'offline') return;
-    try {
-        if (action === 'insert') {
-            await supabase.from('nodes').insert([{ 
-                id: space.id, title: space.title, color: space.color, icon: space.icon, type: 'task_board', created_at: new Date(space.createdAt).toISOString(), workspace_id: workspaceId
-            }]);
-        } else if (action === 'update') {
-            await supabase.from('nodes').update({
-                title: space.title, color: space.color, icon: space.icon
-            }).eq('id', space.id);
-        } else if (action === 'remove') {
-            await supabase.from('nodes').delete().eq('id', space.id);
+    
+    // Try online synchronous execution first
+    if (navigator.onLine) {
+        try {
+            let error = null;
+            if (action === 'insert') {
+                const res = await supabase.from('nodes').insert([{ 
+                    id: space.id, title: space.title, color: space.color, icon: space.icon, type: 'task_board', created_at: new Date(space.createdAt).toISOString(), workspace_id: workspaceId
+                }]);
+                error = res.error;
+            } else if (action === 'update') {
+                const res = await supabase.from('nodes').update({
+                    title: space.title, color: space.color, icon: space.icon
+                }).eq('id', space.id);
+                error = res.error;
+            } else if (action === 'remove') {
+                const res = await supabase.from('nodes').delete().eq('id', space.id);
+                error = res.error;
+            }
+            if (!error) return; // Success
+        } catch (e) {
+            console.warn('[tasksStorage] Online space sync failed, falling back to sync queue', e);
         }
-    } catch(e) { console.error('Supabase Sync Error:', e); }
+    }
+
+    // Create sync payload (offline fallback)
+    const payload = {
+        id: space.id,
+        title: space.title,
+        color: space.color,
+        icon: space.icon,
+        createdAt: space.createdAt,
+        workspaceId
+    };
+    
+    addToSyncQueue('task_space', action, space.id, payload);
 }
 
 async function pushTaskToSupabase(task: TaskData, action: 'insert' | 'update' | 'remove', workspaceId?: string) {
     if (getStorageMode() === 'offline') return;
-    try {
-        if (action === 'insert' || action === 'update') {
-            task.customFields = {
-                ...task.customFields,
-                type: task.type || task.customFields?.type || 'task',
-                guests: task.guests || task.customFields?.guests || []
-            };
+    
+    const taskPayload = { ...task, workspaceId };
+    if (action === 'insert' || action === 'update') {
+        taskPayload.customFields = {
+            ...task.customFields,
+            type: task.type || task.customFields?.type || 'task',
+            guests: task.guests || task.customFields?.guests || []
+        };
+    }
+
+    // Try online synchronous execution first
+    if (navigator.onLine) {
+        try {
+            let error = null;
+            if (action === 'insert') {
+                const res = await supabase.from('tasks').insert([{
+                    id: task.id, title: task.title, description: task.description, status: task.status, priority: task.priority,
+                    node_id: task.spaceId === 'default' ? null : task.spaceId, time_spent_seconds: task.timeSpent,
+                    tags: task.tags, created_at: new Date(task.createdAt).toISOString(),
+                    updated_at: new Date(task.updatedAt).toISOString(),
+                    workspace_id: workspaceId,
+                    metadata: { date: task.date, endDate: task.endDate, startTime: task.startTime, endTime: task.endTime, crmContactId: task.crmContactId, googleEventId: task.googleEventId, linkedCanvasIds: task.linkedCanvasIds, customFields: taskPayload.customFields, comments: task.comments, recurringRule: task.recurringRule }
+                }]);
+                error = res.error;
+            } else if (action === 'update') {
+                const res = await supabase.from('tasks').update({
+                    title: task.title, description: task.description, status: task.status, priority: task.priority,
+                    node_id: task.spaceId === 'default' ? null : task.spaceId, time_spent_seconds: task.timeSpent,
+                    tags: task.tags, updated_at: new Date(task.updatedAt).toISOString(),
+                    workspace_id: workspaceId,
+                    metadata: { date: task.date, endDate: task.endDate, startTime: task.startTime, endTime: task.endTime, crmContactId: task.crmContactId, googleEventId: task.googleEventId, linkedCanvasIds: task.linkedCanvasIds, customFields: taskPayload.customFields, comments: task.comments, recurringRule: task.recurringRule }
+                }).eq('id', task.id);
+                error = res.error;
+            } else if (action === 'remove') {
+                const res = await supabase.from('tasks').delete().eq('id', task.id);
+                error = res.error;
+            }
+            if (!error) return; // Success
+        } catch (e) {
+            console.warn('[tasksStorage] Online task sync failed, falling back to sync queue', e);
         }
-        
-        if (action === 'insert') {
-            await supabase.from('tasks').insert([{
-                id: task.id, title: task.title, description: task.description, status: task.status, priority: task.priority,
-                node_id: task.spaceId, time_spent_seconds: task.timeSpent,
-                tags: task.tags, created_at: new Date(task.createdAt).toISOString(),
-                updated_at: new Date(task.updatedAt).toISOString(),
-                workspace_id: workspaceId,
-                metadata: { date: task.date, endDate: task.endDate, startTime: task.startTime, endTime: task.endTime, crmContactId: task.crmContactId, googleEventId: task.googleEventId, linkedCanvasIds: task.linkedCanvasIds, customFields: task.customFields, comments: task.comments, recurringRule: task.recurringRule }
-            }]);
-        } else if (action === 'update') {
-            await supabase.from('tasks').update({
-                title: task.title, description: task.description, status: task.status, priority: task.priority,
-                node_id: task.spaceId, time_spent_seconds: task.timeSpent,
-                tags: task.tags, updated_at: new Date(task.updatedAt).toISOString(),
-                workspace_id: workspaceId,
-                metadata: { date: task.date, endDate: task.endDate, startTime: task.startTime, endTime: task.endTime, crmContactId: task.crmContactId, googleEventId: task.googleEventId, linkedCanvasIds: task.linkedCanvasIds, customFields: task.customFields, comments: task.comments, recurringRule: task.recurringRule }
-            }).eq('id', task.id);
-        } else if (action === 'remove') {
-            await supabase.from('tasks').delete().eq('id', task.id);
-        }
-    } catch(e) { console.error('Supabase Sync Error:', e); }
+    }
+    
+    addToSyncQueue('task', action, task.id, taskPayload);
 }
+
 
 
 function getStorageMode(): 'online' | 'offline' {

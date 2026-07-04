@@ -2,7 +2,7 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    background-color: var(--text-primary);
+    background-color: var(--bg-primary, #0f172a);
     padding: 40px 20px;
     display: flex;
     justify-content: center;
@@ -24,14 +24,14 @@
 }
 
 .block:hover {
-    background-color: var(--text-primary);
+    background-color: var(--bg-secondary, #1e293b);
 }
 
 .textBlock {
     width: 100%;
     background: transparent;
     border: none;
-    color: var(--text-primary);
+    color: var(--text-primary, #f1f5f9);
     resize: none;
     font-family: inherit;
     line-height: 1.6;
@@ -40,8 +40,15 @@
     border-radius: 4px;
 }
 
-.textBlock:focus {
-    background-color: var(--text-primary);
+.textBlockEditable {
+    width: 100%;
+    color: var(--text-primary, #f1f5f9);
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+.textBlock:focus, .textBlockEditable:focus {
+    background-color: var(--bg-tertiary, #334155);
 }
 
 .imageBlock {

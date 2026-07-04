@@ -38,9 +38,11 @@ import {
   Box,
   Lock,
   Check,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Globe
 } from 'lucide-react';
 import { CanvasInfo, getCanvasData } from './canvasStorage';
+import { ShareSeoModal } from './components/ShareSeoModal';
 import { CANVAS_ICONS, DynamicIcon } from './CanvasIcons';
 import NeuralBackground from './NeuralBackground';
 import { CanvasPreviewModal } from './Home/CanvasPreviewModal';
@@ -255,6 +257,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   }, [onSelectCanvas]);
   const [showMembersManager, setShowMembersManager] = useState(false);
   const [pinSettingsItem, setPinSettingsItem] = useState<CanvasInfo | null>(null);
+  const [shareSeoItem, setShareSeoItem] = useState<CanvasInfo | null>(null);
   
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -519,7 +522,7 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
 
   // ── Context Menu Actions ──
   const handleMenuAction = useCallback(
-    (action: 'rename' | 'duplicate' | 'delete' | 'change_cover' | 'change_icon' | 'pin') => {
+    (action: 'rename' | 'duplicate' | 'delete' | 'change_cover' | 'change_icon' | 'pin' | 'share_seo') => {
       if (!contextMenu) return;
       const canvas = canvasList.find((c) => c.id === contextMenu.id);
       switch (action) {
@@ -545,10 +548,15 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
             setPinSettingsItem(canvas);
           }
           break;
+        case 'share_seo':
+          if (canvas) {
+            setShareSeoItem(canvas);
+          }
+          break;
       }
       setContextMenu(null);
     },
-    [contextMenu, canvasList, startRename, onDuplicateCanvas, onDeleteCanvas, triggerCoverUpload]
+    [contextMenu, canvasList, startRename, onDuplicateCanvas, onDeleteCanvas, triggerCoverUpload, setShareSeoItem]
   );
 
   const renderItemList = (items: CanvasInfo[]) => {
@@ -946,6 +954,13 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
               <Lock size={15} />
               Senha PIN
             </button>
+            <button
+              className={styles.contextMenuItem}
+              onClick={() => handleMenuAction('share_seo')}
+            >
+              <Globe size={15} />
+              Compartilhar / SEO
+            </button>
             <div className={styles.contextMenuSeparator} />
             <button
               className={`${styles.contextMenuItem} ${styles.contextMenuDanger}`}
@@ -1035,6 +1050,14 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
             onUpdateCanvasInfo(pinSettingsItem.id, { properties: updatedProps });
           }}
           onClose={() => setPinSettingsItem(null)}
+        />
+      )}
+      {shareSeoItem && (
+        <ShareSeoModal
+          isOpen={!!shareSeoItem}
+          onClose={() => setShareSeoItem(null)}
+          item={shareSeoItem}
+          onUpdateCanvasInfo={onUpdateCanvasInfo}
         />
       )}
       {/* ── Onboarding Checklist Widget (Floating Pop-up) ── */}

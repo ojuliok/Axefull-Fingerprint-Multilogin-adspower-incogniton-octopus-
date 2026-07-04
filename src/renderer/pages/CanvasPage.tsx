@@ -6,7 +6,7 @@ import {
     Copy, Download, Upload, ChevronRight, ChevronDown,
     Home, PenTool, FileText, Notebook, Search, Folder, FolderPlus, MessageSquare, Settings2, Box,
     PanelLeftClose, PanelLeftOpen, PanelLeft, MousePointerClick, Smile, Settings, X, ChevronsLeft, LayoutDashboard, KanbanSquare, Star, Compass, Lock, Eye, Maximize2,
-    Menu, ChevronLeft, Columns
+    Menu, ChevronLeft, Columns, Globe
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -26,6 +26,7 @@ import { useWorkspace } from '../context/WorkspaceContext';
 import { useAuth } from '../context/AuthContext';
 import { ItemPinModal } from '../features/Canvas/ItemPinModal';
 import { ItemPinUnlockModal } from '../features/Canvas/ItemPinUnlockModal';
+import { ShareSeoModal } from '../features/Canvas/components/ShareSeoModal';
 
 import styles from './CanvasPage.module.css';
 
@@ -97,7 +98,8 @@ const CanvasPage: React.FC = () => {
     const [previewCanvasData, setPreviewCanvasData] = useState<CanvasData | null>(null);
     const previewItemInfo = previewItemId ? canvasList.find(c => c.id === previewItemId) : null;
     const [isTrashView, setIsTrashView] = useState(false);
-    const { currentWorkspace } = useWorkspace();
+    const { workspaces, currentWorkspace, setCurrentWorkspace } = useWorkspace();
+    const [showWorkspaceDropdown, setShowWorkspaceDropdown] = useState(false);
     const { user } = useAuth();
     
     // Sidebar Opening Mode States
@@ -112,6 +114,7 @@ const CanvasPage: React.FC = () => {
     const [renamingId, setRenamingId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasId: string } | null>(null);
+    const [shareSeoItem, setShareSeoItem] = useState<CanvasInfo | null>(null);
     const location = useLocation();
     
     const [viewState, setViewState] = useState<ViewState>(() => {
@@ -1329,6 +1332,43 @@ const CanvasPage: React.FC = () => {
                         onMouseDown={() => setIsResizing(true)} 
                     />
                 )}
+                
+                {/* Workspace Selector (Notion/Supabase style) */}
+                {isSidebarExpanded && (
+                    <div className={styles.workspaceSelectorWrapper}>
+                        <button 
+                            className={styles.workspaceSelectorBtn}
+                            onClick={() => setShowWorkspaceDropdown(!showWorkspaceDropdown)}
+                        >
+                            <div className={styles.workspaceIcon}>
+                                {currentWorkspace?.name ? currentWorkspace.name.charAt(0).toUpperCase() : 'W'}
+                            </div>
+                            <span className={styles.workspaceName}>{currentWorkspace?.name || 'Workspace'}</span>
+                            <ChevronDown size={14} className={styles.workspaceChevron} />
+                        </button>
+                        
+                        {showWorkspaceDropdown && (
+                            <div className={styles.workspaceDropdownMenu}>
+                                {workspaces.map(ws => (
+                                    <button
+                                        key={ws.id}
+                                        onClick={() => {
+                                            setCurrentWorkspace(ws);
+                                            setShowWorkspaceDropdown(false);
+                                        }}
+                                        className={`${styles.workspaceDropdownItem} ${currentWorkspace?.id === ws.id ? styles.activeWorkspace : ''}`}
+                                    >
+                                        <div className={styles.workspaceIconMini}>
+                                            {ws.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <span className={styles.workspaceDropdownText}>{ws.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Sidebar Header (ClickUp style) */}
                 {/* Sidebar Header matching Reference mockup */}
                 <div className={styles.sidebarHeader}>
@@ -1773,6 +1813,42 @@ const CanvasPage: React.FC = () => {
                             </>
                         )}
                     </div>
+
+                    {viewState === 'canvas' && activeCanvasInfo && (
+                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button 
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    background: 'rgba(139, 92, 246, 0.15)',
+                                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                                    color: '#a78bfa',
+                                    fontSize: '12px',
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease'
+                                }}
+                                onClick={() => setShareSeoItem(activeCanvasInfo)}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.25)';
+                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
+                                    e.currentTarget.style.color = '#c084fc';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
+                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                                    e.currentTarget.style.color = '#a78bfa';
+                                }}
+                                title="Configurações de Compartilhamento & SEO"
+                            >
+                                <Globe size={13} />
+                                <span>Compartilhar</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {viewState === 'home' ? (
@@ -1922,6 +1998,17 @@ const CanvasPage: React.FC = () => {
                                 }}
                             >
                                 <Smile size={14} /> Alterar Ícone
+                            </button>
+                            <button
+                                className={styles.contextMenuItem}
+                                onClick={() => {
+                                    const id = contextMenu.canvasId;
+                                    const item = canvasList.find(c => c.id === id);
+                                    setShareSeoItem(item || null);
+                                    setContextMenu(null);
+                                }}
+                            >
+                                <Globe size={14} /> Compartilhar / SEO
                             </button>
                             <button className={styles.contextMenuItem} onClick={() => triggerCanvasExport(contextMenu.canvasId)}>
                                 <Download size={14} /> Exportar (.axecanvas)
@@ -2186,6 +2273,15 @@ const CanvasPage: React.FC = () => {
                         setPinUnlockItem(null);
                         setOnPinSuccess(null);
                     }}
+                />
+            )}
+
+            {shareSeoItem && (
+                <ShareSeoModal
+                    isOpen={!!shareSeoItem}
+                    onClose={() => setShareSeoItem(null)}
+                    item={shareSeoItem}
+                    onUpdateCanvasInfo={handleUpdateCanvasInfo}
                 />
             )}
 

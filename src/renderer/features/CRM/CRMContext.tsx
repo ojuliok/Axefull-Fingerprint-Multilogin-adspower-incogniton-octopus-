@@ -34,6 +34,7 @@ interface CRMContextType {
     updateLead: (id: string, updates: Partial<MarketingCardData>) => void;
     deleteLead: (id: string) => void;
     moveLead: (id: string, groupId: string) => void;
+    reorderLeadsWithinColumn: (groupId: string, cardIds: string[]) => void;
     
     // Spreadsheets / Columns
     addImportedData: (boardId: string, newColumns: string[], newCustomColumnNames: Record<string, string>, newGroups: MarketingGroup[], newLeads: MarketingCardData[]) => void;
@@ -107,11 +108,11 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
                     setLeads(dbLeads);
                 } else {
                     const defaultGroups: MarketingGroup[] = [
-                        { id: 'group-novo', boardId: activeBoardId, title: 'Novo', color: '#0ea5e9', order: 0 },
-                        { id: 'group-contato', boardId: activeBoardId, title: 'Em Contato', color: '#f59e0b', order: 1 },
-                        { id: 'group-proposta', boardId: activeBoardId, title: 'Proposta', color: '#8b5cf6', order: 2 },
-                        { id: 'group-parado', boardId: activeBoardId, title: 'Parado', color: '#ef4444', order: 3 },
-                        { id: 'group-ganho', boardId: activeBoardId, title: 'Ganho', color: '#10b981', order: 4 },
+                        { id: uuidv4(), boardId: activeBoardId, title: 'Novo', color: '#0ea5e9', order: 0 },
+                        { id: uuidv4(), boardId: activeBoardId, title: 'Em Contato', color: '#f59e0b', order: 1 },
+                        { id: uuidv4(), boardId: activeBoardId, title: 'Proposta', color: '#8b5cf6', order: 2 },
+                        { id: uuidv4(), boardId: activeBoardId, title: 'Parado', color: '#ef4444', order: 3 },
+                        { id: uuidv4(), boardId: activeBoardId, title: 'Ganho', color: '#10b981', order: 4 },
                     ];
                     setGroups(defaultGroups);
                     setLeads([]);
@@ -209,6 +210,18 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
         const updated = newLeads.find(l => l.id === id);
         if (updated) pushCrmCardToSupabase(updated, 'update');
     };
+    const reorderLeadsWithinColumn = (groupId: string, cardIds: string[]) => {
+        const updatedLeads = leads.map(lead => {
+            const newIndex = cardIds.indexOf(lead.id);
+            if (newIndex !== -1) {
+                const updatedLead = { ...lead, orderIndex: newIndex, groupId, updatedAt: Date.now() };
+                pushCrmCardToSupabase(updatedLead, 'update');
+                return updatedLead;
+            }
+            return lead;
+        });
+        setLeads(updatedLeads);
+    };
 
     // Spreadsheet Import
     const addImportedData = (boardId: string, newColumns: string[], newCustomColumnNames: Record<string, string>, newGroups: MarketingGroup[], newLeads: MarketingCardData[]) => {
@@ -273,7 +286,8 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
         .filter(l => l.boardId === activeBoardId)
         .filter(l => !searchQuery.trim() ? true : l.title.toLowerCase().includes(searchQuery.toLowerCase().trim()))
         .filter(l => !filterAssignee ? true : l.assignee === filterAssignee)
-        .filter(l => !filterPriority ? true : l.priority === filterPriority);
+        .filter(l => !filterPriority ? true : l.priority === filterPriority)
+        .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
 
     return (
         <CRMContext.Provider value={{
@@ -287,7 +301,7 @@ export const CRMProvider: React.FC<{ children: ReactNode, forcedBoardId?: string
             filterPriority, setFilterPriority,
             updateBoard,
             addGroup, updateGroup, deleteGroup,
-            addLead, updateLead, deleteLead, moveLead,
+            addLead, updateLead, deleteLead, moveLead, reorderLeadsWithinColumn,
             addImportedData,
             selectedLead, activeSpace, activeBoard, activeGroups, activeLeads
         }}>

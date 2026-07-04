@@ -91,18 +91,20 @@ export const LinearPageRenderer: React.FC<LinearPageRendererProps> = ({ nodes, c
                     if (node.type === 'text' || node.type === 'freetext') {
                         return (
                             <div key={node.id} className={styles.block}>
-                                <textarea
-                                    className={styles.textBlock}
-                                    defaultValue={node.content}
+                                <div
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    className={styles.textBlockEditable}
+                                    dangerouslySetInnerHTML={{ __html: node.content || '' }}
                                     style={{ 
                                         fontSize: node.fontSize ? `${node.fontSize}px` : '16px',
                                         color: node.textColor || '#f1f5f9',
-                                        fontWeight: node.fontSize && node.fontSize > 24 ? 'bold' : 'normal'
+                                        fontWeight: node.fontSize && node.fontSize > 24 ? 'bold' : 'normal',
+                                        outline: 'none',
+                                        minHeight: '28px',
+                                        padding: '8px'
                                     }}
-                                    onInput={handleInput}
-                                    onBlur={(e) => onUpdateNode(node.id, e.target.value)}
-                                    // Trigger auto-resize on mount
-                                    ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
+                                    onBlur={(e) => onUpdateNode(node.id, e.currentTarget.innerHTML)}
                                 />
                             </div>
                         );

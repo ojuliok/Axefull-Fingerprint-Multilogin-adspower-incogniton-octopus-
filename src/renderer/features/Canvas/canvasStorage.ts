@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { CanvasInfo, CanvasData, CanvasNode, Stroke, CanvasConnection, BrowserTab } from './canvasTypes';
+import { addToSyncQueue } from '../../lib/syncManager';
 
 export * from './canvasTypes';
 
@@ -25,6 +26,36 @@ function getStorageMode(): 'online' | 'offline' {
     }
 }
 
+function updateLocalCachedNodes(id: string, action: 'delete' | 'update' | 'insert', updates?: any) {
+    try {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('axe_online_backup_nodes_')) {
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    let list: CanvasInfo[] = JSON.parse(raw);
+                    if (action === 'delete') {
+                        list = list.filter(item => item.id !== id);
+                    } else if (action === 'insert' && updates) {
+                        list.unshift(updates);
+                    } else if (action === 'update' && updates) {
+                        list = list.map(item => {
+                            if (item.id === id) {
+                                return { ...item, ...updates, updatedAt: Date.now() };
+                            }
+                            return item;
+                        });
+                    }
+                    localStorage.setItem(key, JSON.stringify(list));
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Failed to update local node cache', e);
+    }
+}
+
+
 // ── List Operations ──
 
 export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> {
@@ -44,7 +75,7 @@ export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> 
             .order('created_at', { ascending: false });
         if (error) throw error;
         
-        return (data || []).map(row => ({
+        const list = (data || []).map(row => ({
             id: row.id,
             name: row.title || '',
             title: row.title,
@@ -63,9 +94,13 @@ export async function getCanvasList(workspaceId: string): Promise<CanvasInfo[]> 
             tags: row.tags,
             notes: row.notes
         }));
+        
+        localStorage.setItem(`axe_online_backup_nodes_${workspaceId}`, JSON.stringify(list));
+        return list;
     } catch (err) {
-        console.error('Error fetching canvases', err);
-        return [];
+        console.error('Error fetching canvases, falling back to local cache', err);
+        const cached = localStorage.getItem(`axe_online_backup_nodes_${workspaceId}`);
+        return cached ? JSON.parse(cached) : [];
     }
 }
 
@@ -108,35 +143,61 @@ export async function createCanvas(workspaceId: string, ownerId: string, name: s
     const id = cleanForceId || crypto.randomUUID();
     const emptyData: CanvasData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
     
-    try {
-        const actualType = type === 'table' ? 'canvas' : type;
-        const properties = type === 'table' ? { subtype: 'table' } : {};
-        
-        const { data, error } = await supabase.from('nodes').insert([{
-            id,
-            workspace_id: sanitizeUUID(workspaceId),
-            owner_id: sanitizeUUID(ownerId),
-            parent_id: sanitizeUUID(parentId),
-            title: name,
-            type: actualType,
-            properties,
-            content_data: emptyData
-        }]).select().single();
-        if (error) throw error;
-        
-        return {
-            id: data.id,
-            name: data.title || '',
-            title: data.title,
-            createdAt: new Date(data.created_at).getTime(),
-            updatedAt: new Date(data.updated_at).getTime(),
-            parentId: data.parent_id,
-            type: data.properties?.subtype === 'table' ? 'table' : (data.type as any)
-        };
-    } catch (err) {
-        console.error('Error creating canvas', err);
-        throw err;
+    const actualType = type === 'table' ? 'canvas' : type;
+    const properties = type === 'table' ? { subtype: 'table' } : {};
+    
+    const newCanvasInfo: CanvasInfo = {
+        id,
+        name,
+        title: name,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        parentId: parentId || undefined,
+        type: type as any
+    };
+
+    // Save empty canvas data locally
+    localStorage.setItem(`axe_online_backup_canvas_data_${id}`, JSON.stringify(emptyData));
+    updateLocalCachedNodes(id, 'insert', newCanvasInfo);
+
+    // Try online synchronous insert first to prevent race condition
+    if (navigator.onLine) {
+        try {
+            const { data, error } = await supabase.from('nodes').insert([{
+                id,
+                workspace_id: sanitizeUUID(workspaceId),
+                owner_id: sanitizeUUID(ownerId),
+                parent_id: sanitizeUUID(parentId),
+                title: name,
+                type: actualType,
+                properties,
+                content_data: emptyData
+            }]).select().single();
+            
+            if (error) throw error;
+            
+            return newCanvasInfo;
+        } catch (err) {
+            console.warn('[canvasStorage] Online insert failed, falling back to sync queue', err);
+        }
     }
+
+    // Queue sync to Supabase (offline mode fallback)
+    const syncPayload = {
+        id,
+        workspaceId,
+        ownerId,
+        parentId,
+        title: name,
+        type: actualType,
+        properties,
+        content_data: emptyData,
+        createdAt: newCanvasInfo.createdAt,
+        updatedAt: newCanvasInfo.updatedAt
+    };
+    addToSyncQueue('node', 'insert', id, syncPayload);
+
+    return newCanvasInfo;
 }
 
 export async function createFolder(workspaceId: string, ownerId: string, name: string, parentId?: string): Promise<CanvasInfo> {
@@ -157,11 +218,13 @@ export async function deleteCanvas(id: string): Promise<void> {
 
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
-    try {
-        await supabase.from('nodes').delete().eq('id', cleanId);
-    } catch (err) {
-        console.error('Error deleting canvas', err);
-    }
+    
+    // Update local cache
+    updateLocalCachedNodes(cleanId, 'delete');
+    localStorage.removeItem(`axe_online_backup_canvas_data_${cleanId}`);
+
+    // Queue sync delete
+    addToSyncQueue('node', 'remove', cleanId, null);
 }
 
 export async function softDeleteCanvas(id: string): Promise<void> {
@@ -181,14 +244,12 @@ export async function softDeleteCanvas(id: string): Promise<void> {
 
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
-    try {
-        await supabase.from('nodes').update({
-            is_deleted: true,
-            deleted_at: new Date().toISOString()
-        }).eq('id', cleanId);
-    } catch (err) {
-        console.error('Error soft deleting canvas', err);
-    }
+
+    const updates = { isDeleted: true, deletedAt: Date.now() };
+    updateLocalCachedNodes(cleanId, 'update', updates);
+
+    // Queue sync update
+    addToSyncQueue('node', 'update', cleanId, updates);
 }
 
 export async function restoreCanvas(id: string): Promise<void> {
@@ -208,14 +269,12 @@ export async function restoreCanvas(id: string): Promise<void> {
 
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
-    try {
-        await supabase.from('nodes').update({
-            is_deleted: false,
-            deleted_at: null
-        }).eq('id', cleanId);
-    } catch (err) {
-        console.error('Error restoring canvas', err);
-    }
+
+    const updates = { isDeleted: false, deletedAt: null };
+    updateLocalCachedNodes(cleanId, 'update', updates);
+
+    // Queue sync update
+    addToSyncQueue('node', 'update', cleanId, updates);
 }
 
 export async function renameCanvas(id: string, name: string): Promise<void> {
@@ -235,14 +294,12 @@ export async function renameCanvas(id: string, name: string): Promise<void> {
 
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
-    try {
-        await supabase.from('nodes').update({
-            title: name,
-            updated_at: new Date().toISOString()
-        }).eq('id', cleanId);
-    } catch (err) {
-        console.error('Error renaming canvas', err);
-    }
+
+    const updates = { name, title: name };
+    updateLocalCachedNodes(cleanId, 'update', updates);
+
+    // Queue sync update
+    addToSyncQueue('node', 'update', cleanId, updates);
 }
 
 export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>): Promise<void> {
@@ -262,22 +319,11 @@ export async function updateCanvasInfo(id: string, updates: Partial<CanvasInfo>)
 
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
-    try {
-        const dbUpdates: any = { updated_at: new Date().toISOString() };
-        if (updates.name !== undefined) dbUpdates.title = updates.name;
-        if (updates.color !== undefined) dbUpdates.color = updates.color;
-        if (updates.isFavorite !== undefined) dbUpdates.is_favorite = updates.isFavorite;
-        if (updates.coverImage !== undefined) dbUpdates.cover_image = updates.coverImage;
-        if (updates.description !== undefined) dbUpdates.description = updates.description;
-        if (updates.icon !== undefined) dbUpdates.icon = updates.icon;
-        if (updates.properties !== undefined) dbUpdates.properties = updates.properties;
-        if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
-        if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
 
-        await supabase.from('nodes').update(dbUpdates).eq('id', cleanId);
-    } catch (err) {
-        console.error('Error updating canvas info', err);
-    }
+    updateLocalCachedNodes(cleanId, 'update', updates);
+
+    // Queue sync update
+    addToSyncQueue('node', 'update', cleanId, updates);
 }
 
 export async function moveCanvasItem(id: string, targetId: string, position: 'before' | 'after' | 'inside', workspaceId?: string): Promise<void> {
@@ -316,57 +362,33 @@ export async function moveCanvasItem(id: string, targetId: string, position: 'be
     const cleanId = sanitizeUUID(id);
     const cleanTargetId = sanitizeUUID(targetId);
     if (!cleanId || !cleanTargetId) return;
+
     try {
         let newParentId: string | null = null;
-        
         if (position === 'inside') {
             newParentId = cleanTargetId;
         } else {
-            const { data: targetData } = await supabase.from('nodes').select('parent_id').eq('id', cleanTargetId).single();
-            if (targetData) {
-                newParentId = targetData.parent_id;
-            }
-        }
-        
-        if (newParentId === cleanId) {
-            console.warn("Prevented circular reference move: cannot make item its own parent.");
-            return;
-        }
-
-        // Fetch all canvases in workspace to check descendants
-        if (newParentId) {
-            const { data: allCanvases } = await supabase
-                .from('nodes')
-                .select('id, parent_id')
-                .eq('workspace_id', workspaceId)
-                .eq('is_deleted', false);
-            
-            if (allCanvases) {
-                const isDescendantOnline = (parent: string, child: string): boolean => {
-                    let current = allCanvases.find((c: any) => c.id === parent);
-                    while (current && current.parent_id) {
-                        if (current.parent_id === child) return true;
-                        current = allCanvases.find((c: any) => c.id === current!.parent_id);
-                    }
-                    return false;
-                };
-
-                if (isDescendantOnline(newParentId, cleanId)) {
-                    console.warn("Prevented circular reference move: cannot move parent inside/next to its own descendant.");
-                    return;
+            // Find parentId from local cache if possible or fallback to check
+            const cachedStr = localStorage.getItem(`axe_online_backup_nodes_${workspaceId}`);
+            if (cachedStr) {
+                const list = JSON.parse(cachedStr);
+                const targetNode = list.find((n: any) => n.id === cleanTargetId);
+                if (targetNode) {
+                    newParentId = targetNode.parentId;
                 }
             }
         }
 
-        await supabase.from('nodes').update({
-            parent_id: newParentId,
-            updated_at: new Date().toISOString()
-        }).eq('id', cleanId);
-        
+        const updates = { parentId: newParentId };
+        updateLocalCachedNodes(cleanId, 'update', updates);
+
+        // Queue sync update
+        addToSyncQueue('node', 'update', cleanId, updates);
     } catch (err) {
         console.error('Error moving canvas', err);
     }
 }
+
 
 export async function duplicateCanvas(id: string, workspaceId: string, ownerId: string): Promise<CanvasInfo | null> {
     if (getStorageMode() === 'offline') {
@@ -465,13 +487,21 @@ export async function getCanvasData(id: string): Promise<CanvasData | null> {
         if (data && data.content_data) {
             const canvasData = data.content_data as CanvasData;
             canvasDataCache[id] = canvasData;
+            // Backup locally
+            localStorage.setItem(`axe_online_backup_canvas_data_${cleanId}`, JSON.stringify(canvasData));
             return canvasData;
         }
         const defaultData = { nodes: [], viewport: { x: 0, y: 0, zoom: 1 } };
         canvasDataCache[id] = defaultData;
         return defaultData;
     } catch (err) {
-        console.error('Error fetching canvas data', err);
+        console.error('Error fetching canvas data online, trying local backup', err);
+        const backupStr = localStorage.getItem(`axe_online_backup_canvas_data_${cleanId}`);
+        if (backupStr) {
+            const data = JSON.parse(backupStr);
+            canvasDataCache[id] = data;
+            return data;
+        }
         return null;
     }
 }
@@ -494,14 +524,13 @@ export async function saveCanvasData(id: string, data: CanvasData): Promise<void
 
     const cleanId = sanitizeUUID(id);
     if (!cleanId) return;
-    try {
-        await supabase.from('nodes').update({
-            content_data: data,
-            updated_at: new Date().toISOString()
-        }).eq('id', cleanId);
-    } catch (err) {
-        console.error('Error saving canvas data', err);
-    }
+
+    // Always backup locally first so changes are never lost if online write fails
+    localStorage.setItem(`axe_online_backup_canvas_data_${cleanId}`, JSON.stringify(data));
+    updateLocalCachedNodes(cleanId, 'update', { updatedAt: Date.now() });
+
+    // Queue sync update
+    addToSyncQueue('canvas', 'update', cleanId, data);
 }
 
 // ── Debounced Save ──

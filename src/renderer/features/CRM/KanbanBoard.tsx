@@ -11,7 +11,7 @@ import {
   DragOverEvent,
   DragEndEvent,
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { sortableKeyboardCoordinates, arrayMove } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
 import { useCRMState } from './CRMContext';
 import KanbanColumn from './KanbanColumn';
@@ -19,7 +19,7 @@ import KanbanCard from './KanbanCard';
 import styles from '../../pages/CRMPage.module.css';
 
 const KanbanBoard: React.FC = () => {
-    const { activeLeads, activeGroups, moveLead, deleteLead, addGroup, activeBoard } = useCRMState();
+    const { activeLeads, activeGroups, moveLead, deleteLead, addGroup, activeBoard, reorderLeadsWithinColumn } = useCRMState();
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const sensors = useSensors(
@@ -67,6 +67,28 @@ const KanbanBoard: React.FC = () => {
 
     const handleDragEnd = (event: DragEndEvent) => {
         setActiveId(null);
+        
+        const { active, over } = event;
+        if (!over) return;
+
+        const activeId = active.id;
+        const overId = over.id;
+
+        if (activeId === overId) return;
+
+        const activeLead = activeLeads.find(l => l.id === activeId);
+        const overLead = activeLeads.find(l => l.id === overId);
+
+        if (activeLead && overLead && activeLead.groupId === overLead.groupId) {
+            const columnCards = activeLeads.filter(l => l.groupId === activeLead.groupId);
+            const oldIndex = columnCards.findIndex(l => l.id === activeId);
+            const newIndex = columnCards.findIndex(l => l.id === overId);
+            
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const rearranged = arrayMove(columnCards, oldIndex, newIndex);
+                reorderLeadsWithinColumn(activeLead.groupId, rearranged.map(l => l.id));
+            }
+        }
     };
 
     const activeCard = activeId ? activeLeads.find(c => c.id === activeId) : null;

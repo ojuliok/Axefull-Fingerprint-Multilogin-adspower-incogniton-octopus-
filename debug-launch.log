@@ -2048,3 +2048,848 @@ Launch Options: {
     "--allow-pre-commit-input"
   ]
 }
+
+--- [2026-07-02T01:52:55.670Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=61087",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T01:53:23.966Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=57920",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T01:53:34.538Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=51463",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T01:59:37.272Z] LaunchProfile Debug ---
+Profile ID: aa443f93-a7c5-4349-a66e-ca85c6c93eee
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1366,
+    "height": 768
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+  "locale": "pt-BR",
+  "timezoneId": "America/Sao_Paulo",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=50858",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T01:59:58.493Z] LaunchProfile Debug ---
+Profile ID: aa443f93-a7c5-4349-a66e-ca85c6c93eee
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=60286",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T02:00:43.930Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=55150",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T02:08:15.732Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=64840",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T13:13:13.892Z] LaunchProfile Debug ---
+Profile ID: 3abe8038-5dd4-464b-9a5f-7b32e9686035
+Browser Type: firefox
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Users\\FAGNER\\AppData\\Local\\ms-playwright\\firefox-1522\\firefox\\firefox.exe",
+  "args": [
+    "-width",
+    "1920",
+    "-height",
+    "1080"
+  ],
+  "firefoxUserPrefs": {
+    "media.peerconnection.enabled": true,
+    "media.navigator.enabled": false,
+    "privacy.resistFingerprinting": false,
+    "dom.webdriver.enabled": false,
+    "useAutomationExtension": false,
+    "toolkit.telemetry.enabled": false,
+    "datareporting.healthreport.uploadEnabled": false,
+    "browser.newtabpage.activity-stream.feeds.telemetry": false,
+    "browser.ping-centre.telemetry": false,
+    "intl.accept_languages": "pt-BR, pt, en-US, en"
+  }
+}
+
+--- [2026-07-02T13:13:42.921Z] LaunchProfile Debug ---
+Profile ID: 0ccf9481-0330-4316-952e-6df77702e22a
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=62029",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T14:49:24.032Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=64315",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T16:02:11.504Z] LaunchProfile Debug ---
+Profile ID: 0ccf9481-0330-4316-952e-6df77702e22a
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=50712",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-02T16:05:03.733Z] LaunchProfile Debug ---
+Profile ID: edd0f3b0-864c-4f51-8779-eb7c57d6e442
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+  "locale": "pt-BR",
+  "timezoneId": "America/Fortaleza",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=62300",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-03T19:50:49.347Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=61545",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-03T20:29:21.959Z] LaunchProfile Debug ---
+Profile ID: 0ccf9481-0330-4316-952e-6df77702e22a
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=54203",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-03T20:30:06.530Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=60904",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-03T20:31:04.644Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=65286",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-03T20:31:37.669Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=58652",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-03T20:33:04.333Z] LaunchProfile Debug ---
+Profile ID: 0ccf9481-0330-4316-952e-6df77702e22a
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=52213",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
+
+--- [2026-07-04T17:48:48.755Z] LaunchProfile Debug ---
+Profile ID: 9f4a7287-22e2-47a6-8da6-ffcdaf9dc953
+Browser Type: chromium
+findSystemChrome(): C:\Program Files\Google\Chrome\Application\chrome.exe
+Launch Options: {
+  "headless": false,
+  "viewport": null,
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "locale": "pt-BR",
+  "timezoneId": "America/Bahia",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "args": [
+    "--remote-debugging-port=49539",
+    "--lang=pt-BR",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--start-maximized",
+    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+    "--enforce-webrtc-ip-permission-check",
+    "--dns-over-https-mode=secure"
+  ],
+  "ignoreDefaultArgs": [
+    "--enable-automation",
+    "--enable-blink-features=IdleDetection",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--metrics-recording-only",
+    "--no-service-autorun",
+    "--export-tagged-pdf",
+    "--disable-search-engine-choice-screen",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-default-apps",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-client-side-phishing-detection",
+    "--disable-popup-blocking",
+    "--disable-breakpad",
+    "--allow-pre-commit-input"
+  ]
+}
