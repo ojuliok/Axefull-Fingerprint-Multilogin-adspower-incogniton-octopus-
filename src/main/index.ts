@@ -68,9 +68,9 @@ function handleProtocolUrl(urlStr: string) {
                 config.supabaseToken = token;
                 fs.writeFileSync(configPath, JSON.stringify(config));
                 
-                stopSupabaseListener();
-                startSupabaseListener();
-                console.log('✅ Agente vinculado com sucesso via protocolo!');
+                // stopSupabaseListener();
+                // startSupabaseListener();
+                console.log('✅ Agente em modo local.');
             }
         }
     } catch (error) {
@@ -133,7 +133,7 @@ function createTray(): void {
         const iconPath = path.join(__dirname, '..', '..', 'assets', 'icon.png');
         tray = new Tray(iconPath);
         const contextMenu = Menu.buildFromTemplate([
-            { label: 'Axefull Fingerprint - Online', enabled: false },
+            { label: 'Axefull Fingerprint - Local', enabled: false },
             { type: 'separator' },
             {
                 label: 'Abrir Painel',
@@ -206,8 +206,8 @@ async function init(): Promise<void> {
     registerCardHandlers();
     registerBulkVideoHandlers();
 
-    // Start Supabase listener for launch commands
-    startSupabaseListener();
+    // Start Supabase listener (disabled in Local mode)
+    // startSupabaseListener();
 
     // Start local REST API server on port 54345
     startLocalApiServer();
@@ -243,7 +243,7 @@ app.on('before-quit', async (event) => {
 
     console.log('[Main] Shutting down...');
     try {
-        stopSupabaseListener();
+        // stopSupabaseListener();
         stopLocalApiServer();
         await closeAllProfiles();
         closeDatabase();

@@ -3,7 +3,7 @@ import { isBrowserInstalled, downloadBrowser, getBrowserExecutablePath } from '.
 import path from 'path';
 import fs from 'fs';
 import net from 'net';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, app } from 'electron';
 import { Fingerprint, Proxy, ProfileWithDetails, BrowserType } from '../profile/types';
 import { getProfileById, setProfileActive, updateLastUsed } from '../profile/profile-manager';
 import { getExtensionPaths } from '../../services/extensions-manager';
@@ -279,6 +279,132 @@ function clearLocks(dataDirPath: string): void {
     }
 }
 
+function prepareChromeProfileConfig(dataDirPath: string, profileName: string): void {
+    try {
+        if (!fs.existsSync(dataDirPath)) {
+            fs.mkdirSync(dataDirPath, { recursive: true });
+        }
+
+        // 1. Configure Local State (Profile Name)
+        const localStatePath = path.join(dataDirPath, 'Local State');
+        let localState: any = {};
+        if (fs.existsSync(localStatePath)) {
+            try {
+                localState = JSON.parse(fs.readFileSync(localStatePath, 'utf-8'));
+            } catch {
+                localState = {};
+            }
+        }
+
+        if (!localState.profile) {
+            localState.profile = {};
+        }
+        if (!localState.profile.info_cache) {
+            localState.profile.info_cache = {};
+        }
+        if (!localState.profile.info_cache.Default) {
+            localState.profile.info_cache.Default = {};
+        }
+
+        localState.profile.info_cache.Default.name = profileName;
+        localState.profile.info_cache.Default.shortcut_name = profileName;
+        localState.profile.info_cache.Default.is_using_default_name = false;
+        localState.profile.last_active_profiles = ['Default'];
+
+        fs.writeFileSync(localStatePath, JSON.stringify(localState, null, 2), 'utf-8');
+
+        // 2. Configure Default/Preferences (Bookmarks Bar always visible)
+        const defaultDir = path.join(dataDirPath, 'Default');
+        if (!fs.existsSync(defaultDir)) {
+            fs.mkdirSync(defaultDir, { recursive: true });
+        }
+
+        const preferencesPath = path.join(defaultDir, 'Preferences');
+        let preferences: any = {};
+        if (fs.existsSync(preferencesPath)) {
+            try {
+                preferences = JSON.parse(fs.readFileSync(preferencesPath, 'utf-8'));
+            } catch {
+                preferences = {};
+            }
+        }
+
+        if (!preferences.bookmark_bar) {
+            preferences.bookmark_bar = {};
+        }
+        preferences.bookmark_bar.show_on_all_tabs = true;
+
+        // We inject the fixed bookmark here!
+        injectFixedBookmark(dataDirPath);
+    } catch (err) {
+        console.error('[BrowserEngine] Failed to prepare Chrome profile configurations:', err);
+    }
+}
+
+function injectFixedBookmark(dataDirPath: string): void {
+    try {
+        const configPath = path.join(app.getPath('userData'), 'config.json');
+        if (!fs.existsSync(configPath)) return;
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        const { fixedBookmarkName, fixedBookmarkUrl } = config;
+        if (!fixedBookmarkUrl) return; // No URL set
+
+        const defaultDir = path.join(dataDirPath, 'Default');
+        if (!fs.existsSync(defaultDir)) {
+            fs.mkdirSync(defaultDir, { recursive: true });
+        }
+        const bookmarksPath = path.join(defaultDir, 'Bookmarks');
+
+        let raw: any = {};
+        if (fs.existsSync(bookmarksPath)) {
+            try { raw = JSON.parse(fs.readFileSync(bookmarksPath, 'utf-8')); } catch { }
+        }
+
+        if (!raw.roots) {
+            raw.roots = { 
+                bookmark_bar: { children: [], id: '1', name: 'Bookmarks bar', type: 'folder' }, 
+                other: { children: [], id: '2', name: 'Other bookmarks', type: 'folder' } 
+            };
+        }
+        if (!raw.roots.bookmark_bar.children) raw.roots.bookmark_bar.children = [];
+
+        // Check if a bookmark with the same URL already exists
+        const children = raw.roots.bookmark_bar.children;
+        const idx = children.findIndex((item: any) => item.type === 'url' && item.url === fixedBookmarkUrl);
+
+        if (idx !== -1) {
+            // Update name in case it changed
+            children[idx].name = fixedBookmarkName || 'Favorito Fixo';
+        } else {
+            // Check if there is a bookmark with the configured name in case the URL changed
+            const nameToFind = fixedBookmarkName || 'Favorito Fixo';
+            const nameIdx = children.findIndex((item: any) => item.type === 'url' && item.name === nameToFind);
+            if (nameIdx !== -1) {
+                // Update URL in case URL changed but name remained
+                children[nameIdx].url = fixedBookmarkUrl;
+            } else {
+                // Add new bookmark
+                const newId = String(Date.now());
+                const nowMicros = String(BigInt(Date.now()) * BigInt(1000) + BigInt('11644473600000000'));
+                children.push({
+                    date_added: nowMicros,
+                    id: newId,
+                    name: fixedBookmarkName || 'Favorito Fixo',
+                    type: 'url',
+                    url: fixedBookmarkUrl
+                });
+            }
+        }
+
+        raw.version = 1;
+        raw.checksum = '';
+
+        fs.writeFileSync(bookmarksPath, JSON.stringify(raw, null, 2), 'utf-8');
+    } catch (err) {
+        console.error('[BrowserEngine] Failed to inject fixed bookmark:', err);
+    }
+}
+
 /**
  * Find the system-installed Google Chrome executable.
  * Playwright's channel:'chrome' in recent versions resolves to Chrome for Testing
@@ -429,6 +555,7 @@ export async function launchProfile(profileId: string): Promise<BrowserContext> 
     }
 
     clearLocks(data_dir_path);
+    prepareChromeProfileConfig(data_dir_path, profile.name);
 
     const cdpPort = await findFreePort();
     const launchOptions = buildLaunchOptions(profile, cdpPort, true, browserType);
@@ -729,6 +856,7 @@ export async function warmupProfile(
 
     // Clear stale locks
     clearLocks(data_dir_path);
+    prepareChromeProfileConfig(data_dir_path, profile.name);
 
     const cdpPort = await findFreePort();
     const total = WARMUP_SITES.length;

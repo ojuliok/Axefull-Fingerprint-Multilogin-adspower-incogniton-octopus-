@@ -51,9 +51,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
     const isLight = theme === 'light';
     const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'JU';
 
-    const [storageMode, setStorageMode] = useState<'online' | 'offline'>(() => (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online');
+    const storageMode = 'offline';
     const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
-    const [showStorageMenu, setShowStorageMenu] = useState(false);
     const [showThemeMenu, setShowThemeMenu] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [ajustesHovered, setAjustesHovered] = useState(false);
@@ -440,31 +439,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                                 </div>
                             </div>
 
-                            <div className="w-full h-px bg-theme-border/40" />
 
-                            {/* Storage Mode */}
-                            <div className="flex flex-col gap-1.5">
-                                <span className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider text-left">Armazenamento</span>
-                                <button
-                                    onClick={() => {
-                                        const next = storageMode === 'online' ? 'offline' : 'online';
-                                        localStorage.setItem('axe_storage_mode', next);
-                                        setStorageMode(next);
-                                        window.location.reload();
-                                    }}
-                                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border transition-all text-xs ${storageMode === 'online' ? 'bg-violet-500/10 text-violet-400 border-violet-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}
-                                >
-                                    <div className="flex items-center gap-1.5">
-                                        {storageMode === 'online' ? <Cloud size={12} /> : <Database size={12} />}
-                                        <span className="font-medium">{storageMode === 'online' ? 'Salvar na Nuvem' : 'Salvar Local'}</span>
-                                    </div>
-                                    <span className="text-[9px] font-bold uppercase tracking-wider bg-theme-border px-1.5 py-0.5 rounded text-theme-text-muted">
-                                        {storageMode === 'online' ? 'Online' : 'Offline'}
-                                    </span>
-                                </button>
-                            </div>
-
-                            <div className="w-full h-px bg-theme-border/40" />
 
                             {/* Theme Selection */}
                             <div className="flex flex-col gap-1.5">

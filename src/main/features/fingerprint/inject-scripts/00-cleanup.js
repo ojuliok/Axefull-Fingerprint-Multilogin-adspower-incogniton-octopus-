@@ -132,21 +132,42 @@
     }
 
     // === Remove automation-related properties from Error stack ===
-    var OriginalError = Error;
+    var OriginalError = window.Error;
     function CleanError(message) {
-        var err = new OriginalError(message);
+        var err;
+        if (this instanceof CleanError) {
+            err = new OriginalError(message);
+        } else {
+            err = OriginalError(message);
+        }
         var originalStack = err.stack;
         if (originalStack) {
-            err.stack = originalStack
-                .replace(/playwright/gi, '')
-                .replace(/puppeteer/gi, '')
-                .replace(/selenium/gi, '')
-                .replace(/webdriver/gi, '')
-                .replace(/cdp/gi, '');
+            Object.defineProperty(err, 'stack', {
+                get: function () {
+                    return originalStack
+                        .replace(/playwright/gi, '')
+                        .replace(/puppeteer/gi, '')
+                        .replace(/selenium/gi, '')
+                        .replace(/webdriver/gi, '')
+                        .replace(/cdp/gi, '');
+                },
+                configurable: true,
+                enumerable: false
+            });
         }
         return err;
     }
     CleanError.prototype = OriginalError.prototype;
+    Object.getOwnPropertyNames(OriginalError).forEach(function (prop) {
+        if (prop !== 'prototype' && prop !== 'name' && prop !== 'length') {
+            try {
+                Object.defineProperty(CleanError, prop, Object.getOwnPropertyDescriptor(OriginalError, prop));
+            } catch (e) {
+                CleanError[prop] = OriginalError[prop];
+            }
+        }
+    });
+    window.Error = CleanError;
 
     // === Patch Permissions API to not reveal automation ===
     if (navigator.permissions) {

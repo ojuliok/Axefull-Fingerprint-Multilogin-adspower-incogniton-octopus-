@@ -3,11 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { addToSyncQueue } from '../../lib/syncManager';
 
 function getStorageMode(): 'online' | 'offline' {
-    try {
-        return (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online';
-    } catch {
-        return 'online';
-    }
+    return 'offline';
 }
 
 export type MarketingPriority = 'Alta' | 'Média' | 'Baixa';

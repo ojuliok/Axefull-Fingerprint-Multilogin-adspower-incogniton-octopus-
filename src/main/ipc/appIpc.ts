@@ -110,6 +110,39 @@ export function registerAppHandlers(): void {
             return { success: false, error: String(err) };
         }
     });
+
+    // ── Fixed Bookmark Settings ──
+    ipcMain.handle('app:get-fixed-bookmark', async () => {
+        try {
+            const configPath = path.join(app.getPath('userData'), 'config.json');
+            let fixedBookmarkUrl = '';
+            let fixedBookmarkName = '';
+            if (fs.existsSync(configPath)) {
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                fixedBookmarkUrl = config.fixedBookmarkUrl || '';
+                fixedBookmarkName = config.fixedBookmarkName || '';
+            }
+            return { success: true, data: { name: fixedBookmarkName, url: fixedBookmarkUrl } };
+        } catch (err) {
+            return { success: false, error: String(err) };
+        }
+    });
+
+    ipcMain.handle('app:save-fixed-bookmark', async (_event, name: string, url: string) => {
+        try {
+            const configPath = path.join(app.getPath('userData'), 'config.json');
+            let config: any = {};
+            if (fs.existsSync(configPath)) {
+                config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            }
+            config.fixedBookmarkUrl = url;
+            config.fixedBookmarkName = name;
+            fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: String(err) };
+        }
+    });
 }
 
 export function registerExtensionHandlers(): void {

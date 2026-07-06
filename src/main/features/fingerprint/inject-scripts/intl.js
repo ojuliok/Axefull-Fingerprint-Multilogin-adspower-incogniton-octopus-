@@ -12,35 +12,49 @@
     // === Date.getTimezoneOffset() ===
     // Playwright already sets timezoneId, but we reinforce it and ensure
     // the offset is correct for the configured timezone
-    var tzOffsets = {
-        'America/Sao_Paulo': 180,
-        'America/New_York': 300,
-        'America/Chicago': 360,
-        'America/Denver': 420,
-        'America/Los_Angeles': 480,
-        'America/Anchorage': 540,
-        'Pacific/Honolulu': 600,
-        'Europe/London': 0,
-        'Europe/Paris': -60,
-        'Europe/Berlin': -60,
-        'Europe/Moscow': -180,
-        'Asia/Dubai': -240,
-        'Asia/Kolkata': -330,
-        'Asia/Bangkok': -420,
-        'Asia/Shanghai': -480,
-        'Asia/Tokyo': -540,
-        'Australia/Sydney': -660,
-        'Pacific/Auckland': -720
+    // === Date.getTimezoneOffset() ===
+    // Dynamically calculate the timezone offset for the target timezone 'tz'
+    // to handle any timezone and DST changes correctly.
+    var origGetTimezoneOffset = Date.prototype.getTimezoneOffset;
+    Date.prototype.getTimezoneOffset = function () {
+        try {
+            var formatter = new OrigDateTimeFormat('en-US', {
+                timeZone: tz,
+                hour12: false,
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            var parts = formatter.formatToParts(this);
+            var partMap = {};
+            for (var i = 0; i < parts.length; i++) {
+                partMap[parts[i].type] = parts[i].value;
+            }
+            
+            var year = parseInt(partMap.year, 10);
+            var month = parseInt(partMap.month, 10) - 1;
+            var day = parseInt(partMap.day, 10);
+            var hour = parseInt(partMap.hour, 10);
+            if (hour === 24) hour = 0; // handle edge case in formatting
+            var minute = parseInt(partMap.minute, 10);
+            var second = parseInt(partMap.second, 10);
+            
+            var targetUtc = Date.UTC(year, month, day, hour, minute, second);
+            var diffMs = this.getTime() - targetUtc;
+            return Math.round(diffMs / 60000);
+        } catch (e) {
+            // Fallback to static offset or original behavior
+            var tzOffsets = {
+                'America/Sao_Paulo': 180, 'America/New_York': 300, 'America/Chicago': 360,
+                'America/Denver': 420, 'America/Los_Angeles': 480, 'America/Anchorage': 540,
+                'Pacific/Honolulu': 600, 'Europe/London': 0, 'Europe/Paris': -60,
+                'Europe/Berlin': -60, 'Europe/Moscow': -180, 'Asia/Dubai': -240,
+                'Asia/Kolkata': -330, 'Asia/Bangkok': -420, 'Asia/Shanghai': -480,
+                'Asia/Tokyo': -540, 'Australia/Sydney': -660, 'Pacific/Auckland': -720
+            };
+            var expectedOffset = tzOffsets[tz];
+            return expectedOffset !== undefined ? expectedOffset : origGetTimezoneOffset.call(this);
+        }
     };
-
-    var expectedOffset = tzOffsets[tz];
-
-    if (expectedOffset !== undefined) {
-        var origGetTimezoneOffset = Date.prototype.getTimezoneOffset;
-        Date.prototype.getTimezoneOffset = function () {
-            return expectedOffset;
-        };
-    }
 
     // === Intl.DateTimeFormat — ensure resolvedOptions matches ===
     var OrigDateTimeFormat = Intl.DateTimeFormat;

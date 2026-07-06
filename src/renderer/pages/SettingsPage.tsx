@@ -37,7 +37,7 @@ const SettingsPage: React.FC = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(
         localStorage.getItem('sidebarCollapsedDefault') === 'true'
     );
-    const [activeSection, setActiveSection] = useState<string>('account');
+    const [activeSection, setActiveSection] = useState<string>('appearance');
 
     // Team state
     const [team, setTeam] = useState<any>(null);
@@ -52,6 +52,10 @@ const SettingsPage: React.FC = () => {
     const [pinInput, setPinInput] = useState(pin || '');
     const [passInput, setPassInput] = useState(secondPassword || '');
 
+    // Fixed Bookmark state
+    const [fixedBookmarkName, setFixedBookmarkName] = useState('');
+    const [fixedBookmarkUrl, setFixedBookmarkUrl] = useState('');
+
     useEffect(() => {
         isMountedRef.current = true;
         window.api.app.info().then(res => {
@@ -60,6 +64,12 @@ const SettingsPage: React.FC = () => {
         window.api.app.localApiPort().then(res => {
             if (isMountedRef.current && res.success && res.data) {
                 setLocalApiPort((res.data as { port: number }).port);
+            }
+        });
+        window.api.app.getFixedBookmark().then(res => {
+            if (isMountedRef.current && res.success && res.data) {
+                setFixedBookmarkName(res.data.name || '');
+                setFixedBookmarkUrl(res.data.url || '');
             }
         });
         return () => {
@@ -166,12 +176,22 @@ const SettingsPage: React.FC = () => {
         }
     };
 
+    const handleSaveFixedBookmark = async () => {
+        try {
+            const res = await window.api.app.saveFixedBookmark(fixedBookmarkName.trim(), fixedBookmarkUrl.trim());
+            if (res.success) {
+                toast.success('Favorito fixo salvo com sucesso');
+            } else {
+                toast.error(res.error || 'Erro ao salvar favorito');
+            }
+        } catch {
+            toast.error('Erro ao salvar favorito');
+        }
+    };
+
     const planStyle = PLAN_COLORS[user?.plan ?? 'free'] ?? PLAN_COLORS.free;
 
     const SECTIONS = [
-        { id: 'account',    label: 'Conta',          icon: User },
-        { id: 'plan',       label: 'Plano',           icon: CreditCard },
-        { id: 'team',       label: 'Equipe',          icon: Users },
         { id: 'appearance', label: 'Aparência',       icon: Palette },
         { id: 'data',       label: 'Dados',           icon: Database },
         { id: 'security',   label: 'Segurança',       icon: Shield },
@@ -683,6 +703,47 @@ const SettingsPage: React.FC = () => {
                                 <button className={styles.exportBtn} onClick={handleExportAll}>
                                     <Download size={13} /> Exportar
                                 </button>
+                            </div>
+                        </div>
+                        <div className={styles.card}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div>
+                                    <p className={styles.settingLabel}>Favorito Fixo (Barra de Favoritos)</p>
+                                    <p className={styles.settingHint}>Configure uma URL fixa que ficará visível na barra de favoritos de todos os perfis ao iniciar o navegador.</p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                    <div style={{ flex: 1, minWidth: '150px' }}>
+                                        <label style={{ fontSize: '11px', color: 'var(--text-muted, #71717a)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', display: 'block' }}>Nome do Favorito</label>
+                                        <input
+                                            type="text"
+                                            className={styles.teamInput}
+                                            style={{ width: '100%', height: '36px', padding: '0 10px', fontSize: '13px' }}
+                                            placeholder="Ex: Google"
+                                            value={fixedBookmarkName}
+                                            onChange={e => setFixedBookmarkName(e.target.value)}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 2, minWidth: '220px' }}>
+                                        <label style={{ fontSize: '11px', color: 'var(--text-muted, #71717a)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', display: 'block' }}>URL</label>
+                                        <input
+                                            type="text"
+                                            className={styles.teamInput}
+                                            style={{ width: '100%', height: '36px', padding: '0 10px', fontSize: '13px' }}
+                                            placeholder="Ex: https://google.com"
+                                            value={fixedBookmarkUrl}
+                                            onChange={e => setFixedBookmarkUrl(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                                    <button 
+                                        className={styles.teamCreateBtn}
+                                        style={{ height: '36px', padding: '0 16px' }}
+                                        onClick={handleSaveFixedBookmark}
+                                    >
+                                        Salvar Favorito
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </section>

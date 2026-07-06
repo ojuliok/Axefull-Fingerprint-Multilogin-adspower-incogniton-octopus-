@@ -46,11 +46,14 @@
             var result = original.call(this, shaderType, precisionType);
             if (result) {
                 var v = (seedHash + shaderType + precisionType) % 3;
-                return {
-                    rangeMin: result.rangeMin + v,
-                    rangeMax: result.rangeMax + v,
-                    precision: result.precision
-                };
+                var proto = window.WebGLShaderPrecisionFormat ? WebGLShaderPrecisionFormat.prototype : Object.prototype;
+                var formatObj = Object.create(proto);
+                Object.defineProperties(formatObj, {
+                    rangeMin: { value: result.rangeMin + v, enumerable: true },
+                    rangeMax: { value: result.rangeMax + v, enumerable: true },
+                    precision: { value: result.precision, enumerable: true }
+                });
+                return formatObj;
             }
             return result;
         };

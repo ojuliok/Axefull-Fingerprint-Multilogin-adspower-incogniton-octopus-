@@ -78,14 +78,7 @@ async function handleRequest(req: http.IncomingMessage, res: http.ServerResponse
             let profile = getProfileById(profileId);
 
             if (!profile) {
-                console.log(`[LocalAPI] Perfil ${profileId} não encontrado localmente. Tentando sincronizar do Supabase...`);
-                try {
-                    const { ensureLocalProfile } = await import('../../services/supabase-listener');
-                    await ensureLocalProfile(profileId);
-                    profile = getProfileById(profileId);
-                } catch (e) {
-                    console.error('[LocalAPI] Falha ao sincronizar perfil do Supabase:', e);
-                }
+                return json(res, 404, { success: false, error: 'Profile not found' });
             }
 
             if (!profile) {

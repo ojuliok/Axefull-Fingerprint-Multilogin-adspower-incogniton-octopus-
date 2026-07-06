@@ -130,6 +130,8 @@ export interface AppAPI {
     openNotesWidget: () => Promise<APIResponse>;
     closeNotesWidget: () => Promise<APIResponse>;
     openExternal: (url: string) => Promise<APIResponse>;
+    getFixedBookmark: () => Promise<APIResponse>;
+    saveFixedBookmark: (name: string, url: string) => Promise<APIResponse>;
 }
 
 export interface TemplatesAPI {
@@ -399,6 +401,8 @@ contextBridge.exposeInMainWorld('api', {
         openNotesWidget: () => ipcRenderer.invoke('app:open-notes-widget'),
         closeNotesWidget: () => ipcRenderer.invoke('app:close-notes-widget'),
         openExternal: (url: string) => ipcRenderer.invoke('app:open-external', url),
+        getFixedBookmark: () => ipcRenderer.invoke('app:get-fixed-bookmark'),
+        saveFixedBookmark: (name: string, url: string) => ipcRenderer.invoke('app:save-fixed-bookmark', name, url),
     },
     templates: {
         list: () => ipcRenderer.invoke('template:list'),

@@ -37,10 +37,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     const [isNotesFloating, setIsNotesFloating] = useState(false);
 
     const refreshWorkspaces = useCallback(async () => {
-        const isOffline = (() => {
-            try { return localStorage.getItem('axe_storage_mode') === 'offline'; }
-            catch { return false; }
-        })();
+        const isOffline = true;
 
         if (isOffline) {
             setIsLoading(true);
@@ -141,10 +138,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }, [refreshWorkspaces]);
 
     const createWorkspace = async (name: string) => {
-        const isOffline = (() => {
-            try { return localStorage.getItem('axe_storage_mode') === 'offline'; }
-            catch { return false; }
-        })();
+        const isOffline = true;
 
         if (isOffline) {
             const newWs: Workspace = {

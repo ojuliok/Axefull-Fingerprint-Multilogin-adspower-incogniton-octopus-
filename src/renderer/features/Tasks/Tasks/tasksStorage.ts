@@ -96,11 +96,7 @@ async function pushTaskToSupabase(task: TaskData, action: 'insert' | 'update' | 
 
 
 function getStorageMode(): 'online' | 'offline' {
-    try {
-        return (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online';
-    } catch {
-        return 'online';
-    }
+    return 'offline';
 }
 
 const getStorageKeys = (workspaceId?: string) => {

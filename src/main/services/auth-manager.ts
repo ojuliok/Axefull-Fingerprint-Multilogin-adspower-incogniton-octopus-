@@ -88,253 +88,49 @@ export interface AuthResult {
 // ─── Auth actions (direto no Supabase) ─────────────────────────────────────────
 
 export async function login(email: string, password: string): Promise<AuthResult> {
-    try {
-        const supabase = getSupabase();
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return { success: false, error: error.message };
-        if (!data.session || !data.user) return { success: false, error: 'Falha ao recuperar sessão' };
-
-        const userId = data.user.id;
-        
-        // Fetch user profile from profiles table in Supabase
-        const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', userId)
-            .maybeSingle();
-
-        // If profile doesn't exist, we use defaults
-        let plan = 'free';
-        let maxProfiles = PLAN_LIMITS.free.max_profiles;
-        let isActive = true;
-
-        if (profile) {
-            plan = profile.plan || 'free';
-            maxProfiles = profile.max_profiles || PLAN_LIMITS[plan]?.max_profiles || PLAN_LIMITS.free.max_profiles;
-            isActive = profile.is_active !== false;
-        }
-
-        if (!isActive) {
-            await supabase.auth.signOut();
-            return { success: false, error: 'Conta suspensa. Entre em contato com o suporte.' };
-        }
-
-        const user: AuthUser = {
-            id: userId,
-            email: data.user.email!,
-            plan,
-            plan_label: PLAN_LIMITS[plan]?.label || 'Free',
-            max_profiles: maxProfiles,
-            is_active: isActive
-        };
-
-        const expiresAt = Date.now() + (data.session.expires_in || 3600) * 1000;
-        await saveSession({
-            access_token: data.session.access_token,
-            idToken: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            expiresAt,
-            userId,
-            email: user.email
-        });
-
-        // Set session in client in case we need to make authenticated requests
-        await supabase.auth.setSession({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token
-        });
-
-        return { 
-            success: true, 
-            user, 
-            session: { 
-                access_token: data.session.access_token, 
-                refresh_token: data.session.refresh_token 
-            } 
-        };
-    } catch (err: any) {
-        console.error('[Auth] login error:', err);
-        return { success: false, error: err.message || 'Erro ao fazer login' };
-    }
+    const user: AuthUser = {
+        id: 'local-user',
+        email: email || 'local@axefull.com',
+        plan: 'enterprise',
+        plan_label: 'Enterprise (Local)',
+        max_profiles: 9999,
+        is_active: true
+    };
+    return { success: true, user };
 }
 
 export async function resetPassword(email: string): Promise<AuthResult> {
-    try {
-        const supabase = getSupabase();
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: undefined
-        });
-        if (error) return { success: false, error: error.message };
-        return { success: true };
-    } catch (err: any) {
-        console.error('[Auth] resetPassword error:', err);
-        return { success: false, error: err.message || 'Erro ao enviar email de recuperação' };
-    }
+    return { success: true };
 }
 
 export async function register(email: string, password: string, name?: string): Promise<AuthResult> {
-    try {
-        const supabase = getSupabase();
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { name }
-            }
-        });
-        if (error) return { success: false, error: error.message };
-        if (!data.user) return { success: false, error: 'Cadastro realizado, mas usuário não retornado.' };
-
-        if (data.session) {
-            const userId = data.user.id;
-            const plan = 'free';
-            const user: AuthUser = {
-                id: userId,
-                email: data.user.email!,
-                plan,
-                plan_label: PLAN_LIMITS.free.label,
-                max_profiles: PLAN_LIMITS.free.max_profiles,
-                is_active: true
-            };
-
-            const expiresAt = Date.now() + (data.session.expires_in || 3600) * 1000;
-            await saveSession({
-                access_token: data.session.access_token,
-                idToken: data.session.access_token,
-                refresh_token: data.session.refresh_token,
-                expiresAt,
-                userId,
-                email: user.email
-            });
-
-            return { 
-                success: true, 
-                user, 
-                session: { 
-                    access_token: data.session.access_token, 
-                    refresh_token: data.session.refresh_token 
-                } 
-            };
-        } else {
-            return { success: true, error: 'Confirme seu email para ativar a conta.' };
-        }
-    } catch (err: any) {
-        console.error('[Auth] register error:', err);
-        return { success: false, error: err.message || 'Não foi possível criar a conta' };
-    }
+    const user: AuthUser = {
+        id: 'local-user',
+        email: email || 'local@axefull.com',
+        plan: 'enterprise',
+        plan_label: 'Enterprise (Local)',
+        max_profiles: 9999,
+        is_active: true
+    };
+    return { success: true, user };
 }
 
 export async function validateSession(): Promise<AuthResult> {
-    const stored = await getStoredSession();
-    if (!stored) return { success: false, error: 'no_session' };
-
-    try {
-        const supabase = getSupabase();
-        let { access_token, refresh_token, expiresAt, userId, email } = stored;
-
-        // Refresh token if expired or close to expiring (within 2 minutes)
-        if (Date.now() >= expiresAt - 2 * 60 * 1000) {
-            const { data, error } = await supabase.auth.setSession({
-                access_token,
-                refresh_token
-            });
-
-            if (error || !data.session || !data.user) {
-                // Try refresh token explicitly
-                const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession({ refresh_token });
-                if (refreshErr || !refreshData.session || !refreshData.user) {
-                    await clearSession();
-                    return { success: false, error: 'session_expired' };
-                }
-                access_token = refreshData.session.access_token;
-                refresh_token = refreshData.session.refresh_token;
-                expiresAt = Date.now() + (refreshData.session.expires_in || 3600) * 1000;
-                userId = refreshData.user.id;
-            } else {
-                access_token = data.session.access_token;
-                refresh_token = data.session.refresh_token;
-                expiresAt = Date.now() + (data.session.expires_in || 3600) * 1000;
-                userId = data.user.id;
-            }
-        } else {
-            // Restore session in memory
-            await supabase.auth.setSession({ access_token, refresh_token });
-        }
-
-        // Fetch profile
-        const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', userId)
-            .maybeSingle();
-
-        let plan = 'free';
-        let maxProfiles = PLAN_LIMITS.free.max_profiles;
-        let isActive = true;
-
-        if (profile) {
-            plan = profile.plan || 'free';
-            maxProfiles = profile.max_profiles || PLAN_LIMITS[plan]?.max_profiles || PLAN_LIMITS.free.max_profiles;
-            isActive = profile.is_active !== false;
-        }
-
-        if (!isActive) {
-            await clearSession();
-            await supabase.auth.signOut();
-            return { success: false, error: 'account_suspended' };
-        }
-
-        const user: AuthUser = {
-            id: userId,
-            email,
-            plan,
-            plan_label: PLAN_LIMITS[plan]?.label || 'Free',
-            max_profiles: maxProfiles,
-            is_active: isActive
-        };
-
-        await saveSession({ access_token, idToken: access_token, refresh_token, expiresAt, userId, email });
-        return { 
-            success: true, 
-            user, 
-            session: { 
-                access_token, 
-                refresh_token 
-            } 
-        };
-    } catch (err) {
-        console.error('[Auth] validateSession error:', err);
-        return { success: false, error: 'Não foi possível conectar ao servidor' };
-    }
+    const user: AuthUser = {
+        id: 'local-user',
+        email: 'local@axefull.com',
+        plan: 'enterprise',
+        plan_label: 'Enterprise (Local)',
+        max_profiles: 9999,
+        is_active: true
+    };
+    return { success: true, user };
 }
 
 export async function logout(): Promise<void> {
-    try {
-        const supabase = getSupabase();
-        await supabase.auth.signOut();
-    } catch {
-        // silently fail
-    } finally {
-        await clearSession();
-    }
+    // no-op
 }
 
 export async function heartbeat(): Promise<{ ok: boolean; action?: string }> {
-    const stored = await getStoredSession();
-    if (!stored) return { ok: false };
-    try {
-        const supabase = getSupabase();
-        const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('is_active')
-            .eq('id', stored.userId)
-            .maybeSingle();
-            
-        if (profile && profile.is_active === false) {
-            return { ok: false, action: 'logout' };
-        }
-        return { ok: true };
-    } catch {
-        return { ok: false };
-    }
+    return { ok: true };
 }

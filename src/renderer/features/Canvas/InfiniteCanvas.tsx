@@ -304,13 +304,14 @@ interface InfiniteCanvasProps {
     onNodesDeleted?: (canvasIds: string[]) => void;
     workspaceId?: string;
     ownerId?: string;
+    type?: string;
 }
 
 interface ContextMenuState { x: number; y: number; nodeId: string; }
 interface SelectionRect { x: number; y: number; w: number; h: number; }
 interface ConnectionContextMenu { x: number; y: number; connectionId: string; }
 
-const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataChange, onOpenPage, onCanvasCreated, onNodesDeleted, workspaceId, ownerId }) => {
+const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataChange, onOpenPage, onCanvasCreated, onNodesDeleted, workspaceId, ownerId, type }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [viewport, setViewport] = useState(data?.viewport || { x: 0, y: 0, zoom: 1 });
     const [nodes, setNodes] = useState<CanvasNode[]>(data?.nodes || []);
@@ -331,7 +332,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const [canvasContextMenu, setCanvasContextMenu] = useState<{ x: number; y: number; canvasX: number; canvasY: number } | null>(null);
     const [showFormatBar, setShowFormatBar] = useState(false);
     const [spaceHeld, setSpaceHeld] = useState(false);
-    const [viewMode, setViewMode] = useState<'canvas' | 'page'>('canvas');
+    const [viewMode, setViewMode] = useState<'canvas' | 'page'>(type === 'page' ? 'page' : 'canvas');
     const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
     const [isPropSidebarMinimized, setIsPropSidebarMinimized] = useState(false);
 

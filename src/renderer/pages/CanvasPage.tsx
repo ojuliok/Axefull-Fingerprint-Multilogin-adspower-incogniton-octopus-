@@ -1250,7 +1250,8 @@ const CanvasPage: React.FC = () => {
         }
 
         const paneCanvasInfo = canvasList.find(c => c.id === paneCanvasId) || null;
-        const paneCanvasType = paneCanvasInfo?.type || 'canvas';
+        const tab = openTabs.find(t => t.id === paneCanvasId);
+        const paneCanvasType = paneCanvasInfo?.type || tab?.type || 'canvas';
 
         if (paneCanvasType === 'space' || paneCanvasType === 'folder') {
             return (
@@ -1279,15 +1280,27 @@ const CanvasPage: React.FC = () => {
             return <CRMCanvasView key={paneCanvasId} boardId={paneCanvasId} />;
         }
 
-        if (paneCanvasType === 'page' && paneCanvasInfo) {
-            return (
-                <CanvasRichText 
-                    key={paneCanvasId} 
-                    canvasInfo={paneCanvasInfo} 
-                    onUpdate={() => reloadCanvasList()} 
-                    onSelectCanvas={handleSelectCanvas}
-                />
-            );
+        if (paneCanvasType === 'page') {
+            const fallbackInfo = paneCanvasInfo || (tab ? {
+                id: tab.id,
+                name: tab.name,
+                title: tab.name,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                type: 'page',
+                icon: tab.icon
+            } : null);
+
+            if (fallbackInfo) {
+                return (
+                    <CanvasRichText 
+                        key={paneCanvasId} 
+                        canvasInfo={fallbackInfo as any} 
+                        onUpdate={() => reloadCanvasList()} 
+                        onSelectCanvas={handleSelectCanvas}
+                    />
+                );
+            }
         }
 
         if (paneCanvasData) {
@@ -1302,6 +1315,7 @@ const CanvasPage: React.FC = () => {
                     onNodesDeleted={handleNodesDeleted}
                     workspaceId={currentWorkspace?.id || ''}
                     ownerId={user?.id || ''}
+                    type={paneCanvasType}
                 />
             );
         }

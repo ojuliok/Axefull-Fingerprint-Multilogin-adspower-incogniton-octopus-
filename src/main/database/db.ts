@@ -292,25 +292,8 @@ export function closeDatabase(): void {
 }
 
 
-/**
- * Async helper to push local changes to Supabase
- */
 async function pushToSupabase(action: 'insert' | 'update' | 'remove', table: string, id: string, data?: any) {
-    try {
-        const supabase = getSupabase();
-        if (action === 'insert' && data) {
-            const { error } = await supabase.from(table).insert([data]);
-            if (error) console.error(`[Supabase Sync] Insert error on ${table}:`, error);
-        } else if (action === 'update' && data) {
-            const { error } = await supabase.from(table).update(data).eq('id', id);
-            if (error) console.error(`[Supabase Sync] Update error on ${table}:`, error);
-        } else if (action === 'remove') {
-            const { error } = await supabase.from(table).delete().eq('id', id);
-            if (error) console.error(`[Supabase Sync] Remove error on ${table}:`, error);
-        }
-    } catch (err) {
-        console.error(`[Supabase Sync] Exception:`, err);
-    }
+    return;
 }
 
 const ALLOWED_TABLES = new Set([

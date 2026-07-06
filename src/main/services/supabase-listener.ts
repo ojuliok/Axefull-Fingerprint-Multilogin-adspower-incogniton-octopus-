@@ -66,96 +66,9 @@ export async function ensureLocalProfile(profileId: string) {
 }
 
 export async function startSupabaseListener() {
-    console.log('⚡ Iniciando Agente Supabase (Listener de Comandos)...');
-    const supabase = getSupabase();
-    
-    try {
-        const { error: authError } = await supabase.auth.signInAnonymously();
-        if (authError) {
-            console.warn('⚠️ Agente (Supabase Auth):', authError.message, '- O Agente tentará escutar os canais mesmo sem login.');
-        } else {
-            console.log('✅ Agente autenticado no Supabase com sucesso.');
-        }
-    } catch (err: any) {
-        console.warn('⚠️ Agente (Supabase Auth Exception):', err.message);
-    }
-
-    // Cancelar comandos antigos pendentes (evita abrir perfis antigos que ficaram presos)
-    try {
-        await supabase
-            .from('launch_commands')
-            .update({ status: 'cancelled_by_restart' })
-            .eq('status', 'pending');
-        console.log('[Supabase] Comandos antigos pendentes foram cancelados com segurança.');
-    } catch (e) { }
-
-    listenerChannel = supabase
-        .channel('agent-commands')
-        .on(
-            'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'launch_commands', filter: "status=eq.pending" },
-            async (payload: any) => {
-                const data = payload.new;
-                const commandId = data.id;
-                console.log(`[Command ${commandId}] Novo comando recebido para o perfil: ${data.profile_id}`);
-                
-                if (data.action === 'close') {
-                    console.log(`[Command ${commandId}] Fechando perfil ${data.profile_id}`);
-                    try {
-                        const { closeProfile } = await import('../features/browser/browser-engine');
-                        await closeProfile(data.profile_id);
-                        
-                        await supabase.from('launch_commands').update({ status: 'active' }).eq('id', commandId);
-                        await supabase.from('profiles').update({ session_status: 'closed' }).eq('id', data.profile_id);
-                        
-                        console.log(`[Command ${commandId}] Perfil ${data.profile_id} fechado com sucesso.`);
-                    } catch (error: any) {
-                        console.error(`[Command ${commandId}] Erro ao fechar:`, error);
-                        await supabase.from('launch_commands').update({ status: 'error', error_message: error.message }).eq('id', commandId);
-                    }
-                    return;
-                }
-
-                // Ação: Abrir
-                try {
-                    await supabase.from('launch_commands').update({ status: 'launching' }).eq('id', commandId);
-                    await supabase.from('profiles').update({ session_status: 'launching' }).eq('id', data.profile_id);
-                    
-                    await ensureLocalProfile(data.profile_id);
-                    const context = await launchProfile(data.profile_id);
-                    
-                    await supabase.from('launch_commands').update({ status: 'active' }).eq('id', commandId);
-                    await supabase.from('profiles').update({ session_status: 'running' }).eq('id', data.profile_id);
-                    console.log(`[Command ${commandId}] Perfil ${data.profile_id} aberto com sucesso!`);
-
-                    // Escuta quando o usuário fechar a janela do navegador localmente
-                    context.on('close', async () => {
-                        console.log(`[Event] Janela do Perfil ${data.profile_id} foi fechada.`);
-                        try {
-                            await supabase.from('profiles').update({ session_status: 'closed' }).eq('id', data.profile_id);
-                        } catch (e) {
-                            console.error('Falha ao atualizar session_status para closed', e);
-                        }
-                    });
-                } catch (error: any) {
-                    console.error(`[Command ${commandId}] Erro ao lançar navegador:`, error);
-                    await supabase.from('launch_commands').update({ status: 'error', error_message: error.message }).eq('id', commandId);
-                    await supabase.from('profiles').update({ session_status: 'error' }).eq('id', data.profile_id);
-                }
-            }
-        )
-        .subscribe((status: any) => {
-            if (status === 'SUBSCRIBED') {
-                console.log('📡 Agente Supabase escutando novos comandos em tempo real...');
-            }
-        });
+    console.log('⚡ Agente Supabase (Listener de Comandos) desativado (Modo Local).');
 }
 
 export function stopSupabaseListener() {
-    if (listenerChannel) {
-        const supabase = getSupabase();
-        supabase.removeChannel(listenerChannel);
-        listenerChannel = null;
-        console.log('⚡ Listener do Supabase encerrado.');
-    }
+    // no-op
 }

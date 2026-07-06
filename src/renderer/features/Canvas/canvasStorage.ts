@@ -19,11 +19,7 @@ function sanitizeUUID(id: string | undefined | null): string | null {
 }
 
 function getStorageMode(): 'online' | 'offline' {
-    try {
-        return (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online';
-    } catch {
-        return 'online';
-    }
+    return 'offline';
 }
 
 function updateLocalCachedNodes(id: string, action: 'delete' | 'update' | 'insert', updates?: any) {

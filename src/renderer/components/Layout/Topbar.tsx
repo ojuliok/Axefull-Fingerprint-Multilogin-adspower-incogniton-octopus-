@@ -16,8 +16,7 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
     const { workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace } = useWorkspace();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
-    const [showStorageMenu, setShowStorageMenu] = useState(false);
-    const [storageMode, setStorageMode] = useState<'online' | 'offline'>(() => (localStorage.getItem('axe_storage_mode') as 'online' | 'offline') || 'online');
+
 
     const isLight = theme === 'light';
     const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'Axe';
@@ -119,57 +118,7 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
                     <Network size={16} />
                 </button>
 
-                {/* Storage Mode Selector */}
-                <div className="relative">
-                    <button
-                        onClick={() => setShowStorageMenu(!showStorageMenu)}
-                        title={`Modo de Armazenamento: ${storageMode === 'online' ? 'Nuvem (Online)' : 'Local (Offline)'}`}
-                        className={`px-2.5 h-8 flex items-center gap-1.5 rounded-lg border transition-all ${storageMode === 'online' ? 'bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'}`}
-                    >
-                        {storageMode === 'online' ? <Cloud size={14} /> : <Database size={14} />}
-                        <span className="text-[10px] font-bold uppercase tracking-wider">{storageMode === 'online' ? 'Online' : 'Offline'}</span>
-                    </button>
 
-                    {showStorageMenu && (
-                        <div className="absolute right-0 top-full mt-2 w-64 glass-card py-2 z-50 animate-fade-in-scale">
-                            <div className="px-4 py-2 border-b border-theme-border/50">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-theme-text-muted">Armazenamento do Canvas</p>
-                            </div>
-                            <div className="p-1">
-                                <button
-                                    onClick={() => {
-                                        localStorage.setItem('axe_storage_mode', 'online');
-                                        setStorageMode('online');
-                                        setShowStorageMenu(false);
-                                        window.location.reload();
-                                    }}
-                                    className={`w-full flex flex-col items-start px-3 py-2 rounded-lg text-left transition-colors ${storageMode === 'online' ? 'bg-violet-500/10 text-violet-400 font-medium' : 'text-theme-text hover:bg-theme-border'}`}
-                                >
-                                    <div className="flex items-center gap-1.5 text-sm">
-                                        <Cloud size={14} />
-                                        <span>Salvar na Nuvem (Online)</span>
-                                    </div>
-                                    <span className="text-[10px] text-theme-text-muted mt-0.5">Sincroniza automaticamente com o Supabase.</span>
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        localStorage.setItem('axe_storage_mode', 'offline');
-                                        setStorageMode('offline');
-                                        setShowStorageMenu(false);
-                                        window.location.reload();
-                                    }}
-                                    className={`w-full flex flex-col items-start px-3 py-2 rounded-lg text-left transition-colors ${storageMode === 'offline' ? 'bg-amber-500/10 text-amber-400 font-medium' : 'text-theme-text hover:bg-theme-border'}`}
-                                >
-                                    <div className="flex items-center gap-1.5 text-sm">
-                                        <Database size={14} />
-                                        <span>Salvar Local (Offline)</span>
-                                    </div>
-                                    <span className="text-[10px] text-theme-text-muted mt-0.5">Salva localmente no navegador. Sem internet.</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
 
                 {/* Theme Toggle */}
                 <button
