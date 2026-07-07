@@ -23,7 +23,7 @@
 
         var localIpRegex = /((192\.168\.)|(10\.)|(172\.(1[6-9]|2\d|3[01])\.)|(127\.)|(::1)|(fc00:)|(fe80:))\S*/;
 
-        function PatchedRTC(config, constraints) {
+        var PatchedRTC = window.__stealth_add_patched ? window.__stealth_add_patched(function (config, constraints) {
             // Remove STUN servers, keep only TURN
             if (config && config.iceServers) {
                 config.iceServers = config.iceServers.map(function (server) {
@@ -75,7 +75,56 @@
             });
 
             return pc;
-        }
+        }) : function (config, constraints) {
+            if (config && config.iceServers) {
+                config.iceServers = config.iceServers.map(function (server) {
+                    var urls = Array.isArray(server.urls) ? server.urls : [server.urls || server.url];
+                    urls = urls.filter(function (u) { return u && u.indexOf('turn:') === 0; });
+                    server.urls = urls;
+                    return server;
+                }).filter(function (s) { return s.urls.length > 0; });
+            }
+
+            var pc = new Orig(config, constraints);
+
+            var origAddEvent = pc.addEventListener.bind(pc);
+            pc.addEventListener = function (type, listener, options) {
+                if (type === 'icecandidate' && listener) {
+                    var wrappedListener = function (event) {
+                        if (event.candidate && event.candidate.candidate) {
+                            if (localIpRegex.test(event.candidate.candidate) || event.candidate.candidate.indexOf('host') !== -1) {
+                                return;
+                            }
+                        }
+                        listener(event);
+                    };
+                    return origAddEvent(type, wrappedListener, options);
+                }
+                return origAddEvent(type, listener, options);
+            };
+
+            var _handler = null;
+            Object.defineProperty(pc, 'onicecandidate', {
+                set: function (handler) {
+                    if (handler) {
+                        _handler = function (event) {
+                            if (event.candidate && event.candidate.candidate) {
+                                if (localIpRegex.test(event.candidate.candidate) || event.candidate.candidate.indexOf('host') !== -1) {
+                                    return;
+                                }
+                            }
+                            handler(event);
+                        };
+                        origAddEvent('icecandidate', _handler);
+                    } else {
+                        _handler = null;
+                    }
+                },
+                get: function () { return _handler; }
+            });
+
+            return pc;
+        };
 
         PatchedRTC.prototype = Orig.prototype;
         PatchedRTC.generateCertificate = Orig.generateCertificate;

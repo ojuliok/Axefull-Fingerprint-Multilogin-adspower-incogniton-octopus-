@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
     X, Bold, Italic, List, Paperclip, Send, Clock, User, FileText, 
     ChevronUp, ChevronDown, Share2, Sparkles, MoreHorizontal, Layout, 
-    Play, Pause, Tag, Calendar, Flag, Plus, Search, Bell, Filter, 
+    Play, Pause, RefreshCw, Tag, Calendar, Flag, Plus, Search, Bell, Filter, 
     Check, Smile, AtSign, Settings, Trash, Eye, Lock, CheckSquare, Square
 } from 'lucide-react';
 import { MarketingPriority, LeadUpdate } from './crmStorage';
@@ -913,19 +913,23 @@ Próximos Passos:
 
                                         {selectedLead.profileId && (() => {
                                             const prof = profiles.find(p => p.id === selectedLead.profileId);
-                                            const isRunning = prof?.status === 'running' || prof?.is_active === 1;
+                                            if (!prof) return null;
+                                            const isOnline = prof.is_active === 1;
+                                            const isStarting = prof.status === 'running' && !isOnline;
                                             return (
                                                 <button
-                                                    onClick={() => isRunning ? closeProfile(prof.id) : launchProfile(prof.id)}
+                                                    disabled={isStarting}
+                                                    onClick={() => isOnline ? closeProfile(prof.id) : launchProfile(prof.id)}
                                                     style={{
-                                                        background: isRunning ? '#ef4444' : '#10b981',
+                                                        background: isStarting ? '#475569' : isOnline ? '#ef4444' : '#10b981',
                                                         border: 'none', color: '#fff', borderRadius: '4px',
                                                         padding: '2px 8px', fontSize: '11px', display: 'flex',
-                                                        alignItems: 'center', gap: '4px', cursor: 'pointer'
+                                                        alignItems: 'center', gap: '4px', cursor: isStarting ? 'not-allowed' : 'pointer',
+                                                        opacity: isStarting ? 0.7 : 1
                                                     }}
                                                 >
-                                                    {isRunning ? <Pause size={10} fill="#fff" /> : <Play size={10} fill="#fff" />}
-                                                    {isRunning ? 'Parar' : 'Iniciar'}
+                                                    {isStarting ? <RefreshCw size={10} className="animate-spin" /> : isOnline ? <Pause size={10} fill="#fff" /> : <Play size={10} fill="#fff" />}
+                                                    {isStarting ? 'Iniciando...' : isOnline ? 'Parar' : 'Iniciar'}
                                                 </button>
                                             );
                                         })()}

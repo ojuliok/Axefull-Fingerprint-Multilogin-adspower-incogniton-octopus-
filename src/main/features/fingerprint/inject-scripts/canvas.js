@@ -44,7 +44,28 @@
         return imageData;
     }
 
-    HTMLCanvasElement.prototype.toDataURL = function () {
+    HTMLCanvasElement.prototype.toDataURL = window.__stealth_add_patched ? window.__stealth_add_patched(function () {
+        if (_applying) return originalToDataURL.apply(this, arguments);
+        try {
+            var ctx = this.getContext('2d');
+            if (ctx && this.width > 0 && this.height > 0) {
+                _applying = true;
+                var imageData = originalGetImageData.call(ctx, 0, 0, this.width, this.height);
+                _applying = false;
+                addNoiseToImageData(imageData, this.width, this.height);
+
+                var tempCanvas = document.createElement('canvas');
+                tempCanvas.width = this.width;
+                tempCanvas.height = this.height;
+                var tempCtx = tempCanvas.getContext('2d');
+                tempCtx.putImageData(imageData, 0, 0);
+                return originalToDataURL.apply(tempCanvas, arguments);
+            }
+        } catch (e) {
+            _applying = false;
+        }
+        return originalToDataURL.apply(this, arguments);
+    }) : function () {
         if (_applying) return originalToDataURL.apply(this, arguments);
         try {
             var ctx = this.getContext('2d');
@@ -67,7 +88,29 @@
         return originalToDataURL.apply(this, arguments);
     };
 
-    HTMLCanvasElement.prototype.toBlob = function (callback) {
+    HTMLCanvasElement.prototype.toBlob = window.__stealth_add_patched ? window.__stealth_add_patched(function (callback) {
+        if (_applying) return originalToBlob.apply(this, arguments);
+        var args = Array.prototype.slice.call(arguments);
+        try {
+            var ctx = this.getContext('2d');
+            if (ctx && this.width > 0 && this.height > 0) {
+                _applying = true;
+                var imageData = originalGetImageData.call(ctx, 0, 0, this.width, this.height);
+                _applying = false;
+                addNoiseToImageData(imageData, this.width, this.height);
+
+                var tempCanvas = document.createElement('canvas');
+                tempCanvas.width = this.width;
+                tempCanvas.height = this.height;
+                var tempCtx = tempCanvas.getContext('2d');
+                tempCtx.putImageData(imageData, 0, 0);
+                return originalToBlob.apply(tempCanvas, args);
+            }
+        } catch (e) {
+            _applying = false;
+        }
+        return originalToBlob.apply(this, args);
+    }) : function (callback) {
         if (_applying) return originalToBlob.apply(this, arguments);
         var args = Array.prototype.slice.call(arguments);
         try {
@@ -91,7 +134,13 @@
         return originalToBlob.apply(this, args);
     };
 
-    CanvasRenderingContext2D.prototype.getImageData = function (sx, sy, sw, sh) {
+    CanvasRenderingContext2D.prototype.getImageData = window.__stealth_add_patched ? window.__stealth_add_patched(function (sx, sy, sw, sh) {
+        var imageData = originalGetImageData.call(this, sx, sy, sw, sh);
+        if (!_applying) {
+            addNoiseToImageData(imageData, sw, sh);
+        }
+        return imageData;
+    }) : function (sx, sy, sw, sh) {
         var imageData = originalGetImageData.call(this, sx, sy, sw, sh);
         if (!_applying) {
             addNoiseToImageData(imageData, sw, sh);

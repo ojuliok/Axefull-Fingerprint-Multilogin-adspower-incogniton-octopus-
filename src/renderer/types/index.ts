@@ -16,6 +16,9 @@ export interface Profile {
     browser_type: 'chromium' | 'firefox';
     fingerprint: Fingerprint;
     proxy: Proxy | null;
+    bypass_list?: string | null;
+    avatar_color?: string | null;
+    avatar_icon?: string | null;
 }
 
 export interface Folder {

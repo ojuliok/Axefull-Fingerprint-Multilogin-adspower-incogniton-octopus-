@@ -2,6 +2,7 @@ import initSqlJs, { Database as SqlJsDatabase, SqlValue } from 'sql.js';
 import path from 'path';
 import fs from 'fs';
 import { app } from 'electron';
+import { v4 as uuidv4 } from 'uuid';
 import { getSupabase } from './supabase-client';
 
 let db: SqlJsDatabase | null = null;
@@ -113,6 +114,11 @@ function runMigrations(database: SqlJsDatabase): void {
         { column: 'category', type: 'TEXT DEFAULT \'all\'' },
         { column: 'folder_id', type: 'TEXT' },
         { column: 'browser_type', type: 'TEXT DEFAULT \'chromium\'' },
+        { column: 'last_login_at', type: 'DATETIME' },
+        { column: 'oauth_linked_email', type: 'TEXT' },
+        { column: 'bypass_list', type: 'TEXT' },
+        { column: 'avatar_color', type: 'TEXT' },
+        { column: 'avatar_icon', type: 'TEXT' },
     ];
 
     for (const migration of profileMigrations) {
@@ -251,6 +257,39 @@ export async function initDatabase(): Promise<SqlJsDatabase> {
             profile_id TEXT,
             details TEXT,
             integrity_hash TEXT NOT NULL
+        );
+
+        -- Security/Audit logs table
+        CREATE TABLE IF NOT EXISTS security_audit_logs (
+            id TEXT PRIMARY KEY,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            action_type TEXT NOT NULL,
+            profile_id TEXT,
+            details TEXT,
+            severity TEXT CHECK(severity IN ('INFO', 'WARNING', 'ERROR')) DEFAULT 'INFO'
+        );
+
+        -- Sessions table
+        CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY,
+            profile_id TEXT NOT NULL,
+            provider TEXT NOT NULL,
+            status TEXT NOT NULL,
+            last_login_at DATETIME,
+            expires_at DATETIME,
+            FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+        );
+
+        -- OAuth Tokens table
+        CREATE TABLE IF NOT EXISTS oauth_tokens (
+            id TEXT PRIMARY KEY,
+            profile_id TEXT NOT NULL,
+            provider TEXT NOT NULL,
+            access_token_ref TEXT NOT NULL,
+            refresh_token_ref TEXT,
+            scope TEXT,
+            expires_at DATETIME,
+            FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
         );
     `;
 
@@ -435,4 +474,27 @@ export function findBy<T>(
 
     stmt.free();
     return undefined;
+}
+
+/**
+ * Log a security event to the security_audit_logs table.
+ */
+export function logSecurityEvent(
+    actionType: string,
+    details: string,
+    severity: 'INFO' | 'WARNING' | 'ERROR' = 'INFO',
+    profileId?: string
+): void {
+    if (!db) return;
+    try {
+        const id = uuidv4();
+        db.run(
+            `INSERT INTO security_audit_logs (id, action_type, profile_id, details, severity) VALUES (?, ?, ?, ?, ?)`,
+            [id, actionType, profileId || null, details, severity]
+        );
+        saveDatabase();
+        console.log(`[SecurityAuditLog] [${severity}] ${actionType}: ${details}`);
+    } catch (err) {
+        console.error('[Database] Failed to write security audit log:', err);
+    }
 }

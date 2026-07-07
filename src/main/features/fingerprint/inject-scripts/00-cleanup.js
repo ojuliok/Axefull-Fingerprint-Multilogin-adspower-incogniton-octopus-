@@ -6,6 +6,56 @@
 (function () {
     'use strict';
 
+    // === Shared Stealth Registry to hide function overrides from toString() ===
+    window.__stealth_patched_set = new WeakSet();
+    window.__stealth_add_patched = function (fn) {
+        if (typeof fn === 'function' && window.__stealth_patched_set) {
+            window.__stealth_patched_set.add(fn);
+        }
+        return fn;
+    };
+
+    // Intercept Object.defineProperty to automatically register new getters/setters/methods
+    var origDefineProperty = Object.defineProperty;
+    Object.defineProperty = function (obj, prop, descriptor) {
+        if (descriptor) {
+            if (typeof descriptor.value === 'function') {
+                window.__stealth_add_patched(descriptor.value);
+            }
+            if (typeof descriptor.get === 'function') {
+                window.__stealth_add_patched(descriptor.get);
+            }
+            if (typeof descriptor.set === 'function') {
+                window.__stealth_add_patched(descriptor.set);
+            }
+        }
+        return origDefineProperty.call(Object, obj, prop, descriptor);
+    };
+    window.__stealth_add_patched(Object.defineProperty);
+
+    // Intercept Object.defineProperties
+    var origDefineProperties = Object.defineProperties;
+    Object.defineProperties = function (obj, props) {
+        if (props) {
+            Object.keys(props).forEach(function (prop) {
+                var descriptor = props[prop];
+                if (descriptor) {
+                    if (typeof descriptor.value === 'function') {
+                        window.__stealth_add_patched(descriptor.value);
+                    }
+                    if (typeof descriptor.get === 'function') {
+                        window.__stealth_add_patched(descriptor.get);
+                    }
+                    if (typeof descriptor.set === 'function') {
+                        window.__stealth_add_patched(descriptor.set);
+                    }
+                }
+            });
+        }
+        return origDefineProperties.call(Object, obj, props);
+    };
+    window.__stealth_add_patched(Object.defineProperties);
+
     // === Remove Playwright traces ===
     try {
         delete window.__playwright;
@@ -35,9 +85,33 @@
         delete document.$cdc_asdjflasutopfhvcZLmcfl_;
     } catch (e) { }
 
+    // Dynamic scan and removal of cdc_ keys on document
+    try {
+        var docKeys = Object.keys(document).concat(Object.getOwnPropertyNames(document)).filter(function (k) {
+            return k.indexOf('cdc_') !== -1 || k.match(/^\$cdc_/);
+        });
+        for (var i = 0; i < docKeys.length; i++) {
+            try { delete document[docKeys[i]]; } catch (e) { }
+        }
+    } catch (e) {}
+
     // === Clean navigator.webdriver ===
-    // Real Chrome (non-automated) returns false, not undefined
+    // If webdriver is set directly on navigator instance, delete it so prototype chain getter is used
+    try {
+        if (navigator.hasOwnProperty('webdriver')) {
+            delete navigator.webdriver;
+        }
+    } catch (e) {}
+    try {
+        if ('webdriver' in navigator) {
+            delete navigator.webdriver;
+        }
+    } catch (e) {}
+
     var navProto = Navigator.prototype;
+    try {
+        delete navProto.webdriver;
+    } catch (e) {}
     try {
         Object.defineProperty(navProto, 'webdriver', {
             get: function () { return false; },
@@ -49,6 +123,11 @@
     // === Build complete window.chrome matching real Chrome ===
     if (!window.chrome) {
         window.chrome = {};
+    }
+    if (window.chrome && 'webdriver' in window.chrome) {
+        try {
+            delete window.chrome.webdriver;
+        } catch (e) {}
     }
 
     // chrome.runtime — full Port implementation so connect() works
@@ -66,17 +145,17 @@
         window.chrome.runtime = {
             id: undefined,
             lastError: null,
-            connect: function (extId, info) { return makePort(info && info.name); },
-            sendMessage: function () { },
-            getManifest: function () { return null; },
-            getURL: function (path) { return ''; },
-            reload: function () { },
-            requestUpdateCheck: function () { },
-            onMessage: { addListener: function () { }, removeListener: function () { }, hasListener: function () { return false; } },
-            onConnect: { addListener: function () { }, removeListener: function () { }, hasListener: function () { return false; } },
-            onInstalled: { addListener: function () { }, removeListener: function () { }, hasListener: function () { return false; } },
-            onStartup: { addListener: function () { }, removeListener: function () { }, hasListener: function () { return false; } },
-            getPlatformInfo: function (cb) { if (cb) cb({ os: 'win', arch: 'x86-64', nacl_arch: 'x86-64' }); return Promise.resolve({ os: 'win', arch: 'x86-64', nacl_arch: 'x86-64' }); }
+            connect: window.__stealth_add_patched(function (extId, info) { return makePort(info && info.name); }),
+            sendMessage: window.__stealth_add_patched(function () { }),
+            getManifest: window.__stealth_add_patched(function () { return null; }),
+            getURL: window.__stealth_add_patched(function (path) { return ''; }),
+            reload: window.__stealth_add_patched(function () { }),
+            requestUpdateCheck: window.__stealth_add_patched(function () { }),
+            onMessage: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }), hasListener: window.__stealth_add_patched(function () { return false; }) },
+            onConnect: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }), hasListener: window.__stealth_add_patched(function () { return false; }) },
+            onInstalled: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }), hasListener: window.__stealth_add_patched(function () { return false; }) },
+            onStartup: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }), hasListener: window.__stealth_add_patched(function () { return false; }) },
+            getPlatformInfo: window.__stealth_add_patched(function (cb) { if (cb) cb({ os: 'win', arch: 'x86-64', nacl_arch: 'x86-64' }); return Promise.resolve({ os: 'win', arch: 'x86-64', nacl_arch: 'x86-64' }); })
         };
     }
 
@@ -86,33 +165,33 @@
             isInstalled: false,
             InstallState: { DISABLED: 'disabled', INSTALLED: 'installed', NOT_INSTALLED: 'not_installed' },
             RunningState: { CANNOT_RUN: 'cannot_run', READY_TO_RUN: 'ready_to_run', RUNNING: 'running' },
-            getDetails: function () { return null; },
-            getIsInstalled: function () { return false; },
-            installState: function (cb) { if (cb) cb('not_installed'); }
+            getDetails: window.__stealth_add_patched(function () { return null; }),
+            getIsInstalled: window.__stealth_add_patched(function () { return false; }),
+            installState: window.__stealth_add_patched(function (cb) { if (cb) cb('not_installed'); })
         };
     }
 
     // chrome.webstore — presence expected by Google pages
     if (!window.chrome.webstore) {
         window.chrome.webstore = {
-            onInstallStageChanged: { addListener: function () { }, removeListener: function () { } },
-            onDownloadProgress: { addListener: function () { }, removeListener: function () { } },
-            install: function (url, onSuccess, onFailure) { if (onFailure) onFailure({ message: 'Not supported.' }); }
+            onInstallStageChanged: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }) },
+            onDownloadProgress: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }) },
+            install: window.__stealth_add_patched(function (url, onSuccess, onFailure) { if (onFailure) onFailure({ message: 'Not supported.' }); })
         };
     }
 
     if (!window.chrome.csi) {
-        window.chrome.csi = function () {
+        window.chrome.csi = window.__stealth_add_patched(function () {
             return {
                 startE: Date.now(),
                 onloadT: Date.now(),
                 pageT: Math.random() * 1000 + 500,
                 tran: 15
             };
-        };
+        });
     }
     if (!window.chrome.loadTimes) {
-        window.chrome.loadTimes = function () {
+        window.chrome.loadTimes = window.__stealth_add_patched(function () {
             return {
                 commitLoadTime: Date.now() / 1000,
                 connectionInfo: 'h2',
@@ -128,7 +207,7 @@
                 wasFetchedViaSpdy: true,
                 wasNpnNegotiated: true
             };
-        };
+        });
     }
 
     // === Remove automation-related properties from Error stack ===
@@ -167,17 +246,17 @@
             }
         }
     });
-    window.Error = CleanError;
+    window.Error = window.__stealth_add_patched(CleanError);
 
     // === Patch Permissions API to not reveal automation ===
     if (navigator.permissions) {
         var origQuery = navigator.permissions.query.bind(navigator.permissions);
-        navigator.permissions.query = function (params) {
+        navigator.permissions.query = window.__stealth_add_patched(function (params) {
             if (params && params.name === 'notifications') {
                 return Promise.resolve({ state: 'prompt', onchange: null });
             }
             return origQuery(params);
-        };
+        });
     }
 
     // iframes inherit all init scripts automatically from Playwright context

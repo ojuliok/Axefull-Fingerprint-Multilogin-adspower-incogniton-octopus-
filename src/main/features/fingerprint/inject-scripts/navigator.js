@@ -9,8 +9,12 @@
     // === Helper: Patch a property at prototype level ===
     function patchProto(proto, prop, value) {
         var origDesc = Object.getOwnPropertyDescriptor(proto, prop);
+        var getter = function () { return value; };
+        if (window.__stealth_add_patched) {
+            window.__stealth_add_patched(getter);
+        }
         var desc = {
-            get: function () { return value; },
+            get: getter,
             enumerable: origDesc ? origDesc.enumerable : true,
             configurable: origDesc ? origDesc.configurable : true
         };
@@ -73,10 +77,38 @@
             brands: brands,
             mobile: false,
             platform: platformName,
-            toJSON: function () {
+            toJSON: window.__stealth_add_patched ? window.__stealth_add_patched(function () {
+                return { brands: this.brands, mobile: this.mobile, platform: this.platform };
+            }) : function () {
                 return { brands: this.brands, mobile: this.mobile, platform: this.platform };
             },
-            getHighEntropyValues: function (hints) {
+            getHighEntropyValues: window.__stealth_add_patched ? window.__stealth_add_patched(function (hints) {
+                var result = {
+                    brands: brands,
+                    mobile: false,
+                    platform: platformName
+                };
+
+                for (var i = 0; i < hints.length; i++) {
+                    var h = hints[i];
+                    if (h === 'architecture') result.architecture = 'x86';
+                    if (h === 'bitness') result.bitness = '64';
+                    if (h === 'fullVersionList') {
+                        result.fullVersionList = brands.map(function (b) {
+                            return { brand: b.brand, version: b.brand === 'Not A Brand' ? (notBrandVersion + '.0.0.0') : fullVersion };
+                        });
+                    }
+                    if (h === 'model') result.model = '';
+                    if (h === 'platformVersion') {
+                        if (platformName === 'Windows') result.platformVersion = '15.0.0';
+                        else if (platformName === 'macOS') result.platformVersion = '14.4.0';
+                        else result.platformVersion = '6.5.0';
+                    }
+                    if (h === 'uaFullVersion') result.uaFullVersion = fullVersion;
+                    if (h === 'wow64') result.wow64 = false;
+                }
+                return Promise.resolve(result);
+            }) : function (hints) {
                 var result = {
                     brands: brands,
                     mobile: false,

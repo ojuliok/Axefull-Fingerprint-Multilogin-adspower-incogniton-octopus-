@@ -48,7 +48,35 @@
     // Pre-calculated widths for base fonts (prevents detection of missing fonts)
     var fallbackWidths = {};
 
-    CanvasRenderingContext2D.prototype.measureText = function (text) {
+    CanvasRenderingContext2D.prototype.measureText = window.__stealth_add_patched ? window.__stealth_add_patched(function (text) {
+        var result = origMeasureText.call(this, text);
+        var currentFont = this.font || '';
+
+        // Extract font family from canvas font property
+        var families = currentFont.split(',').map(function (f) {
+            return f.replace(/^[\d.]+\w*\s+/, '').replace(/['"]/g, '').trim();
+        });
+
+        // Check if any specified font is NOT in our allowed list
+        var hasDisallowed = families.some(function (family) {
+            if (baseFonts.indexOf(family.toLowerCase()) !== -1) return false;
+            return !allowedFonts.some(function (f) {
+                return f.toLowerCase() === family.toLowerCase();
+            });
+        });
+
+        if (hasDisallowed) {
+            // Return measurement for fallback font only
+            var fallbackFont = currentFont.replace(/[^,]+,/, '').trim() || 'sans-serif';
+            var savedFont = this.font;
+            this.font = currentFont.replace(/^([\d.]+\w*\s+).*/, '$1') + fallbackFont;
+            var fallbackResult = origMeasureText.call(this, text);
+            this.font = savedFont;
+            return fallbackResult;
+        }
+
+        return result;
+    }) : function (text) {
         var result = origMeasureText.call(this, text);
         var currentFont = this.font || '';
 
@@ -80,7 +108,30 @@
 
     // === Method 4: Protect getComputedStyle font detection ===
     var origGetComputed = window.getComputedStyle;
-    window.getComputedStyle = function (element, pseudoElt) {
+    window.getComputedStyle = window.__stealth_add_patched ? window.__stealth_add_patched(function (element, pseudoElt) {
+        var style = origGetComputed.call(window, element, pseudoElt);
+
+        // If checking font-family, ensure it only reports allowed fonts
+        var origGetProp = style.getPropertyValue.bind(style);
+        style.getPropertyValue = function (prop) {
+            if (prop === 'font-family') {
+                var value = origGetProp(prop);
+                if (value) {
+                    var filtered = value.split(',').map(function (f) { return f.trim(); }).filter(function (f) {
+                        var clean = f.replace(/['"]/g, '');
+                        if (baseFonts.indexOf(clean.toLowerCase()) !== -1) return true;
+                        return allowedFonts.some(function (af) {
+                            return af.toLowerCase() === clean.toLowerCase();
+                        });
+                    });
+                    return filtered.length > 0 ? filtered.join(', ') : value;
+                }
+            }
+            return origGetProp(prop);
+        };
+
+        return style;
+    }) : function (element, pseudoElt) {
         var style = origGetComputed.call(window, element, pseudoElt);
 
         // If checking font-family, ensure it only reports allowed fonts

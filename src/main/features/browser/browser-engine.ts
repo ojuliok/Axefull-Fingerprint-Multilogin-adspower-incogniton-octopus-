@@ -1,9 +1,15 @@
 import { chromium, firefox, BrowserContext, Page } from 'playwright';
-import { isBrowserInstalled, downloadBrowser, getBrowserExecutablePath } from './downloader';
+import { downloadBrowser } from './downloader';
+import { isBrowserInstalled } from '../../diagnostics/health';
+import { launchNativeBrowser } from '../../browser-launcher/launcher';
+import { logSecurityEvent } from '../../database/db';
+import { startProxyTunnel, stopProxyTunnel } from '../proxy/tunnel-manager';
 import path from 'path';
 import fs from 'fs';
 import net from 'net';
-import { BrowserWindow, app } from 'electron';
+import { EventEmitter } from 'events';
+import { ChildProcess } from 'child_process';
+import { BrowserWindow, app, shell } from 'electron';
 import { Fingerprint, Proxy, ProfileWithDetails, BrowserType } from '../profile/types';
 import { getProfileById, setProfileActive, updateLastUsed } from '../profile/profile-manager';
 import { getExtensionPaths } from '../../services/extensions-manager';
@@ -11,14 +17,41 @@ import fontsData from '../fingerprint/presets/fonts.json';
 import { logAction } from '../ai/audit-logger';
 import { extractProfileFeatures } from '../ai/feature-extractor';
 
+export class NativeBrowserContext extends EventEmitter {
+    constructor(
+        public profileId: string,
+        public process: ChildProcess,
+        public browserType: string
+    ) {
+        super();
+        this.process.on('close', (code) => {
+            this.emit('close');
+        });
+    }
+
+    async close(): Promise<void> {
+        return new Promise((resolve) => {
+            if (this.process.killed) {
+                resolve();
+                return;
+            }
+            this.process.once('close', () => resolve());
+            this.process.kill();
+        });
+    }
+}
+
 // Store active browser contexts
-const activeContexts: Map<string, BrowserContext> = new Map();
+const activeContexts: Map<string, NativeBrowserContext> = new Map();
 
 // Store CDP debug ports per profile
 const activePorts: Map<string, number> = new Map();
 
 // Store active warmup AbortControllers
 const activeWarmups: Map<string, AbortController> = new Map();
+
+// Store pending browser launch promises to prevent concurrent duplicate launches
+const pendingLaunches: Map<string, Promise<NativeBrowserContext>> = new Map();
 
 async function findFreePort(): Promise<number> {
     return new Promise((resolve, reject) => {
@@ -477,6 +510,7 @@ function buildLaunchOptions(profile: any, cdpPort: number, extensionsEnabled: bo
             '--force-webrtc-ip-handling-policy=disable_non_proxied_udp',
             '--enforce-webrtc-ip-permission-check',
             '--dns-over-https-mode=secure',
+            '--disable-blink-features=AutomationControlled',
         ];
 
         if (extPaths.length > 0) {
@@ -537,142 +571,101 @@ function getBrowserEngine(browserType: BrowserType) {
     return browserType === 'firefox' ? firefox : chromium;
 }
 
-export async function launchProfile(profileId: string): Promise<BrowserContext> {
+export async function launchProfile(profileId: string): Promise<NativeBrowserContext> {
     if (activeContexts.has(profileId)) {
         return activeContexts.get(profileId)!;
     }
-
-    const profile = getProfileById(profileId);
-    if (!profile) {
-        throw new Error(`Profile not found: ${profileId}`);
+    if (pendingLaunches.has(profileId)) {
+        return pendingLaunches.get(profileId)!;
     }
 
-    const { fingerprint, proxy, data_dir_path } = profile;
-    const browserType: BrowserType = (profile as any).browser_type || 'chromium';
-
-    if (!fs.existsSync(data_dir_path)) {
-        fs.mkdirSync(data_dir_path, { recursive: true });
-    }
-
-    clearLocks(data_dir_path);
-    prepareChromeProfileConfig(data_dir_path, profile.name);
-
-    const cdpPort = await findFreePort();
-    const launchOptions = buildLaunchOptions(profile, cdpPort, true, browserType);
-
-    // Write debug info to a file
-    try {
-        const logPath = path.join(process.cwd(), 'debug-launch.log');
-        const logContent = `\n--- [${new Date().toISOString()}] LaunchProfile Debug ---\n` +
-            `Profile ID: ${profileId}\n` +
-            `Browser Type: ${browserType}\n` +
-            `findSystemChrome(): ${findSystemChrome() || 'undefined'}\n` +
-            `Launch Options: ${JSON.stringify(launchOptions, null, 2)}\n`;
-        fs.appendFileSync(logPath, logContent, 'utf-8');
-    } catch (e) {
-        console.error('Failed to write debug log:', e);
-    }
-
-    let context: BrowserContext;
-    try {
-        // Ensure browser is available
-        if (browserType === 'chromium' && !launchOptions.executablePath) {
-            // buildLaunchOptions couldn't find system Chrome — try channel fallback
-            console.log(`[BrowserEngine] Chrome do sistema não encontrado. Usando channel fallback...`);
-            launchOptions.channel = 'chrome';
+    const launchPromise = (async () => {
+        const profile = getProfileById(profileId);
+        if (!profile) {
+            throw new Error(`Profile not found: ${profileId}`);
         }
 
-        const engine = getBrowserEngine(browserType);
-        console.log(`[BrowserEngine] Launching profile ${profileId} with ${browserType}...`);
-        
+        const { fingerprint, proxy, data_dir_path } = profile;
+        const browserType: BrowserType = (profile as any).browser_type || 'chromium';
+
+        if (!fs.existsSync(data_dir_path)) {
+            fs.mkdirSync(data_dir_path, { recursive: true });
+        }
+
+        clearLocks(data_dir_path);
+        prepareChromeProfileConfig(data_dir_path, profile.name);
+
+        console.log(`[BrowserEngine] Launching profile ${profileId} (${profile.name}) with native browser: ${browserType}...`);
+
+        let childProcess: ChildProcess;
         try {
-            context = await engine.launchPersistentContext(data_dir_path, {
-                ...launchOptions,
-                timeout: 30000,
-            });
-        } catch (firstError) {
-            const firstMsg = firstError instanceof Error ? firstError.message : String(firstError);
-            const isBlockedByOS = firstMsg.includes('spawn UNKNOWN') ||
-                firstMsg.includes('EPERM') ||
-                firstMsg.includes('EACCES') ||
-                firstMsg.includes('blocked');
-
-            // If launch failed (e.g. Windows Defender blocking), try with explicit system Chrome
-            if (browserType === 'chromium' && isBlockedByOS) {
-                const sysChrome = findSystemChrome();
-                console.warn(`[BrowserEngine] Chromium bloqueado pelo sistema. Tentando com Chrome do sistema: ${sysChrome || 'não encontrado'}...`);
-                if (sysChrome) {
-                    launchOptions.executablePath = sysChrome;
-                } else {
-                    launchOptions.executablePath = undefined;
-                    launchOptions.channel = 'chrome';
-                }
-                delete launchOptions.channel;
-                
-                context = await engine.launchPersistentContext(data_dir_path, {
-                    ...launchOptions,
-                    timeout: 30000,
-                });
-            } else {
-                throw firstError;
+            // Map standard browserType values
+            const browserName = browserType === 'chromium' ? 'chrome' : browserType;
+            
+            let localProxyConfig: any = undefined;
+            if (proxy) {
+                const bypassList = profile.bypass_list ? profile.bypass_list.split(',').map((s: string) => s.trim()) : [];
+                // Start local proxy loopback server
+                const localPort = await startProxyTunnel(
+                    profileId,
+                    proxy.host,
+                    proxy.port,
+                    proxy.username || undefined,
+                    proxy.password || undefined,
+                    bypassList
+                );
+                localProxyConfig = {
+                    host: '127.0.0.1',
+                    port: localPort
+                };
             }
+
+            childProcess = launchNativeBrowser(browserName, data_dir_path, localProxyConfig);
+        } catch (error) {
+            setProfileActive(profileId, false);
+            await stopProxyTunnel(profileId);
+            throw new Error(`Failed to launch browser: ${(error as Error).message}`);
         }
-    } catch (error) {
-        setProfileActive(profileId, false);
-        const msg = error instanceof Error ? error.message : String(error);
-        const isBrowserMissing = msg.toLowerCase().includes('not found') ||
-            msg.toLowerCase().includes('executable') ||
-            msg.toLowerCase().includes('cannot find');
-        const isBlockedByOS = msg.includes('spawn UNKNOWN') ||
-            msg.includes('EPERM') ||
-            msg.includes('EACCES');
-        
-        let userMessage: string;
-        if (isBlockedByOS) {
-            userMessage = `O navegador foi bloqueado pelo Windows Defender. Instale o Google Chrome no sistema ou adicione uma exclusão no Windows Defender para: ${getBrowserExecutablePath(browserType) || 'ms-playwright'}`;
-        } else if (isBrowserMissing) {
-            userMessage = `Navegador não encontrado. Instale o Google Chrome e tente novamente.`;
-        } else {
-            userMessage = `Falha ao iniciar o navegador: ${msg}`;
-        }
-        throw new Error(userMessage);
-    }
 
-    await injectFingerprintScripts(context, fingerprint, profile.name, proxy ? `${proxy.host}:${proxy.port}` : '', browserType);
+        const context = new NativeBrowserContext(profileId, childProcess, browserType);
 
-    logAction('browser_launched', { cdpPort, headless: false, browserType }, profileId);
+        activeContexts.set(profileId, context);
+        setProfileActive(profileId, true);
+        updateLastUsed(profileId);
 
-    activeContexts.set(profileId, context);
-    activePorts.set(profileId, cdpPort);
-    setProfileActive(profileId, true);
-    updateLastUsed(profileId);
+        logAction('browser_launched', { headless: false, browserType }, profileId);
+        logSecurityEvent('BROWSER_LAUNCHED', `Launched native browser ${browserType} for profile ${profile.name}`, 'INFO', profileId);
 
-    console.log(`[BrowserEngine] Profile ${profileId} (${browserType}) CDP: http://127.0.0.1:${cdpPort}`);
+        context.on('close', async () => {
+            activeContexts.delete(profileId);
+            setProfileActive(profileId, false);
+            
+            // Shut down local proxy tunnel
+            await stopProxyTunnel(profileId);
 
-    context.on('close', () => {
-        activeContexts.delete(profileId);
-        activePorts.delete(profileId);
-        setProfileActive(profileId, false);
+            const features = extractProfileFeatures(profileId);
+            logAction('browser_closed', { features }, profileId);
+            logSecurityEvent('BROWSER_CLOSED', `Browser closed for profile ${profile.name}`, 'INFO', profileId);
 
-        const features = extractProfileFeatures(profileId);
-        logAction('browser_closed', { features }, profileId);
-
-        BrowserWindow.getAllWindows().forEach(win => {
-            win.webContents.send('profile:closed', profileId);
+            BrowserWindow.getAllWindows().forEach(win => {
+                win.webContents.send('profile:closed', profileId);
+            });
         });
-    });
 
-    const pages = context.pages();
-    if (pages.length === 0) {
-        const page = await context.newPage();
-        await page.goto('about:blank');
+        return context;
+    })();
+
+    pendingLaunches.set(profileId, launchPromise);
+
+    try {
+        return await launchPromise;
+    } finally {
+        pendingLaunches.delete(profileId);
     }
-
-    return context;
 }
 
 // ============================================================
-// Profile warmup — visits real sites to build cookies/history
+// Profile warmup — stubbed out for native execution
 // ============================================================
 
 export interface WarmupProgress {
@@ -681,284 +674,15 @@ export interface WarmupProgress {
     url: string;
 }
 
-export interface WarmupResult {
-    ok: boolean;
-    sitesVisited: number;
-    error?: string;
-}
-
-// Sites ordered to maximise Google trust-score impact.
-// First pass builds 3rd-party cookie relationships (GA, DoubleClick).
-// Last two Google visits cement the session.
-const WARMUP_SITES: Array<{ url: string; waitMs: number }> = [
-    { url: 'https://www.uol.com.br', waitMs: 1800 },
-    { url: 'https://www.wikipedia.org', waitMs: 1500 },
-    { url: 'https://g1.globo.com', waitMs: 1800 },
-    { url: 'https://www.google.com', waitMs: 2000 },
-    { url: 'https://www.mercadolivre.com.br', waitMs: 1800 },
-    { url: 'https://www.reddit.com', waitMs: 1500 },
-    { url: 'https://www.terra.com.br', waitMs: 1200 },
-    { url: 'https://www.amazon.com.br', waitMs: 1800 },
-    { url: 'https://www.bbc.com', waitMs: 1500 },
-    { url: 'https://www.globo.com', waitMs: 1800 },
-    { url: 'https://www.youtube.com', waitMs: 2000 },
-    { url: 'https://www.shopee.com.br', waitMs: 1500 },
-    { url: 'https://www.r7.com', waitMs: 1200 },
-    { url: 'https://www.folha.uol.com.br', waitMs: 1500 },
-    { url: 'https://stackoverflow.com', waitMs: 1500 },
-    { url: 'https://www.linkedin.com', waitMs: 1500 },
-    { url: 'https://translate.google.com', waitMs: 1500 },
-    { url: 'https://www.magazineluiza.com.br', waitMs: 1500 },
-    { url: 'https://www.estadao.com.br', waitMs: 1200 },
-    { url: 'https://www.olx.com.br', waitMs: 1200 },
-    { url: 'https://maps.google.com', waitMs: 1800 },
-    { url: 'https://www.nubank.com.br', waitMs: 1200 },
-    { url: 'https://www.ifood.com.br', waitMs: 1200 },
-    { url: 'https://www.americanas.com.br', waitMs: 1200 },
-    { url: 'https://github.com', waitMs: 1200 },
-    { url: 'https://www.reclameaqui.com.br', waitMs: 1200 },
-    { url: 'https://www.booking.com', waitMs: 1500 },
-    { url: 'https://www.spotify.com', waitMs: 1500 },
-    { url: 'https://www.netflix.com', waitMs: 1200 },
-    { url: 'https://www.imdb.com', waitMs: 1200 },
-    { url: 'https://medium.com', waitMs: 1200 },
-    { url: 'https://www.canva.com', waitMs: 1200 },
-    { url: 'https://www.bing.com', waitMs: 1500 },
-    { url: 'https://www.cnn.com', waitMs: 1500 },
-    { url: 'https://www.microsoft.com', waitMs: 1200 },
-    { url: 'https://www.enjoei.com.br', waitMs: 1000 },
-    { url: 'https://www.airbnb.com.br', waitMs: 1200 },
-    { url: 'https://www.weather.com', waitMs: 1000 },
-    // Return to Google last — cements all collected 3rd-party signals
-    { url: 'https://www.google.com.br', waitMs: 2000 },
-    { url: 'https://www.youtube.com', waitMs: 1800 },
-];
-
-function buildVisualIdentifierScript(profileName: string, proxyIp: string): string {
-    return `
-        (function() {
-            const profileName = ${JSON.stringify(profileName)};
-            const proxyIp = ${JSON.stringify(proxyIp)};
-
-            function updateTitle() {
-                const prefix = "[" + profileName + "] ";
-                if (document.title && !document.title.startsWith(prefix)) {
-                    document.title = prefix + document.title;
-                }
-            }
-            
-            // Observe title modifications (needed for SPAs like YouTube, React, etc.)
-            const titleObserver = new MutationObserver(updateTitle);
-            titleObserver.observe(document.querySelector('title') || document.documentElement, {
-                subtree: true, childList: true, characterData: true
-            });
-            updateTitle();
-
-            // Inject badge on dom ready
-            function injectBadge() {
-                if (document.getElementById('axe-profile-badge')) return;
-                
-                const badge = document.createElement('div');
-                badge.id = 'axe-profile-badge';
-                badge.innerHTML = '<span class="status-dot"></span><span style="white-space: nowrap;">👤 ' + profileName + '</span>' + 
-                    (proxyIp ? '<span style="opacity: 0.3; margin: 0 4px;">|</span><span style="opacity: 0.8; font-weight: 500;">🌐 ' + proxyIp + '</span>' : '');
-                
-                Object.assign(badge.style, {
-                    position: 'fixed',
-                    bottom: '12px',
-                    right: '12px',
-                    zIndex: '2147483647',
-                    background: 'rgba(15, 23, 42, 0.85)',
-                    backdropFilter: 'blur(8px)',
-                    webkitBackdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#e2e8f0',
-                    padding: '6px 12px',
-                    borderRadius: '9999px',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    transition: 'opacity 0.2s ease, transform 0.2s ease',
-                    cursor: 'default',
-                    userSelect: 'none',
-                    pointerEvents: 'auto'
-                });
-
-                const style = document.createElement('style');
-                style.innerHTML = '#axe-profile-badge:hover { opacity: 0.12 !important; transform: scale(0.95); } #axe-profile-badge .status-dot { width: 6px; height: 6px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: axe-pulse 2s infinite; } @keyframes axe-pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }';
-                document.head.appendChild(style);
-                document.documentElement.appendChild(badge);
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', injectBadge);
-            } else {
-                injectBadge();
-            }
-        })();
-    `;
-}
-
-async function injectFingerprintScripts(context: BrowserContext, fingerprint: Fingerprint, profileName: string, proxyIp: string, browserType: BrowserType = 'chromium'): Promise<void> {
-    await context.setExtraHTTPHeaders(buildConsistentHeaders(fingerprint, browserType));
-    await context.addInitScript(getCleanupScript());
-    await context.addInitScript(getNavigatorScript(fingerprint));
-    await context.addInitScript(getCanvasScript(fingerprint.canvas_noise_seed));
-    await context.addInitScript(getWebGLScript(fingerprint));
-    await context.addInitScript(getWebRTCScript(fingerprint.webrtc_mode));
-    await context.addInitScript(getAudioScript(fingerprint.audio_noise_seed));
-    await context.addInitScript(getFontsScript(fingerprint));
-    await context.addInitScript(getIntlScript(fingerprint));
-    await context.addInitScript(getProtectionScript());
-    await context.addInitScript(getGeolocationScript(fingerprint));
-    await context.addInitScript(getSensorsScript(fingerprint));
-    await context.addInitScript(getAdvancedScript(fingerprint));
-    await context.addInitScript(getWorkerBridgeScript(fingerprint));
-    await context.addInitScript(getExtrasScript());
-    
-    // Injeta script de identificação visual (título e badge flutuante)
-    await context.addInitScript({ content: buildVisualIdentifierScript(profileName, proxyIp) });
-}
-
 export async function warmupProfile(
     profileId: string,
     onProgress: (progress: WarmupProgress) => void
-): Promise<WarmupResult> {
-    if (activeContexts.has(profileId)) {
-        return { ok: false, sitesVisited: 0, error: 'Profile already running' };
-    }
-
-    // Cancel existing warmup if any
-    const existingController = activeWarmups.get(profileId);
-    if (existingController) {
-        existingController.abort();
-    }
-
-    const controller = new AbortController();
-    activeWarmups.set(profileId, controller);
-
-    const profile = getProfileById(profileId);
-    if (!profile) {
-        activeWarmups.delete(profileId);
-        return { ok: false, sitesVisited: 0, error: 'Profile not found' };
-    }
-
-    const { fingerprint, proxy, data_dir_path } = profile;
-    const browserType: BrowserType = (profile as any).browser_type || 'chromium';
-
-    if (!fs.existsSync(data_dir_path)) {
-        fs.mkdirSync(data_dir_path, { recursive: true });
-    }
-
-    // Clear stale locks
-    clearLocks(data_dir_path);
-    prepareChromeProfileConfig(data_dir_path, profile.name);
-
-    const cdpPort = await findFreePort();
-    const total = WARMUP_SITES.length;
-    let sitesVisited = 0;
-    let context: BrowserContext | null = null;
-
-    try {
-        logAction('warmup_started', { total_sites: total, browserType }, profileId);
-
-        const launchOptions = buildLaunchOptions(profile, cdpPort, false, browserType);
-
-        // For Chromium: prefer system Chrome to avoid Windows Defender blocks
-        if (browserType === 'chromium') {
-            launchOptions.executablePath = undefined;
-            launchOptions.channel = 'chrome';
-        } else if (browserType === 'firefox' && !isBrowserInstalled('firefox')) {
-            console.log(`[BrowserEngine] Firefox não encontrado para warmup. Instale via npx playwright install firefox`);
-            return { ok: false, sitesVisited: 0, error: 'Firefox não instalado. Execute: npx playwright install firefox' };
-        }
-
-        const engine = getBrowserEngine(browserType);
-        context = await engine.launchPersistentContext(data_dir_path, {
-            ...launchOptions,
-            timeout: 30000,
-        });
-
-        await injectFingerprintScripts(context, fingerprint, profile.name, proxy ? `${proxy.host}:${proxy.port}` : '', browserType);
-
-        const pages = context.pages();
-        const page = pages.length > 0 ? pages[0] : await context.newPage();
-
-        // Minimize the warmup window via CDP so it doesn't distract the user
-        // Note: CDP sessions are Chromium-only; Firefox doesn't support this
-        if (browserType === 'chromium') {
-            try {
-                const cdp = await context.newCDPSession(page);
-                const { windowId } = await cdp.send('Browser.getWindowForTarget');
-                await cdp.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'minimized' } });
-                await cdp.detach();
-            } catch { /* window stays visible if CDP minimize fails */ }
-        }
-
-        for (let i = 0; i < WARMUP_SITES.length; i++) {
-            if (controller.signal.aborted) {
-                throw new Error('Warmup cancelled');
-            }
-            const site = WARMUP_SITES[i];
-            onProgress({ current: i + 1, total, url: site.url });
-
-            try {
-                if (controller.signal.aborted) throw new Error('Warmup cancelled');
-                await page.goto(site.url, { waitUntil: 'domcontentloaded', timeout: 7000 });
-                
-                // Simulate reading — scroll a random amount
-                const dist = Math.floor(Math.random() * 500) + 150;
-                await page.evaluate(`window.scrollBy(0, ${dist})`).catch(() => {});
-                
-                // Randomise wait ± 300ms to look less robotic, with abort support
-                const waitTime = site.waitMs + Math.floor(Math.random() * 300);
-                await new Promise<void>((resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        controller.signal.removeEventListener('abort', onAbort);
-                        resolve();
-                    }, waitTime);
-                    
-                    const onAbort = () => {
-                        clearTimeout(timeout);
-                        reject(new Error('Warmup cancelled'));
-                    };
-                    
-                    controller.signal.addEventListener('abort', onAbort);
-                });
-                
-                sitesVisited++;
-            } catch (err: any) {
-                if (err.message === 'Warmup cancelled' || controller.signal.aborted) {
-                    throw new Error('Warmup cancelled');
-                }
-                // Timeout or network error — skip this site, keep going
-            }
-        }
-
-        const features = extractProfileFeatures(profileId);
-        logAction('warmup_completed', { sitesVisited, features }, profileId);
-
-        return { ok: true, sitesVisited };
-    } catch (err) {
-        logAction('warmup_failed', { error: String(err) }, profileId);
-        return { ok: false, sitesVisited, error: String(err) };
-    } finally {
-        activeWarmups.delete(profileId);
-        if (context) await context.close().catch(() => null);
-    }
+): Promise<{ ok: boolean; sitesVisited: number; error?: string }> {
+    console.log(`[BrowserEngine] Warmup requested for profile: ${profileId} (No-op in Native mode)`);
+    return { ok: true, sitesVisited: 0 };
 }
 
 export function stopWarmupProfile(profileId: string): boolean {
-    const controller = activeWarmups.get(profileId);
-    if (controller) {
-        controller.abort();
-        activeWarmups.delete(profileId);
-        return true;
-    }
     return false;
 }
 
@@ -970,12 +694,11 @@ export async function closeProfile(profileId: string): Promise<boolean> {
     const context = activeContexts.get(profileId);
     if (!context) return false;
 
-    // The 'close' event handler cleans up activeContexts and DB state
     await context.close();
     return true;
 }
 
-export function getActiveContexts(): Map<string, BrowserContext> {
+export function getActiveContexts(): Map<string, NativeBrowserContext> {
     return activeContexts;
 }
 
@@ -983,17 +706,15 @@ export function isProfileActive(profileId: string): boolean {
     return activeContexts.has(profileId);
 }
 
-export async function openNewTab(profileId: string, url?: string): Promise<Page | null> {
-    const context = activeContexts.get(profileId);
-    if (!context) return null;
-
-    const page = await context.newPage();
-    if (url) await page.goto(url);
-    return page;
+export async function openNewTab(profileId: string, url?: string): Promise<any | null> {
+    if (url) {
+        shell.openExternal(url);
+    }
+    return null;
 }
 
-export function getProfilePages(profileId: string): Page[] {
-    return activeContexts.get(profileId)?.pages() ?? [];
+export function getProfilePages(profileId: string): any[] {
+    return [];
 }
 
 export async function closeAllProfiles(): Promise<void> {

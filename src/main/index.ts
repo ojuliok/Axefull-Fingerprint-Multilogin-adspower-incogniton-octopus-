@@ -25,6 +25,7 @@ import { registerBulkVideoHandlers } from './ipc/bulkVideoIpc';
 import { closeAllProfiles } from './features/browser/browser-engine';
 import { startSupabaseListener, stopSupabaseListener } from './services/supabase-listener';
 import { startLocalApiServer, stopLocalApiServer } from './features/local-api/local-api-server';
+import { initComplianceGuard } from './security/compliance-guard';
 
 let tray: Tray | null = null;
 let mainWindow: BrowserWindow | null = null;
@@ -181,6 +182,18 @@ function createTray(): void {
  */
 async function init(): Promise<void> {
     console.log('[Main] Initializing Axefull Fingerprint Browser...');
+
+    // Inicializar a proteção de conformidade (bloqueia logins Google em WebViews)
+    initComplianceGuard();
+
+    // Registrar o cliente de protocolo customizado para axeagent://
+    if (process.defaultApp) {
+        if (process.argv.length >= 2) {
+            app.setAsDefaultProtocolClient('axeagent', process.execPath, [path.resolve(process.argv[1])]);
+        }
+    } else {
+        app.setAsDefaultProtocolClient('axeagent');
+    }
 
     // Inicializar bandeja do sistema
     createTray();

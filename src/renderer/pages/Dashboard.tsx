@@ -23,6 +23,8 @@ import {
 } from '../utils/constants';
 import { StatusPickerPopup } from '../features/Dashboard/StatusPickerPopup';
 import { TagPickerPopup } from '../features/Dashboard/TagPickerPopup';
+import { AvatarPickerPopup } from '../features/Dashboard/AvatarPickerPopup';
+import * as Lucide from 'lucide-react';
 import { MiniSidebarItem as MiniItem } from '../features/Dashboard/MiniSidebarItem';
 import { FloatingBulkActions } from '../features/Dashboard/FloatingBulkActions';
 import { ResourceMonitor } from '../features/Dashboard/ResourceMonitor';
@@ -115,7 +117,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
     });
     const [expandedPanel, setExpandedPanel] = useState<{ profileId: string; tab: string } | null>(null);
     const [editingNotes, setEditingNotes] = useState('');
+    const [activeNotesEdit, setActiveNotesEdit] = useState<{ profileId: string; tempValue: string } | null>(null);
     const [folderCellPicker, setFolderCellPicker] = useState<{ profileId: string; x: number; y: number } | null>(null);
+    const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
+        try {
+            const saved = localStorage.getItem('axe_column_widths');
+            return saved ? JSON.parse(saved) : {
+                name: 320,
+                status: 140,
+                notes: 220,
+                folder: 150,
+                tags: 180,
+                proxy: 240,
+            };
+        } catch {
+            return {
+                name: 320,
+                status: 140,
+                notes: 220,
+                folder: 150,
+                tags: 180,
+                proxy: 240,
+            };
+        }
+    });
+    const [avatarPicker, setAvatarPicker] = useState<{ profileId: string; x: number; y: number } | null>(null);
+    const [viewingNote, setViewingNote] = useState<{ profileName: string; notes: string } | null>(null);
     const [groupBy, setGroupBy] = useState<'none' | 'status' | 'folder'>('none');
     const [defaultDetailTab, setDefaultDetailTab] = useState<'general' | 'fingerprint' | 'proxy' | 'cookies' | 'history' | 'bookmarks' | 'clear'>('general');
 
@@ -659,13 +686,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
     const getGridTemplateColumns = () => {
         let cols = '40px'; // checkbox always
         if (visibleColumns.favorite) cols += ' 32px';
-        cols += ' minmax(200px, 2fr)'; // name always
-        if (visibleColumns.status) cols += ' 120px';
-        if (visibleColumns.notes) cols += ' minmax(80px, 1fr)';
-        if (visibleColumns.folder) cols += ' 140px';
-        if (visibleColumns.tags) cols += ' 160px';
-        if (visibleColumns.proxy) cols += ' 1fr';
-        if (visibleColumns.actions) cols += ' 90px';
+        cols += ` ${columnWidths.name}px`;
+        if (visibleColumns.status) cols += ` ${columnWidths.status}px`;
+        if (visibleColumns.notes) cols += ` ${columnWidths.notes}px`;
+        if (visibleColumns.folder) cols += ` ${columnWidths.folder}px`;
+        if (visibleColumns.tags) cols += ` ${columnWidths.tags}px`;
+        if (visibleColumns.proxy) cols += ` ${columnWidths.proxy}px`;
+        cols += ' 90px'; // actions
         return cols;
     };
 
@@ -678,6 +705,104 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
     const saveNotes = async () => {
         if (!expandedPanel) return;
         await handleUpdateProfile(expandedPanel.profileId, { notes: editingNotes });
+    };
+
+    const renderNotesPreview = (notes: string | null): string => {
+        if (!notes) return '';
+        const trimmed = notes.trim();
+        if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (Array.isArray(parsed)) {
+                    return parsed
+                        .map((block: any) => {
+                            if (typeof block === 'object' && block !== null) {
+                                return block.title || block.content || block.text || '';
+                            }
+                            return String(block);
+                        })
+                        .filter(Boolean)
+                        .join(' - ');
+                }
+                if (parsed.type === 'doc' && Array.isArray(parsed.content)) {
+                    const extractText = (node: any): string => {
+                        if (node.text) return node.text;
+                        if (Array.isArray(node.content)) {
+                            return node.content.map(extractText).join(' ');
+                        }
+                        return '';
+                    };
+                    return parsed.content.map(extractText).join(' ').trim();
+                }
+            } catch {
+                // fallback
+            }
+        }
+        return notes;
+    };
+
+    const saveInlineNotes = async () => {
+        if (!activeNotesEdit) return;
+        const { profileId, tempValue } = activeNotesEdit;
+        setActiveNotesEdit(null);
+        await handleUpdateProfile(profileId, { notes: tempValue });
+    };
+
+    const handleInlineNotesKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            saveInlineNotes();
+        } else if (e.key === 'Escape') {
+            setActiveNotesEdit(null);
+        }
+    };
+
+    const startResize = (e: React.MouseEvent, columnKey: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const startX = e.clientX;
+        const startWidth = columnWidths[columnKey] || 150;
+
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            const newWidth = Math.max(80, startWidth + deltaX);
+            setColumnWidths(prev => {
+                const next = { ...prev, [columnKey]: newWidth };
+                localStorage.setItem('axe_column_widths', JSON.stringify(next));
+                return next;
+            });
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const renderProfileAvatar = (p: Profile) => {
+        const iconName = p.avatar_icon;
+        const customColor = p.avatar_color || 'linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%)';
+        const IconComponent = iconName ? (Lucide as any)[iconName] : null;
+
+        return (
+            <div 
+                className={styles.mondayAvatar} 
+                style={{ background: customColor, cursor: 'pointer' }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setAvatarPicker({
+                        profileId: p.id,
+                        x: rect.left,
+                        y: rect.bottom + 4
+                    });
+                }}
+            >
+                {IconComponent ? <IconComponent size={12} /> : p.name.charAt(0).toUpperCase()}
+            </div>
+        );
     };
 
     const COLUMN_CONFIG = [
@@ -1344,12 +1469,40 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                     </div>
                                 </div>
                                 {visibleColumns.favorite && <div className={styles.mondayHeaderCell}>★</div>}
-                                <div className={styles.mondayHeaderCell}>Nome do Perfil</div>
-                                {visibleColumns.status && <div className={styles.mondayHeaderCell}>Status</div>}
-                                {visibleColumns.notes && <div className={styles.mondayHeaderCell}>Notas</div>}
-                                {visibleColumns.folder && <div className={styles.mondayHeaderCell}>Grupo / Pasta</div>}
-                                {visibleColumns.tags && <div className={styles.mondayHeaderCell}>Tags / SO</div>}
-                                {visibleColumns.proxy && <div className={styles.mondayHeaderCell}>Proxy</div>}
+                                <div className={styles.mondayHeaderCell}>
+                                    Nome do Perfil
+                                    <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'name')} />
+                                </div>
+                                {visibleColumns.status && (
+                                    <div className={styles.mondayHeaderCell}>
+                                        Status
+                                        <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'status')} />
+                                    </div>
+                                )}
+                                {visibleColumns.notes && (
+                                    <div className={styles.mondayHeaderCell}>
+                                        Notas
+                                        <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'notes')} />
+                                    </div>
+                                )}
+                                {visibleColumns.folder && (
+                                    <div className={styles.mondayHeaderCell}>
+                                        Grupo / Pasta
+                                        <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'folder')} />
+                                    </div>
+                                )}
+                                {visibleColumns.tags && (
+                                    <div className={styles.mondayHeaderCell}>
+                                        Tags / SO
+                                        <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'tags')} />
+                                    </div>
+                                )}
+                                {visibleColumns.proxy && (
+                                    <div className={styles.mondayHeaderCell}>
+                                        Proxy
+                                        <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'proxy')} />
+                                    </div>
+                                )}
                                 {visibleColumns.actions && <div className={styles.mondayHeaderCell}>Ações</div>}
                             </div>
                             
@@ -1384,7 +1537,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
 
                                         {/* Name & Avatar */}
                                         <div className={styles.mondayCell} style={{ gap: '10px' }}>
-                                            <div className={styles.mondayAvatar}>{profile.name.charAt(0).toUpperCase()}</div>
+                                            {renderProfileAvatar(profile)}
                                             <span className={styles.mondayProfileName} onClick={(e) => { e.stopPropagation(); setDetailProfile(profile); }}>{profile.name}</span>
                                             {profile.is_active && <span className="flex w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" title="Online" />}
                                             <button className={styles.expandBtn} onClick={(e) => { e.stopPropagation(); openDetailPanel(profile.id); }} title="Expandir">
@@ -1397,8 +1550,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                             <div className={styles.mondayCell} style={{ padding: '6px 8px' }}>
                                                 <div 
                                                     className={styles.statusCell}
+                                                    style={{ background: statusCfg.dot, color: '#fff', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', borderRadius: '4px', textShadow: '0 1px 2px rgba(0,0,0,0.25)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', height: '28px', width: '100%' }}
                                                     onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setStatusPicker({ profileId: profile.id, x: r.left, y: r.bottom + 6 }); }}>
-                                                    <span className={styles.statusDot} style={{ background: statusCfg.dot }} />
                                                     <span className={styles.statusLabel}>{statusCfg.label}</span>
                                                 </div>
                                             </div>
@@ -1406,9 +1559,38 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
 
                                         {/* Notes */}
                                         {visibleColumns.notes && (
-                                            <div className={styles.mondayCell} onClick={(e) => { e.stopPropagation(); openDetailPanel(profile.id, 'updates'); }}>
-                                                {profile.notes ? (
-                                                    <span className={styles.notesPreview} title={profile.notes}>{profile.notes}</span>
+                                            <div 
+                                                className={styles.mondayCell} 
+                                                onClick={(e) => { 
+                                                    e.stopPropagation(); 
+                                                    setActiveNotesEdit({ profileId: profile.id, tempValue: profile.notes || '' }); 
+                                                }}
+                                            >
+                                                {activeNotesEdit?.profileId === profile.id ? (
+                                                    <input
+                                                        type="text"
+                                                        className={styles.inlineNotesInput}
+                                                        value={activeNotesEdit.tempValue}
+                                                        onChange={(e) => setActiveNotesEdit({ ...activeNotesEdit, tempValue: e.target.value })}
+                                                        onBlur={saveInlineNotes}
+                                                        onKeyDown={handleInlineNotesKeyDown}
+                                                        autoFocus
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    />
+                                                ) : profile.notes ? (
+                                                    <div className={styles.notesPreviewContainer} style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: '8px' }}>
+                                                        <span className={styles.notesPreview} style={{ flex: 1 }} title={renderNotesPreview(profile.notes)}>{renderNotesPreview(profile.notes)}</span>
+                                                        <button 
+                                                            className={styles.notesExpandBtn} 
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation(); 
+                                                                setViewingNote({ profileName: profile.name, notes: profile.notes || '' }); 
+                                                            }}
+                                                            title="Expandir nota"
+                                                        >
+                                                            <Maximize2 size={11} />
+                                                        </button>
+                                                    </div>
                                                 ) : (
                                                     <span className={styles.notesEmpty}>Adicionar nota...</span>
                                                 )}
@@ -1482,16 +1664,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                         {/* Actions */}
                                         {visibleColumns.actions && (
                                             <div className={styles.mondayCell} style={{ gap: '8px', justifyContent: 'flex-end', position: 'relative' }}>
-                                                <button
-                                                    className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all border ${
-                                                        profile.is_active
-                                                        ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20'
-                                                        : 'bg-white/5 hover:bg-violet-600 text-slate-200 border-white/10 hover:border-violet-500'
-                                                    }`}
-                                                    title={profile.is_active ? 'Parar' : 'Iniciar'}
-                                                    onClick={(e) => { e.stopPropagation(); profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id); }}>
-                                                    {profile.is_active ? <StopCircle size={14} /> : <Play size={14} />}
-                                                </button>
+                                                {(() => {
+                                                    const isStarting = profile.status === 'running' && !profile.is_active;
+                                                    return (
+                                                        <button
+                                                            disabled={isStarting}
+                                                            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all border ${
+                                                                isStarting
+                                                                ? 'bg-violet-600/20 text-violet-400 border-violet-500/20 cursor-not-allowed'
+                                                                : profile.is_active
+                                                                ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20'
+                                                                : 'bg-white/5 hover:bg-violet-600 text-slate-200 border-white/10 hover:border-violet-500'
+                                                            }`}
+                                                            title={isStarting ? 'Iniciando...' : profile.is_active ? 'Parar' : 'Iniciar'}
+                                                            onClick={(e) => { e.stopPropagation(); profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id); }}>
+                                                            {isStarting ? <RefreshCw size={14} className="animate-spin" /> : profile.is_active ? <StopCircle size={14} /> : <Play size={14} />}
+                                                        </button>
+                                                    );
+                                                })()}
                                                 
                                                 <button
                                                     className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/10 transition-colors"
@@ -1763,6 +1953,49 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                     onSelect={(id, status) => handleUpdateProfile(id, { status })}
                     onClose={() => setStatusPicker(null)}
                 />
+            )}
+
+            {/* Avatar Picker Popup */}
+            {avatarPicker && (
+                <AvatarPickerPopup
+                    profileId={avatarPicker.profileId}
+                    currentIcon={profiles.find(p => p.id === avatarPicker.profileId)?.avatar_icon ?? null}
+                    currentColor={profiles.find(p => p.id === avatarPicker.profileId)?.avatar_color ?? null}
+                    position={{ x: avatarPicker.x, y: avatarPicker.y }}
+                    onSelect={(id, updates) => {
+                        handleUpdateProfile(id, updates);
+                        setAvatarPicker(null);
+                    }}
+                    onClose={() => setAvatarPicker(null)}
+                />
+            )}
+
+            {/* Expanded Note Modal */}
+            {viewingNote && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+                    onClick={() => setViewingNote(null)}
+                >
+                    <div 
+                        className="bg-[#181824] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[80vh] overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between p-4 border-b border-white/5">
+                            <h3 className="text-md font-semibold text-slate-200">
+                                Notas do Perfil: <span className="text-violet-400 font-semibold">{viewingNote.profileName}</span>
+                            </h3>
+                            <button 
+                                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition-all"
+                                onClick={() => setViewingNote(null)}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto text-slate-300 text-sm whitespace-pre-wrap leading-relaxed select-text max-h-[60vh]">
+                            {renderNotesPreview(viewingNote.notes) || viewingNote.notes}
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Tag Picker Popup */}

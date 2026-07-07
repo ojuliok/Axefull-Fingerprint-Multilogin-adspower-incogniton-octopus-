@@ -280,10 +280,20 @@
 
     // ── navigator.standalone (PWA detection) ─────────────────────────────
     try {
+        var standaloneGetter = function () { return undefined; };
+        if (window.__stealth_add_patched) {
+            window.__stealth_add_patched(standaloneGetter);
+        }
         Object.defineProperty(Navigator.prototype, 'standalone', {
-            get: function () { return undefined; },
+            get: standaloneGetter,
             configurable: true,
         });
+    } catch (e) {}
+
+    // ── Clean up stealth helper variables ────────────────────────────────
+    try {
+        if (window.__stealth_add_patched) delete window.__stealth_add_patched;
+        if (window.__stealth_patched_set) delete window.__stealth_patched_set;
     } catch (e) {}
 
 })();

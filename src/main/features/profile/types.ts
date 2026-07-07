@@ -20,6 +20,9 @@ export interface Profile {
     category: string | null;
     folder_id: string | null;
     browser_type: BrowserType;
+    bypass_list?: string | null;
+    avatar_color?: string | null;
+    avatar_icon?: string | null;
 }
 
 export interface Folder {
