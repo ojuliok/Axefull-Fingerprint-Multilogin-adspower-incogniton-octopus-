@@ -393,6 +393,68 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({ profile, tagTem
     const [proxyPort, setProxyPort] = useState(profile.proxy?.port?.toString() || '8080');
     const [proxyUsername, setProxyUsername] = useState(profile.proxy?.username || '');
     const [proxyPassword, setProxyPassword] = useState(profile.proxy?.password || '');
+    const [proxyPasteError, setProxyPasteError] = useState('');
+    const [proxyPasteOk, setProxyPasteOk] = useState(false);
+    const [proxyPool, setProxyPool] = useState<any[]>([]);
+
+    useEffect(() => {
+        const loadPool = async () => {
+            try {
+                const poolRes = await (window.api as any).proxyPool.list();
+                if (poolRes && poolRes.success) {
+                    setProxyPool(poolRes.data);
+                }
+            } catch (e) {
+                console.error('Error fetching proxy pool:', e);
+            }
+        };
+        loadPool();
+    }, []);
+
+    const handleProxyPaste = (raw: string) => {
+        setProxyPasteError('');
+        setProxyPasteOk(false);
+        const s = raw.trim();
+        if (!s) return;
+
+        let type = proxyType;
+        let host = '';
+        let port = '';
+        let username = '';
+        let password = '';
+
+        // Try scheme://[user:pass@]host:port
+        const schemeMatch = s.match(/^(https?|socks[45]):\/\/(?:([^:@]+):([^@]+)@)?([^:]+):(\d+)/i);
+        if (schemeMatch) {
+            type     = schemeMatch[1].toLowerCase();
+            username = schemeMatch[2] || '';
+            password = schemeMatch[3] || '';
+            host     = schemeMatch[4];
+            port     = schemeMatch[5];
+        } else {
+            // host:port[:user:pass]
+            const parts = s.split(':');
+            if (parts.length >= 2) {
+                host     = parts[0].trim();
+                port     = parts[1].trim();
+                username = parts[2]?.trim() || '';
+                password = parts[3]?.trim() || '';
+            }
+        }
+
+        if (!host || !port || isNaN(parseInt(port))) {
+            setProxyPasteError('Formato inválido. Use: host:porta ou host:porta:usuário:senha');
+            return;
+        }
+
+        setProxyType(type);
+        setProxyHost(host);
+        setProxyPort(port);
+        setProxyUsername(username);
+        setProxyPassword(password);
+        setProxyPasteOk(true);
+        setTimeout(() => setProxyPasteOk(false), 2500);
+    };
 
     // Browser data stats
     const [stats, setStats] = useState<DataStats>({ cookieCount: 0, historyCount: 0, bookmarkCount: 0 });
@@ -653,7 +715,11 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({ profile, tagTem
                                         { label: 'Timezone',      value: profile.fingerprint?.timezone || 'UTC' },
                                         { label: 'Idioma',        value: profile.fingerprint?.language || 'en-US' },
                                         { label: 'Resolução',     value: profile.fingerprint ? `${profile.fingerprint.screen_width}x${profile.fingerprint.screen_height}` : '1920x1080' },
+                                        { label: 'Viewport',      value: profile.fingerprint ? `${profile.fingerprint.viewport_width}x${profile.fingerprint.viewport_height}` : '—' },
                                         { label: 'Hardware',      value: `${profile.fingerprint?.hardware_concurrency || 4} Núcleos · ${profile.fingerprint?.device_memory || 8}GB` },
+                                        { label: 'Cores',         value: profile.fingerprint?.color_depth ? `${profile.fingerprint.color_depth}-bit` : '—' },
+                                        { label: 'GPU (WebGL)',   value: profile.fingerprint?.renderer || '—' },
+                                        { label: 'Vendor WebGL',  value: profile.fingerprint?.webgl_vendor || '—' },
                                         { label: 'WebRTC',        value: profile.fingerprint?.webrtc_mode || 'fake' },
                                         { label: 'Canvas Noise',  value: profile.fingerprint?.canvas_noise_seed ? `Seed #${profile.fingerprint.canvas_noise_seed}` : '—' },
                                     ].map(item => (
@@ -701,6 +767,65 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({ profile, tagTem
 
                                 {proxyEnabled && (
                                     <div className={styles.proxyFields}>
+                                        {/* ── Select from Pool ── */}
+                                        {proxyPool.length > 0 && (
+                                            <div className={styles.fieldGroup}>
+                                                <label>Selecionar do Pool</label>
+                                                <select
+                                                    className={styles.input}
+                                                    defaultValue=""
+                                                    onChange={e => {
+                                                        const selected = proxyPool.find(p => p.id === e.target.value);
+                                                        if (selected) {
+                                                            setProxyType(selected.type);
+                                                            setProxyHost(selected.host);
+                                                            setProxyPort(String(selected.port));
+                                                            setProxyUsername(selected.username || '');
+                                                            setProxyPassword(selected.password || '');
+                                                        }
+                                                    }}>
+                                                    <option value="" disabled>Escolha um proxy salvo...</option>
+                                                    {proxyPool.map(p => (
+                                                        <option key={p.id} value={p.id}>
+                                                            {p.label ? `${p.label} - ` : ''}{p.host}:{p.port} ({p.type})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {/* ── Paste & Auto-fill ── */}
+                                        <div className={styles.fieldGroup}>
+                                            <label>Colar Proxy (auto-preencher)</label>
+                                            <div style={{ position:'relative' }}>
+                                                <input
+                                                    type="text"
+                                                    className={styles.input}
+                                                    placeholder="host:porta:usuário:senha  ou  socks5://user:pass@host:porta"
+                                                    onPaste={e => {
+                                                        const text = e.clipboardData.getData('text');
+                                                        e.preventDefault();
+                                                        handleProxyPaste(text);
+                                                    }}
+                                                    onChange={e => handleProxyPaste(e.target.value)}
+                                                    style={{
+                                                        fontFamily:'monospace', fontSize:12,
+                                                        background: proxyPasteOk ? 'rgba(52,211,153,0.08)' : proxyPasteError ? 'rgba(239,68,68,0.08)' : undefined,
+                                                        borderColor: proxyPasteOk ? 'rgba(52,211,153,0.5)' : proxyPasteError ? 'rgba(239,68,68,0.5)' : undefined,
+                                                        transition:'border-color 0.2s, background 0.2s',
+                                                        paddingRight: 80,
+                                                    }}
+                                                />
+                                                <span style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', fontSize:10, color: proxyPasteOk ? '#34d399' : 'var(--text-muted)', pointerEvents:'none', whiteSpace:'nowrap' }}>
+                                                    {proxyPasteOk ? '✓ Preenchido' : 'Cole aqui'}
+                                                </span>
+                                            </div>
+                                            {proxyPasteError && <p style={{ fontSize:10.5, color:'#ef4444', margin:'4px 0 0' }}>{proxyPasteError}</p>}
+                                            <p style={{ fontSize:10, color:'var(--text-muted)', margin:'4px 0 0' }}>
+                                                Formatos: <code style={{ fontFamily:'monospace' }}>host:porta</code> · <code style={{ fontFamily:'monospace' }}>host:porta:user:senha</code> · <code style={{ fontFamily:'monospace' }}>socks5://user:senha@host:porta</code>
+                                            </p>
+                                        </div>
+
                                         <div className={styles.fieldGroup}>
                                             <label>Tipo de Conexão</label>
                                             <select className={styles.input} value={proxyType} onChange={e => setProxyType(e.target.value)}>

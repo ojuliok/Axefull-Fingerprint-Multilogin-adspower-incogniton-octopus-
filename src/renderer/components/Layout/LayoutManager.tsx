@@ -14,11 +14,14 @@ import DadosClean from '../../pages/DadosClean';
 import GlobalTaskWidget from '../../features/Tasks/GlobalTaskWidget';
 import FloatingPomodoro from '../../features/Tasks/FloatingPomodoro';
 import FloatingNotes from '../../features/Notes/FloatingNotes';
+import FloatingProfiles from './FloatingProfiles';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { LockScreen } from '../../features/Security/LockScreen';
 
 export const LayoutManager: React.FC = () => {
     const { layout } = useTheme();
     const { state } = useAuth();
+    const { isProfilesFloating } = useWorkspace();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -146,6 +149,29 @@ export const LayoutManager: React.FC = () => {
             );
         }
 
+        if (layout === 'classic-sidebar-right') {
+            return (
+                <div className="flex flex-col md:flex-row flex-1 h-[100dvh] overflow-hidden">
+                    <div className="flex flex-col flex-1 overflow-hidden relative">
+                        <main className="flex-1 overflow-hidden relative bg-theme-surface rounded-tr-[16px]">
+                            <Outlet />
+                        </main>
+                    </div>
+                    <div className="hidden md:flex">
+                        <Sidebar
+                            currentView={currentView}
+                            onViewChange={onViewChange}
+                            onOpenExtensions={() => setShowExtensions(true)}
+                        />
+                    </div>
+                    <MobileBottomNav 
+                        currentView={currentView} 
+                        onViewChange={onViewChange} 
+                    />
+                </div>
+            );
+        }
+
         // Default: classic-sidebar or split-panel
         return (
             <div className="flex flex-col md:flex-row flex-1 h-[100dvh] overflow-hidden">
@@ -208,6 +234,7 @@ export const LayoutManager: React.FC = () => {
             <GlobalTaskWidget />
             <FloatingPomodoro />
             <FloatingNotes />
+            <FloatingProfiles />
             <LockScreen />
         </div>
     );

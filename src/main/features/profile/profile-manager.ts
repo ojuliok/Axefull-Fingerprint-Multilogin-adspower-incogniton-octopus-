@@ -50,8 +50,11 @@ export function createProfile(input: CreateProfileInput): ProfileWithDetails {
         is_active: 0,
         tags: input.tags || null,
         category: input.category || null,
-        folder_id: null,
+        folder_id: input.folder_id || null,
         browser_type: input.browser_type || 'chromium',
+        bypass_list: input.bypass_list || null,
+        avatar_color: input.avatar_color || null,
+        avatar_icon: input.avatar_icon || null,
     };
 
     insert('profiles', profile as unknown as Record<string, unknown>);
@@ -399,6 +402,9 @@ export function cloneProfile(profileId: string): ProfileWithDetails {
         category: source.category,
         folder_id: source.folder_id,
         browser_type: source.browser_type || 'chromium',
+        bypass_list: source.bypass_list || null,
+        avatar_color: source.avatar_color || null,
+        avatar_icon: source.avatar_icon || null,
     };
     insert('profiles', cloned as unknown as Record<string, unknown>);
 

@@ -5,7 +5,7 @@ export interface ProfileAPI {
     create: (input: { name: string; notes?: string; platform?: string; tags?: string; proxy?: ProxyInput }) => Promise<APIResponse>;
     list: () => Promise<APIResponse>;
     get: (id: string) => Promise<APIResponse>;
-    update: (id: string, input: { name?: string; notes?: string | null; status?: string; tags?: string | null; category?: string | null; folder_id?: string | null }) => Promise<APIResponse>;
+    update: (id: string, input: { name?: string; notes?: string | null; status?: string; tags?: string | null; category?: string | null; folder_id?: string | null; avatar_color?: string | null; avatar_icon?: string | null; bypass_list?: string | null; browser_type?: string }) => Promise<APIResponse>;
     updateStatus: (id: string, status: string) => Promise<APIResponse>;
     updateProxy: (profileId: string, proxy: ProxyInput | null) => Promise<APIResponse>;
     regenerateFingerprint: (profileId: string, platform?: string) => Promise<APIResponse>;
@@ -148,7 +148,7 @@ export interface ProxyPoolAPI {
     bulkImport: (rawText: string) => Promise<APIResponse>;
     remove: (id: string) => Promise<APIResponse>;
     test: (id: string) => Promise<APIResponse>;
-    assign: (proxyId: string, profileId: string) => Promise<APIResponse>;
+    assign: (proxyId: string, profileIds: string[]) => Promise<APIResponse>;
     unassign: (proxyId: string) => Promise<APIResponse>;
 }
 
@@ -296,7 +296,7 @@ contextBridge.exposeInMainWorld('api', {
             ipcRenderer.invoke('profile:list'),
         get: (id: string) =>
             ipcRenderer.invoke('profile:get', id),
-        update: (id: string, input: { name?: string; notes?: string; status?: string }) =>
+        update: (id: string, input: any) =>
             ipcRenderer.invoke('profile:update', id, input),
         updateStatus: (id: string, status: string) =>
             ipcRenderer.invoke('profile:update-status', id, status),
@@ -417,7 +417,7 @@ contextBridge.exposeInMainWorld('api', {
         bulkImport: (rawText: string) => ipcRenderer.invoke('proxy-pool:bulk-import', rawText),
         remove: (id: string) => ipcRenderer.invoke('proxy-pool:remove', id),
         test: (id: string) => ipcRenderer.invoke('proxy-pool:test', id),
-        assign: (proxyId: string, profileId: string) => ipcRenderer.invoke('proxy-pool:assign', proxyId, profileId),
+        assign: (proxyId: string, profileIds: string[]) => ipcRenderer.invoke('proxy-pool:assign', proxyId, profileIds),
         unassign: (proxyId: string) => ipcRenderer.invoke('proxy-pool:unassign', proxyId),
     },
     team: {

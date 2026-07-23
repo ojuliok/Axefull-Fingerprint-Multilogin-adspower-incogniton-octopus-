@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type Theme = 'dark' | 'light' | 'retro-vintage' | 'cyber-retro' | 'luxury-supreme' | 'cool-tech' | 'pool-vibe' | 'custom';
-export type Layout = 'classic-sidebar' | 'top-navigation' | 'floating-dock' | 'split-panel' | 'futuristic-console';
+export type Layout = 'classic-sidebar' | 'classic-sidebar-right' | 'top-navigation' | 'floating-dock' | 'split-panel' | 'futuristic-console';
 export type ButtonStyle = 'default' | 'retro-striped' | 'gold-gradient' | 'cyber-neon' | 'glossy-pill' | 'glass-card';
 
 export interface CustomThemeColors {
@@ -66,7 +66,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({
     theme: 'cyber-retro',
-    layout: 'top-navigation',
+    layout: 'classic-sidebar-right',
     buttonStyle: 'default',
     customColors: defaultCustomColors,
     setTheme: () => {},
@@ -84,7 +84,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const [layout, setLayoutState] = useState<Layout>(() => {
         const stored = localStorage.getItem('axe-layout') as Layout | null;
-        return stored || 'top-navigation';
+        return stored || 'classic-sidebar-right';
     });
 
     const [buttonStyle, setButtonStyleState] = useState<ButtonStyle>(() => {

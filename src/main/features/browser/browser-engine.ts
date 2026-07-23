@@ -1,7 +1,7 @@
 import { chromium, firefox, BrowserContext, Page } from 'playwright';
 import { downloadBrowser } from './downloader';
 import { isBrowserInstalled } from '../../diagnostics/health';
-import { launchNativeBrowser } from '../../browser-launcher/launcher';
+import { launchNativeBrowser, getBrowserExecutablePath } from '../../browser-launcher/launcher';
 import { logSecurityEvent } from '../../database/db';
 import { startProxyTunnel, stopProxyTunnel } from '../proxy/tunnel-manager';
 import path from 'path';
@@ -12,7 +12,27 @@ import { ChildProcess } from 'child_process';
 import { BrowserWindow, app, shell } from 'electron';
 import { Fingerprint, Proxy, ProfileWithDetails, BrowserType } from '../profile/types';
 import { getProfileById, setProfileActive, updateLastUsed } from '../profile/profile-manager';
+
 import { getExtensionPaths } from '../../services/extensions-manager';
+import { 
+    injectFingerprint, 
+    buildChromeAntiDetectFlags, 
+    disconnectCDP,
+    getCleanupScript,
+    getNavigatorScript,
+    getCanvasScript,
+    getWebGLScript,
+    getWebRTCScript,
+    getAudioScript,
+    getIntlScript,
+    getFontsScript,
+    getProtectionScript,
+    getGeolocationScript,
+    getSensorsScript,
+    getAdvancedScript,
+    getWorkerBridgeScript,
+    getExtrasScript
+} from './cdp-injector';
 import fontsData from '../fingerprint/presets/fonts.json';
 import { logAction } from '../ai/audit-logger';
 import { extractProfileFeatures } from '../ai/feature-extractor';
@@ -20,17 +40,24 @@ import { extractProfileFeatures } from '../ai/feature-extractor';
 export class NativeBrowserContext extends EventEmitter {
     constructor(
         public profileId: string,
-        public process: ChildProcess,
+        public process: ChildProcess | null,
         public browserType: string
     ) {
         super();
-        this.process.on('close', (code) => {
-            this.emit('close');
-        });
+        if (this.process) {
+            this.process.on('close', (code) => {
+                this.emit('close');
+            });
+        }
     }
 
     async close(): Promise<void> {
         return new Promise((resolve) => {
+            if (!this.process) {
+                // If it's a Playwright context, close() is overridden locally, but just in case:
+                resolve();
+                return;
+            }
             if (this.process.killed) {
                 resolve();
                 return;
@@ -469,100 +496,7 @@ function findSystemChrome(): string | undefined {
     return undefined;
 }
 
-/**
- * Build launch options adapted for the target browser type.
- * Chromium and Firefox require different arguments.
- */
-function buildLaunchOptions(profile: any, cdpPort: number, extensionsEnabled: boolean = true, browserType: BrowserType = 'chromium') {
-    const { fingerprint, proxy } = profile;
 
-    const baseOptions: any = {
-        headless: false,
-        viewport: null,
-        screen: {
-            width: fingerprint.screen_width,
-            height: fingerprint.screen_height,
-        },
-        userAgent: fingerprint.user_agent,
-        locale: fingerprint.language,
-        timezoneId: fingerprint.timezone,
-        proxy: buildProxyConfig(proxy),
-    };
-
-    if (browserType === 'chromium') {
-        // Chromium-specific configuration
-        // Use the system-installed Chrome directly to avoid Windows Defender blocking
-        const systemChrome = findSystemChrome();
-        if (systemChrome) {
-            baseOptions.executablePath = systemChrome;
-        } else {
-            // Fallback: let Playwright try its own resolution
-            baseOptions.channel = 'chrome';
-        }
-
-        const extPaths = extensionsEnabled ? getExtensionPaths() : [];
-        const args = [
-            `--remote-debugging-port=${cdpPort}`,
-            `--lang=${fingerprint.language}`,
-            '--no-first-run',
-            '--no-default-browser-check',
-            '--start-maximized',
-            '--force-webrtc-ip-handling-policy=disable_non_proxied_udp',
-            '--enforce-webrtc-ip-permission-check',
-            '--dns-over-https-mode=secure',
-            '--disable-blink-features=AutomationControlled',
-        ];
-
-        if (extPaths.length > 0) {
-            args.push(`--load-extension=${extPaths.join(',')}`);
-        }
-
-        baseOptions.args = args;
-        baseOptions.ignoreDefaultArgs = [
-            '--enable-automation',
-            '--enable-blink-features=IdleDetection',
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--metrics-recording-only',
-            '--no-service-autorun',
-            '--export-tagged-pdf',
-            '--disable-search-engine-choice-screen',
-            '--password-store=basic',
-            '--use-mock-keychain',
-            '--disable-default-apps',
-            '--disable-component-extensions-with-background-pages',
-            '--disable-client-side-phishing-detection',
-            '--disable-popup-blocking',
-            '--disable-breakpad',
-            '--allow-pre-commit-input',
-        ];
-    } else {
-        // Firefox-specific configuration
-        const firefoxExec = getBrowserExecutablePath('firefox');
-        baseOptions.executablePath = firefoxExec || undefined;
-
-        baseOptions.args = [
-            '-width', String(fingerprint.screen_width),
-            '-height', String(fingerprint.screen_height),
-        ];
-
-        // Firefox preferences for anti-fingerprint detection
-        baseOptions.firefoxUserPrefs = {
-            'media.peerconnection.enabled': fingerprint.webrtc_mode !== 'disabled',
-            'media.navigator.enabled': false,
-            'privacy.resistFingerprinting': false, // We handle our own fingerprint
-            'dom.webdriver.enabled': false,
-            'useAutomationExtension': false,
-            'toolkit.telemetry.enabled': false,
-            'datareporting.healthreport.uploadEnabled': false,
-            'browser.newtabpage.activity-stream.feeds.telemetry': false,
-            'browser.ping-centre.telemetry': false,
-            'intl.accept_languages': fingerprint.languages.replace(/,/g, ', '),
-        };
-    }
-
-    return baseOptions;
-}
 
 /**
  * Get the Playwright browser engine for the specified type.
@@ -597,37 +531,136 @@ export async function launchProfile(profileId: string): Promise<NativeBrowserCon
 
         console.log(`[BrowserEngine] Launching profile ${profileId} (${profile.name}) with native browser: ${browserType}...`);
 
-        let childProcess: ChildProcess;
-        try {
-            // Map standard browserType values
-            const browserName = browserType === 'chromium' ? 'chrome' : browserType;
-            
-            let localProxyConfig: any = undefined;
-            if (proxy) {
-                const bypassList = profile.bypass_list ? profile.bypass_list.split(',').map((s: string) => s.trim()) : [];
-                // Start local proxy loopback server
-                const localPort = await startProxyTunnel(
-                    profileId,
-                    proxy.host,
-                    proxy.port,
-                    proxy.username || undefined,
-                    proxy.password || undefined,
-                    bypassList
-                );
-                localProxyConfig = {
-                    host: '127.0.0.1',
-                    port: localPort
-                };
-            }
+        let nativeContext: NativeBrowserContext | undefined = undefined;
+        let cdpPort: number | undefined;
 
-            childProcess = launchNativeBrowser(browserName, data_dir_path, localProxyConfig);
+        try {
+            if (browserType === 'firefox') {
+                const proxyServer = proxy ? `${proxy.type}://${proxy.host}:${proxy.port}` : undefined;
+                const launchOpts: any = {
+                    headless: false,
+                    viewport: null,
+                    screen: {
+                        width: fingerprint.screen_width,
+                        height: fingerprint.screen_height,
+                    },
+                    userAgent: fingerprint.user_agent,
+                    locale: fingerprint.language,
+                    timezoneId: fingerprint.timezone,
+                    proxy: proxyServer ? {
+                        server: proxyServer,
+                        username: proxy.username || undefined,
+                        password: proxy.password || undefined,
+                    } : undefined,
+                    args: [
+                        '-width', String(fingerprint.screen_width),
+                        '-height', String(fingerprint.screen_height),
+                    ],
+                    firefoxUserPrefs: {
+                        'media.peerconnection.enabled': fingerprint.webrtc_mode !== 'disabled',
+                        'media.navigator.enabled': false,
+                        'privacy.resistFingerprinting': false, 
+                        'dom.webdriver.enabled': false,
+                        'useAutomationExtension': false,
+                        'toolkit.telemetry.enabled': false,
+                        'datareporting.healthreport.uploadEnabled': false,
+                        'browser.newtabpage.activity-stream.feeds.telemetry': false,
+                        'browser.ping-centre.telemetry': false,
+                        'intl.accept_languages': fingerprint.languages.replace(/,/g, ', '),
+                    }
+                };
+
+                const firefoxExec = getBrowserExecutablePath('firefox');
+                if (firefoxExec) launchOpts.executablePath = firefoxExec;
+
+                const pwContext = await firefox.launchPersistentContext(data_dir_path, launchOpts);
+                
+                // Inject fingerprint scripts for Firefox
+                await pwContext.addInitScript(getCleanupScript(fingerprint));
+                await pwContext.addInitScript(getNavigatorScript(fingerprint));
+                await pwContext.addInitScript(getCanvasScript(fingerprint));
+                await pwContext.addInitScript(getWebGLScript(fingerprint));
+                await pwContext.addInitScript(getWebRTCScript(fingerprint));
+                await pwContext.addInitScript(getAudioScript(fingerprint));
+                await pwContext.addInitScript(getIntlScript(fingerprint));
+                await pwContext.addInitScript(getFontsScript(fingerprint));
+                await pwContext.addInitScript(getProtectionScript());
+                await pwContext.addInitScript(getGeolocationScript(fingerprint));
+                await pwContext.addInitScript(getSensorsScript(fingerprint));
+                await pwContext.addInitScript(getAdvancedScript(fingerprint));
+                await pwContext.addInitScript(getWorkerBridgeScript(fingerprint));
+                await pwContext.addInitScript(getExtrasScript());
+
+                // We don't have a child process available directly via Playwright's persistent context
+                // But we can create a mock NativeBrowserContext for compatibility.
+                nativeContext = new NativeBrowserContext(profileId, null as any, browserType);
+                (nativeContext as any).pwContext = pwContext;
+                
+                pwContext.on('close', () => {
+                    nativeContext?.emit('close');
+                });
+                
+                // Expose a close method that closes playwright context
+                nativeContext.close = async () => {
+                    await pwContext.close();
+                };
+
+            } else {
+                // Chromium uses Native CDP Launch
+                // Resolve the correct native browser binary name based on browser_type
+                const browserName = (() => {
+                    switch (browserType) {
+                        case 'edge':   return 'edge';
+                        case 'brave':  return 'brave';
+                        default:       return 'chrome';
+                    }
+                })();
+                
+                let childProcess: ChildProcess;
+
+                let localProxyConfig: any = undefined;
+                if (proxy) {
+                    const bypassList = profile.bypass_list ? profile.bypass_list.split(',').map((s: string) => s.trim()) : [];
+                    // Start local proxy loopback server
+                    const localPort = await startProxyTunnel(
+                        profileId,
+                        proxy.type,
+                        proxy.host,
+                        proxy.port,
+                        proxy.username || undefined,
+                        proxy.password || undefined,
+                        bypassList
+                    );
+                    localProxyConfig = {
+                        host: '127.0.0.1',
+                        port: localPort
+                    };
+                }
+
+                let extraArgs: string[] = [];
+
+                cdpPort = await findFreePort();
+                activePorts.set(profileId, cdpPort);
+                const extPaths = getExtensionPaths();
+                extraArgs = buildChromeAntiDetectFlags(fingerprint, cdpPort, extPaths);
+
+                childProcess = launchNativeBrowser(browserName, data_dir_path, localProxyConfig, undefined, extraArgs);
+                
+                // Once launched, connect via CDP to inject fingerprint
+                if (cdpPort) {
+                    await injectFingerprint(profileId, cdpPort, fingerprint, browserType);
+                }
+                
+                nativeContext = new NativeBrowserContext(profileId, childProcess, browserType);
+            }
         } catch (error) {
             setProfileActive(profileId, false);
-            await stopProxyTunnel(profileId);
+            if (browserType === 'chromium') await stopProxyTunnel(profileId);
+            if (cdpPort) activePorts.delete(profileId);
             throw new Error(`Failed to launch browser: ${(error as Error).message}`);
         }
 
-        const context = new NativeBrowserContext(profileId, childProcess, browserType);
+        const context = nativeContext!;
 
         activeContexts.set(profileId, context);
         setProfileActive(profileId, true);
@@ -639,7 +672,11 @@ export async function launchProfile(profileId: string): Promise<NativeBrowserCon
         context.on('close', async () => {
             activeContexts.delete(profileId);
             setProfileActive(profileId, false);
+            activePorts.delete(profileId);
             
+            // Disconnect CDP
+            await disconnectCDP(profileId);
+
             // Shut down local proxy tunnel
             await stopProxyTunnel(profileId);
 

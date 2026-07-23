@@ -22,10 +22,12 @@ import {
     registerCardHandlers
 } from './ipc/appIpc';
 import { registerBulkVideoHandlers } from './ipc/bulkVideoIpc';
+import { registerMetaCleanHandlers } from './ipc/metacleanIpc';
 import { closeAllProfiles } from './features/browser/browser-engine';
 import { startSupabaseListener, stopSupabaseListener } from './services/supabase-listener';
 import { startLocalApiServer, stopLocalApiServer } from './features/local-api/local-api-server';
 import { initComplianceGuard } from './security/compliance-guard';
+
 
 let tray: Tray | null = null;
 let mainWindow: BrowserWindow | null = null;
@@ -218,6 +220,7 @@ async function init(): Promise<void> {
     registerAiHandlers();
     registerCardHandlers();
     registerBulkVideoHandlers();
+    registerMetaCleanHandlers();
 
     // Start Supabase listener (disabled in Local mode)
     // startSupabaseListener();

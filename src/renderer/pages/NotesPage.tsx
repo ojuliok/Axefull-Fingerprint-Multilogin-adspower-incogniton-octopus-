@@ -50,6 +50,7 @@ export interface Note {
     isStarred: boolean;
     created_at: string;
     updated_at: string;
+    profileId?: string;
 }
 
 export interface NoteBlock {
@@ -225,14 +226,95 @@ const NotesPage: React.FC = () => {
             localStorage.setItem('axe_notes_notes', JSON.stringify(parsedNotes));
         }
 
-        // Set active space and note
-        if (parsedSpaces.length > 0) {
-            setActiveSpaceId(parsedSpaces[0].id);
-            const spaceNotes = parsedNotes.filter(n => n.spaceId === parsedSpaces[0].id);
-            if (spaceNotes.length > 0) {
-                setActiveNoteId(spaceNotes[0].id);
+        const syncFingerprints = async (initialNotes: Note[], initialSpaces: Space[]) => {
+            try {
+                if (!window.api || !window.api.profiles) return;
+                const result = await window.api.profiles.list();
+                if (!result.success) return;
+                const dbProfiles = (result.data as any[]) || [];
+                
+                const FINGERPRINT_SPACE_ID = 'fingerprint-notes-space';
+                
+                // Ensure the Fingerprints space exists
+                let updatedSpaces = [...initialSpaces];
+                let spacesChanged = false;
+                if (!updatedSpaces.find(s => s.id === FINGERPRINT_SPACE_ID)) {
+                    updatedSpaces.push({
+                        id: FINGERPRINT_SPACE_ID,
+                        name: 'Perfis 👤',
+                        icon: '👤',
+                        created_at: new Date().toISOString()
+                    });
+                    setSpaces(updatedSpaces);
+                    localStorage.setItem('axe_notes_spaces', JSON.stringify(updatedSpaces));
+                    spacesChanged = true;
+                }
+
+                // Sync each profile to notes
+                let updatedNotes = [...initialNotes];
+                let notesChanged = false;
+
+                dbProfiles.forEach((profile: any) => {
+                    if (profile.category === 'trash') return;
+                    const noteId = `profile-note-${profile.id}`;
+                    let noteIndex = updatedNotes.findIndex(n => n.profileId === profile.id || n.id === noteId);
+                    
+                    if (noteIndex > -1) {
+                        const note = updatedNotes[noteIndex];
+                        if (note.title !== profile.name || note.content !== (profile.notes || '')) {
+                            updatedNotes[noteIndex] = {
+                                ...note,
+                                title: profile.name,
+                                content: profile.notes || '',
+                                profileId: profile.id,
+                                updated_at: new Date().toISOString()
+                            };
+                            notesChanged = true;
+                        }
+                    } else {
+                        updatedNotes.push({
+                            id: noteId,
+                            spaceId: FINGERPRINT_SPACE_ID,
+                            title: profile.name,
+                            content: profile.notes || '',
+                            isStarred: false,
+                            created_at: profile.created_at || new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                            profileId: profile.id
+                        });
+                        notesChanged = true;
+                    }
+                });
+
+                // Remove notes of deleted profiles
+                const activeProfileIds = dbProfiles.filter((p: any) => p.category !== 'trash').map((p: any) => p.id);
+                const beforeCount = updatedNotes.length;
+                updatedNotes = updatedNotes.filter(n => n.spaceId !== FINGERPRINT_SPACE_ID || (n.profileId && activeProfileIds.includes(n.profileId)));
+                if (updatedNotes.length !== beforeCount) {
+                    notesChanged = true;
+                }
+
+                if (notesChanged) {
+                    setNotes(updatedNotes);
+                    localStorage.setItem('axe_notes_notes', JSON.stringify(updatedNotes));
+                }
+
+                // Auto select active space/note
+                if (updatedSpaces.length > 0) {
+                    const defaultSpace = updatedSpaces.find(s => s.id === FINGERPRINT_SPACE_ID) || updatedSpaces[0];
+                    setActiveSpaceId(defaultSpace.id);
+                    const spaceNotes = updatedNotes.filter(n => n.spaceId === defaultSpace.id);
+                    if (spaceNotes.length > 0) {
+                        setActiveNoteId(spaceNotes[0].id);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to sync fingerprints in notes page:', err);
             }
-        }
+        };
+
+        // Call sync
+        syncFingerprints(parsedNotes, parsedSpaces);
 
         // Click listener to close context menu
         const handleWindowClick = () => {
@@ -249,8 +331,30 @@ const NotesPage: React.FC = () => {
     };
 
     const saveNotesToStorage = (newNotes: Note[]) => {
+        // Sync note deletion to profile SQLite database
+        notes.forEach(async (oldNote) => {
+            if (oldNote.profileId && !newNotes.some(n => n.id === oldNote.id)) {
+                try {
+                    await window.api.profiles.update(oldNote.profileId, { notes: '' });
+                } catch (err) {
+                    console.error('Failed to clear notes on profile note deletion:', err);
+                }
+            }
+        });
+
         setNotes(newNotes);
         localStorage.setItem('axe_notes_notes', JSON.stringify(newNotes));
+
+        // Sync note edits to profile SQLite database
+        newNotes.forEach(async (note) => {
+            if (note.profileId && window.api && window.api.profiles) {
+                try {
+                    await window.api.profiles.update(note.profileId, { notes: note.content });
+                } catch (err) {
+                    console.error('Failed to sync note back to profile:', err);
+                }
+            }
+        });
     };
 
     // Space actions

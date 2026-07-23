@@ -222,6 +222,8 @@ const CanvasPage: React.FC = () => {
 
     const reloadCanvasList = useCallback(async () => {
         if (!currentWorkspace) return;
+        // BUG-001 & PERF-002: Resetar pastas expandidas do workspace anterior ao recarregar lista
+        setExpandedFolders(new Set());
         const list = await getCanvasList(currentWorkspace.id);
         setCanvasList(list);
     }, [currentWorkspace]);
@@ -343,31 +345,38 @@ const CanvasPage: React.FC = () => {
     useEffect(() => {
         let cancelled = false;
         if (activeCanvasId) {
-            const canvas = canvasList.find(c => c.id === activeCanvasId);
-            if (canvas && (canvas.type === 'canvas' || !canvas.type)) {
-                // SWR Cache optimization
-                const cached = getCachedCanvasData(activeCanvasId);
-                if (cached) {
-                    setActiveCanvasData(cached);
-                } else {
-                    setActiveCanvasData(null);
-                }
-
-                getCanvasData(activeCanvasId).then(data => {
-                    if (!cancelled && data) {
-                        setActiveCanvasData(data);
-                    }
-                }).catch(err => {
-                    if (!cancelled) {
-                        console.error("Error loading active canvas data:", err);
-                    }
-                });
+            // 1. First: try in-memory cache (instantaneous, survives tab switches)
+            const memCached = getCachedCanvasData(activeCanvasId);
+            if (memCached) {
+                setActiveCanvasData(memCached);
             }
+            // 2. Then: load from persistent storage (localStorage or Supabase)
+            // This overwrites with fresh data when available
+            getCanvasData(activeCanvasId).then(data => {
+                if (!cancelled) {
+                    if (data) {
+                        setActiveCanvasData(data);
+                    } else if (!memCached) {
+                        // Only show empty if truly no cached or stored data exists
+                        setActiveCanvasData({ nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    }
+                }
+            }).catch(err => {
+                if (!cancelled) {
+                    console.error('[CanvasPage] Error loading canvas data:', err);
+                    if (!memCached) {
+                        setActiveCanvasData({ nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    }
+                }
+            });
         } else {
             setActiveCanvasData(null);
         }
         return () => { cancelled = true; };
-    }, [activeCanvasId, canvasList]);
+    // Note: intentionally only depends on activeCanvasId — canvasList changes should not
+    // re-trigger data loading as that causes unnecessary reloads and potential data loss.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeCanvasId]);
 
     // Load split canvas data when splitTabId changes
     useEffect(() => {
@@ -618,7 +627,9 @@ const CanvasPage: React.FC = () => {
                     } else {
                         setNavigationStack([{ id, name: canvas.name }]);
                     }
-                    setActiveCanvasData({ nodes: [], viewport: { x: 0, y: 0, zoom: 1 } });
+                    // Do NOT reset to empty here — the useEffect on activeCanvasId will load
+                    // data from localStorage cache or Supabase. Resetting to empty causes a
+                    // race condition where the blank state triggers a save overwriting real data.
                     setViewState('canvas');
                 }, 0);
                 return currentTabs;
@@ -772,7 +783,11 @@ const CanvasPage: React.FC = () => {
     const handleNodesDeleted = useCallback((canvasIds: string[]) => {
         canvasIds.forEach(id => softDeleteCanvas(id));
         reloadCanvasList();
-    }, []);
+    }, [reloadCanvasList]);
+
+    const handleCanvasCreated = useCallback(() => {
+        reloadCanvasList();
+    }, [reloadCanvasList]);
 
     const handleStartRename = useCallback((id: string) => {
         const canvas = canvasList.find(c => c.id === id);
@@ -1074,40 +1089,57 @@ const CanvasPage: React.FC = () => {
         }
     }, [expandedFolders, checkPinAndProceed]);
 
+    const childrenMap = useMemo(() => {
+        const map = new Map<string | undefined, CanvasInfo[]>();
+        for (const c of canvasList) {
+            if (isTrashView ? !c.isDeleted : c.isDeleted) continue;
+            const pId = c.parentId || undefined;
+            if (!map.has(pId)) map.set(pId, []);
+            map.get(pId)!.push(c);
+        }
+        return map;
+    }, [canvasList, isTrashView]);
+
     const renderCanvasTree = useCallback((parentId: string | undefined = undefined, depth: number = 0, visited: Set<string> = new Set()) => {
         if (sidebarSearch.trim() !== '' && parentId !== undefined) {
             return null;
         }
 
-        const items = canvasList.filter(c => {
-            if (isTrashView ? !c.isDeleted : c.isDeleted) return false;
-            
-            if (sidebarSearch.trim() !== '') {
-                return c.name.toLowerCase().includes(sidebarSearch.toLowerCase().trim());
-            }
+        let itemsToProcess: CanvasInfo[] = [];
 
-            if (activeFilter !== 'all') {
-                // When filtering, ignore parentId (flatten the tree) and only show matching types
-                if (activeFilter === 'canvas' && (!c.type || c.type === 'canvas')) return true;
-                if (activeFilter === 'folder' && (c.type === 'folder' || c.type === 'space')) return true;
-                if (activeFilter === c.type) return true;
+        if (activeFilter === 'all' && sidebarSearch.trim() === '') {
+            itemsToProcess = childrenMap.get(parentId) || [];
+        } else {
+            itemsToProcess = canvasList.filter(c => {
+                if (isTrashView ? !c.isDeleted : c.isDeleted) return false;
+                
+                if (sidebarSearch.trim() !== '') {
+                    return c.name.toLowerCase().includes(sidebarSearch.toLowerCase().trim());
+                }
+
+                if (activeFilter !== 'all') {
+                    // When filtering, ignore parentId (flatten the tree) and only show matching types
+                    if (activeFilter === 'canvas' && (!c.type || c.type === 'canvas')) return true;
+                    if (activeFilter === 'folder' && (c.type === 'folder' || c.type === 'space')) return true;
+                    if (activeFilter === c.type) return true;
+                    return false;
+                }
+
                 return false;
-            }
+            });
+        }
 
-            // Normal tree view
-            return (c.parentId || undefined) === (parentId || undefined);
-        });
+        if (itemsToProcess.length === 0) return null;
 
-        if (items.length === 0) return null;
-
-        return items.map(canvas => {
+        return itemsToProcess.map(canvas => {
             if (visited.has(canvas.id)) {
                 return null; // Cycle prevention
             }
             const nextVisited = new Set(visited);
             nextVisited.add(canvas.id);
 
-            const hasChildren = canvasList.some(c => c.parentId === canvas.id);
+            const children = childrenMap.get(canvas.id) || [];
+            const hasChildren = children.length > 0;
             const isFolderExpanded = expandedFolders.has(canvas.id);
             const isActive = activeCanvasId === canvas.id;
             const isFolder = canvas.type === 'folder';
@@ -1184,10 +1216,10 @@ const CanvasPage: React.FC = () => {
                                     <span className={styles.canvasItemName}>{canvas.name}</span>
                                     
                                     {!isFolder && hasChildren && (
-                                        <span className={styles.canvasItemCount}>{canvasList.filter(c => c.parentId === canvas.id).length}</span>
+                                        <span className={styles.canvasItemCount}>{children.length}</span>
                                     )}
                                     {isFolder && hasChildren && (
-                                        <span className={styles.canvasItemCount}>{canvasList.filter(c => c.parentId === canvas.id).length}</span>
+                                        <span className={styles.canvasItemCount}>{children.length}</span>
                                     )}
                                     
                                     {(isFolder || !isFolder) && (
@@ -1228,7 +1260,7 @@ const CanvasPage: React.FC = () => {
                 </div>
             );
         });
-    }, [canvasList, expandedFolders, activeCanvasId, renamingId, renameValue, isSidebarExpanded, isTrashView, handleSelectCanvas, handleContextMenu, handleConfirmRename, handleRenameKeyDown, toggleFolder, handleOpenSidebarEmojiPicker, draggedId, dragOverId, dropPosition, handleDragStart, handleDragOver, handleDragLeave, handleDrop, handleDragEnd, activeFilter, sidebarSearch]);
+    }, [childrenMap, canvasList, expandedFolders, activeCanvasId, renamingId, renameValue, isSidebarExpanded, isTrashView, handleSelectCanvas, handleContextMenu, handleConfirmRename, handleRenameKeyDown, toggleFolder, handleOpenSidebarEmojiPicker, draggedId, dragOverId, dropPosition, handleDragStart, handleDragOver, handleDragLeave, handleDrop, handleDragEnd, activeFilter, sidebarSearch]);
 
     const renderCanvasPane = (paneCanvasId: string | null, paneCanvasData: CanvasData | null) => {
         if (!paneCanvasId) {
@@ -1311,7 +1343,7 @@ const CanvasPage: React.FC = () => {
                     data={paneCanvasData}
                     onDataChange={handleDataChange}
                     onOpenPage={handleOpenPage}
-                    onCanvasCreated={() => reloadCanvasList()}
+                    onCanvasCreated={handleCanvasCreated}
                     onNodesDeleted={handleNodesDeleted}
                     workspaceId={currentWorkspace?.id || ''}
                     ownerId={user?.id || ''}

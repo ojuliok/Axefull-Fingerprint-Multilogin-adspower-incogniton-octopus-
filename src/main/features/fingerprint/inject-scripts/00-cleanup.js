@@ -155,7 +155,7 @@
             onConnect: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }), hasListener: window.__stealth_add_patched(function () { return false; }) },
             onInstalled: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }), hasListener: window.__stealth_add_patched(function () { return false; }) },
             onStartup: { addListener: window.__stealth_add_patched(function () { }), removeListener: window.__stealth_add_patched(function () { }), hasListener: window.__stealth_add_patched(function () { return false; }) },
-            getPlatformInfo: window.__stealth_add_patched(function (cb) { if (cb) cb({ os: 'win', arch: 'x86-64', nacl_arch: 'x86-64' }); return Promise.resolve({ os: 'win', arch: 'x86-64', nacl_arch: 'x86-64' }); })
+            getPlatformInfo: window.__stealth_add_patched(function (cb) { if (cb) cb({ os: 'PLATFORM_OS_PLACEHOLDER', arch: 'x86-64', nacl_arch: 'x86-64' }); return Promise.resolve({ os: 'PLATFORM_OS_PLACEHOLDER', arch: 'x86-64', nacl_arch: 'x86-64' }); })
         };
     }
 

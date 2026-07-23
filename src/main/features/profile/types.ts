@@ -95,6 +95,9 @@ export interface CreateProfileInput {
     folder_id?: string;
     browser_type?: BrowserType;
     proxy?: Omit<Proxy, 'id' | 'profile_id'>;
+    avatar_color?: string | null;
+    avatar_icon?: string | null;
+    bypass_list?: string | null;
 }
 
 export interface UpdateProfileInput {
@@ -104,6 +107,10 @@ export interface UpdateProfileInput {
     tags?: string | null;
     category?: string | null;
     folder_id?: string | null;
+    avatar_color?: string | null;
+    avatar_icon?: string | null;
+    bypass_list?: string | null;
+    browser_type?: BrowserType;
 }
 
 export interface UpdateFingerprintInput {

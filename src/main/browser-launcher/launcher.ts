@@ -10,7 +10,7 @@ export interface ProxyConfig {
     password?: string;
 }
 
-function getBrowserExecutablePath(browser: string): string {
+export function getBrowserExecutablePath(browser: string): string {
     const bLower = browser.toLowerCase();
     
     if (process.platform === 'win32') {
@@ -72,12 +72,15 @@ function getBrowserExecutablePath(browser: string): string {
 /**
  * Launch an isolated native desktop browser window for a specific profile.
  * Supports Chrome, Edge, Brave, and Firefox.
+ * 
+ * @param extraArgs - Additional command-line arguments (e.g., CDP port, anti-detection flags)
  */
 export function launchNativeBrowser(
     browser: string,
     profilePath: string,
     proxy?: ProxyConfig,
-    onExit?: (code: number | null) => void
+    onExit?: (code: number | null) => void,
+    extraArgs: string[] = []
 ): ChildProcess {
     if (!isBrowserInstalled(browser)) {
         throw new Error(`Browser "${browser}" is not installed.`);
@@ -97,9 +100,6 @@ export function launchNativeBrowser(
     } else {
         // Chromium-based profile isolation flags
         args.push(`--user-data-dir=${profilePath}`);
-        args.push('--no-first-run');
-        args.push('--no-default-browser-check');
-        args.push('--start-maximized');
 
         if (proxy) {
             // Apply proxy server argument
@@ -108,6 +108,9 @@ export function launchNativeBrowser(
             // is handled via prompt or local PAC / forwarding tunnel.
         }
     }
+
+    // Append extra arguments (CDP port, anti-detection flags, etc.)
+    args.push(...extraArgs);
 
     // Audit arguments via compliance guard to block headless/auto-sign-in attempts
     auditLaunchArguments(args);
@@ -119,17 +122,17 @@ export function launchNativeBrowser(
         stdio: 'ignore'
     });
 
+    // Keep process tracked for CDP connection management
+    // The Electron app will handle cleanup on exit
     child.unref();
 
-    if (onExit) {
-        child.on('close', (code) => {
-            console.log(`[BrowserLauncher] Browser process closed (PID: ${child.pid}, Exit Code: ${code})`);
-            onExit(code);
-        });
-        child.on('error', (err) => {
-            console.error(`[BrowserLauncher] Browser process error:`, err);
-        });
-    }
+    child.on('close', (code) => {
+        console.log(`[BrowserLauncher] Browser process closed (PID: ${child.pid}, Exit Code: ${code})`);
+        if (onExit) onExit(code);
+    });
+    child.on('error', (err) => {
+        console.error(`[BrowserLauncher] Browser process error:`, err);
+    });
 
     return child;
 }

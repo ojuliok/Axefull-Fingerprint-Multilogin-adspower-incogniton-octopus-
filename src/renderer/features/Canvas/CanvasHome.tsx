@@ -400,9 +400,19 @@ const CanvasHome: React.FC<CanvasHomeProps> = ({
   );
 
   // ── Helpers ──
+  const childrenCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of canvasList) {
+      if (c.parentId) {
+        map.set(c.parentId, (map.get(c.parentId) || 0) + 1);
+      }
+    }
+    return map;
+  }, [canvasList]);
+
   const getChildCount = useCallback(
-    (id: string) => canvasList.filter((c) => c.parentId === id).length,
-    [canvasList]
+    (id: string) => childrenCountMap.get(id) || 0,
+    [childrenCountMap]
   );
 
   const getNodeCount = useCallback((id: string) => {

@@ -328,6 +328,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const [proxyConfiguringId, setProxyConfiguringId] = useState<string | null>(null);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [isDragOver, setIsDragOver] = useState(false);
+    const [isDraggingNode, setIsDraggingNode] = useState(false);
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
     const [canvasContextMenu, setCanvasContextMenu] = useState<{ x: number; y: number; canvasX: number; canvasY: number } | null>(null);
     const [showFormatBar, setShowFormatBar] = useState(false);
@@ -365,7 +366,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     const [showLayersPanel, setShowLayersPanel] = useState(false);
     const [showTextSidebar, setShowTextSidebar] = useState(false);
     // Grid Snapping & Sketch Setas Modes
-    const [gridSnap, setGridSnap] = useState(false);
+    const [gridSnap, setGridSnap] = useState(true);
 
     // Excalidraw-like Drawing Tool States
     type ActiveTool = 'select' | 'hand' | 'rectangle' | 'diamond' | 'ellipse' | 'line' | 'arrow' | 'triangle' | 'blockArrow' | 'elbowArrow' | 'pen' | 'arrowPen' | 'freetext' | 'frame';
@@ -519,6 +520,28 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
             saveData(state.nodes, state.strokes, viewport, state.connections, false);
         }
     }, [history, viewport, saveData]);
+
+    // ── Fix: Re-initialize internal state when canvasId changes ──
+    // useState only uses the initial value on first mount. When canvasId changes (switching documents),
+    // we must manually sync state from the new `data` prop to avoid showing stale content.
+    const lastInitializedCanvasIdRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (canvasId && lastInitializedCanvasIdRef.current !== canvasId) {
+            lastInitializedCanvasIdRef.current = canvasId;
+            setNodes(data?.nodes || []);
+            setStrokes(data?.strokes || []);
+            setConnections(data?.connections || []);
+            setViewport(data?.viewport || { x: 0, y: 0, zoom: 1 });
+            setHistory([{ nodes: data?.nodes || [], connections: data?.connections || [], strokes: data?.strokes || [] }]);
+            historyIndexRef.current = 0;
+            setHistoryTrigger(t => t + 1);
+            setSelectedIds(new Set());
+            setEditingNodeId(null);
+            setContextMenu(null);
+            setCanvasContextMenu(null);
+        }
+    }, [canvasId, data]);
+
     // Load Card Content when activeCardId is set
     useEffect(() => {
         if (!activeCardId) {
@@ -977,15 +1000,13 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
             const my = e.clientY - rect.top;
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
 
-            setViewport(v => {
-                const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, v.zoom * delta));
-                const newX = mx - (mx - v.x) * (newZoom / v.zoom);
-                const newY = my - (my - v.y) * (newZoom / v.zoom);
-                const newV = { x: newX, y: newY, zoom: newZoom };
-                
-                debouncedSaveCanvasData(canvasId, { nodes, strokes, connections, viewport: newV });
-                return newV;
-            });
+            const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, viewport.zoom * delta));
+            const newX = mx - (mx - viewport.x) * (newZoom / viewport.zoom);
+            const newY = my - (my - viewport.y) * (newZoom / viewport.zoom);
+            const newV = { x: newX, y: newY, zoom: newZoom };
+            
+            setViewport(newV);
+            debouncedSaveCanvasData(canvasId, { nodes, strokes, connections, viewport: newV });
         };
 
         container.addEventListener('wheel', onWheel, { passive: false });
@@ -2161,6 +2182,8 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
             if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
             if (!moved) return;
 
+            setIsDraggingNode(true);
+
             // Clear text selection and exit edit mode to prevent horizontal dragging issues
             me.preventDefault();
             setEditingNodeId(null);
@@ -2188,6 +2211,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
         const handleUp = () => {
             document.removeEventListener('mousemove', handleMove);
             document.removeEventListener('mouseup', handleUp);
+            setIsDraggingNode(false);
             if (moved) {
                 setNodes(prev => {
                     requestAnimationFrame(() => saveData(prev, strokes, viewport));
@@ -2953,14 +2977,14 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                     return (
                         <div
                             key={node.id}
-                            className={`${styles.nodeWrapper} ${isSelected ? styles.selectedWrapper : ''}`}
+                            className={`${styles.nodeWrapper} ${isSelected ? styles.selectedWrapper : ''} ${isDraggingNode ? styles.isDraggingWrapper : ''}`}
                             style={{
                                 left: isFullscreen ? -viewport.x / viewport.zoom : node.x, 
                                 top: isFullscreen ? -viewport.y / viewport.zoom : node.y, 
                                 width: isFullscreen ? ((containerRef.current?.clientWidth || window.innerWidth) / viewport.zoom) : node.width, 
                                 height: isFullscreen ? ((containerRef.current?.clientHeight || window.innerHeight) / viewport.zoom) : node.height,
                                 zIndex: isFullscreen ? 999999 : node.zIndex,
-                                transition: 'all 0.2s ease-in-out',
+                                transition: isDraggingNode ? 'none' : 'all 0.2s ease-in-out',
                             }}
                             onMouseEnter={() => setHoveredNodeId(node.id)}
                             onMouseLeave={() => setHoveredNodeId(null)}
@@ -3540,7 +3564,7 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                 <div className={styles.tableNodeWrapper}>
                                     {!node.isLocked && (
                                         <div className={styles.tableControls}>
-                                            <button className={styles.tableCtrlBtn} onClick={(e) => {
+                                            <button className={styles.tableCtrlBtn} title="Adicionar Linha" onClick={(e) => {
                                                 e.stopPropagation();
                                                 const newData = [...(node.tableData || [])].map(r => [...r]);
                                                 if (newData.length > 0) {
@@ -3549,13 +3573,13 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                     newData.push(['']);
                                                 }
                                                 updateNodeTableData(node.id, newData);
-                                            }}>+ Linha</button>
-                                            <button className={styles.tableCtrlBtn} onClick={(e) => {
+                                            }}><Plus size={14} /> Linha</button>
+                                            <button className={styles.tableCtrlBtn} title="Adicionar Coluna" onClick={(e) => {
                                                 e.stopPropagation();
                                                 const newData = [...(node.tableData || [])].map(r => [...r]);
                                                 newData.forEach(r => r.push(''));
                                                 updateNodeTableData(node.id, newData);
-                                            }}>+ Coluna</button>
+                                            }}><Plus size={14} /> Coluna</button>
                                         </div>
                                     )}
                                     <table className={styles.tableNodeTable}>
@@ -3563,8 +3587,9 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                             {node.tableData?.map((row, rowIndex) => (
                                                 <tr key={rowIndex}>
                                                     {row.map((cell, colIndex) => (
-                                                        <td key={colIndex}>
+                                                        <td key={colIndex} className={styles.tableCellWrapper}>
                                                             <div
+                                                                id={`cell-${node.id}-${rowIndex}-${colIndex}`}
                                                                 contentEditable={!node.isLocked}
                                                                 suppressContentEditableWarning={true}
                                                                 onBlur={(e) => {
@@ -3572,6 +3597,70 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                                     const newData = [...(node.tableData || [])].map(r => [...r]);
                                                                     newData[rowIndex][colIndex] = e.target.innerText;
                                                                     updateNodeTableData(node.id, newData);
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    if (node.isLocked) return;
+                                                                    if (e.key === 'Tab') {
+                                                                        e.preventDefault();
+                                                                        const newData = [...(node.tableData || [])].map(r => [...r]);
+                                                                        newData[rowIndex][colIndex] = (e.target as HTMLElement).innerText;
+                                                                        
+                                                                        let nextRow = rowIndex;
+                                                                        let nextCol = colIndex + (e.shiftKey ? -1 : 1);
+                                                                        
+                                                                        if (nextCol >= newData[nextRow].length) {
+                                                                            nextRow++;
+                                                                            nextCol = 0;
+                                                                            if (nextRow >= newData.length) {
+                                                                                newData.push(new Array(newData[0].length).fill(''));
+                                                                            }
+                                                                        } else if (nextCol < 0) {
+                                                                            nextRow--;
+                                                                            if (nextRow >= 0) {
+                                                                                nextCol = newData[nextRow].length - 1;
+                                                                            } else {
+                                                                                nextRow = 0;
+                                                                                nextCol = 0;
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        updateNodeTableData(node.id, newData);
+                                                                        setTimeout(() => {
+                                                                            const nextCell = document.getElementById(`cell-${node.id}-${nextRow}-${nextCol}`);
+                                                                            if (nextCell) {
+                                                                                nextCell.focus();
+                                                                            }
+                                                                        }, 50);
+                                                                    }
+                                                                }}
+                                                                onPaste={(e) => {
+                                                                    if (node.isLocked) return;
+                                                                    const text = e.clipboardData.getData('text');
+                                                                    if (text.includes('\t') || text.includes('\n')) {
+                                                                        const rows = text.split(/\r?\n/).filter(r => r.trim() !== '');
+                                                                        if (rows.length === 1 && !rows[0].includes('\t')) return;
+                                                                        
+                                                                        e.preventDefault();
+                                                                        const newData = [...(node.tableData || [])].map(r => [...r]);
+                                                                        let maxCols = newData[0]?.length || 1;
+                                                                        
+                                                                        rows.forEach((row, rIdx) => {
+                                                                            const targetRow = rowIndex + rIdx;
+                                                                            if (!newData[targetRow]) {
+                                                                                newData.push(new Array(maxCols).fill(''));
+                                                                            }
+                                                                            const cols = row.split('\t');
+                                                                            cols.forEach((col, cIdx) => {
+                                                                                const targetCol = colIndex + cIdx;
+                                                                                while (targetCol >= maxCols) {
+                                                                                    newData.forEach(r => r.push(''));
+                                                                                    maxCols++;
+                                                                                }
+                                                                                newData[targetRow][targetCol] = col.trim();
+                                                                            });
+                                                                        });
+                                                                        updateNodeTableData(node.id, newData);
+                                                                    }
                                                                 }}
                                                                 className={styles.tableCellEditable}
                                                                 style={{ color: node.textColor || 'inherit' }}
@@ -3581,13 +3670,13 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                                         </td>
                                                     ))}
                                                     {!node.isLocked && (
-                                                        <td>
-                                                            <button className={styles.tableRemoveBtn} onClick={(e) => {
+                                                        <td className={styles.tableRemoveCell}>
+                                                            <button className={styles.tableRemoveBtn} title="Remover Linha" onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 const newData = [...(node.tableData || [])].map(r => [...r]);
                                                                 newData.splice(rowIndex, 1);
                                                                 updateNodeTableData(node.id, newData);
-                                                            }}><Minus size={12} /></button>
+                                                            }}><Minus size={14} /></button>
                                                         </td>
                                                     )}
                                                 </tr>
@@ -3595,16 +3684,16 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
                                             {!node.isLocked && (
                                                 <tr>
                                                     {node.tableData && node.tableData[0] && node.tableData[0].map((_, colIndex) => (
-                                                        <td key={`rem-col-${colIndex}`} style={{ textAlign: 'center' }}>
-                                                            <button className={styles.tableRemoveBtn} onClick={(e) => {
+                                                        <td key={`rem-col-${colIndex}`} className={styles.tableRemoveCellBottom}>
+                                                            <button className={styles.tableRemoveBtn} title="Remover Coluna" onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 const newData = [...(node.tableData || [])].map(r => [...r]);
                                                                 newData.forEach(r => r.splice(colIndex, 1));
                                                                 updateNodeTableData(node.id, newData);
-                                                            }}><Minus size={12} /></button>
+                                                            }}><Minus size={14} /></button>
                                                         </td>
                                                     ))}
-                                                    <td></td>
+                                                    <td className={styles.tableRemoveCell}></td>
                                                 </tr>
                                             )}
                                         </tbody>
@@ -5724,4 +5813,4 @@ const InfiniteCanvas: React.FC<InfiniteCanvasProps> = ({ canvasId, data, onDataC
     );
 };
 
-export default InfiniteCanvas;
+export default React.memo(InfiniteCanvas);

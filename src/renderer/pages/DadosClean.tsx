@@ -145,7 +145,11 @@ const DadosClean: React.FC = () => {
 
     const onBrowse = async () => {
         const res = await (window.api as any).metaClean.openDialog();
-        if (res.success && res.data?.length) ingestPaths(res.data);
+        if (res.success && res.data?.length) {
+            // openDialog returns { path, fields }[] — extract just the paths for ingestPaths
+            const paths = (res.data as { path: string; fields: MetaField[] }[]).map(f => f.path);
+            ingestPaths(paths);
+        }
     };
 
     // ─── Clean ───────────────────────────────────────────────────────────────

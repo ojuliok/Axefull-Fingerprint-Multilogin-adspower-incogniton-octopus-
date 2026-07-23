@@ -71,14 +71,41 @@ const LeadDetailModal: React.FC = () => {
     const tagsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
 
-    // Load active card values
+    // BUG-002: Reconciliação limpa de formulário com flush ao alterar o lead selecionado
+    const prevLeadIdRef = useRef<string | null>(null);
+
     useEffect(() => {
+        // Se mudou o lead selecionado e havia um lead anterior, faz o flush das alterações pendentes
+        if (prevLeadIdRef.current && prevLeadIdRef.current !== selectedLeadId) {
+            const prevLead = leads.find(l => l.id === prevLeadIdRef.current);
+            if (prevLead) {
+                const updates: Partial<any> = {};
+                if (titleText.trim() && titleText !== prevLead.title) {
+                    updates.title = titleText.trim();
+                }
+                if (description !== (prevLead.description || prevLead.notes)) {
+                    updates.description = description;
+                }
+                if (Object.keys(updates).length > 0) {
+                    updateLead(prevLead.id, updates, true);
+                }
+            }
+        }
+
+        prevLeadIdRef.current = selectedLeadId;
+
         if (selectedLead) {
             setTitleText(selectedLead.title || '');
             setDescription(selectedLead.description || selectedLead.notes || '');
             setTimerSeconds(selectedLead.timeSpent || 0);
+            setIsEditingTitle(false);
+            setUpdateText('');
+        } else {
+            setTitleText('');
+            setDescription('');
+            setTimerSeconds(0);
         }
-    }, [selectedLead]);
+    }, [selectedLeadId, selectedLead]);
 
     // Timer Interval
     useEffect(() => {
@@ -87,24 +114,22 @@ const LeadDetailModal: React.FC = () => {
             interval = setInterval(() => {
                 setTimerSeconds(prev => {
                     const next = prev + 1;
-                    // Save to storage every 5 seconds
-                    if (next % 5 === 0) {
-                        updateLead(selectedLead!.id, { timeSpent: next });
+                    if (next % 5 === 0 && selectedLead) {
+                        updateLead(selectedLead.id, { timeSpent: next });
                     }
                     return next;
                 });
             }, 1000);
         } else {
             if (interval) clearInterval(interval);
-            // Save final time spent
             if (selectedLead) {
-                updateLead(selectedLead.id, { timeSpent: timerSeconds });
+                updateLead(selectedLead.id, { timeSpent: timerSeconds }, true);
             }
         }
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [isTracking]);
+    }, [isTracking, selectedLeadId]);
 
     // Click outside dropdowns
     useEffect(() => {

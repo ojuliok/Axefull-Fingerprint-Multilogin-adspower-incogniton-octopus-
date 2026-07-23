@@ -1,0 +1,348 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="Axe Agent" Language="1033" Version="1.0.0" Manufacturer="Axefull" UpgradeCode="B5C3D4E5-F6A7-8901-BCDE-234567890123">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Acao Personalizada para Executar o App apos instalacao -->
+    <SetProperty Id="WixShellExecTarget" Value="[#File_MainExe]" After="CostFinalize" />
+    <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Axe Agent" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Axe Agent" />
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+        <Component Id="Comp_MainExe" Guid="A1B2C3D4-E5F6-7890-ABCD-123456789012">
+          <File Id="File_MainExe" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\Axe Agent.exe" KeyPath="yes">
+            <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="Axe Agent" WorkingDirectory="INSTALLFOLDER" Advertise="no" />
+            <Shortcut Id="StartMenuShortcut" Directory="ApplicationProgramsFolder" Name="Axe Agent" WorkingDirectory="INSTALLFOLDER" Advertise="no" />
+          </File>
+          <!-- Registro do protocolo axeagent:// -->
+          <RegistryValue Root="HKCR" Key="axeagent" Type="string" Value="URL:axeagent Protocol" KeyPath="no"/>
+          <RegistryValue Root="HKCR" Key="axeagent" Name="URL Protocol" Type="string" Value="" KeyPath="no"/>
+          <RegistryValue Root="HKCR" Key="axeagent\shell\open\command" Type="string" Value="&quot;[INSTALLFOLDER]Axe Agent.exe&quot; &quot;%1&quot;" KeyPath="no"/>
+        </Component>        <Component Id="Comp_2" Guid="2A4A62E9-494F-47AC-B27C-3A8EEDDEB843">
+          <File Id="File_2" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\chrome_100_percent.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_3" Guid="0D109AE7-4532-44EF-9B96-35D886AB789D">
+          <File Id="File_3" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\chrome_200_percent.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_4" Guid="7A14FF5E-027E-45B5-B198-AEE3F041D2C6">
+          <File Id="File_4" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\d3dcompiler_47.dll" KeyPath="yes" />
+        </Component>        <Component Id="Comp_5" Guid="AC4AF14F-4294-41D9-A3AA-C223968EB315">
+          <File Id="File_5" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\ffmpeg.dll" KeyPath="yes" />
+        </Component>        <Component Id="Comp_6" Guid="FA6220B7-A315-4472-ABEF-A1783F612D74">
+          <File Id="File_6" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\icudtl.dat" KeyPath="yes" />
+        </Component>        <Component Id="Comp_7" Guid="08315D72-75F1-4626-B041-EEA689C93DB4">
+          <File Id="File_7" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\libEGL.dll" KeyPath="yes" />
+        </Component>        <Component Id="Comp_8" Guid="07A1056E-D976-495B-BB66-ACF12ECB4883">
+          <File Id="File_8" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\libGLESv2.dll" KeyPath="yes" />
+        </Component>        <Component Id="Comp_9" Guid="00238465-5532-46D3-9D1D-1EEFAFA8AF44">
+          <File Id="File_9" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\LICENSE.electron.txt" KeyPath="yes" />
+        </Component>        <Component Id="Comp_10" Guid="7B764A51-0A64-487E-B176-31CB1A124F0D">
+          <File Id="File_10" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\LICENSES.chromium.html" KeyPath="yes" />
+        </Component>        <Component Id="Comp_11" Guid="C28165F7-8BD1-431B-995B-3D4DDE44C4DA">
+          <File Id="File_11" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_12" Guid="A50430B6-1E44-43C4-8B7F-0D06256A1CA0">
+          <File Id="File_12" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\snapshot_blob.bin" KeyPath="yes" />
+        </Component>        <Component Id="Comp_13" Guid="6343BF58-550A-4034-A0B5-9A45AA6DE37F">
+          <File Id="File_13" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\v8_context_snapshot.bin" KeyPath="yes" />
+        </Component>        <Component Id="Comp_14" Guid="03C2A76F-E17B-44F8-8B9E-6D2F2F83CA37">
+          <File Id="File_14" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\vk_swiftshader.dll" KeyPath="yes" />
+        </Component>        <Component Id="Comp_15" Guid="330E2C8B-E59F-4354-A9FA-C4CE308702AA">
+          <File Id="File_15" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\vk_swiftshader_icd.json" KeyPath="yes" />
+        </Component>        <Component Id="Comp_16" Guid="8483839A-635D-46BC-9540-215875216847">
+          <File Id="File_16" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\vulkan-1.dll" KeyPath="yes" />
+        </Component>        <Component Id="Comp_17" Guid="991A30FC-EE78-4970-B0C3-FD0F408D7DA8">
+          <File Id="File_17" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\af.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_18" Guid="1AEFE417-1BC4-4597-813C-72B0040DE6C2">
+          <File Id="File_18" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\am.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_19" Guid="E2AFA917-7F42-4FC8-A3E6-8F7383B438DA">
+          <File Id="File_19" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ar.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_20" Guid="195015A5-777F-4B10-ABF7-3F775CD66A5F">
+          <File Id="File_20" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\bg.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_21" Guid="738092A1-D839-4904-900A-6FA6EA302EFB">
+          <File Id="File_21" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\bn.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_22" Guid="55F96636-CF0C-493D-9018-72B0347008A0">
+          <File Id="File_22" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ca.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_23" Guid="1FFE2A0D-6FB6-442F-8E3C-3C11D328D4C8">
+          <File Id="File_23" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\cs.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_24" Guid="FB63953D-D5A7-467D-A5B7-3CB85E3FC0C7">
+          <File Id="File_24" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\da.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_25" Guid="AF7F93A8-B051-4A6D-86C0-483CA2131DA0">
+          <File Id="File_25" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\de.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_26" Guid="9E5F6E90-B0B0-44EC-9B27-20C99509E444">
+          <File Id="File_26" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\el.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_27" Guid="3F444C50-84CA-4711-821E-867BB5744ADD">
+          <File Id="File_27" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\en-GB.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_28" Guid="C7F92E96-9917-45BF-BCC9-FF82A49ACDD3">
+          <File Id="File_28" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\en-US.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_29" Guid="32CAD731-29FB-4300-BCAC-1CACAF17611C">
+          <File Id="File_29" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\es-419.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_30" Guid="1BCDDFFC-A246-46D6-B7B6-2F7D9C54F360">
+          <File Id="File_30" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\es.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_31" Guid="72B71274-0994-4C95-ACF0-17027A051A1E">
+          <File Id="File_31" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\et.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_32" Guid="5CDEF690-58AC-4049-AE08-1AAE4839CC50">
+          <File Id="File_32" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\fa.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_33" Guid="0EE5F3E6-6E07-4D78-BEE9-EA46B1854A84">
+          <File Id="File_33" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\fi.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_34" Guid="0A8E17CD-89F4-469F-930E-D0C87606A631">
+          <File Id="File_34" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\fil.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_35" Guid="5D2768CF-CFD3-4CCD-A57D-76D89F051A1E">
+          <File Id="File_35" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\fr.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_36" Guid="1455F3D7-1966-49A5-BFFE-FF4D922BD067">
+          <File Id="File_36" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\gu.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_37" Guid="263EE63C-1ED9-4B29-81FD-AB3C505C1620">
+          <File Id="File_37" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\he.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_38" Guid="F5570011-F118-4279-A73C-37AA532FCE73">
+          <File Id="File_38" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\hi.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_39" Guid="BF724AED-4474-4947-9FF5-F211B1B953BF">
+          <File Id="File_39" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\hr.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_40" Guid="41829CF8-6E93-4AD0-8073-A8DC24DBCE15">
+          <File Id="File_40" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\hu.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_41" Guid="79C4C11A-DA1F-4267-A51D-4546A81D6F0C">
+          <File Id="File_41" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\id.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_42" Guid="E18DE05A-0DC7-4F1F-8B05-01437BF4980C">
+          <File Id="File_42" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\it.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_43" Guid="BA33CCF3-3C91-4A22-997D-B4647755AE46">
+          <File Id="File_43" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ja.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_44" Guid="406FA846-4384-4CBB-9F23-8BA3621F2173">
+          <File Id="File_44" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\kn.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_45" Guid="AF41AA70-FA13-4E0C-8D97-A808EB68C133">
+          <File Id="File_45" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ko.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_46" Guid="3AE85661-D747-4AE1-B44A-1134A53838EB">
+          <File Id="File_46" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\lt.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_47" Guid="A98228C0-2B01-419B-B283-79DFB2C0DBCD">
+          <File Id="File_47" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\lv.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_48" Guid="DCDBB8EA-3105-4303-ABCD-85979F46618C">
+          <File Id="File_48" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ml.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_49" Guid="ADB0407C-C88A-4521-B9D7-A7337C533FA2">
+          <File Id="File_49" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\mr.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_50" Guid="9E17E1A2-F814-4F9A-8B14-34134EE9789F">
+          <File Id="File_50" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ms.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_51" Guid="838A1462-7A87-4F23-A896-CFC7173BF607">
+          <File Id="File_51" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\nb.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_52" Guid="280FDF7A-55EC-4000-B4A4-1BB25DE900F6">
+          <File Id="File_52" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\nl.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_53" Guid="DA721025-8CA2-4107-B4B5-54D4782A6E98">
+          <File Id="File_53" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\pl.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_54" Guid="BCFB840E-2C9C-4A6F-9FCD-46AA277809DA">
+          <File Id="File_54" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\pt-BR.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_55" Guid="FC6532CD-A1A9-416F-8D59-83811C96DDD7">
+          <File Id="File_55" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\pt-PT.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_56" Guid="3154FC0D-A4DF-4F43-AE48-2E0DAC4A7310">
+          <File Id="File_56" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ro.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_57" Guid="FA426E91-5069-4715-BFE6-255EB1AE9B59">
+          <File Id="File_57" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ru.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_58" Guid="B900F540-2261-4741-8EB0-0D93B645014D">
+          <File Id="File_58" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\sk.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_59" Guid="0A15A756-657F-4E1A-BD8A-06E23B00B902">
+          <File Id="File_59" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\sl.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_60" Guid="1AA723F0-1758-49E6-821B-21331D97AA5C">
+          <File Id="File_60" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\sr.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_61" Guid="2B805AF5-A60F-4365-B46D-764281B6CC4C">
+          <File Id="File_61" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\sv.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_62" Guid="4EA411D2-0B53-4BCA-84CC-7E776CA63E5F">
+          <File Id="File_62" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\sw.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_63" Guid="3DD8083E-7B8F-4769-9BFC-8E6D80B9AFC0">
+          <File Id="File_63" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ta.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_64" Guid="9B8032F0-76C5-4B8A-8090-EA8A950EBCBB">
+          <File Id="File_64" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\te.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_65" Guid="41B6863C-5A62-444D-BFC5-89A2748D4ACB">
+          <File Id="File_65" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\th.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_66" Guid="6BA6D600-FC5B-4C1D-BFDE-4FD90A54025A">
+          <File Id="File_66" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\tr.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_67" Guid="B8B4AFF1-6E59-4AB8-A012-7237F3BCDE04">
+          <File Id="File_67" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\uk.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_68" Guid="4C1BA124-235F-4B3F-8EBC-EC1D6D65E0C7">
+          <File Id="File_68" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\ur.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_69" Guid="0D145DCA-66B6-4448-BEBB-54FFB63C945D">
+          <File Id="File_69" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\vi.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_70" Guid="506999D6-6EA7-4314-A77F-4817388F8046">
+          <File Id="File_70" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\zh-CN.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_71" Guid="39B51E70-C7E7-4948-97F0-9505B2E9FB40">
+          <File Id="File_71" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\locales\zh-TW.pak" KeyPath="yes" />
+        </Component>        <Component Id="Comp_72" Guid="ED71D90A-348D-48AA-93AF-3DCA25DDF86C">
+          <File Id="File_72" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app-update.yml" KeyPath="yes" />
+        </Component>        <Component Id="Comp_73" Guid="93EA0E34-0226-42DE-B61E-48ABBF792C7A">
+          <File Id="File_73" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar" KeyPath="yes" />
+        </Component>        <Component Id="Comp_74" Guid="E58A8A03-0C2B-4E35-A533-F1535CA92066">
+          <File Id="File_74" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\elevate.exe" KeyPath="yes" />
+        </Component>        <Component Id="Comp_75" Guid="7C91F4E7-9873-4936-A98F-4C63DE28BC53">
+          <File Id="File_75" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\.env" KeyPath="yes" />
+        </Component>        <Component Id="Comp_76" Guid="F69352DC-BCF1-41C1-BE7D-4AE67D9D8A27">
+          <File Id="File_76" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\.gitignore~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_77" Guid="D506F09D-C4B5-4D72-B1F5-D3D45952F0B6">
+          <File Id="File_77" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\download.js~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_78" Guid="328CD5CD-586F-4BCC-A49D-F0B3F6B0C75A">
+          <File Id="File_78" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\download.sh~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_79" Guid="AB70675D-2964-4FFB-9DCF-A30814DEB727">
+          <File Id="File_79" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\download.ts~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_80" Guid="6F075ACF-5447-494D-91A8-30C171EC8144">
+          <File Id="File_80" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\index.js" KeyPath="yes" />
+        </Component>        <Component Id="Comp_81" Guid="CA3403A4-FE98-478E-AB63-7064081C6BCA">
+          <File Id="File_81" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\index.js~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_82" Guid="2259C751-2043-4519-A84C-426BCA39E7A1">
+          <File Id="File_82" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\package.json" KeyPath="yes" />
+        </Component>        <Component Id="Comp_83" Guid="A4BFC386-3075-4822-97EA-3882B411CD87">
+          <File Id="File_83" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\package.json~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_84" Guid="23EB1E05-D180-4E04-B269-AF42BD3ED299">
+          <File Id="File_84" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\tsconfig.json" KeyPath="yes" />
+        </Component>        <Component Id="Comp_85" Guid="36219FE7-1397-475E-B490-18645F1D9E33">
+          <File Id="File_85" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\tsconfig.json~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_86" Guid="3B780FDD-A88A-4CC1-8192-2800532B0846">
+          <File Id="File_86" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\lib\manifest.js~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_87" Guid="E164F778-448A-4F26-BA55-7224909560D4">
+          <File Id="File_87" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\lib\platforms.js~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_88" Guid="84FEA43B-2EF3-4A3E-AFFC-A4E5CF16CD92">
+          <File Id="File_88" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\lib\verify-file.js" KeyPath="yes" />
+        </Component>        <Component Id="Comp_89" Guid="E66337D6-5563-4D16-A58B-C88A1B15ED23">
+          <File Id="File_89" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\lib\verify-file.js~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_90" Guid="D1769976-A7CF-4DEA-8FA1-D269C0ED4209">
+          <File Id="File_90" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\types\index.test-d.ts" KeyPath="yes" />
+        </Component>        <Component Id="Comp_91" Guid="0D429817-8FEF-4491-98D5-4469F3F103FD">
+          <File Id="File_91" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\types\index.test-d.ts~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_92" Guid="D0490A15-E63A-477C-877B-ED7CDA9FBA42">
+          <File Id="File_92" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\ffmpeg\types\lib\verify-file.test-d.ts~" KeyPath="yes" />
+        </Component>        <Component Id="Comp_93" Guid="46CF46CD-4B91-4E9B-996E-F7C4F84C32D8">
+          <File Id="File_93" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\win32-x64\ffmpeg.exe" KeyPath="yes" />
+        </Component>        <Component Id="Comp_94" Guid="EBC402F5-8BBA-490E-B203-C9520C98A829">
+          <File Id="File_94" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffmpeg-installer\win32-x64\package.json" KeyPath="yes" />
+        </Component>        <Component Id="Comp_95" Guid="57FD88F1-F9CA-4575-A367-675565E0AD29">
+          <File Id="File_95" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffprobe-installer\ffprobe\index.js" KeyPath="yes" />
+        </Component>        <Component Id="Comp_96" Guid="3BBDAD82-26A3-4CA2-B160-8FD913D5E6F0">
+          <File Id="File_96" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffprobe-installer\ffprobe\package.json" KeyPath="yes" />
+        </Component>        <Component Id="Comp_97" Guid="5E5EF97D-C5D5-4090-9831-8F49895F2CD1">
+          <File Id="File_97" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffprobe-installer\ffprobe\tsconfig.json" KeyPath="yes" />
+        </Component>        <Component Id="Comp_98" Guid="8F01AB43-629A-4688-984D-4FA1AE6C6C77">
+          <File Id="File_98" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffprobe-installer\ffprobe\lib\verify-file.js" KeyPath="yes" />
+        </Component>        <Component Id="Comp_99" Guid="159431A7-66D6-45A8-BC6C-DDDED0732DC7">
+          <File Id="File_99" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffprobe-installer\win32-x64\ffprobe.exe" KeyPath="yes" />
+        </Component>        <Component Id="Comp_100" Guid="519263A9-BA6F-49AA-AB87-0996957920B3">
+          <File Id="File_100" Source="C:\Users\FAGNER\fingerprint-release\win-unpacked\resources\app.asar.unpacked\node_modules\@ffprobe-installer\win32-x64\package.json" KeyPath="yes" />
+        </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="Comp_FolderCleanup" Guid="C6D4E5F6-A7B8-9012-CDEF-345678901234">
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\Axefull\AxeAgent" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="MainFeature" Title="Axe Agent" Level="1">
+      <ComponentRef Id="Comp_MainExe" />
+      <ComponentRef Id="Comp_2" />
+      <ComponentRef Id="Comp_3" />
+      <ComponentRef Id="Comp_4" />
+      <ComponentRef Id="Comp_5" />
+      <ComponentRef Id="Comp_6" />
+      <ComponentRef Id="Comp_7" />
+      <ComponentRef Id="Comp_8" />
+      <ComponentRef Id="Comp_9" />
+      <ComponentRef Id="Comp_10" />
+      <ComponentRef Id="Comp_11" />
+      <ComponentRef Id="Comp_12" />
+      <ComponentRef Id="Comp_13" />
+      <ComponentRef Id="Comp_14" />
+      <ComponentRef Id="Comp_15" />
+      <ComponentRef Id="Comp_16" />
+      <ComponentRef Id="Comp_17" />
+      <ComponentRef Id="Comp_18" />
+      <ComponentRef Id="Comp_19" />
+      <ComponentRef Id="Comp_20" />
+      <ComponentRef Id="Comp_21" />
+      <ComponentRef Id="Comp_22" />
+      <ComponentRef Id="Comp_23" />
+      <ComponentRef Id="Comp_24" />
+      <ComponentRef Id="Comp_25" />
+      <ComponentRef Id="Comp_26" />
+      <ComponentRef Id="Comp_27" />
+      <ComponentRef Id="Comp_28" />
+      <ComponentRef Id="Comp_29" />
+      <ComponentRef Id="Comp_30" />
+      <ComponentRef Id="Comp_31" />
+      <ComponentRef Id="Comp_32" />
+      <ComponentRef Id="Comp_33" />
+      <ComponentRef Id="Comp_34" />
+      <ComponentRef Id="Comp_35" />
+      <ComponentRef Id="Comp_36" />
+      <ComponentRef Id="Comp_37" />
+      <ComponentRef Id="Comp_38" />
+      <ComponentRef Id="Comp_39" />
+      <ComponentRef Id="Comp_40" />
+      <ComponentRef Id="Comp_41" />
+      <ComponentRef Id="Comp_42" />
+      <ComponentRef Id="Comp_43" />
+      <ComponentRef Id="Comp_44" />
+      <ComponentRef Id="Comp_45" />
+      <ComponentRef Id="Comp_46" />
+      <ComponentRef Id="Comp_47" />
+      <ComponentRef Id="Comp_48" />
+      <ComponentRef Id="Comp_49" />
+      <ComponentRef Id="Comp_50" />
+      <ComponentRef Id="Comp_51" />
+      <ComponentRef Id="Comp_52" />
+      <ComponentRef Id="Comp_53" />
+      <ComponentRef Id="Comp_54" />
+      <ComponentRef Id="Comp_55" />
+      <ComponentRef Id="Comp_56" />
+      <ComponentRef Id="Comp_57" />
+      <ComponentRef Id="Comp_58" />
+      <ComponentRef Id="Comp_59" />
+      <ComponentRef Id="Comp_60" />
+      <ComponentRef Id="Comp_61" />
+      <ComponentRef Id="Comp_62" />
+      <ComponentRef Id="Comp_63" />
+      <ComponentRef Id="Comp_64" />
+      <ComponentRef Id="Comp_65" />
+      <ComponentRef Id="Comp_66" />
+      <ComponentRef Id="Comp_67" />
+      <ComponentRef Id="Comp_68" />
+      <ComponentRef Id="Comp_69" />
+      <ComponentRef Id="Comp_70" />
+      <ComponentRef Id="Comp_71" />
+      <ComponentRef Id="Comp_72" />
+      <ComponentRef Id="Comp_73" />
+      <ComponentRef Id="Comp_74" />
+      <ComponentRef Id="Comp_75" />
+      <ComponentRef Id="Comp_76" />
+      <ComponentRef Id="Comp_77" />
+      <ComponentRef Id="Comp_78" />
+      <ComponentRef Id="Comp_79" />
+      <ComponentRef Id="Comp_80" />
+      <ComponentRef Id="Comp_81" />
+      <ComponentRef Id="Comp_82" />
+      <ComponentRef Id="Comp_83" />
+      <ComponentRef Id="Comp_84" />
+      <ComponentRef Id="Comp_85" />
+      <ComponentRef Id="Comp_86" />
+      <ComponentRef Id="Comp_87" />
+      <ComponentRef Id="Comp_88" />
+      <ComponentRef Id="Comp_89" />
+      <ComponentRef Id="Comp_90" />
+      <ComponentRef Id="Comp_91" />
+      <ComponentRef Id="Comp_92" />
+      <ComponentRef Id="Comp_93" />
+      <ComponentRef Id="Comp_94" />
+      <ComponentRef Id="Comp_95" />
+      <ComponentRef Id="Comp_96" />
+      <ComponentRef Id="Comp_97" />
+      <ComponentRef Id="Comp_98" />
+      <ComponentRef Id="Comp_99" />
+      <ComponentRef Id="Comp_100" />
+
+      <ComponentRef Id="Comp_FolderCleanup" />
+    </Feature>
+
+    <InstallExecuteSequence>
+      <Custom Action="LaunchApplication" After="InstallFinalize">NOT Installed</Custom>
+    </InstallExecuteSequence>
+  </Product>
+</Wix>

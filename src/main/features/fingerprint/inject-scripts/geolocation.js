@@ -78,19 +78,21 @@
     };
 
     // Small deterministic jitter so position is not exactly city center.
-    // Uses a simple seed derived from the timezone string.
+    // Uses timezone + profile-unique canvas seed to ensure uniqueness per profile.
     function seededRandom(seed) {
         var x = Math.sin(seed + 1) * 43758.5453123;
         return x - Math.floor(x);
     }
-    function tzSeed(tz) {
+    function computeSeed(tz, canvasSeed) {
         var n = 0;
-        for (var i = 0; i < tz.length; i++) n = (n * 31 + tz.charCodeAt(i)) & 0x7fffffff;
+        var combined = tz + '|' + canvasSeed;
+        for (var i = 0; i < combined.length; i++) n = (n * 31 + combined.charCodeAt(i)) & 0x7fffffff;
         return n;
     }
 
+    var CANVAS_SEED = 'CANVAS_SEED_PLACEHOLDER';
     var base = TZ_COORDS[TIMEZONE] || { lat: 51.5074, lon: -0.1278 };
-    var seed = tzSeed(TIMEZONE);
+    var seed = computeSeed(TIMEZONE, CANVAS_SEED);
 
     // ±0.02 degrees ≈ ±2.2 km — realistic city-level precision
     var JITTER = 0.02;

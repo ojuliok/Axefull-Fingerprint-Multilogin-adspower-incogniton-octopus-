@@ -15,7 +15,7 @@ export interface ProxyPoolEntry {
     last_tested_at: string | null;
     last_status: 'ok' | 'failed' | 'untested';
     last_latency_ms: number | null;
-    assigned_profile_id: string | null;
+    assigned_profile_ids: string[];
     created_at: string;
 }
 
@@ -25,6 +25,16 @@ export function getProxyPool(): ProxyPoolEntry[] {
     const results: ProxyPoolEntry[] = [];
     while (stmt.step()) {
         const row = stmt.getAsObject() as Record<string, SqlValue>;
+        let assignedIds: string[] = [];
+        const rawAssigned = row.assigned_profile_id as string | null;
+        if (rawAssigned) {
+            if (rawAssigned.startsWith('[')) {
+                try { assignedIds = JSON.parse(rawAssigned); } catch (e) {}
+            } else {
+                assignedIds = [rawAssigned];
+            }
+        }
+
         results.push({
             id: row.id as string,
             label: row.label as string | null,
@@ -36,7 +46,7 @@ export function getProxyPool(): ProxyPoolEntry[] {
             last_tested_at: row.last_tested_at as string | null,
             last_status: (row.last_status as string || 'untested') as ProxyPoolEntry['last_status'],
             last_latency_ms: row.last_latency_ms as number | null,
-            assigned_profile_id: row.assigned_profile_id as string | null,
+            assigned_profile_ids: assignedIds,
             created_at: row.created_at as string,
         });
     }
@@ -65,10 +75,14 @@ export function addProxyToPool(input: {
         last_tested_at: null,
         last_status: 'untested',
         last_latency_ms: null,
-        assigned_profile_id: null,
+        assigned_profile_ids: [],
         created_at: now,
     };
-    insert('proxy_pool', entry as unknown as Record<string, unknown>);
+    
+    const dbEntry = { ...entry, assigned_profile_id: null };
+    delete (dbEntry as any).assigned_profile_ids;
+
+    insert('proxy_pool', dbEntry as unknown as Record<string, unknown>);
     saveDatabase();
     return entry;
 }
@@ -149,18 +163,48 @@ export async function testPoolProxy(id: string): Promise<{ ok: boolean; ip?: str
     return result;
 }
 
-export function assignProxy(proxyId: string, profileId: string): void {
+export function assignProxy(proxyId: string, profileIds: string[]): void {
     const db = getDb();
-    db.run('UPDATE proxy_pool SET assigned_profile_id = ? WHERE id = ?', [profileId, proxyId]);
+    const pool = getProxyPool();
+    const proxy = pool.find(p => p.id === proxyId);
+    if (!proxy) return;
+
+    // Update pool table
+    db.run('UPDATE proxy_pool SET assigned_profile_id = ? WHERE id = ?', [JSON.stringify(profileIds), proxyId]);
+    
+    // Inject proxy into profiles dynamically
+    // Avoid cyclic imports: import updateProfileProxy locally
+    const { updateProfileProxy } = require('../profile/profile-manager');
+    for (const pid of profileIds) {
+        updateProfileProxy(pid, {
+            type: proxy.type,
+            host: proxy.host,
+            port: proxy.port,
+            username: proxy.username || undefined,
+            password: proxy.password || undefined
+        });
+    }
+
     saveDatabase();
 }
 
 export function unassignProxy(proxyId: string): void {
     const db = getDb();
+    
+    // We should also remove the proxy from the profiles that were using it
+    const pool = getProxyPool();
+    const proxy = pool.find(p => p.id === proxyId);
+    if (proxy && proxy.assigned_profile_ids.length > 0) {
+        const { updateProfileProxy } = require('../profile/profile-manager');
+        for (const pid of proxy.assigned_profile_ids) {
+            updateProfileProxy(pid, null);
+        }
+    }
+
     db.run('UPDATE proxy_pool SET assigned_profile_id = NULL WHERE id = ?', [proxyId]);
     saveDatabase();
 }
 
 export function getUnassignedProxies(): ProxyPoolEntry[] {
-    return getProxyPool().filter(p => !p.assigned_profile_id);
+    return getProxyPool().filter(p => p.assigned_profile_ids.length === 0);
 }

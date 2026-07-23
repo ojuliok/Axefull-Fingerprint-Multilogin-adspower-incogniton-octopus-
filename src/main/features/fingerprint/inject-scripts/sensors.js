@@ -171,20 +171,106 @@
                 { name: 'Microsoft Mark',    lang: 'en-US', localService: true,  default: false },
                 { name: 'Google US English', lang: 'en-US', localService: false, default: false },
             ],
+            win_enGB: [
+                { name: 'Microsoft Hazel',   lang: 'en-GB', localService: true,  default: true  },
+                { name: 'Microsoft George',  lang: 'en-GB', localService: true,  default: false },
+                { name: 'Google UK English Female', lang: 'en-GB', localService: false, default: false },
+            ],
+            win_deDE: [
+                { name: 'Microsoft Hedda',   lang: 'de-DE', localService: true,  default: true  },
+                { name: 'Microsoft Stefan',  lang: 'de-DE', localService: true,  default: false },
+                { name: 'Google Deutsch',    lang: 'de-DE', localService: false, default: false },
+            ],
+            win_frFR: [
+                { name: 'Microsoft Julie',   lang: 'fr-FR', localService: true,  default: true  },
+                { name: 'Microsoft Paul',    lang: 'fr-FR', localService: true,  default: false },
+                { name: 'Google français',   lang: 'fr-FR', localService: false, default: false },
+            ],
+            win_esES: [
+                { name: 'Microsoft Laura',   lang: 'es-ES', localService: true,  default: true  },
+                { name: 'Microsoft Pablo',   lang: 'es-ES', localService: true,  default: false },
+                { name: 'Google español',    lang: 'es-ES', localService: false, default: false },
+            ],
+            win_itIT: [
+                { name: 'Microsoft Elsa',    lang: 'it-IT', localService: true,  default: true  },
+                { name: 'Microsoft Cosimo',  lang: 'it-IT', localService: true,  default: false },
+                { name: 'Google italiano',   lang: 'it-IT', localService: false, default: false },
+            ],
+            win_jaJP: [
+                { name: 'Microsoft Haruka',  lang: 'ja-JP', localService: true,  default: true  },
+                { name: 'Microsoft Ichiro',  lang: 'ja-JP', localService: true,  default: false },
+                { name: 'Google 日本語',     lang: 'ja-JP', localService: false, default: false },
+            ],
+            win_enAU: [
+                { name: 'Microsoft Catherine', lang: 'en-AU', localService: true,  default: true  },
+                { name: 'Microsoft James',   lang: 'en-AU', localService: true,  default: false },
+            ],
+            win_enCA: [
+                { name: 'Microsoft Linda',   lang: 'en-CA', localService: true,  default: true  },
+                { name: 'Microsoft Richard', lang: 'en-CA', localService: true,  default: false },
+            ],
             mac_ptBR: [
                 { name: 'Luciana', lang: 'pt-BR', localService: true, default: true  },
                 { name: 'Felipe',  lang: 'pt-BR', localService: true, default: false },
             ],
             mac_enUS: [
-                { name: 'Alex',   lang: 'en-US', localService: true, default: true  },
+                { name: 'Alex',     lang: 'en-US', localService: true, default: true  },
                 { name: 'Samantha', lang: 'en-US', localService: true, default: false },
                 { name: 'Victoria', lang: 'en-US', localService: true, default: false },
             ],
+            mac_enGB: [
+                { name: 'Daniel',   lang: 'en-GB', localService: true, default: true  },
+                { name: 'Kate',     lang: 'en-GB', localService: true, default: false },
+            ],
+            mac_deDE: [
+                { name: 'Anna',     lang: 'de-DE', localService: true, default: true  },
+                { name: 'Markus',   lang: 'de-DE', localService: true, default: false },
+                { name: 'Yannick',  lang: 'de-DE', localService: true, default: false },
+            ],
+            mac_frFR: [
+                { name: 'Amelie',   lang: 'fr-FR', localService: true, default: true  },
+                { name: 'Thomas',   lang: 'fr-FR', localService: true, default: false },
+            ],
+            mac_esES: [
+                { name: 'Monica',   lang: 'es-ES', localService: true, default: true  },
+                { name: 'Jorge',    lang: 'es-ES', localService: true, default: false },
+            ],
+            mac_itIT: [
+                { name: 'Alice',    lang: 'it-IT', localService: true, default: true  },
+                { name: 'Luca',     lang: 'it-IT', localService: true, default: false },
+            ],
+            mac_jaJP: [
+                { name: 'Kyoko',    lang: 'ja-JP', localService: true, default: true  },
+                { name: 'Otoya',    lang: 'ja-JP', localService: true, default: false },
+            ],
+            mac_enAU: [
+                { name: 'Karen',    lang: 'en-AU', localService: true, default: true  },
+                { name: 'Lee',      lang: 'en-AU', localService: true, default: false },
+            ],
+            mac_enCA: [
+                { name: 'Samantha', lang: 'en-CA', localService: true, default: true  },
+            ],
         };
 
+        // Derive key from language prefix
+        function langToKey(l) {
+            if (!l) return 'enUS';
+            var lower = l.toLowerCase();
+            if (lower.startsWith('pt')) return 'ptBR';
+            if (lower.startsWith('de')) return 'deDE';
+            if (lower.startsWith('fr')) return 'frFR';
+            if (lower.startsWith('es')) return 'esES';
+            if (lower.startsWith('it')) return 'itIT';
+            if (lower.startsWith('ja')) return 'jaJP';
+            if (lower === 'en-gb' || lower === 'en_gb') return 'enGB';
+            if (lower === 'en-au' || lower === 'en_au') return 'enAU';
+            if (lower === 'en-ca' || lower === 'en_ca') return 'enCA';
+            return 'enUS';
+        }
+
         var osKey  = isMac ? 'mac' : 'win';
-        var langKey = lang && lang.startsWith('pt') ? 'ptBR' : 'enUS';
-        var voiceList = voicesMap[osKey + '_' + langKey] || voicesMap['win_enUS'];
+        var langKey = langToKey(lang);
+        var voiceList = voicesMap[osKey + '_' + langKey] || voicesMap[osKey + '_enUS'] || voicesMap['win_enUS'];
 
         var fakeVoices = voiceList.map(function (v) {
             return {

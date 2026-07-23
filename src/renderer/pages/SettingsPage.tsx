@@ -68,8 +68,8 @@ const SettingsPage: React.FC = () => {
         });
         window.api.app.getFixedBookmark().then(res => {
             if (isMountedRef.current && res.success && res.data) {
-                setFixedBookmarkName(res.data.name || '');
-                setFixedBookmarkUrl(res.data.url || '');
+                setFixedBookmarkName((res.data as any).name || '');
+                setFixedBookmarkUrl((res.data as any).url || '');
             }
         });
         return () => {
@@ -509,6 +509,24 @@ const SettingsPage: React.FC = () => {
                                                         <div className="w-2 h-2 bg-white/5 rounded-sm" />
                                                     </div>
                                                 </div>
+                                            </div>
+                                        )
+                                    },
+                                    { 
+                                        id: 'classic-sidebar-right', 
+                                        label: 'Sidebar Direita', 
+                                        desc: 'Menu lateral fino de ícones fixados à direita.',
+                                        icon: PanelLeft,
+                                        mock: (
+                                            <div className="flex h-full w-full">
+                                                <div className="flex-1 flex flex-col h-full justify-between p-0.5">
+                                                    <div className="h-1.5 bg-white/5 rounded-sm" />
+                                                    <div className="flex gap-0.5 justify-end">
+                                                        <div className="w-2 h-2 bg-white/5 rounded-sm" />
+                                                        <div className="w-2 h-2 bg-white/5 rounded-sm" />
+                                                    </div>
+                                                </div>
+                                                <div className="w-3 bg-violet-600/30 border-l border-white/5 h-full" />
                                             </div>
                                         )
                                     },

@@ -1,6 +1,7 @@
 {
   "name": "axefull-fingerprint",
   "version": "1.0.0",
+  "author": "Axefull",
   "private": true,
   "overrides": {
     "rollup": "npm:@rollup/wasm-node"
@@ -47,6 +48,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.18.0",
+    "socks": "^2.8.9",
     "sql.js": "^1.14.1",
     "uuid": "^9.0.0",
     "ws": "^8.21.0"
@@ -96,7 +98,10 @@
       "**/node_modules/@ffprobe-installer/**"
     ],
     "win": {
-      "target": "nsis",
+      "target": [
+        "nsis",
+        "msi"
+      ],
       "icon": "assets/icon.ico",
       "certificateFile": "certs/self_signed.pfx",
       "certificatePassword": "axefull123"
@@ -109,6 +114,13 @@
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
       "include": "installer.nsh"
+    },
+    "msi": {
+      "oneClick": false,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
   }
 }

@@ -345,6 +345,9 @@ const ListGroup: React.FC<{
     const [isHeaderDropdownOpen, setIsHeaderDropdownOpen] = useState(false);
     const [activeRowDropdown, setActiveRowDropdown] = useState<string | null>(null);
 
+    const [visibleCount, setVisibleCount] = useState(50);
+    const visibleLeads = leads.slice(0, visibleCount);
+
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (colDropdownRef.current && !colDropdownRef.current.contains(e.target as Node)) {
@@ -755,7 +758,7 @@ const ListGroup: React.FC<{
                     </div>
 
                     {/* Data Rows */}
-                    {leads.map(lead => {
+                    {visibleLeads.map(lead => {
                         const isSelected = selectedIds.includes(lead.id);
                         return (
                             <div 
@@ -868,15 +871,18 @@ const ListGroup: React.FC<{
                                         );
                                     }
                                     if (col.startsWith('custom_people_')) {
-                                        const val = (lead as any)[col] || '';
+                                        const person = (lead as any)[col] || '';
                                         return (
-                                            <div key={col} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid var(--border-default)', height: '100%' }}>
-                                                <InlineEdit 
-                                                    value={val} 
-                                                    onSave={(newVal) => updateLead(lead.id, { [col]: newVal })} 
-                                                    placeholder="Pessoas..." 
-                                                    style={{ textAlign: 'center' }}
-                                                />
+                                            <div key={col} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid var(--border-default)' }}>
+                                                {person ? (
+                                                    <div title={person} style={{ width: 22, height: 22, borderRadius: '50%', background: '#0ea5e9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 'bold', color: '#fff' }}>
+                                                        {person.charAt(0).toUpperCase()}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'transparent', border: '1px dashed var(--border-default)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', cursor: 'pointer' }}>
+                                                        <User size={12} />
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     }
@@ -1024,6 +1030,39 @@ const ListGroup: React.FC<{
                         <div></div>
                     </div>
 
+                    {/* Progressive Windowing / Load More Bar */}
+                    {leads.length > visibleCount && (
+                        <div style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '8px 16px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-default)',
+                            fontSize: '12px', color: 'var(--text-secondary)'
+                        }}>
+                            <span>Exibindo <strong style={{ color: 'var(--text-primary)' }}>{visibleLeads.length}</strong> de <strong style={{ color: 'var(--text-primary)' }}>{leads.length}</strong> tarefas neste grupo</span>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                    onClick={() => setVisibleCount(prev => prev + 50)}
+                                    style={{
+                                        background: 'var(--bg-tertiary)', border: '1px solid var(--border-default)',
+                                        borderRadius: '4px', padding: '4px 12px', color: 'var(--text-primary)',
+                                        fontSize: '12px', cursor: 'pointer', fontWeight: 500
+                                    }}
+                                >
+                                    Carregar mais 50
+                                </button>
+                                <button
+                                    onClick={() => setVisibleCount(leads.length)}
+                                    style={{
+                                        background: '#7c3aed', border: 'none',
+                                        borderRadius: '4px', padding: '4px 12px', color: '#ffffff',
+                                        fontSize: '12px', cursor: 'pointer', fontWeight: 500
+                                    }}
+                                >
+                                    Carregar todas ({leads.length})
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Footer Row (Totals) */}
                     <div style={{ 
                         display: 'grid', gridTemplateColumns, alignItems: 'center', fontSize: '11px', 
@@ -1068,6 +1107,27 @@ const ListGroup: React.FC<{
 const CRMList: React.FC = () => {
     const { activeBoard, activeGroups, activeLeads, updateBoard, addGroup, updateLead, deleteLead } = useCRMState();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const activeResizeCleanupRef = useRef<(() => void) | null>(null);
+
+    // MEM-001: Listener crm-reload-leads com referência estável e cleanup garantido no unmount
+    useEffect(() => {
+        const handleReload = () => {
+            console.log('[CRMList] Evento crm-reload-leads capturado.');
+        };
+        window.addEventListener('crm-reload-leads', handleReload);
+        return () => {
+            window.removeEventListener('crm-reload-leads', handleReload);
+        };
+    }, []);
+
+    // MEM-002: Cleanup defensivo de qualquer sessão de resize ativa no unmount do componente
+    useEffect(() => {
+        return () => {
+            if (activeResizeCleanupRef.current) {
+                activeResizeCleanupRef.current();
+            }
+        };
+    }, []);
 
     const [columnWidths, setColumnWidths] = useState<Record<string, string>>(() => {
         try {
@@ -1100,6 +1160,11 @@ const CRMList: React.FC = () => {
 
     const startResize = (e: React.MouseEvent, colId: string) => {
         e.preventDefault();
+        // Se houver resize ativo anterior, limpa antes de iniciar um novo
+        if (activeResizeCleanupRef.current) {
+            activeResizeCleanupRef.current();
+        }
+
         const headerCell = e.currentTarget.parentElement;
         if (!headerCell) return;
         
@@ -1116,9 +1181,15 @@ const CRMList: React.FC = () => {
             }));
         };
 
-        const handleMouseUp = () => {
+        const cleanup = () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('blur', handleMouseUp);
+            activeResizeCleanupRef.current = null;
+        };
+
+        const handleMouseUp = () => {
+            cleanup();
             // Save to localStorage
             setColumnWidths(current => {
                 localStorage.setItem('axe_crm_col_widths', JSON.stringify(current));
@@ -1126,8 +1197,10 @@ const CRMList: React.FC = () => {
             });
         };
 
+        activeResizeCleanupRef.current = cleanup;
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('blur', handleMouseUp);
     };
 
     const createCustomColumn = (type: 'status' | 'dropdown' | 'text' | 'date' | 'people' | 'number') => {

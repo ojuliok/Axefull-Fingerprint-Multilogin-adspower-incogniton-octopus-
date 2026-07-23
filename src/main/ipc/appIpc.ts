@@ -242,8 +242,8 @@ export function registerProxyPoolHandlers(): void {
         catch (e) { return { success: false, error: String(e) }; }
     });
 
-    ipcMain.handle('proxy-pool:assign', (_e, proxyId: string, profileId: string) => {
-        try { assignProxy(proxyId, profileId); return { success: true }; }
+    ipcMain.handle('proxy-pool:assign', (_e, proxyId: string, profileIds: string[]) => {
+        try { assignProxy(proxyId, profileIds); return { success: true }; }
         catch (e) { return { success: false, error: String(e) }; }
     });
 

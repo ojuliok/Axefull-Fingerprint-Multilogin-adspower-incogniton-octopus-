@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network, Eraser } from 'lucide-react';
+import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronUp, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network, Eraser } from 'lucide-react';
 import CreateProfileModal from '../features/Profiles/ProfileEditor/CreateProfileModal';
 import PropertiesModal from '../features/Profiles/ProfileEditor/PropertiesModal';
 import ProfileDetailModal from '../features/Profiles/ProfileDetail/ProfileDetailModal';
 import AutomationModal from '../features/AutomationModal/AutomationModal';
 import TemplatesModal from '../features/Templates/TemplatesModal';
 import { useToast } from '../context/ToastContext';
+import { useWorkspace } from '../context/WorkspaceContext';
 import styles from './Dashboard.module.css';
 import { ProfileAIScore } from '../features/AI/ProfileAIScore';
 import { Profile, Folder } from '../types';
@@ -25,6 +26,7 @@ import { StatusPickerPopup } from '../features/Dashboard/StatusPickerPopup';
 import { TagPickerPopup } from '../features/Dashboard/TagPickerPopup';
 import { AvatarPickerPopup } from '../features/Dashboard/AvatarPickerPopup';
 import * as Lucide from 'lucide-react';
+import NoteTiptapEditor from '../features/Notes/NoteTiptapEditor';
 import { MiniSidebarItem as MiniItem } from '../features/Dashboard/MiniSidebarItem';
 import { FloatingBulkActions } from '../features/Dashboard/FloatingBulkActions';
 import { ResourceMonitor } from '../features/Dashboard/ResourceMonitor';
@@ -34,8 +36,83 @@ interface DashboardProps {
     onOpenProxies?: () => void;
 }
 
+const syncProfilesToNotes = (profilesList: Profile[]) => {
+    try {
+        const savedNotes = localStorage.getItem('axe_notes_notes');
+        const parsedNotes = savedNotes ? JSON.parse(savedNotes) : [];
+        const savedSpaces = localStorage.getItem('axe_notes_spaces');
+        const parsedSpaces = savedSpaces ? JSON.parse(savedSpaces) : [];
+        const FINGERPRINT_SPACE_ID = 'fingerprint-notes-space';
+        
+        let changed = false;
+        
+        // Ensure space exists
+        if (!parsedSpaces.find((s: any) => s.id === FINGERPRINT_SPACE_ID)) {
+            parsedSpaces.push({
+                id: FINGERPRINT_SPACE_ID,
+                name: 'Perfis 👤',
+                icon: '👤',
+                created_at: new Date().toISOString()
+            });
+            localStorage.setItem('axe_notes_spaces', JSON.stringify(parsedSpaces));
+        }
+        
+        let updatedNotes = [...parsedNotes];
+        
+        profilesList.forEach((profile) => {
+            if (profile.category === 'trash') return;
+            
+            const noteId = `profile-note-${profile.id}`;
+            let noteIndex = updatedNotes.findIndex((n: any) => n.profileId === profile.id || n.id === noteId);
+            
+            if (noteIndex > -1) {
+                const note = updatedNotes[noteIndex];
+                if (note.title !== profile.name || note.content !== (profile.notes || '')) {
+                    updatedNotes[noteIndex] = {
+                        ...note,
+                        title: profile.name,
+                        content: profile.notes || '',
+                        profileId: profile.id,
+                        updated_at: new Date().toISOString()
+                    };
+                    changed = true;
+                }
+            } else {
+                updatedNotes.push({
+                    id: noteId,
+                    spaceId: FINGERPRINT_SPACE_ID,
+                    title: profile.name,
+                    content: profile.notes || '',
+                    isStarred: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    profileId: profile.id
+                });
+                changed = true;
+            }
+        });
+        
+        // Remove notes of deleted profiles
+        const activeProfileIds = profilesList.filter(p => p.category !== 'trash').map(p => p.id);
+        const beforeCount = updatedNotes.length;
+        updatedNotes = updatedNotes.filter((n: any) => n.spaceId !== FINGERPRINT_SPACE_ID || (n.profileId && activeProfileIds.includes(n.profileId)));
+        if (updatedNotes.length !== beforeCount) {
+            changed = true;
+        }
+        
+        if (changed) {
+            localStorage.setItem('axe_notes_notes', JSON.stringify(updatedNotes));
+            // Trigger storage event to update other views in real-time
+            window.dispatchEvent(new Event('storage'));
+        }
+    } catch (e) {
+        console.error('Error syncing profiles to notes:', e);
+    }
+};
+
 const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }) => {
     const { toast } = useToast();
+    const { isProfilesFloating, setIsProfilesFloating } = useWorkspace();
     const isMountedRef = useRef(true);
 
     useEffect(() => {
@@ -48,6 +125,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showFoldersGridWindow, setShowFoldersGridWindow] = useState(false);
+    const [newInlineFolderName, setNewInlineFolderName] = useState('');
+    const [isFoldersBarExpanded, setIsFoldersBarExpanded] = useState(true);
     const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
     const [showPropertiesModal, setShowPropertiesModal] = useState(false);
     const [selectedProfileIds, setSelectedProfileIds] = useState<string[]>([]);
@@ -107,8 +187,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
 
     // Column visibility
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
-        try { return JSON.parse(localStorage.getItem('axe_visible_columns') || 'null') ?? { favorite: true, status: true, notes: true, folder: true, tags: true, proxy: true, actions: true }; }
-        catch { return { favorite: true, status: true, notes: true, folder: true, tags: true, proxy: true, actions: true }; }
+        const defaults = { favorite: true, status: true, notes: true, folder: true, tags: true, os: true, proxy: true, actions: true };
+        try { 
+            const saved = localStorage.getItem('axe_visible_columns');
+            if (saved) return { ...defaults, ...JSON.parse(saved) };
+            return defaults;
+        }
+        catch { return defaults; }
     });
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [favorites, setFavorites] = useState<Record<string, boolean>>(() => {
@@ -116,29 +201,26 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
         catch { return {}; }
     });
     const [expandedPanel, setExpandedPanel] = useState<{ profileId: string; tab: string } | null>(null);
+    const [isDetailExpanded, setIsDetailExpanded] = useState(false);
+    const [isSavingNotes, setIsSavingNotes] = useState(false);
     const [editingNotes, setEditingNotes] = useState('');
     const [activeNotesEdit, setActiveNotesEdit] = useState<{ profileId: string; tempValue: string } | null>(null);
     const [folderCellPicker, setFolderCellPicker] = useState<{ profileId: string; x: number; y: number } | null>(null);
     const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
+        const defaults = {
+            name: 220,
+            status: 110,
+            notes: 150,
+            folder: 120,
+            tags: 130,
+            os: 120,
+            proxy: 160,
+        };
         try {
             const saved = localStorage.getItem('axe_column_widths');
-            return saved ? JSON.parse(saved) : {
-                name: 320,
-                status: 140,
-                notes: 220,
-                folder: 150,
-                tags: 180,
-                proxy: 240,
-            };
+            return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
         } catch {
-            return {
-                name: 320,
-                status: 140,
-                notes: 220,
-                folder: 150,
-                tags: 180,
-                proxy: 240,
-            };
+            return defaults;
         }
     });
     const [avatarPicker, setAvatarPicker] = useState<{ profileId: string; x: number; y: number } | null>(null);
@@ -212,6 +294,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
             if (!isMountedRef.current) return;
             if (result.success) {
                 setProfiles(result.data as Profile[]);
+                syncProfilesToNotes(result.data as Profile[]);
             }
             
             const foldersResult = await window.api.profiles.listFolders();
@@ -362,7 +445,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
             try {
                 const result = await window.api.profiles.delete(profileId);
                 if (result.success) {
-                    setProfiles((prev: Profile[]) => prev.filter((p: Profile) => p.id !== profileId));
+                    setProfiles((prev: Profile[]) => {
+                        const next = prev.filter((p: Profile) => p.id !== profileId);
+                        syncProfilesToNotes(next);
+                        return next;
+                    });
                 }
             } catch (error) {
                 console.error('Error deleting profile:', error);
@@ -404,9 +491,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
         try {
             const result = await window.api.profiles.update(profileId, data);
             if (result.success) {
-                setProfiles((prev: Profile[]) => prev.map((p: Profile) => 
-                    p.id === profileId ? { ...p, ...data } : p
-                ));
+                setProfiles((prev: Profile[]) => {
+                    const next = prev.map((p: Profile) => 
+                        p.id === profileId ? { ...p, ...data } : p
+                    );
+                    syncProfilesToNotes(next);
+                    return next;
+                });
             }
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -691,6 +782,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
         if (visibleColumns.notes) cols += ` ${columnWidths.notes}px`;
         if (visibleColumns.folder) cols += ` ${columnWidths.folder}px`;
         if (visibleColumns.tags) cols += ` ${columnWidths.tags}px`;
+        if (visibleColumns.os) cols += ` ${columnWidths.os}px`;
         if (visibleColumns.proxy) cols += ` ${columnWidths.proxy}px`;
         cols += ' 90px'; // actions
         return cols;
@@ -704,7 +796,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
 
     const saveNotes = async () => {
         if (!expandedPanel) return;
-        await handleUpdateProfile(expandedPanel.profileId, { notes: editingNotes });
+        setIsSavingNotes(true);
+        try {
+            await handleUpdateProfile(expandedPanel.profileId, { notes: editingNotes });
+        } finally {
+            setTimeout(() => setIsSavingNotes(false), 800);
+        }
     };
 
     const renderNotesPreview = (notes: string | null): string => {
@@ -810,7 +907,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
         { key: 'status', label: 'Status', color: '#38bdf8' },
         { key: 'notes', label: 'Notas', color: '#f87171' },
         { key: 'folder', label: 'Grupo / Pasta', color: '#a78bfa' },
-        { key: 'tags', label: 'Tags / SO', color: '#34d399' },
+        { key: 'tags', label: 'Tags', color: '#34d399' },
+        { key: 'os', label: 'SO', color: '#6366f1' },
         { key: 'proxy', label: 'Proxy', color: '#06b6d4' },
         { key: 'actions', label: 'Ações', color: '#94a3b8' },
     ];
@@ -1267,9 +1365,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                     {/* Monday Style Board Header */}
                     {/* Mega Toolbar (Phase 4) */}
                     <div className={styles.megaToolbar}>
-                        <h1 className={styles.megaTitle}>
-                            {selectedFolder ? getFolderName(selectedFolder) : selectedCategory === 'trash' ? 'Lixeira' : selectedCategory === 'all' ? 'Todos os Perfis' : getCategoryName(selectedCategory)}
-                        </h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className={styles.megaTitle}>
+                                {selectedFolder ? getFolderName(selectedFolder) : selectedCategory === 'trash' ? 'Lixeira' : selectedCategory === 'all' ? 'Todos os Perfis' : getCategoryName(selectedCategory)}
+                            </h1>
+                            {!loading && (
+                                <button className={`${styles.megaBtn} ${styles.megaBtnPrimary}`} onClick={() => setShowCreateModal(true)} title="Novo Perfil" style={{ height: '28px', padding: '0 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Plus size={13} strokeWidth={2.5} /> <span style={{ fontSize: '12px' }}>Novo Perfil</span>
+                                </button>
+                            )}
+                        </div>
 
                         {!loading && (
                             <>
@@ -1293,9 +1398,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 <div className={styles.megaDivider} />
 
                                 {/* Core Actions */}
-                                <button className={`${styles.megaBtn} ${styles.megaBtnPrimary}`} onClick={() => setShowCreateModal(true)} title="Novo Perfil">
-                                    <Plus size={14} strokeWidth={2.5} /> <span className={styles.btnText}>Novo Perfil</span>
-                                </button>
                                 <button className={styles.megaBtn} onClick={handleImportProfiles} title="Importar perfis">
                                     <Upload size={14} /> <span className={styles.btnText}>Importar</span>
                                 </button>
@@ -1317,6 +1419,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 {/* Tools */}
                                 <button className={styles.megaBtn} title="Filtro">
                                     <Filter size={14} /> <span className={styles.btnText}>Filtro</span>
+                                </button>
+                                <button className={`${styles.megaBtn} ${showFoldersGridWindow ? styles.megaBtnActive : ''}`} onClick={() => setShowFoldersGridWindow(true)} title="Pastas e Grupos">
+                                    <FolderIcon size={14} /> <span className={styles.btnText}>Pastas</span>
+                                </button>
+                                <button className={styles.megaBtn} onClick={() => setIsFoldersBarExpanded(!isFoldersBarExpanded)} title={isFoldersBarExpanded ? "Ocultar Barra de Pastas" : "Exibir Barra de Pastas"}>
+                                    {isFoldersBarExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />} <span className={styles.btnText}>{isFoldersBarExpanded ? "Ocultar" : "Pastas Rápidas"}</span>
                                 </button>
 
                                 {/* Column Selector */}
@@ -1415,6 +1523,44 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                         )}
                     </div>
 
+                    {!loading && selectedCategory !== 'trash' && isFoldersBarExpanded && (
+                        <div className={styles.quickFoldersBar}>
+                            <span className={styles.quickFoldersTitle}>
+                                <FolderIcon size={12} /> Pastas rápidas:
+                            </span>
+                            <button
+                                onClick={() => { setSelectedFolder(null); setSelectedCategory('all'); setSelectedTag(null); }}
+                                className={`${styles.quickFolderChip} ${!selectedFolder ? styles.quickFolderChipActive : ''}`}
+                            >
+                                Todos ({profiles.filter(p => p.category !== 'trash').length})
+                            </button>
+                            {folders.map(folder => {
+                                const folderProfilesCount = profiles.filter(p => p.folder_id === folder.id && p.category !== 'trash').length;
+                                const isSelected = selectedFolder === folder.id;
+                                const color = getFolderColor(folder.id) || '#a78bfa';
+                                return (
+                                    <button
+                                        key={folder.id}
+                                        onClick={() => { setSelectedFolder(folder.id); setSelectedCategory('all'); setSelectedTag(null); }}
+                                        className={`${styles.quickFolderChip} ${isSelected ? styles.quickFolderChipActive : ''}`}
+                                        style={isSelected ? { borderColor: `${color}60`, color: color } : {}}
+                                    >
+                                        <span className={styles.folderDot} style={{ background: color }} />
+                                        {folder.name}
+                                        <span className={styles.quickFolderCount}>({folderProfilesCount})</span>
+                                    </button>
+                                );
+                            })}
+                            <button
+                                onClick={() => setIsProfilesFloating(true)}
+                                className={styles.quickFoldersFloatingLaunchBtn}
+                                title="Abrir como Janela Flutuante"
+                            >
+                                <Maximize2 size={12} /> Flutuar Perfis
+                            </button>
+                        </div>
+                    )}
+
                     {selectedCategory === 'trash' && !loading && (
                         <div className={styles.trashBanner}>
                             <div className="flex items-center gap-2 text-red-400/80">
@@ -1493,8 +1639,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 )}
                                 {visibleColumns.tags && (
                                     <div className={styles.mondayHeaderCell}>
-                                        Tags / SO
+                                        Tags
                                         <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'tags')} />
+                                    </div>
+                                )}
+                                {visibleColumns.os && (
+                                    <div className={styles.mondayHeaderCell}>
+                                        SO
+                                        <div className={styles.resizeHandle} onMouseDown={(e) => startResize(e, 'os')} />
                                     </div>
                                 )}
                                 {visibleColumns.proxy && (
@@ -1612,8 +1764,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                             </div>
                                         )}
 
-                                        {/* Tags & OS */}
+                                        {/* Tags */}
                                         {visibleColumns.tags && (
+                                            <div className={styles.mondayCell} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '8px 12px' }}>
+                                                {/* Tags */}
+                                                <div className={styles.tagListContainer} onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setTagPicker({ profileId: profile.id, x: r.left, y: r.bottom + 4 }); }} title="Adicionar / Remover tags">
+                                                    {profile.tags ? (
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {profile.tags.split(',').map(tag => {
+                                                                const t = tag.trim();
+                                                                if(!t) return null;
+                                                                const isSocial = SOCIAL_TAG_COLORS[t.toLowerCase()];
+                                                                return (
+                                                                    <span key={t} className={styles.tagChip} style={isSocial ? { color: isSocial.color, background: isSocial.bgActive, borderColor: isSocial.borderActive, display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' } : { display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); setSelectedTag(t); setSelectedCategory('all'); setSelectedFolder(null); }}>
+                                                                        {t}
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    ) : (
+                                                        <span className={styles.notesEmpty}>+ Adicionar tag</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* OS */}
+                                        {visibleColumns.os && (
                                             <div className={styles.mondayCell} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '8px 12px' }}>
                                                 {/* OS and Browser */}
                                                 <div className="flex flex-wrap gap-1">
@@ -1625,25 +1802,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                                     <span className={styles.browserBadge} onClick={(e) => { e.stopPropagation(); setDefaultDetailTab('fingerprint'); setDetailProfile(profile); }} title="Especificações da Fingerprint (Navegador)">
                                                         <Globe size={10} /> Chrome {profile.fingerprint?.user_agent?.match(/Chrome\/(\d+)/)?.[1] || ''}
                                                     </span>
-                                                </div>
-                                                {/* Tags */}
-                                                <div className={styles.tagListContainer} onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setTagPicker({ profileId: profile.id, x: r.left, y: r.bottom + 4 }); }} title="Adicionar / Remover tags">
-                                                    {profile.tags ? (
-                                                        <div className="flex flex-wrap gap-1">
-                                                            {profile.tags.split(',').map(tag => {
-                                                                const t = tag.trim();
-                                                                if(!t) return null;
-                                                                const isSocial = SOCIAL_TAG_COLORS[t.toLowerCase()];
-                                                                return (
-                                                                    <span key={t} className={styles.tagChip} style={isSocial ? { color: isSocial.color, background: isSocial.bgActive, borderColor: isSocial.borderActive, display: 'inline-flex', alignItems: 'center', gap: '4px' } : { display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                                                        {t}
-                                                                    </span>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    ) : (
-                                                        <span className={styles.notesEmpty}>+ Adicionar tag</span>
-                                                    )}
                                                 </div>
                                             </div>
                                         )}
@@ -1663,18 +1821,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
 
                                         {/* Actions */}
                                         {visibleColumns.actions && (
-                                            <div className={styles.mondayCell} style={{ gap: '8px', justifyContent: 'flex-end', position: 'relative' }}>
+                                            <div className={`${styles.mondayCell} ${styles.mondayCellActions}`} style={{ gap: '8px', justifyContent: 'flex-end' }}>
                                                 {(() => {
                                                     const isStarting = profile.status === 'running' && !profile.is_active;
                                                     return (
                                                         <button
                                                             disabled={isStarting}
-                                                            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all border ${
+                                                            className={`${styles.actionBtn} ${
                                                                 isStarting
-                                                                ? 'bg-violet-600/20 text-violet-400 border-violet-500/20 cursor-not-allowed'
+                                                                ? styles.actionBtnStarting
                                                                 : profile.is_active
-                                                                ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20'
-                                                                : 'bg-white/5 hover:bg-violet-600 text-slate-200 border-white/10 hover:border-violet-500'
+                                                                ? styles.actionBtnStop
+                                                                : styles.actionBtnPlay
                                                             }`}
                                                             title={isStarting ? 'Iniciando...' : profile.is_active ? 'Parar' : 'Iniciar'}
                                                             onClick={(e) => { e.stopPropagation(); profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id); }}>
@@ -1684,7 +1842,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                                 })()}
                                                 
                                                 <button
-                                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/10 transition-colors"
+                                                    className={styles.actionBtn}
                                                     onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpenMenu(openMenu === profile.id ? null : profile.id); }}>
                                                     <MoreVertical size={16} />
                                                 </button>
@@ -2063,11 +2221,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
             {/* Detail Panel */}
             {expandedPanel && (
                 <>
-                    <div className={styles.detailPanelOverlay} onClick={() => { saveNotes(); setExpandedPanel(null); }} />
-                    <div className={styles.detailPanel}>
+                    <div className={styles.detailPanelOverlay} onClick={() => { saveNotes(); setExpandedPanel(null); setIsDetailExpanded(false); }} />
+                    <div className={`${styles.detailPanel} ${isDetailExpanded ? styles.detailPanelExpanded : ''}`}>
                         <div className={styles.detailPanelHeader}>
-                            <button className={styles.detailPanelClose} onClick={() => { saveNotes(); setExpandedPanel(null); }}>
+                            <button className={styles.detailPanelClose} onClick={() => { saveNotes(); setExpandedPanel(null); setIsDetailExpanded(false); }}>
                                 <X size={16} />
+                            </button>
+                            <button className={styles.detailPanelClose} onClick={() => setIsDetailExpanded(!isDetailExpanded)} title={isDetailExpanded ? "Restaurar" : "Expandir"}>
+                                {isDetailExpanded ? <PanelLeftClose size={16} /> : <Maximize2 size={16} />}
                             </button>
                             <span className={styles.detailPanelTitle}>
                                 {profiles.find(p => p.id === expandedPanel.profileId)?.name}
@@ -2087,25 +2248,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                         <div className={styles.detailPanelBody}>
                             {expandedPanel.tab === 'updates' && (
                                 <>
-                                    <div className={styles.notesEditor}>
-                                        <div className={styles.notesEditorToolbar}>
-                                            <button className={styles.notesToolbarBtn} title="Negrito"><Bold size={14} /></button>
-                                            <button className={styles.notesToolbarBtn} title="Itálico"><Italic size={14} /></button>
-                                            <button className={styles.notesToolbarBtn} title="Sublinhado"><Underline size={14} /></button>
-                                            <button className={styles.notesToolbarBtn} title="Tachado"><Strikethrough size={14} /></button>
-                                            <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.06)', margin: '0 4px' }} />
-                                            <button className={styles.notesToolbarBtn} title="Lista"><ListOrdered size={14} /></button>
-                                            <button className={styles.notesToolbarBtn} title="Link"><Link2 size={14} /></button>
+                                    <div className={styles.notesEditor} style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                        <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--bg-secondary)', marginBottom: '16px', display: 'flex', flexDirection: 'column' }}>
+                                            <NoteTiptapEditor 
+                                                content={editingNotes}
+                                                onChange={setEditingNotes}
+                                                placeholder="Escreva uma atualização (suporta Markdown e atalhos úteis)..."
+                                            />
                                         </div>
-                                        <textarea
-                                            className={styles.notesTextarea}
-                                            placeholder="Escreva uma atualização..."
-                                            value={editingNotes}
-                                            onChange={(e) => setEditingNotes(e.target.value)}
-                                        />
                                         <div className={styles.notesSaveRow}>
                                             <div />
-                                            <button className={styles.notesSaveBtn} onClick={saveNotes}>Atualizar</button>
+                                            <button 
+                                                className={styles.notesSaveBtn} 
+                                                onClick={saveNotes} 
+                                                disabled={isSavingNotes}
+                                                style={{ opacity: isSavingNotes ? 0.7 : 1, transition: 'all 0.2s' }}
+                                            >
+                                                {isSavingNotes ? 'Salvando...' : 'Atualizar / Salvar'}
+                                            </button>
                                         </div>
                                     </div>
                                     {!editingNotes && (
@@ -2141,17 +2301,213 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                 <>
                     <div style={{ position: 'fixed', inset: 0, zIndex: 498 }} onClick={() => setFolderCellPicker(null)} />
                     <div className={styles.folderPickerDropdown} style={{ left: folderCellPicker.x, top: folderCellPicker.y }}>
-                        {folders.map(f => (
-                            <button key={f.id} onClick={() => { handleUpdateProfile(folderCellPicker.profileId, { folder_id: f.id }); setFolderCellPicker(null); }}>
-                                <FolderIcon size={13} /> {f.name}
-                            </button>
-                        ))}
+                        {folders.map(f => {
+                            const color = getFolderColor(f.id) || '#a78bfa';
+                            return (
+                                <div key={f.id} className={styles.folderPickerItemRow}>
+                                    <button 
+                                        className={styles.folderPickerSelectBtn}
+                                        onClick={() => { handleUpdateProfile(folderCellPicker.profileId, { folder_id: f.id }); setFolderCellPicker(null); }}
+                                    >
+                                        <FolderIcon size={13} style={{ color: color }} />
+                                        <span className={styles.folderPickerName}>{f.name}</span>
+                                    </button>
+                                    <button 
+                                        className={styles.folderPickerDeleteBtn}
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            if (confirm(`Tem certeza que deseja excluir permanentemente a pasta "${f.name}"?`)) {
+                                                const res = await window.api.profiles.deleteFolder(f.id);
+                                                if (res.success) {
+                                                    await loadProfiles();
+                                                }
+                                            }
+                                        }}
+                                        title="Excluir Pasta"
+                                    >
+                                        <Trash2 size={11} />
+                                    </button>
+                                </div>
+                            );
+                        })}
                         {folders.length > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '4px 8px' }} />}
-                        <button onClick={() => { handleUpdateProfile(folderCellPicker.profileId, { folder_id: null }); setFolderCellPicker(null); }}>
-                            <Square size={13} /> Sem Pasta
+                        <button className={styles.folderPickerSelectBtn} onClick={() => { handleUpdateProfile(folderCellPicker.profileId, { folder_id: null }); setFolderCellPicker(null); }}>
+                            <Square size={13} /> <span className={styles.folderPickerName}>Sem Pasta</span>
                         </button>
+                        
+                        <div className={styles.folderPickerInputRow}>
+                            <input
+                                type="text"
+                                placeholder="Nova pasta..."
+                                value={newInlineFolderName}
+                                onChange={(e) => setNewInlineFolderName(e.target.value)}
+                                onKeyDown={async (e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (newInlineFolderName.trim()) {
+                                            const res = await window.api.profiles.createFolder(newInlineFolderName.trim());
+                                            if (res.success) {
+                                                await loadProfiles();
+                                                setNewInlineFolderName('');
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                            <button
+                                onClick={async (e) => {
+                                    e.stopPropagation();
+                                    if (newInlineFolderName.trim()) {
+                                        const res = await window.api.profiles.createFolder(newInlineFolderName.trim());
+                                        if (res.success) {
+                                            await loadProfiles();
+                                            setNewInlineFolderName('');
+                                        }
+                                    }
+                                }}
+                                title="Criar Pasta"
+                            >
+                                <Plus size={12} />
+                            </button>
+                        </div>
                     </div>
                 </>
+            )}
+
+            {/* Folders Grid Window Modal */}
+            {showFoldersGridWindow && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[1100] p-4 animate-fade-in" onClick={() => setShowFoldersGridWindow(false)}>
+                    <div className="bg-theme-surface border border-theme-border rounded-2xl shadow-2xl w-[680px] max-w-full flex flex-col overflow-hidden relative" onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
+                            <h3 className="text-base font-bold text-theme-text flex items-center gap-2">
+                                <FolderIcon size={18} className="text-violet-400" />
+                                Pastas e Grupos
+                            </h3>
+                            <button
+                                className="text-theme-text-muted hover:text-theme-text transition-colors p-1 hover:bg-theme-surface rounded-lg"
+                                onClick={() => setShowFoldersGridWindow(false)}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        {/* Folders Grid */}
+                        <div className="flex-1 p-6 overflow-y-auto max-h-[420px] grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {/* All profiles card */}
+                            <div 
+                                onClick={() => { setSelectedFolder(null); setSelectedCategory('all'); setSelectedTag(null); setShowFoldersGridWindow(false); }}
+                                className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between h-[100px] ${
+                                    !selectedFolder 
+                                    ? 'bg-violet-600/10 border-violet-500/50 hover:bg-violet-600/20' 
+                                    : 'bg-theme-card border-theme-border hover:bg-theme-card-hover hover:border-theme-border-hover'
+                                }`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="w-8 h-8 rounded-lg bg-violet-600/20 flex items-center justify-center text-violet-400">
+                                        <LayoutGrid size={16} />
+                                    </div>
+                                    <span className="text-[10px] bg-violet-500/20 text-violet-300 font-semibold px-2 py-0.5 rounded-full">
+                                        Padrão
+                                    </span>
+                                </div>
+                                <div>
+                                    <div className="font-bold text-sm text-theme-text">Todos os Perfis</div>
+                                    <div className="text-xs text-theme-text-muted mt-1">
+                                        {profiles.filter(p => p.category !== 'trash').length} perfis
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Dynamic folder cards */}
+                            {folders.map(folder => {
+                                const folderProfilesCount = profiles.filter(p => p.folder_id === folder.id && p.category !== 'trash').length;
+                                const isSelected = selectedFolder === folder.id;
+                                const color = getFolderColor(folder.id) || '#a78bfa';
+                                const FolderIconComp = getFolderIcon(folder.id);
+                                return (
+                                    <div 
+                                        key={folder.id}
+                                        onClick={() => { setSelectedFolder(folder.id); setSelectedCategory('all'); setSelectedTag(null); setShowFoldersGridWindow(false); }}
+                                        className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between h-[100px] relative group ${
+                                            isSelected 
+                                            ? 'bg-violet-600/10 border-violet-500/50 hover:bg-violet-600/20' 
+                                            : 'bg-theme-card border-theme-border hover:bg-theme-card-hover hover:border-theme-border-hover'
+                                        }`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}15`, color: color }}>
+                                                <FolderIconComp size={16} />
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm(`Tem certeza que deseja excluir permanentemente a pasta "${folder.name}"?`)) {
+                                                            const res = await window.api.profiles.deleteFolder(folder.id);
+                                                            if (res.success) {
+                                                                await loadProfiles();
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="w-6 h-6 rounded bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    title="Excluir Pasta"
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color: color }}>
+                                                    Pasta
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-sm text-theme-text truncate">{folder.name}</div>
+                                            <div className="text-xs text-theme-text-muted mt-1">
+                                                {folderProfilesCount} perfis
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Footer / Create Folder Quick Action */}
+                        <div className="px-6 py-4 border-t border-theme-border bg-theme-surface/50 flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2 flex-1">
+                                <FolderIcon size={14} className="text-theme-text-muted" />
+                                <input
+                                    type="text"
+                                    placeholder="Nova pasta rápida..."
+                                    className="bg-transparent text-xs text-theme-text border-none outline-none focus:ring-0 flex-1 placeholder:text-theme-text-faint"
+                                    value={newFolderName}
+                                    onChange={(e) => setNewFolderName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && newFolderName.trim()) {
+                                            submitNewFolder();
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => { setIsProfilesFloating(true); setShowFoldersGridWindow(false); }}
+                                    className="px-3 py-1.5 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white font-semibold rounded-lg text-xs border border-violet-500/20 hover:border-violet-500 transition-colors flex items-center gap-1"
+                                    title="Abrir como Janela Flutuante"
+                                >
+                                    <Maximize2 size={12} /> Flutuar Perfis
+                                </button>
+                                <button
+                                    disabled={!newFolderName.trim()}
+                                    onClick={submitNewFolder}
+                                    className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:hover:bg-violet-600 text-white font-semibold rounded-lg text-xs transition-colors flex items-center gap-1"
+                                >
+                                    <Plus size={12} /> Criar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

@@ -400,7 +400,9 @@ export const webApiBridge: ElectronAPI = {
         openExternal: async (url: string) => {
             window.open(url, '_blank');
             return success();
-        }
+        },
+        getFixedBookmark: async () => success({ name: '', url: '' }),
+        saveFixedBookmark: async (name: string, url: string) => success({ name, url })
     },
     templates: { list: async () => success([]), save: async () => unsupported('Templates'), delete: async () => unsupported('Templates'), createProfile: async () => unsupported('Templates'), bulkCreate: async () => unsupported('Templates') },
     proxyPool: { list: async () => success([]), add: async () => unsupported('Proxy Pool'), bulkImport: async () => unsupported('Proxy Pool'), remove: async () => unsupported('Proxy Pool'), test: async () => unsupported('Proxy Pool'), assign: async () => unsupported('Proxy Pool'), unassign: async () => unsupported('Proxy Pool') },

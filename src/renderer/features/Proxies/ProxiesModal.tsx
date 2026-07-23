@@ -37,7 +37,7 @@ interface PoolEntry {
     password: string | null;
     last_status: 'ok' | 'failed' | 'untested';
     last_latency_ms: number | null;
-    assigned_profile_id: string | null;
+    assigned_profile_ids: string[];
     testState?: 'idle' | 'testing';
 }
 
@@ -65,6 +65,11 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const [bulkText, setBulkText] = useState('');
     const [importing, setImporting] = useState(false);
     const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+    
+    // ── Assign Modal State ──
+    const [assignModalProxy, setAssignModalProxy] = useState<PoolEntry | null>(null);
+    const [assignSelectedProfiles, setAssignSelectedProfiles] = useState<string[]>([]);
+    const [assignSaving, setAssignSaving] = useState(false);
 
     // ── Load per-profile proxies ──
     const loadProxies = useCallback(async () => {
@@ -252,10 +257,23 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         toast.success('Proxy removido do pool');
     };
 
-    const handlePoolAssign = async (proxyId: string, profileId: string) => {
-        const res = await window.api.proxyPool.assign(proxyId, profileId);
-        if (res.success) { toast.success('Proxy atribuído'); loadPool(); }
-        else toast.error('Erro ao atribuir');
+    const handlePoolAssign = async () => {
+        if (!assignModalProxy) return;
+        setAssignSaving(true);
+        try {
+            const res = await window.api.proxyPool.assign(assignModalProxy.id, assignSelectedProfiles);
+            if (res.success) { 
+                toast.success('Proxy atribuído com sucesso'); 
+                setAssignModalProxy(null);
+                loadPool(); 
+            } else { 
+                toast.error('Erro ao atribuir'); 
+            }
+        } catch {
+            toast.error('Erro ao atribuir');
+        } finally {
+            setAssignSaving(false);
+        }
     };
 
     const handlePoolUnassign = async (proxyId: string) => {
@@ -407,21 +425,23 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                         {entry.testState !== 'testing' && entry.last_status === 'failed' && <span className={styles.statusFail}><XCircle size={12} /> Falhou</span>}
                                     </div>
                                     <div className={styles.cellUser}>
-                                        {entry.assigned_profile_id ? (
-                                            <span className={styles.assignedBadge} title={entry.assigned_profile_id}>
-                                                <LinkIcon size={10} /> {profileName(entry.assigned_profile_id)}
-                                            </span>
-                                        ) : (
-                                            <select className={styles.assignSelect} defaultValue="" onChange={e => { if (e.target.value) handlePoolAssign(entry.id, e.target.value); }}>
-                                                <option value="" disabled>Atribuir...</option>
-                                                {allProfiles.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                            </select>
-                                        )}
+                                        <button 
+                                            className={styles.assignSelect} 
+                                            style={{ cursor: 'pointer', padding: '4px 8px', background: 'var(--bg-primary)' }}
+                                            onClick={() => {
+                                                setAssignModalProxy(entry);
+                                                setAssignSelectedProfiles(entry.assigned_profile_ids || []);
+                                            }}
+                                        >
+                                            {entry.assigned_profile_ids && entry.assigned_profile_ids.length > 0 
+                                                ? <><LinkIcon size={12} style={{ display: 'inline-block', marginRight: 4 }} /> {entry.assigned_profile_ids.length} {entry.assigned_profile_ids.length === 1 ? 'Perfil' : 'Perfis'}</> 
+                                                : 'Atribuir a...'}
+                                        </button>
                                     </div>
                                     <div className={styles.cellActions}>
                                         <button className={styles.actionBtn} onClick={() => handlePoolTest(entry.id)} title="Testar"><RefreshCw size={13} /></button>
-                                        {entry.assigned_profile_id && <button className={styles.actionBtn} onClick={() => handlePoolUnassign(entry.id)} title="Remover atribuição"><X size={13} /></button>}
-                                        <button className={`${styles.actionBtn} ${styles.actionDanger}`} onClick={() => handlePoolRemove(entry.id)} title="Remover"><Trash2 size={13} /></button>
+                                        {entry.assigned_profile_ids && entry.assigned_profile_ids.length > 0 && <button className={styles.actionBtn} onClick={() => handlePoolUnassign(entry.id)} title="Remover todas as atribuições"><X size={13} /></button>}
+                                        <button className={`${styles.actionBtn} ${styles.actionDanger}`} onClick={() => handlePoolRemove(entry.id)} title="Remover do Pool"><Trash2 size={13} /></button>
                                     </div>
                                 </div>
                             ))}
@@ -429,6 +449,49 @@ const ProxiesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     )
                 )}
             </div>
+
+            {/* ── Assign Modal ── */}
+            {assignModalProxy && (
+                <div className={styles.editOverlay} onClick={() => setAssignModalProxy(null)}>
+                    <div className={styles.editModal} onClick={e => e.stopPropagation()} style={{ maxWidth: 450 }}>
+                        <div className={styles.editHeader}>
+                            <h3>Atribuir Proxy</h3>
+                            <button onClick={() => setAssignModalProxy(null)}><X size={16} /></button>
+                        </div>
+                        <div className={styles.editBody} style={{ maxHeight: '50vh', overflowY: 'auto' }}>
+                            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                                Selecione os perfis que usarão este proxy ({assignModalProxy.host}:{assignModalProxy.port}):
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                {allProfiles.map(p => (
+                                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '8px 12px', background: 'var(--bg-primary)', borderRadius: 6, border: '1px solid var(--border-default)' }}>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={assignSelectedProfiles.includes(p.id)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setAssignSelectedProfiles(prev => [...prev, p.id]);
+                                                } else {
+                                                    setAssignSelectedProfiles(prev => prev.filter(id => id !== p.id));
+                                                }
+                                            }}
+                                            style={{ accentColor: 'var(--accent)' }}
+                                        />
+                                        <span style={{ fontSize: 13, color: 'var(--text-primary)' }}>{p.name}</span>
+                                    </label>
+                                ))}
+                                {allProfiles.length === 0 && <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Nenhum perfil encontrado.</span>}
+                            </div>
+                        </div>
+                        <div className={styles.editFooter}>
+                            <button className={styles.cancelBtn} onClick={() => setAssignModalProxy(null)}>Cancelar</button>
+                            <button className={styles.saveBtn} onClick={handlePoolAssign} disabled={assignSaving}>
+                                {assignSaving ? <Loader2 size={14} className="animate-spin" /> : null} Salvar Atribuições
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Edit Modal ── */}
             {editState && (

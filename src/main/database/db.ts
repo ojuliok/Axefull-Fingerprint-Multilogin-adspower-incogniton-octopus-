@@ -37,6 +37,97 @@ export function getBrowserDataPath(): string {
 }
 
 let saveTimeout: NodeJS.Timeout | null = null;
+let isWriting = false;
+let writePending = false;
+let currentSequence = 0;
+let lastSavedSequence = 0;
+let lastBackupTime = 0;
+
+/**
+ * Get the database backup directory
+ */
+export function getDbBackupDir(): string {
+    const userDataPath = app.getPath('userData');
+    const backupDir = path.join(userDataPath, 'database_backups');
+
+    if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir, { recursive: true });
+    }
+
+    return backupDir;
+}
+
+/**
+ * Creates a rolling backup of the database file on disk, keeping up to 5 backups.
+ */
+function createLocalDbBackup(): void {
+    try {
+        const now = Date.now();
+        // Backup at most once every 5 minutes to avoid disk thrashing
+        if (now - lastBackupTime < 5 * 60 * 1000) {
+            return;
+        }
+
+        if (!fs.existsSync(dbPath)) return;
+
+        const backupDir = getDbBackupDir();
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = path.join(backupDir, `profiles_${timestamp}.db`);
+
+        // Copy database file
+        fs.copyFileSync(dbPath, backupPath);
+        lastBackupTime = now;
+        console.log('[Database] Created rolling backup at:', backupPath);
+
+        // Keep only the last 5 backups
+        const files = fs.readdirSync(backupDir)
+            .filter(f => f.startsWith('profiles_') && f.endsWith('.db'))
+            .map(f => ({ name: f, time: fs.statSync(path.join(backupDir, f)).mtimeMs }))
+            .sort((a, b) => b.time - a.time);
+
+        if (files.length > 5) {
+            for (let i = 5; i < files.length; i++) {
+                fs.unlinkSync(path.join(backupDir, files[i].name));
+            }
+        }
+    } catch (err) {
+        console.error('[Database] Failed to create rolling backup:', err);
+    }
+}
+
+/**
+ * Attempt to restore the database from the latest valid backup
+ */
+function attemptRestoreFromBackup(): boolean {
+    try {
+        const backupDir = getDbBackupDir();
+        if (!fs.existsSync(backupDir)) return false;
+
+        const backups = fs.readdirSync(backupDir)
+            .filter(f => f.startsWith('profiles_') && f.endsWith('.db'))
+            .map(f => ({ name: f, path: path.join(backupDir, f), time: fs.statSync(path.join(backupDir, f)).mtimeMs }))
+            .sort((a, b) => b.time - a.time);
+
+        if (backups.length === 0) {
+            console.warn('[Database] No database backups found to restore.');
+            return false;
+        }
+
+        // Try restoring from the latest backup
+        for (const backup of backups) {
+            try {
+                console.log(`[Database] Trying to restore from backup: ${backup.name}`);
+                fs.copyFileSync(backup.path, dbPath);
+                return true;
+            } catch (err) {
+                console.error(`[Database] Failed to copy backup ${backup.name}:`, err);
+            }
+        }
+    } catch (err) {
+        console.error('[Database] Error searching for backups to restore:', err);
+    }
+    return false;
+}
 
 /**
  * Save database to disk atomically to prevent corruption
@@ -44,20 +135,63 @@ let saveTimeout: NodeJS.Timeout | null = null;
 export function saveDatabase(immediate: boolean = false): void {
     if (!db || !dbPath) return;
 
-    const performSave = () => {
+    currentSequence++;
+
+    const performSaveSync = () => {
         if (!db || !dbPath) return;
+        const seq = currentSequence;
         try {
             const data = db.export();
             const buffer = Buffer.from(data);
-            const tempPath = dbPath + '.tmp';
+            const tempPath = dbPath + '.' + uuidv4() + '.tmp';
             
             // Write to a temporary file first
             fs.writeFileSync(tempPath, buffer);
             
             // Atomically rename the temp file to the final destination
             fs.renameSync(tempPath, dbPath);
+            lastSavedSequence = seq;
+            
+            // Trigger local database rolling backup
+            createLocalDbBackup();
         } catch (err) {
-            console.error('[Database] Failed to save database atomically:', err);
+            console.error('[Database] Failed to save database atomically (sync):', err);
+        }
+    };
+
+    const performSaveAsync = async () => {
+        if (!db || !dbPath) return;
+        if (isWriting) {
+            writePending = true;
+            return;
+        }
+        isWriting = true;
+        try {
+            while (db && dbPath) {
+                writePending = false;
+                const seq = currentSequence;
+                const data = db.export();
+                const buffer = Buffer.from(data);
+                const tempPath = dbPath + '.' + uuidv4() + '.tmp';
+                
+                await fs.promises.writeFile(tempPath, buffer);
+                
+                if (seq > lastSavedSequence) {
+                    await fs.promises.rename(tempPath, dbPath);
+                    lastSavedSequence = seq;
+                    
+                    // Trigger local database rolling backup
+                    createLocalDbBackup();
+                } else {
+                    await fs.promises.unlink(tempPath).catch(() => {});
+                }
+
+                if (!writePending) break;
+            }
+        } catch (err) {
+            console.error('[Database] Failed to save database atomically (async):', err);
+        } finally {
+            isWriting = false;
         }
     };
 
@@ -66,7 +200,7 @@ export function saveDatabase(immediate: boolean = false): void {
             clearTimeout(saveTimeout);
             saveTimeout = null;
         }
-        performSave();
+        performSaveSync();
         return;
     }
 
@@ -74,7 +208,7 @@ export function saveDatabase(immediate: boolean = false): void {
 
     saveTimeout = setTimeout(() => {
         saveTimeout = null;
-        performSave();
+        performSaveAsync();
     }, 500);
 }
 
@@ -147,12 +281,65 @@ export async function initDatabase(): Promise<SqlJsDatabase> {
     const SQL = await initSqlJs();
 
     // Load existing database or create new one
+    let databaseLoaded = false;
+
     if (fs.existsSync(dbPath)) {
-        const buffer = fs.readFileSync(dbPath);
-        db = new SQL.Database(buffer);
-    } else {
+        try {
+            const buffer = fs.readFileSync(dbPath);
+            db = new SQL.Database(buffer);
+            
+            // Check integrity
+            const stmt = db.prepare('PRAGMA integrity_check');
+            let isOk = false;
+            if (stmt.step()) {
+                const values = stmt.get();
+                isOk = values[0] === 'ok';
+            }
+            stmt.free();
+
+            if (isOk) {
+                databaseLoaded = true;
+                console.log('[Database] Integrity check passed.');
+            } else {
+                console.error('[Database] Integrity check failed. Attempting to restore from backup...');
+                db.close();
+                db = null;
+            }
+        } catch (error) {
+            console.error('[Database] Failed to read database or check integrity:', error);
+            if (db) {
+                try { db.close(); } catch {}
+                db = null;
+            }
+        }
+    }
+
+    // Try to restore from backup if loading failed
+    if (!databaseLoaded && fs.existsSync(dbPath)) {
+        const restored = attemptRestoreFromBackup();
+        if (restored) {
+            try {
+                const buffer = fs.readFileSync(dbPath);
+                db = new SQL.Database(buffer);
+                databaseLoaded = true;
+                console.log('[Database] Successfully restored database from backup.');
+            } catch (error) {
+                console.error('[Database] Failed to load restored database:', error);
+                if (db) {
+                    try { db.close(); } catch {}
+                    db = null;
+                }
+            }
+        }
+    }
+
+    if (!db) {
+        console.log('[Database] Creating a fresh database instance.');
         db = new SQL.Database();
     }
+
+    // Enable foreign keys constraint enforcement
+    db!.run('PRAGMA foreign_keys = ON;');
 
     // Create tables
     const schema = `
@@ -293,19 +480,19 @@ export async function initDatabase(): Promise<SqlJsDatabase> {
         );
     `;
 
-    db.run(schema);
+    db!.run(schema);
 
     // Run migrations to add missing columns
-    runMigrations(db);
+    runMigrations(db!);
 
     // Reset all profiles to inactive on startup (in case app crashed with browsers open)
-    db.run('UPDATE profiles SET is_active = 0');
+    db!.run('UPDATE profiles SET is_active = 0');
     console.log('[Database] Reset all profiles to inactive state');
 
     saveDatabase();
 
     console.log('[Database] Initialized at:', dbPath);
-    return db;
+    return db!;
 }
 
 /**
@@ -323,6 +510,12 @@ export function getDb(): SqlJsDatabase {
  */
 export function closeDatabase(): void {
     if (db) {
+        try {
+            console.log('[Database] Performing database compaction (VACUUM)...');
+            db.run('VACUUM');
+        } catch (err) {
+            console.error('[Database] Compaction failed:', err);
+        }
         saveDatabase(true);
         db.close();
         db = null;
@@ -332,7 +525,39 @@ export function closeDatabase(): void {
 
 
 async function pushToSupabase(action: 'insert' | 'update' | 'remove', table: string, id: string, data?: any) {
-    return;
+    try {
+        const url = process.env.VITE_SUPABASE_URL;
+        const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+        
+        if (!url || !key || url.includes('COLOQUE') || key.includes('COLOQUE')) {
+            // Supabase not configured, run in local mode quietly
+            return;
+        }
+
+        const supabase = getSupabase();
+        if (!supabase) return;
+
+        console.log(`[SupabaseSync] Syncing ${action} on table ${table} with ID ${id}`);
+
+        if (action === 'insert') {
+            const { error } = await supabase.from(table).upsert(data);
+            if (error) {
+                console.error(`[SupabaseSync] Insert/Upsert failed for table ${table}:`, error.message);
+            }
+        } else if (action === 'update') {
+            const { error } = await supabase.from(table).update(data).eq('id', id);
+            if (error) {
+                console.error(`[SupabaseSync] Update failed for table ${table}:`, error.message);
+            }
+        } else if (action === 'remove') {
+            const { error } = await supabase.from(table).delete().eq('id', id);
+            if (error) {
+                console.error(`[SupabaseSync] Delete failed for table ${table}:`, error.message);
+            }
+        }
+    } catch (err) {
+        console.error('[SupabaseSync] Error in pushToSupabase:', err);
+    }
 }
 
 const ALLOWED_TABLES = new Set([

@@ -94,6 +94,16 @@ export function validateConsistency(
                 actual: renderer,
             });
         }
+    } else {
+        if (renderer.includes('Apple M')) {
+            issues.push({
+                field: 'renderer',
+                severity: 'critical',
+                message: 'GPU Apple Silicon só existe no macOS',
+                expected: 'NVIDIA, AMD ou Intel',
+                actual: renderer,
+            });
+        }
     }
     if (ua.includes('Linux')) {
         if (renderer.includes('Direct3D')) {
@@ -158,7 +168,15 @@ export function validateConsistency(
     }
 
     // === 6. Timezone vs Proxy Country ===
-    if (proxyCountry && proxyTimezone) {
+    if (proxyTimezone && fingerprint.timezone !== proxyTimezone) {
+        issues.push({
+            field: 'timezone',
+            severity: 'critical',
+            message: `Proxy indica timezone ${proxyTimezone} mas perfil usa ${fingerprint.timezone}`,
+            expected: proxyTimezone,
+            actual: fingerprint.timezone,
+        });
+    } else if (proxyCountry) {
         const geoProfile = (presets.geoProfiles as any)[proxyCountry];
         if (geoProfile) {
             const validTimezones: string[] = geoProfile.timezones;

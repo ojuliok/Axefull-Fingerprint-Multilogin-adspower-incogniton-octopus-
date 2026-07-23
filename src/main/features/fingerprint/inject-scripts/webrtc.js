@@ -22,6 +22,8 @@
         if (!Orig) return;
 
         var localIpRegex = /((192\.168\.)|(10\.)|(172\.(1[6-9]|2\d|3[01])\.)|(127\.)|(::1)|(fc00:)|(fe80:))\S*/;
+        // Also block mDNS candidates (.local hostnames) used in modern browsers to mask IP
+        var mDNSRegex = /\.local\b/i;
 
         var PatchedRTC = window.__stealth_add_patched ? window.__stealth_add_patched(function (config, constraints) {
             // Remove STUN servers, keep only TURN
@@ -42,7 +44,7 @@
                 if (type === 'icecandidate' && listener) {
                     var wrappedListener = function (event) {
                         if (event.candidate && event.candidate.candidate) {
-                            if (localIpRegex.test(event.candidate.candidate) || event.candidate.candidate.indexOf('host') !== -1) {
+                            if (localIpRegex.test(event.candidate.candidate) || mDNSRegex.test(event.candidate.candidate) || event.candidate.candidate.indexOf('host') !== -1) {
                                 return; // suppress local IP candidate
                             }
                         }
@@ -60,7 +62,7 @@
                     if (handler) {
                         _handler = function (event) {
                             if (event.candidate && event.candidate.candidate) {
-                                if (localIpRegex.test(event.candidate.candidate) || event.candidate.candidate.indexOf('host') !== -1) {
+                                if (localIpRegex.test(event.candidate.candidate) || mDNSRegex.test(event.candidate.candidate) || event.candidate.candidate.indexOf('host') !== -1) {
                                     return;
                                 }
                             }

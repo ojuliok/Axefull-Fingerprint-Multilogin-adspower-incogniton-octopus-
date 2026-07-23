@@ -48,6 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
     const { workspaces, currentWorkspace, setCurrentWorkspace, createWorkspace } = useWorkspace();
 
     const isSplitPanel = layout === 'split-panel';
+    const isRightSidebar = layout === 'classic-sidebar-right';
     const isLight = theme === 'light';
     const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'JU';
 
@@ -88,7 +89,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
         hoverTimeoutRef.current = setTimeout(() => {
             setAjustesHovered(false);
             setShowWorkspaceMenu(false);
-            setShowStorageMenu(false);
             setShowThemeMenu(false);
         }, 300);
     };
@@ -397,11 +397,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                         </span>
                     </button>
 
-                    {/* Popover content (Workspace switcher + Theme selection + Online status) */}
                     {ajustesHovered && (
                         <div 
-                            className="absolute bottom-0 ml-2 w-64 bg-theme-surface border border-theme-border shadow-[0_8px_30px_rgba(0,0,0,0.3)] rounded-xl py-3 px-4 z-[999] flex flex-col gap-3 animate-fade-in-scale"
-                            style={{ left: isSplitPanel ? '100%' : '60px' }}
+                            className={`absolute bottom-0 w-64 bg-theme-surface border border-theme-border shadow-[0_8px_30px_rgba(0,0,0,0.3)] rounded-xl py-3 px-4 z-[999] flex flex-col gap-3 animate-fade-in-scale ${isRightSidebar ? 'mr-2' : 'ml-2'}`}
+                            style={isRightSidebar ? { right: '100%' } : { left: isSplitPanel ? '100%' : '60px' }}
                         >
                             {/* Workspace Selector */}
                             <div className="flex flex-col gap-1.5">
@@ -497,8 +496,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, onOpenExte
                         <>
                             <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
                             <div 
-                                className="absolute bottom-0 w-56 bg-theme-surface border border-theme-border/60 shadow-[0_8px_30px_rgba(0,0,0,0.2)] rounded-xl py-1 z-50 animate-fade-in-scale"
-                                style={{ left: isSplitPanel ? '100%' : '60px' }}
+                                className={`absolute bottom-0 w-56 bg-theme-surface border border-theme-border/60 shadow-[0_8px_30px_rgba(0,0,0,0.2)] rounded-xl py-1 z-50 animate-fade-in-scale ${isRightSidebar ? 'mr-2' : ''}`}
+                                style={isRightSidebar ? { right: '100%' } : { left: isSplitPanel ? '100%' : '60px' }}
                             >
                                 <div className="px-4 py-3 border-b border-theme-border/50 text-left">
                                     <p className="text-xs font-semibold truncate text-theme-text">{user?.email}</p>

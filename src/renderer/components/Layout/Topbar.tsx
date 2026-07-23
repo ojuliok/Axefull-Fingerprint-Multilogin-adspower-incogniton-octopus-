@@ -175,9 +175,6 @@ const Topbar: React.FC<TopbarProps> = ({ runningProfilesCount, onOpenActiveProfi
             {showWorkspaceMenu && (
                 <div className="fixed inset-0 z-40" onClick={() => setShowWorkspaceMenu(false)} />
             )}
-            {showStorageMenu && (
-                <div className="fixed inset-0 z-40" onClick={() => setShowStorageMenu(false)} />
-            )}
         </header>
     );
 };

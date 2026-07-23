@@ -43,7 +43,7 @@
     patchProto(navProto, 'platform', config.platform);
     patchProto(navProto, 'vendor', config.vendor);
     patchProto(navProto, 'language', config.language);
-    patchProto(navProto, 'languages', Object.freeze(config.languages.split(',')));
+    patchProto(navProto, 'languages', Object.freeze(config.languages.split(',').map(function(l){ return l.trim(); })));
     patchProto(navProto, 'hardwareConcurrency', config.hardwareConcurrency);
     patchProto(navProto, 'deviceMemory', config.deviceMemory);
     patchProto(navProto, 'maxTouchPoints', config.maxTouchPoints || 0);
@@ -100,9 +100,27 @@
                     }
                     if (h === 'model') result.model = '';
                     if (h === 'platformVersion') {
-                        if (platformName === 'Windows') result.platformVersion = '15.0.0';
-                        else if (platformName === 'macOS') result.platformVersion = '14.4.0';
-                        else result.platformVersion = '6.5.0';
+                        if (platformName === 'Windows') {
+                            // Derive Windows version from UA string:
+                            // Windows NT 10.0 + Chrome 128+ = likely Win 10 or 11
+                            // Chrome 109+ UA always says NT 10.0 regardless of Win 11
+                            // Match: higher Chrome versions trend toward Win11
+                            var ntMatch = config.userAgent.match(/Windows NT ([\d.]+)/);
+                            var chromeMajor = parseInt(chromeVersion, 10) || 100;
+                            var ntVersion = ntMatch ? parseFloat(ntMatch[1]) : 10.0;
+                            if (ntVersion >= 10.0 && chromeMajor >= 128) {
+                                // Win 10 22H2 = 10.0.19045 → platformVersion '10.0.0'
+                                // Win 11 = 10.0.22000+ → platformVersion '15.0.0'
+                                // Use Chrome version as proxy: newer Chrome → Win 11 more likely
+                                result.platformVersion = chromeMajor >= 134 ? '15.0.0' : '10.0.0';
+                            } else {
+                                result.platformVersion = '10.0.0';
+                            }
+                        } else if (platformName === 'macOS') {
+                            result.platformVersion = '14.4.0';
+                        } else {
+                            result.platformVersion = '6.5.0';
+                        }
                     }
                     if (h === 'uaFullVersion') result.uaFullVersion = fullVersion;
                     if (h === 'wow64') result.wow64 = false;
@@ -126,9 +144,27 @@
                     }
                     if (h === 'model') result.model = '';
                     if (h === 'platformVersion') {
-                        if (platformName === 'Windows') result.platformVersion = '15.0.0';
-                        else if (platformName === 'macOS') result.platformVersion = '14.4.0';
-                        else result.platformVersion = '6.5.0';
+                        if (platformName === 'Windows') {
+                            // Derive Windows version from UA string:
+                            // Windows NT 10.0 + Chrome 128+ = likely Win 10 or 11
+                            // Chrome 109+ UA always says NT 10.0 regardless of Win 11
+                            // Match: higher Chrome versions trend toward Win11
+                            var ntMatch = config.userAgent.match(/Windows NT ([\d.]+)/);
+                            var chromeMajor = parseInt(chromeVersion, 10) || 100;
+                            var ntVersion = ntMatch ? parseFloat(ntMatch[1]) : 10.0;
+                            if (ntVersion >= 10.0 && chromeMajor >= 128) {
+                                // Win 10 22H2 = 10.0.19045 → platformVersion '10.0.0'
+                                // Win 11 = 10.0.22000+ → platformVersion '15.0.0'
+                                // Use Chrome version as proxy: newer Chrome → Win 11 more likely
+                                result.platformVersion = chromeMajor >= 134 ? '15.0.0' : '10.0.0';
+                            } else {
+                                result.platformVersion = '10.0.0';
+                            }
+                        } else if (platformName === 'macOS') {
+                            result.platformVersion = '14.4.0';
+                        } else {
+                            result.platformVersion = '6.5.0';
+                        }
                     }
                     if (h === 'uaFullVersion') result.uaFullVersion = fullVersion;
                     if (h === 'wow64') result.wow64 = false;
@@ -157,10 +193,10 @@
         });
     } catch (e) { }
 
-    // === Plugins (realistic for Chrome) ===
+    // === Plugins — match exactly the real plugin list for the browser type ===
     if (!isFirefox) {
         try {
-            var fakePlugins = [
+            var chromePdfBase = [
                 {
                     name: 'PDF Viewer',
                     description: 'Portable Document Format',
@@ -183,13 +219,6 @@
                     0: { type: 'application/pdf', suffixes: 'pdf', description: '' }
                 },
                 {
-                    name: 'Microsoft Edge PDF Viewer',
-                    description: 'Portable Document Format',
-                    filename: 'internal-pdf-viewer',
-                    length: 1,
-                    0: { type: 'application/pdf', suffixes: 'pdf', description: '' }
-                },
-                {
                     name: 'WebKit built-in PDF',
                     description: 'Portable Document Format',
                     filename: 'internal-pdf-viewer',
@@ -197,6 +226,15 @@
                     0: { type: 'application/pdf', suffixes: 'pdf', description: '' }
                 }
             ];
+            // Edge-only plugin — only inject when UA is Microsoft Edge
+            var edgePdfPlugin = {
+                name: 'Microsoft Edge PDF Viewer',
+                description: 'Portable Document Format',
+                filename: 'internal-pdf-viewer',
+                length: 1,
+                0: { type: 'application/pdf', suffixes: 'pdf', description: '' }
+            };
+            var fakePlugins = isEdge ? chromePdfBase.concat([edgePdfPlugin]) : chromePdfBase;
             fakePlugins.item = function (i) { return fakePlugins[i]; };
             fakePlugins.namedItem = function (name) { return fakePlugins.find(function (p) { return p.name === name; }); };
             fakePlugins.refresh = function () { };
@@ -205,22 +243,7 @@
         } catch (e) { }
     }
 
-    // === Connection API ===
-    if (navigator.connection || 'connection' in navProto) {
-        var connData = {
-            effectiveType: '4g',
-            downlink: 10,
-            rtt: 50,
-            saveData: false,
-            type: 'wifi',
-            onchange: null,
-            addEventListener: function () { },
-            removeEventListener: function () { }
-        };
-        try {
-            patchProto(navProto, 'connection', connData);
-        } catch (e) { }
-    }
+    // === Connection API — defined in sensors.js to avoid conflicting type values ===
 })({
     userAgent: 'USER_AGENT_PLACEHOLDER',
     platform: 'PLATFORM_PLACEHOLDER',
