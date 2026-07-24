@@ -114,4 +114,19 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Assinar digitalmente o instalador MSI com a chave self_signed.pfx se disponível
+$pfxFile = "$PSScriptRoot\certs\self_signed.pfx"
+$signtool = "C:\Users\FAGNER\AppData\Local\electron-builder\Cache\winCodeSign\121497747\windows-10\x64\signtool.exe"
+
+if ((Test-Path $pfxFile) -and (Test-Path $signtool)) {
+    Write-Host "Assinando digitalmente o instalador MSI..." -ForegroundColor Cyan
+    & "$signtool" sign /f "$pfxFile" /p "axefull123" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$outputMsi"
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Instalador MSI assinado digitalmente com sucesso!" -ForegroundColor Green
+    } else {
+        Write-Warning "Falha ao assinar digitalmente o arquivo MSI. O instalador foi gerado sem assinatura."
+    }
+}
+
 Write-Host "SUCESSO! O instalador MSI foi criado em: $outputMsi" -ForegroundColor Green
+

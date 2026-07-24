@@ -1,6 +1,6 @@
 import { app, BrowserWindow, Tray, Menu } from 'electron';
 import path from 'path';
-import * as dotenv from 'dotenv';
+const dotenv = require('dotenv');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });

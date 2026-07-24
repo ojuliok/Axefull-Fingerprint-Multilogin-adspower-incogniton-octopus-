@@ -43,6 +43,18 @@ config.renderer = {
     root: 'src/renderer',
     base: './',
     envDir: path.resolve(__dirname),
+    optimizeDeps: {
+        include: [
+            'react',
+            'react-dom',
+            '@blocknote/core',
+            '@blocknote/react',
+            '@blocknote/mantine',
+            '@mantine/core',
+            '@mantine/hooks',
+            '@tiptap/react'
+        ],
+    },
     build: {
         outDir: 'dist/renderer',
         emptyOutDir: true,

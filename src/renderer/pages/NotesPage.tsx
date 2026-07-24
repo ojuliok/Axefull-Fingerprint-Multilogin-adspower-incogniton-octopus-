@@ -6,7 +6,13 @@ import {
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { useWorkspace } from '../context/WorkspaceContext';
-import NoteTiptapEditor from '../features/Notes/NoteTiptapEditor';
+import { DocEditor } from '../components/Docs/DocEditor';
+import { SecondarySidebar } from '../components/Layout/SecondarySidebar';
+import { useTabs } from '../context/TabContext';
+import { TabBar } from '../components/Layout/TabBar';
+import { DocTreeItem } from '../components/Docs/DocTreeItem';
+import { DocBreadcrumbs } from '../components/Docs/DocBreadcrumbs';
+import { CommandPalette } from '../components/Docs/CommandPalette';
 import { encryptData, decryptData } from '../utils/crypto';
 
 export interface PassVault {
@@ -45,6 +51,8 @@ export interface Space {
 export interface Note {
     id: string;
     spaceId: string;
+    parentId?: string | null;
+    icon?: string;
     title: string;
     content: string; // Markdown text content
     isStarred: boolean;
@@ -67,9 +75,10 @@ const SPACE_ICONS = [
     '🎨', '💼', '📊', '📅', '🔑', '⭐️', '🌍', '🏠', '🔥', '📚'
 ];
 
-const NotesPage: React.FC = () => {
+const NotesContent: React.FC = () => {
     const { toast } = useToast();
     const { setIsNotesFloating } = useWorkspace();
+    const { openTab } = useTabs();
 
     // Notes Data States
     const [spaces, setSpaces] = useState<Space[]>([]);
@@ -80,6 +89,19 @@ const NotesPage: React.FC = () => {
     // UI Interface States
     const [searchQuery, setSearchQuery] = useState('');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+    // Ctrl + K listener for Notion Command Palette
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                setIsSearchOpen(prev => !prev);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     // Dialog / Modal States
     const [isSpaceModalOpen, setIsSpaceModalOpen] = useState(false);
@@ -1791,312 +1813,124 @@ const NotesPage: React.FC = () => {
     };
 
     return (
-        <div className="flex h-full w-full bg-theme-base overflow-hidden relative">
-            
-            {/* ─── SIDEBAR ────────────────────────────────────── */}
-            <div className={`
-                bg-theme-surface/70 backdrop-blur-md border-r border-theme-border flex flex-col h-full shrink-0 select-none
-                transition-all duration-300 ease-in-out
-                ${isSidebarCollapsed ? 'w-0 border-r-0 opacity-0 overflow-hidden' : 'w-[300px]'}
-            `}>
-                
-                {/* Search Header */}
-                <div className="p-4 border-b border-theme-border flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <StickyNote size={18} className="text-amber-500" />
-                            <span className="font-bold text-sm text-theme-text">Bloco de Notas</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <button 
-                                onClick={() => setIsSettingsOpen(true)}
-                                className="p-1.5 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-card transition-all"
-                                title="Segurança e Configurações"
-                            >
-                                <Settings size={15} />
-                            </button>
-                            <button 
-                                onClick={() => setIsSidebarCollapsed(true)}
-                                className="p-1.5 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-card transition-all"
-                                title="Recolher Menu"
-                            >
-                                <ChevronLeft size={15} />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Search Bar */}
-                    <div className="relative">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-faint" />
-                        <input
-                            type="text"
-                            placeholder="Buscar notas..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-theme-base/60 text-xs border border-theme-border focus:border-amber-500 focus:outline-none rounded-lg py-2 pl-9 pr-4 text-theme-text placeholder-theme-text-faint transition-all"
-                        />
-                    </div>
-                </div>
-
-                {/* Spaces list */}
-                <div className="p-4 border-b border-theme-border bg-theme-base/20 flex flex-col shrink-0">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider">Espaços</span>
-                        <button 
-                            onClick={() => setIsSpaceModalOpen(true)}
-                            className="p-1 rounded bg-theme-card hover:bg-theme-border text-theme-text hover:text-amber-500 transition-colors flex items-center gap-1 text-[10px] font-medium"
-                        >
-                            <Plus size={10} /> Novo
-                        </button>
-                    </div>
-
-                    <div className="flex flex-col gap-1 max-h-[160px] overflow-y-auto scrollbar-thin scrollbar-thumb-amber-500/20 hover:scrollbar-thumb-amber-500/40 pr-1">
-                        {spaces.map(space => {
-                            const isSelected = activeSpaceId === space.id && !isPassSelected;
-                            return (
-                                <div
-                                    key={space.id}
-                                    onClick={() => {
-                                        setActiveSpaceId(space.id);
-                                        const spaceNotes = notes.filter(n => n.spaceId === space.id);
-                                        setActiveNoteId(spaceNotes.length > 0 ? spaceNotes[0].id : '');
-                                        setIsPassSelected(false);
-                                    }}
-                                    onContextMenu={(e) => handleSpaceContextMenu(e, space.id)}
-                                    className={`group flex items-center justify-between px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
-                                        isSelected 
-                                            ? 'bg-gradient-to-r from-amber-500/10 to-transparent border-l-2 border-amber-500 text-theme-text font-semibold' 
-                                            : 'text-theme-text-muted hover:bg-theme-card hover:text-theme-text'
-                                    }`}
-                                    title="Clique com o botão direito para opções"
-                                >
-                                    <div className="flex items-center gap-2 text-xs overflow-hidden">
-                                        <span className="text-sm shrink-0">{space.icon}</span>
-                                        <span className="truncate">{space.name}</span>
-                                    </div>
-                                    {spaces.length > 1 && (
-                                        <button 
-                                            onClick={(e) => handleDeleteSpace(space.id, e)}
-                                            className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-500 rounded transition-all"
-                                            title="Excluir Espaço"
-                                        >
-                                            <Trash2 size={10} />
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* ─── COFRE PASS SECTION ───────────────────────── */}
-                <div className="p-3 border-b border-theme-border bg-theme-base/5 flex flex-col shrink-0">
-                    <div
-                        onClick={() => {
-                            setIsPassSelected(true);
-                            setActiveNoteId('');
-                        }}
-                        className={`group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all ${
-                            isPassSelected 
-                                ? 'bg-gradient-to-r from-amber-500/20 to-transparent border-l-2 border-amber-500 text-theme-text font-bold shadow-sm' 
-                                : 'text-theme-text-muted hover:bg-theme-card hover:text-theme-text'
-                        }`}
-                        title="Acesse suas senhas com segurança"
-                    >
-                        <div className="flex items-center gap-2 text-xs">
-                            <Key size={14} className={isPassSelected ? 'text-amber-500' : 'text-theme-text-faint'} />
-                            <span>Cofre Pass</span>
-                        </div>
-                        {isPassUnlocked ? (
-                            <span className="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-0.5 font-semibold">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
-                                Aberto
-                            </span>
-                        ) : (
-                            <span className="text-[8px] px-1.5 py-0.5 rounded bg-theme-border text-theme-text-muted border border-theme-border font-semibold">
-                                Bloqueado
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Notes list inside space */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    <div className="p-4 py-3 flex items-center justify-between shrink-0">
-                        <span className="text-[10px] font-bold text-theme-text-muted uppercase tracking-wider">Notas</span>
-                        <button 
-                            onClick={handleCreateNote}
-                            disabled={!activeSpaceId}
-                            className="p-1.5 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-black font-bold transition-colors flex items-center gap-1 text-[10px] shadow-sm"
-                        >
-                            <Plus size={10} strokeWidth={2.5} /> Nova Nota
-                        </button>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1 scrollbar-thin scrollbar-thumb-amber-500/20 hover:scrollbar-thumb-amber-500/40 pr-1">
-                        {filteredNotes.length === 0 ? (
-                            <div className="text-center py-8 text-theme-text-faint text-xs">
-                                Nenhuma nota encontrada.
-                            </div>
-                        ) : (
-                            filteredNotes.map(note => {
-                                const isSelected = activeNoteId === note.id && !isPassSelected;
-                                return (
-                                    <div
-                                        key={note.id}
-                                        onClick={() => {
-                                            setActiveNoteId(note.id);
-                                            setIsPassSelected(false);
-                                            if (window.innerWidth < 768) {
-                                                setIsSidebarCollapsed(true);
-                                            }
-                                        }}
-                                        onContextMenu={(e) => handleNoteContextMenu(e, note.id)}
-                                        className={`group relative flex flex-col gap-1 p-3 rounded-lg cursor-pointer transition-all border ${
-                                            isSelected 
-                                                ? 'bg-theme-card border-theme-border shadow-sm' 
-                                                : 'border-transparent hover:bg-theme-card/40 text-theme-text-muted'
-                                        } ${note.isStarred ? 'border-amber-500/30 bg-gradient-to-r from-amber-500/[0.04] to-transparent' : ''}`}
-                                        title="Botão direito para Mover ou Excluir"
-                                    >
-                                        
-                                        {/* Glowing border highlight for starred notes */}
-                                        {note.isStarred && (
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-lg shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-                                        )}
-
-                                        <div className="flex items-start justify-between gap-2">
-                                            <span className={`text-xs truncate font-semibold leading-tight ${
-                                                isSelected ? 'text-theme-text' : 'text-theme-text-muted group-hover:text-theme-text'
-                                            }`}>
-                                                {note.title || 'Sem Título'}
-                                            </span>
-                                            
-                                            <div className="flex items-center gap-1 shrink-0">
-                                                <button
-                                                    onClick={(e) => handleToggleStar(note.id, e)}
-                                                    className={`transition-colors p-0.5 rounded ${
-                                                        note.isStarred 
-                                                            ? 'text-amber-500 hover:text-amber-600' 
-                                                            : 'text-theme-text-faint hover:text-amber-500 opacity-0 group-hover:opacity-100'
-                                                    }`}
-                                                >
-                                                    <Star size={11} fill={note.isStarred ? 'currentColor' : 'none'} />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <span className="text-[10px] text-theme-text-faint line-clamp-2">
-                                            {note.content.replace(/<[^>]*>?/gm, '').replace(/[#*`\-[\]]/g, '').trim() || 'Sem conteúdo...'}
-                                        </span>
-
-                                        <span className="text-[8px] text-theme-text-faint text-right mt-1">
-                                            {new Date(note.updated_at).toLocaleDateString('pt-BR', {
-                                                hour: '2-digit', minute: '2-digit'
-                                            })}
-                                        </span>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* ─── SIDEBAR EXPAND TOGGLE ──────────────────────── */}
-            {isSidebarCollapsed && (
-                <button
-                    onClick={() => setIsSidebarCollapsed(false)}
-                    className="absolute top-4 left-4 z-40 p-2 rounded-xl bg-theme-surface border border-theme-border text-theme-text-muted hover:text-theme-text shadow-md hover:bg-theme-card transition-all"
-                    title="Expandir Menu"
-                >
-                    <Menu size={16} />
-                </button>
-            )}
+        <div className="flex h-full w-full bg-[#0b0c10] text-zinc-100 overflow-hidden relative">
+            {/* ─── SECONDARY SIDEBAR ─────────────────────────────── */}
+            {/* ─── SECONDARY SIDEBAR ─────────────────────────────── */}
+            <SecondarySidebar
+                spaces={spaces}
+                activeSpaceId={activeSpaceId}
+                onSelectSpace={(spaceId) => {
+                    setActiveSpaceId(spaceId);
+                    setIsPassSelected(false);
+                }}
+                notes={notes}
+                activeNoteId={activeNoteId}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onSelectNote={(id) => {
+                    setActiveNoteId(id);
+                    setIsPassSelected(false);
+                    const note = notes.find(n => n.id === id);
+                    if (note) {
+                        openTab({ id: note.id, title: note.title, icon: note.icon });
+                    }
+                }}
+                onCreateNote={(parentId) => handleCreateNote(parentId)}
+                onCreateSpace={() => setIsSpaceModalOpen(true)}
+                onContextMenuNote={(e, note) => {
+                    e.preventDefault();
+                    setContextMenu({
+                        x: e.clientX,
+                        y: e.clientY,
+                        visible: true,
+                        noteId: note.id
+                    });
+                }}
+                onToggleStarNote={handleToggleStar}
+                onDeleteNote={handleDeleteNote}
+                onSelectPassVault={() => {
+                    setIsPassSelected(true);
+                    setActiveNoteId('');
+                }}
+                isPassSelected={isPassSelected}
+                onOpenSearchModal={() => setIsSearchOpen(true)}
+            />
 
             {/* ─── MAIN EDITOR AREA ───────────────────────────── */}
-            <div className="flex-1 flex flex-col h-full bg-theme-base overflow-hidden">
+            <div className="flex-1 flex flex-col h-full bg-[#0b0c10] overflow-hidden">
+                {/* Document Tab Bar */}
+                {!isPassSelected && (
+                    <TabBar onNewDoc={() => handleCreateNote()} />
+                )}
+
                 {isPassSelected ? (
                     renderPassVaultView()
                 ) : activeNote ? (
                     <>
-                        {/* Note Header */}
-                        <div className="h-14 border-b border-theme-border px-6 flex items-center justify-between bg-theme-surface/30 backdrop-blur-sm shrink-0 select-none">
-                            <div className="flex items-center gap-3 overflow-hidden flex-1 max-w-xl">
-                                {isSidebarCollapsed && <div className="w-8" /> /* Spacing for the floating Menu button */}
-                                <span className="text-lg">{activeSpace?.icon}</span>
-                                <input
-                                    type="text"
-                                    value={activeNote.title}
-                                    onChange={(e) => handleUpdateNoteTitle(e.target.value)}
-                                    className="bg-transparent font-bold text-sm text-theme-text focus:outline-none border-b border-transparent focus:border-theme-border py-0.5 truncate flex-1"
-                                    placeholder="Título da nota"
-                                />
-                            </div>
+                        {/* Notion Breadcrumbs Trail Header */}
+                        <DocBreadcrumbs
+                            spaceName={activeSpace?.name}
+                            spaceIcon={activeSpace?.icon}
+                            note={activeNote}
+                            parentNote={notes.find(n => n.id === activeNote.parentId)}
+                            isStarred={activeNote.isStarred}
+                            onToggleStar={() => handleToggleStar(activeNote.id)}
+                            onFloatWidget={() => setIsNotesFloating(true)}
+                            onOpenSearch={() => setIsSearchOpen(true)}
+                        />
 
-                            <div className="flex items-center gap-2">
-                                {/* Star Button */}
-                                <button
-                                    onClick={() => handleToggleStar(activeNote.id)}
-                                    className={`p-2 rounded-lg border transition-all ${
-                                        activeNote.isStarred
-                                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20'
-                                            : 'bg-theme-card border-theme-border text-theme-text-muted hover:text-theme-text'
-                                    }`}
-                                    title={activeNote.isStarred ? 'Remover dos Favoritos' : 'Marcar como Favorita'}
-                                >
-                                    <Star size={14} fill={activeNote.isStarred ? 'currentColor' : 'none'} />
-                                </button>
-
-                                {/* Pin / Float Button */}
-                                <button
-                                    onClick={() => setIsNotesFloating(true)}
-                                    className="p-2 rounded-lg border bg-theme-card border-theme-border text-theme-text-muted hover:text-amber-500 hover:border-amber-500/50 transition-all"
-                                    title="Fixar como Widget Flutuante"
-                                >
-                                    <Pin size={14} />
-                                </button>
-
-                                {/* Delete note */}
-                                <button
-                                    onClick={() => handleDeleteNote(activeNote.id)}
-                                    className="p-2 rounded-lg border border-theme-border bg-theme-card text-theme-text-muted hover:text-red-500 hover:border-red-500/30 transition-all"
-                                    title="Excluir Nota"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Note Body */}
-                        <div className="flex-1 overflow-hidden relative flex flex-col bg-theme-base">
-                            <NoteTiptapEditor 
-                                content={activeNote.content} 
-                                onChange={handleUpdateNoteContent} 
+                        {/* Note Body with BlockNote Notion-like Editor */}
+                        <div className="flex-1 overflow-hidden relative flex flex-col bg-[#0b0c10]">
+                            <DocEditor 
+                                noteId={activeNote.id}
+                                title={activeNote.title}
+                                icon={activeNote.icon}
+                                content={activeNote.content}
+                                updatedAt={activeNote.updated_at}
+                                onTitleChange={handleUpdateNoteTitle}
+                                onIconChange={(icon) => {
+                                    const updated = notes.map(n => n.id === activeNote.id ? { ...n, icon, updated_at: new Date().toISOString() } : n);
+                                    saveNotesToStorage(updated);
+                                }}
+                                onContentChange={handleUpdateNoteContent} 
                             />
                         </div>
                     </>
                 ) : (
                     /* EMPTY STATE */
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 select-none">
-                        <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 animate-bounce">
+                        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 animate-bounce">
                             <StickyNote size={32} />
                         </div>
-                        <h3 className="font-bold text-sm text-theme-text">Nenhuma Nota Aberta</h3>
-                        <p className="text-xs text-theme-text-muted max-w-sm mt-1">
-                            Selecione uma nota existente na barra lateral ou crie uma nova nota dentro de um Espaço para começar a estruturar suas ideias.
+                        <h3 className="font-bold text-base text-zinc-100">Nenhum Documento Selecionado</h3>
+                        <p className="text-xs text-zinc-400 max-w-sm mt-1.5 leading-relaxed">
+                            Selecione um documento na barra lateral ou crie uma nova nota no estilo Notion para começar.
                         </p>
-                        {activeSpaceId && (
-                            <button
-                                onClick={handleCreateNote}
-                                className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
-                            >
-                                <Plus size={14} /> Criar Nova Nota
-                            </button>
-                        )}
+                        <button
+                            onClick={() => handleCreateNote()}
+                            className="mt-5 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                        >
+                            <Plus size={15} /> Criar Novo Documento
+                        </button>
                     </div>
                 )}
             </div>
+
+            {/* Notion Ctrl+K Command Palette Modal */}
+            <CommandPalette
+                isOpen={isSearchOpen}
+                onClose={() => setIsSearchOpen(false)}
+                notes={notes}
+                onSelectNote={(id) => {
+                    setActiveNoteId(id);
+                    setIsPassSelected(false);
+                    const note = notes.find(n => n.id === id);
+                    if (note) {
+                        openTab({ id: note.id, title: note.title, icon: note.icon });
+                    }
+                }}
+                onCreateNote={() => handleCreateNote()}
+            />
 
             {/* ─── MODAL: NEW SPACE ───────────────────────────── */}
             {isSpaceModalOpen && (
@@ -2660,6 +2494,12 @@ const NotesPage: React.FC = () => {
             )}
 
         </div>
+    );
+};
+
+const NotesPage: React.FC = () => {
+    return (
+        <NotesContent />
     );
 };
 

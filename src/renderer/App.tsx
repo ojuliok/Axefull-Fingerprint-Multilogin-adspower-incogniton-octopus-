@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { PomodoroProvider } from './context/PomodoroContext';
 import { SecurityProvider } from './context/SecurityContext';
 import { WorkspaceProvider } from './context/WorkspaceContext';
+import { TabProvider } from './context/TabContext';
 
 import { LayoutManager } from './components/Layout/LayoutManager';
 import { isWebMode } from './utils/env';
@@ -69,28 +70,30 @@ const App: React.FC = () => {
                     <ToastProvider>
                         <PomodoroProvider>
                             <WorkspaceProvider>
-                                <HashRouter>
-                                    <Suspense fallback={<PageLoader />}>
-                                        <Routes>
-                                            <Route path="/" element={<ProtectedRoute><LayoutManager /></ProtectedRoute>}>
-                                                <Route index element={<Navigate to="/home" replace />} />
-                                                <Route path="home" element={<HomeW97 />} />
-                                                <Route path="profiles" element={<Dashboard onOpenExtensions={() => window.dispatchEvent(new CustomEvent('open-extensions-modal'))} onOpenProxies={() => window.dispatchEvent(new CustomEvent('open-proxies-modal'))} />} />
-                                                <Route path="dadosclean" element={<DadosClean />} />
-                                                <Route path="overview" element={<CanvasPage key="overview" />} />
-                                                <Route path="canvas" element={<CanvasPage key="canvas" />} />
-                                                <Route path="tasks" element={<TasksView />} />
-                                                <Route path="agenda" element={<AgendaView />} />
-                                                <Route path="settings" element={<SettingsPage />} />
-                                                <Route path="download" element={<DownloadPage />} />
-                                                <Route path="vitrine" element={<VitrinePage />} />
-                                                <Route path="notes" element={<NotesPage />} />
-                                            </Route>
-                                            {/* Standalone Window Routes */}
-                                            <Route path="/notes-widget" element={<NotesWidgetWindow />} />
-                                        </Routes>
-                                    </Suspense>
-                                </HashRouter>
+                                <TabProvider>
+                                    <HashRouter>
+                                        <Suspense fallback={<PageLoader />}>
+                                            <Routes>
+                                                <Route path="/" element={<ProtectedRoute><LayoutManager /></ProtectedRoute>}>
+                                                    <Route index element={<Navigate to="/home" replace />} />
+                                                    <Route path="home" element={<HomeW97 />} />
+                                                    <Route path="profiles" element={<Dashboard onOpenExtensions={() => window.dispatchEvent(new CustomEvent('open-extensions-modal'))} onOpenProxies={() => window.dispatchEvent(new CustomEvent('open-proxies-modal'))} />} />
+                                                    <Route path="dadosclean" element={<DadosClean />} />
+                                                    <Route path="overview" element={<CanvasPage key="overview" />} />
+                                                    <Route path="canvas" element={<CanvasPage key="canvas" />} />
+                                                    <Route path="tasks" element={<TasksView />} />
+                                                    <Route path="agenda" element={<AgendaView />} />
+                                                    <Route path="settings" element={<SettingsPage />} />
+                                                    <Route path="download" element={<DownloadPage />} />
+                                                    <Route path="vitrine" element={<VitrinePage />} />
+                                                    <Route path="notes" element={<NotesPage />} />
+                                                </Route>
+                                                {/* Standalone Window Routes */}
+                                                <Route path="/notes-widget" element={<NotesWidgetWindow />} />
+                                            </Routes>
+                                        </Suspense>
+                                    </HashRouter>
+                                </TabProvider>
                             </WorkspaceProvider>
                         </PomodoroProvider>
                     </ToastProvider>
