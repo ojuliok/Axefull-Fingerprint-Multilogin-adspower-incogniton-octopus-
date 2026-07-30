@@ -1,8 +1,64 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+.yarn/
+.npm/
+
+# Build and Packaging Outputs
 dist/
 build/
-.env
-.env.local
-.DS_Store
-release/
 out/
+release/
+release-builds/
+*.exe
+*.msi
+*.dmg
+*.app
+*.zip
+*.tar.gz
+*.blockmap
+*.builder-effective-config.yaml
+
+# Local User Data, Databases & Backups (CRITICAL PRIVACY PROTECTION)
+backups/
+userData/
+user-data/
+axe-profiles/
+axe_data/
+profiles/
+*.axeprofile
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+*.log
+
+# Environment & Secret Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+credentials.json
+config.local.json
+
+# IDE & Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Temporary & Cache Directories
+.antigravity/
+.gemini/
+tmp/
+temp/
