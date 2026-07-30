@@ -255,21 +255,48 @@ export function registerProfileIpcHandlers(): void {
         }
     });
 
-    // Export ZIP
-    ipcMain.handle('profile:export-zip', async (_event: IpcMainInvokeEvent, profileId: string, destPath: string) => {
+    // Export ZIP (Perfil + Navegador + Fingerprint)
+    ipcMain.handle('profile:export-zip', async (_event: IpcMainInvokeEvent, profileId: string, destPath?: string) => {
         try {
-            await exportProfile(profileId, destPath);
-            return { success: true };
+            let targetPath = destPath;
+            if (!targetPath) {
+                const profile = getProfileById(profileId);
+                const safeName = (profile?.name || profileId).replace(/[^a-zA-Z0-9_-]/g, '_');
+                const { filePath, canceled } = await dialog.showSaveDialog({
+                    title: 'Extrair Todos os Dados do Perfil e Navegador',
+                    defaultPath: `axe_profile_${safeName}_data.axeprofile`,
+                    filters: [
+                        { name: 'Axe Profile Package (.axeprofile)', extensions: ['axeprofile'] },
+                        { name: 'Arquivo ZIP (.zip)', extensions: ['zip'] }
+                    ],
+                });
+                if (canceled || !filePath) return { success: false, error: 'cancelled' };
+                targetPath = filePath;
+            }
+            await exportProfile(profileId, targetPath);
+            return { success: true, data: { path: targetPath } };
         } catch (error: any) {
             console.error('Error in profile:export-zip:', error);
             return { success: false, error: error.message };
         }
     });
 
-    // Import ZIP
-    ipcMain.handle('profile:import-zip', async (_event: IpcMainInvokeEvent, sourcePath: string) => {
+    // Import ZIP (Perfil + Navegador + Fingerprint)
+    ipcMain.handle('profile:import-zip', async (_event: IpcMainInvokeEvent, sourcePath?: string) => {
         try {
-            const profile = await importProfile(sourcePath);
+            let targetPath = sourcePath;
+            if (!targetPath) {
+                const { filePaths, canceled } = await dialog.showOpenDialog({
+                    title: 'Importar Pacote Completo de Perfil e Navegador',
+                    filters: [
+                        { name: 'Axe Profile Package (.axeprofile, .zip)', extensions: ['axeprofile', 'zip'] }
+                    ],
+                    properties: ['openFile'],
+                });
+                if (canceled || filePaths.length === 0) return { success: false, error: 'cancelled' };
+                targetPath = filePaths[0];
+            }
+            const profile = await importProfile(targetPath);
             return { success: true, profile };
         } catch (error: any) {
             console.error('Error in profile:import-zip:', error);
@@ -277,22 +304,42 @@ export function registerProfileIpcHandlers(): void {
         }
     });
 
-    // Export JSON
+    // Export JSON (Completo com Fingerprint, Cookies, Histórico, Bookmarks, Proxy)
     ipcMain.handle('profile:export', async (_event: IpcMainInvokeEvent, profileIds: string[]) => {
         try {
-            const profiles = profileIds.map(id => getProfileById(id)).filter(Boolean);
+            const dataManager = await import('../features/profile/data-manager');
+            const fullProfiles = await Promise.all(profileIds.map(async (id) => {
+                const profile = getProfileById(id);
+                if (!profile) return null;
+
+                const [cookies, history, bookmarks] = await Promise.all([
+                    dataManager.getCookies(id).catch(() => []),
+                    dataManager.getHistory(id, 500).catch(() => []),
+                    dataManager.getBookmarks(id).catch(() => []),
+                ]);
+
+                return {
+                    ...profile,
+                    cookies,
+                    history,
+                    bookmarks,
+                };
+            }));
+
+            const validProfiles = fullProfiles.filter(Boolean);
+
             const exportData = {
-                version: '1.0',
+                version: '2.0',
                 app: 'Axe MultiLogin',
                 exported_at: new Date().toISOString(),
-                count: profiles.length,
-                profiles,
+                count: validProfiles.length,
+                profiles: validProfiles,
             };
 
             const { filePath, canceled } = await dialog.showSaveDialog({
-                title: 'Exportar Perfis',
-                defaultPath: `axe-profiles-${Date.now()}.json`,
-                filters: [{ name: 'Axe Profile Export (JSON)', extensions: ['json'] }],
+                title: 'Exportar Perfis Completo (JSON)',
+                defaultPath: `axe-profiles-full-${Date.now()}.json`,
+                filters: [{ name: 'Axe Profile Full Export (JSON)', extensions: ['json'] }],
             });
 
             if (canceled || !filePath) {
@@ -300,8 +347,8 @@ export function registerProfileIpcHandlers(): void {
             }
 
             fs.writeFileSync(filePath, JSON.stringify(exportData, null, 2), 'utf-8');
-            logAction('profiles_exported', { count: profileIds.length, path: filePath });
-            return { success: true, data: { path: filePath, count: profiles.length } };
+            logAction('profiles_exported', { count: validProfiles.length, path: filePath });
+            return { success: true, data: { path: filePath, count: validProfiles.length } };
         } catch (error) {
             console.error('[IPC] profile:export error:', error);
             return { success: false, error: String(error) };

@@ -27,6 +27,8 @@ import { closeAllProfiles } from './features/browser/browser-engine';
 import { startSupabaseListener, stopSupabaseListener } from './services/supabase-listener';
 import { startLocalApiServer, stopLocalApiServer } from './features/local-api/local-api-server';
 import { initComplianceGuard } from './security/compliance-guard';
+import { registerMultiIpcHandlers } from './features/multi';
+
 
 
 let tray: Tray | null = null;
@@ -218,6 +220,8 @@ async function init(): Promise<void> {
     registerProxyPoolHandlers();
     registerTeamHandlers();
     registerAiHandlers();
+    registerMultiIpcHandlers();
+
     registerCardHandlers();
     registerBulkVideoHandlers();
     registerMetaCleanHandlers();

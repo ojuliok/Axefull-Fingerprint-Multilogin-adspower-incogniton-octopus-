@@ -17,7 +17,8 @@ export interface ProfileAPI {
     clone: (profileId: string) => Promise<APIResponse>;
     bulkClone: (profileIds: string[]) => Promise<APIResponse>;
     bulkRegenerateFingerprint: (profileIds: string[]) => Promise<APIResponse>;
-    export: (profileIds: string[]) => Promise<APIResponse>;
+    exportZip: (profileId: string, destPath?: string) => Promise<APIResponse>;
+    importZip: (sourcePath?: string) => Promise<APIResponse>;
     import: () => Promise<APIResponse>;
     emptyTrash: () => Promise<APIResponse>;
 }
@@ -321,8 +322,8 @@ contextBridge.exposeInMainWorld('api', {
         bulkRegenerateFingerprint: (profileIds: string[]) =>
             ipcRenderer.invoke('profile:bulk-fingerprint', profileIds),
         export: (profileIds: string[]) => ipcRenderer.invoke('profile:export', profileIds),
-        exportZip: (profileId: string, destPath: string) => ipcRenderer.invoke('profile:export-zip', profileId, destPath),
-        importZip: (sourcePath: string) => ipcRenderer.invoke('profile:import-zip', sourcePath),
+        exportZip: (profileId: string, destPath?: string) => ipcRenderer.invoke('profile:export-zip', profileId, destPath),
+        importZip: (sourcePath?: string) => ipcRenderer.invoke('profile:import-zip', sourcePath),
         import: () =>
             ipcRenderer.invoke('profile:import'),
         emptyTrash: () =>

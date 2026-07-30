@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TaskList from '@tiptap/extension-task-list';
@@ -8,8 +8,8 @@ import TiptapImage from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 
 import { useTheme } from '../../context/ThemeContext';
-import { 
-    Smile, Image as ImageIcon, Clock, FileText, Share2, MoreHorizontal, 
+import {
+    Smile, Image as ImageIcon, Clock, FileText, Share2, MoreHorizontal,
     Sparkles, X, Plus, CheckSquare, Layers, Tag, User, Calendar, Table as TableIcon
 } from 'lucide-react';
 
@@ -17,7 +17,8 @@ import { NotionBlockMenu } from './NotionBlockMenu';
 import { SlashMenu } from './SlashMenu';
 import { BubbleMenuToolbar } from './BubbleMenuToolbar';
 import { NotionBlockGrip } from './NotionBlockGrip';
-import { NotionDatabase } from './NotionDatabase';
+import { DatabaseBlockNode } from './DatabaseBlockNode';
+import { ColumnBlockNode, ColumnNode } from './ColumnBlockNode';
 import './DocEditor.css';
 
 interface DocEditorProps {
@@ -29,11 +30,6 @@ interface DocEditorProps {
     onTitleChange: (title: string) => void;
     onIconChange?: (icon: string) => void;
     onContentChange: (content: string) => void;
-}
-
-export interface DatabaseBlockItem {
-    id: string;
-    initialViewType: 'table' | 'kanban' | 'list';
 }
 
 const EMOJI_LIST = ['📝', '🚀', '💡', '🔥', '🎯', '⚡️', '🎨', '📚', '🧠', '💼', '📌', '🌐', '🛠️', '⚙️', '🌟', '📁', '📊', '📅', '🔑', '🏷️'];
@@ -51,7 +47,7 @@ const STARTER_TEMPLATES = [
     {
         title: '🚀 Planejamento de Projeto (AppFlowy)',
         icon: '🚀',
-        content: `<h1>🚀 Planejamento de Projeto</h1><p>Visão geral e metas do projeto.</p><h2>Metas Principais</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><div><p>Definir arquitetura</p></div></li><li data-type="taskItem" data-checked="false"><div><p>Criar protótipo inicial</p></div></li><li data-type="taskItem" data-checked="false"><div><p>Testar com usuários</p></div></li></ul><p>[[DATABASE:table]]</p>`
+        content: `<h1>🚀 Planejamento de Projeto</h1><p>Visão geral e metas do projeto.</p><h2>Metas Principais</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><div><p>Definir arquitetura</p></div></li><li data-type="taskItem" data-checked="false"><div><p>Criar protótipo inicial</p></div></li><li data-type="taskItem" data-checked="false"><div><p>Testar com usuários</p></div></li></ul><p></p>`
     },
     {
         title: '📋 Notas de Reunião',
@@ -61,7 +57,7 @@ const STARTER_TEMPLATES = [
     {
         title: '🎯 Lista de Tarefas & OKRs',
         icon: '🎯',
-        content: `<h1>🎯 Objetivos & OKRs</h1><p>Acompanhamento de metas trimestrais.</p><h2>Metas Chave</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="true"><div><p>Lançamento da versão 1.0</p></div></li><li data-type="taskItem" data-checked="false"><div><p>Alcançar 100% de cobertura</p></div></li></ul><p>[[DATABASE:kanban]]</p>`
+        content: `<h1>🎯 Objetivos & OKRs</h1><p>Acompanhamento de metas trimestrais.</p><h2>Metas Chave</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="true"><div><p>Lançamento da versão 1.0</p></div></li><li data-type="taskItem" data-checked="false"><div><p>Alcançar 100% de cobertura</p></div></li></ul><p></p>`
     }
 ];
 
@@ -80,9 +76,6 @@ export const DocEditor: React.FC<DocEditorProps> = ({
     const [showCoverModal, setShowCoverModal] = useState(false);
     const [coverImage, setCoverImage] = useState<string | null>(null);
 
-    // Track embedded databases with individual view configuration
-    const [databaseBlocks, setDatabaseBlocks] = useState<DatabaseBlockItem[]>([]);
-
     // Notion Block Grip Handle state
     const editorContainerRef = useRef<HTMLDivElement>(null);
     const [gripState, setGripState] = useState<{
@@ -90,6 +83,9 @@ export const DocEditor: React.FC<DocEditorProps> = ({
         position: { top: number; left: number } | null;
         targetElement: HTMLElement | null;
     }>({ visible: false, position: null, targetElement: null });
+
+    // Dragging state for block reorder
+    const dragNodeRef = useRef<{ html: string; pos: number } | null>(null);
 
     // Notion / AppFlowy Block Context Menu state
     const [blockMenuState, setBlockMenuState] = useState<{
@@ -103,7 +99,7 @@ export const DocEditor: React.FC<DocEditorProps> = ({
         position: { x: number; y: number } | null;
     }>({ isOpen: false, position: null });
 
-    // AppFlowy Selection Bubble Toolbar state ("Ver ao selecionar o texto")
+    // AppFlowy Selection Bubble Toolbar state
     const [bubbleState, setBubbleState] = useState<{
         isOpen: boolean;
         position: { x: number; y: number } | null;
@@ -118,21 +114,27 @@ export const DocEditor: React.FC<DocEditorProps> = ({
         }, 300);
     };
 
-    // Parse databases from content
-    const syncDatabasesFromHtml = (html: string) => {
-        if (!html) return;
-        const matches = html.match(/\[\[DATABASE:(table|kanban|list)\]\]/g);
-        if (matches) {
-            const parsed: DatabaseBlockItem[] = matches.map((m, idx) => {
-                const typeMatch = m.match(/\[\[DATABASE:(table|kanban|list)\]\]/);
-                const viewType = (typeMatch && typeMatch[1]) ? (typeMatch[1] as 'table' | 'kanban' | 'list') : 'table';
-                return { id: `db-${idx}`, initialViewType: viewType };
-            });
-            setDatabaseBlocks(parsed);
-        }
-    };
+    // Open slash menu at a given screen position
+    const openSlashMenuAt = useCallback((x: number, y: number) => {
+        setSlashMenuState({ isOpen: true, position: { x, y } });
+    }, []);
 
-    // Tiptap Editor Instance with comprehensive null guards
+    // Open slash menu from grip + button
+    const handleOpenSlashMenuFromGrip = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!editor || editor.isDestroyed || !editor.view) return;
+        // Focus cursor before the current hovered block
+        if (gripState.targetElement) {
+            try {
+                const pos = editor.view.posAtDOM(gripState.targetElement, 0);
+                editor.chain().setTextSelection(pos).focus().run();
+            } catch (_) { }
+        }
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        openSlashMenuAt(rect.left, rect.bottom + 6);
+    }, [gripState.targetElement, openSlashMenuAt]);
+
+    // Tiptap Editor Instance
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -143,6 +145,9 @@ export const DocEditor: React.FC<DocEditorProps> = ({
             }),
             TiptapImage,
             Link.configure({ openOnClick: false }),
+            DatabaseBlockNode,
+            ColumnBlockNode,
+            ColumnNode,
         ],
         content: content || '<p></p>',
         onUpdate: ({ editor }) => {
@@ -150,7 +155,6 @@ export const DocEditor: React.FC<DocEditorProps> = ({
             try {
                 const html = editor.getHTML();
                 triggerContentSave(html);
-                syncDatabasesFromHtml(html);
 
                 // Detect Slash Command typing
                 const { selection } = editor.state;
@@ -198,7 +202,7 @@ export const DocEditor: React.FC<DocEditorProps> = ({
     const currentNoteIdRef = useRef(noteId);
     const isFirstRender = useRef(true);
 
-    // Update editor content when note changes (with view existence check preventing 'commands' null getter crash)
+    // Update editor content when note changes
     useEffect(() => {
         if (!editor || editor.isDestroyed || !editor.view) return;
 
@@ -212,26 +216,18 @@ export const DocEditor: React.FC<DocEditorProps> = ({
             } catch (err) {
                 console.warn('[DocEditor] Safe setContent prevented crash:', err);
             }
-            if (content) syncDatabasesFromHtml(content);
         }
     }, [noteId, editor, content]);
 
-    // Hide raw [[DATABASE:...]] placeholder text paragraphs from view in real-time
-    useEffect(() => {
-        if (!editorContainerRef.current) return;
-        const paragraphs = editorContainerRef.current.querySelectorAll('.tiptap p');
-        paragraphs.forEach(p => {
-            if (p.textContent && p.textContent.includes('[[DATABASE:')) {
-                (p as HTMLElement).style.display = 'none';
-            }
-        });
-    });
-
-    // Handle mouse movement for left :: grip handle with safe margin
+    // Handle mouse movement for left :: grip handle
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!editorContainerRef.current) return;
 
-        const targetEl = (e.target as HTMLElement).closest('p, h1, h2, h3, li, blockquote, pre') as HTMLElement;
+        // Detect standard text blocks OR Tiptap NodeView wrappers (database, column blocks)
+        const targetEl = (e.target as HTMLElement).closest(
+            'p, h1, h2, h3, li, blockquote, pre, [data-node-view-wrapper], [data-type="databaseBlock"], [data-type="columnBlock"]'
+        ) as HTMLElement;
+
         if (targetEl && editorContainerRef.current.contains(targetEl)) {
             const containerRect = editorContainerRef.current.getBoundingClientRect();
             const elRect = targetEl.getBoundingClientRect();
@@ -240,7 +236,7 @@ export const DocEditor: React.FC<DocEditorProps> = ({
                 visible: true,
                 position: {
                     top: elRect.top - containerRect.top + elRect.height / 2,
-                    left: 6,
+                    left: 0,
                 },
                 targetElement: targetEl,
             });
@@ -260,7 +256,7 @@ export const DocEditor: React.FC<DocEditorProps> = ({
         });
     };
 
-    // Open block menu from :: grip handle
+    // Open block Turn Into menu from :: grip handle click
     const handleOpenGripMenu = (e: React.MouseEvent) => {
         e.stopPropagation();
         setBlockMenuState({
@@ -269,29 +265,99 @@ export const DocEditor: React.FC<DocEditorProps> = ({
         });
     };
 
-    // Add block below from + grip handle
-    const handleAddBlockBelow = () => {
+    // Drag start for :: handle — store block content and pos
+    const handleGripDragStart = (e: React.DragEvent) => {
+        if (!editor || editor.isDestroyed || !editor.view || !gripState.targetElement) return;
+
+        const el = gripState.targetElement;
+        const outerHtml = el.outerHTML;
+        e.dataTransfer.setData('text/html', outerHtml);
+        e.dataTransfer.effectAllowed = 'move';
+
+        try {
+            // posAtDOM with offset 0 gives us the position at the start of the element
+            let pos: number;
+            try {
+                pos = editor.view.posAtDOM(el, 0);
+            } catch (_) {
+                // For NodeView wrappers, try the first child
+                const child = el.firstElementChild as HTMLElement;
+                pos = child ? editor.view.posAtDOM(child, 0) : 0;
+            }
+            dragNodeRef.current = { html: outerHtml, pos };
+        } catch (_) {
+            dragNodeRef.current = null;
+        }
+
+        // Fade the dragged element
+        setTimeout(() => { el.style.opacity = '0.35'; }, 0);
+    };
+
+    // Drop handler — move dragged block to drop position
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        if (!editor || editor.isDestroyed || !editor.view || !dragNodeRef.current) return;
+
+        // Restore opacity
+        if (gripState.targetElement) {
+            gripState.targetElement.style.opacity = '';
+        }
+
+        try {
+            const dropCoords = editor.view.posAtCoords({ left: e.clientX, top: e.clientY });
+            if (!dropCoords) { dragNodeRef.current = null; return; }
+
+            const { html, pos: fromPos } = dragNodeRef.current;
+            const state = editor.state;
+            const doc = state.doc;
+
+            // Resolve the node boundaries at the source position
+            let nodeStart = fromPos;
+            let nodeEnd = fromPos;
+            try {
+                const resolvedFrom = doc.resolve(fromPos);
+                // Walk up to block level
+                const depth = resolvedFrom.depth;
+                nodeStart = resolvedFrom.before(depth > 0 ? depth : 1);
+                const nodeAtStart = doc.nodeAt(nodeStart);
+                nodeEnd = nodeAtStart ? nodeStart + nodeAtStart.nodeSize : nodeStart + 1;
+            } catch (_) { }
+
+            const targetPos = Math.min(dropCoords.pos, doc.content.size);
+
+            // Avoid inserting inside the same node
+            if (targetPos >= nodeStart && targetPos <= nodeEnd) {
+                dragNodeRef.current = null;
+                return;
+            }
+
+            editor.chain()
+                .deleteRange({ from: nodeStart, to: nodeEnd })
+                .insertContentAt(Math.max(0, targetPos > nodeEnd ? targetPos - (nodeEnd - nodeStart) : targetPos), html)
+                .focus()
+                .run();
+        } catch (err) {
+            console.warn('[DocEditor] Drop reorder error:', err);
+        }
+
+        dragNodeRef.current = null;
+    };
+
+    // Insert database inline at cursor position
+    const handleAddDatabase = (viewType: 'table' | 'kanban' | 'list' = 'table') => {
         if (!editor || editor.isDestroyed || !editor.view) return;
         try {
-            editor.chain().focus().insertContent('<p></p>').run();
-        } catch (e) { }
-    };
-
-    // Add inline database with explicit view type
-    const handleAddDatabase = (viewType: 'table' | 'kanban' | 'list' = 'table') => {
-        const dbId = `db-${Date.now()}`;
-        setDatabaseBlocks(prev => [...prev, { id: dbId, initialViewType: viewType }]);
-        if (editor && !editor.isDestroyed && editor.view) {
-            try {
-                editor.chain().focus().insertContent(`<p>[[DATABASE:${viewType}]]</p>`).run();
-            } catch (e) { }
-        }
-    };
-
-    // Drag start for :: handle
-    const handleGripDragStart = (e: React.DragEvent) => {
-        if (gripState.targetElement) {
-            e.dataTransfer.setData('text/html', gripState.targetElement.outerHTML);
+            editor.chain().focus().insertContent({
+                type: 'databaseBlock',
+                attrs: { viewType, dbId: `db-${Date.now()}` },
+            }).run();
+        } catch (e) {
+            console.warn('[DocEditor] handleAddDatabase error:', e);
         }
     };
 
@@ -313,8 +379,6 @@ export const DocEditor: React.FC<DocEditorProps> = ({
         if (!editor || editor.isDestroyed || !editor.view) return;
 
         try {
-            editor.chain().focus();
-
             switch (type) {
                 case 'paragraph':
                     editor.chain().focus().setNode('paragraph').run();
@@ -348,12 +412,15 @@ export const DocEditor: React.FC<DocEditorProps> = ({
                 default:
                     if (type.endsWith('columns')) {
                         const count = parseInt(type.charAt(0), 10) || 2;
-                        let colsHtml = `<div style="display: grid; grid-template-columns: repeat(${count}, 1fr); gap: 16px; margin: 12px 0;">`;
+                        const cols: any[] = [];
                         for (let i = 0; i < count; i++) {
-                            colsHtml += `<div style="padding: 12px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;"><p>Coluna ${i + 1}</p></div>`;
+                            cols.push({ type: 'paragraph', content: [{ type: 'text', text: `Coluna ${i + 1}` }] });
                         }
-                        colsHtml += `</div>`;
-                        editor.chain().focus().insertContent(colsHtml).run();
+                        editor.chain().focus().insertContent({
+                            type: 'columnBlock',
+                            attrs: { columns: count },
+                            content: cols,
+                        }).run();
                     }
                     break;
             }
@@ -417,7 +484,6 @@ export const DocEditor: React.FC<DocEditorProps> = ({
             try {
                 if (editor.commands && typeof editor.commands.setContent === 'function') {
                     editor.commands.setContent(templateContent);
-                    syncDatabasesFromHtml(templateContent);
                 }
             } catch (e) { }
         }
@@ -565,14 +631,14 @@ export const DocEditor: React.FC<DocEditorProps> = ({
                 <div className="h-px bg-white/[0.06] w-full my-2" />
             </div>
 
-            {/* AppFlowy Floating Selection Formatting Toolbar ("Ver ao selecionar o texto") */}
+            {/* AppFlowy Floating Selection Formatting Toolbar */}
             {bubbleState.isOpen && bubbleState.position && editor && (
                 <div
                     style={{ top: `${bubbleState.position.y}px`, left: `${bubbleState.position.x}px` }}
                     className="fixed z-50 animate-in fade-in zoom-in-95 duration-100"
                 >
-                    <BubbleMenuToolbar 
-                        editor={editor} 
+                    <BubbleMenuToolbar
+                        editor={editor}
                         onOpenColorMenu={(e) => {
                             setBlockMenuState({ isOpen: true, position: { x: e.clientX, y: e.clientY } });
                         }}
@@ -586,53 +652,20 @@ export const DocEditor: React.FC<DocEditorProps> = ({
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 onContextMenu={handleCanvasContextMenu}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
                 className="max-w-4xl w-full mx-auto px-10 pb-32 flex-1 cursor-text relative"
             >
                 {/* Hover Drag Handle :: and + button */}
                 <NotionBlockGrip
                     visible={gripState.visible}
                     position={gripState.position}
-                    onAddBlockBelow={handleAddBlockBelow}
+                    onOpenSlashMenu={handleOpenSlashMenuFromGrip}
                     onOpenBlockMenu={handleOpenGripMenu}
                     onDragStart={handleGripDragStart}
                 />
 
                 <EditorContent editor={editor} className="tiptap min-h-[40px]" />
-
-                {/* Embedded Notion Databases with explicit initial view type */}
-                {databaseBlocks.map((dbItem) => (
-                    <NotionDatabase
-                        key={dbItem.id}
-                        id={dbItem.id}
-                        initialViewType={dbItem.initialViewType}
-                        onDelete={() => {
-                            setDatabaseBlocks(prev => prev.filter(item => item.id !== dbItem.id));
-                            if (editor && !editor.isDestroyed && editor.view) {
-                                try {
-                                    const html = editor.getHTML();
-                                    const cleaned = html.replace(/<p>[^<]*\[\[DATABASE:[^\]]+\]\][^<]*<\/p>/gi, '');
-                                    if (editor.commands && typeof editor.commands.setContent === 'function') {
-                                        editor.commands.setContent(cleaned || '<p></p>');
-                                    }
-                                } catch (e) { }
-                            }
-                        }}
-                        onAddTextAbove={() => {
-                            if (editor && !editor.isDestroyed && editor.view) {
-                                try {
-                                    editor.chain().focus().insertContent('<p></p>').run();
-                                } catch (e) { }
-                            }
-                        }}
-                        onAddTextBelow={() => {
-                            if (editor && !editor.isDestroyed && editor.view) {
-                                try {
-                                    editor.chain().focus().insertContent('<p></p>').run();
-                                } catch (e) { }
-                            }
-                        }}
-                    />
-                ))}
             </div>
 
             {/* AppFlowy Slash Command Menu */}

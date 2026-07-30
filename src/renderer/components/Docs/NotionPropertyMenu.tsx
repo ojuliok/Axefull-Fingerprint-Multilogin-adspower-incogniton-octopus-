@@ -123,6 +123,19 @@ export const NotionPropertyMenu: React.FC<NotionPropertyMenuProps> = ({
                     placeholder="Type property name..."
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onBlur={() => {
+                        if (name.trim() && column && name !== column.name) {
+                            onSaveColumn({ ...column, name: name.trim() });
+                        }
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            if (name.trim() && column && name !== column.name) {
+                                onSaveColumn({ ...column, name: name.trim() });
+                            }
+                            onClose();
+                        }
+                    }}
                     className="w-full bg-transparent text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none font-medium"
                     autoFocus
                 />

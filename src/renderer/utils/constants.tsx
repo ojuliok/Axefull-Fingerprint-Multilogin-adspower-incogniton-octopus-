@@ -20,6 +20,27 @@ export const STATUS_CONFIG: Record<string, { label: string; cls: string; dot: st
     waiting: { label: 'Aguardando',cls: 'text-violet-400 bg-violet-500/10 border-violet-500/20',dot: '#a78bfa' },
 };
 
+export const getStatusMap = (): Record<string, { label: string; cls: string; dot: string }> => {
+    try {
+        const saved = localStorage.getItem('axe_custom_status_config');
+        if (saved) {
+            const custom = JSON.parse(saved);
+            return { ...STATUS_CONFIG, ...custom };
+        }
+    } catch (e) {
+        console.error('Error reading custom status config', e);
+    }
+    return STATUS_CONFIG;
+};
+
+export const saveCustomStatusConfig = (updatedMap: Record<string, { label: string; cls: string; dot: string }>) => {
+    try {
+        localStorage.setItem('axe_custom_status_config', JSON.stringify(updatedMap));
+    } catch (e) {
+        console.error('Error saving custom status config', e);
+    }
+};
+
 export const SOCIAL_TAG_COLORS: Record<string, { color: string; bg: string; border: string; bgActive: string; borderActive: string }> = {
     facebook:  { color: '#1877f2', bg: 'rgba(24, 119, 242, 0.05)',  border: 'rgba(24, 119, 242, 0.15)', bgActive: 'rgba(24, 119, 242, 0.15)', borderActive: 'rgba(24, 119, 242, 0.4)' },
     instagram: { color: '#e1306c', bg: 'rgba(225, 48, 108, 0.05)', border: 'rgba(225, 48, 108, 0.15)', bgActive: 'rgba(225, 48, 108, 0.15)', borderActive: 'rgba(225, 48, 108, 0.4)' },

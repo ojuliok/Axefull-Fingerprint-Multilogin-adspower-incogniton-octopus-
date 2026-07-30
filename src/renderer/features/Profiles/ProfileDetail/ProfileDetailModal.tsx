@@ -458,11 +458,29 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({ profile, tagTem
 
     // Browser data stats
     const [stats, setStats] = useState<DataStats>({ cookieCount: 0, historyCount: 0, bookmarkCount: 0 });
+    const [isExtracting, setIsExtracting] = useState(false);
+
     const loadStats = useCallback(async () => {
         const res = await window.api.browserData.stats(profile.id);
         if (res.success) setStats(res.data as DataStats);
     }, [profile.id]);
     useEffect(() => { loadStats(); }, [loadStats]);
+
+    const handleExportFullProfileData = async () => {
+        try {
+            setIsExtracting(true);
+            const res = await window.api.profiles.exportZip(profile.id);
+            if (res.success && res.data) {
+                toast.success('Extração Concluída', `Dados do perfil e navegador extraídos com sucesso!`);
+            } else if (res.error && res.error !== 'cancelled') {
+                toast.error('Erro na Extração', res.error);
+            }
+        } catch (err) {
+            toast.error('Erro ao extrair dados do perfil', String(err));
+        } finally {
+            setIsExtracting(false);
+        }
+    };
 
     const handleSave = async () => {
         setSaving(true);
@@ -483,9 +501,10 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({ profile, tagTem
             } else {
                 await window.api.profiles.updateProxy(profile.id, null);
             }
+            toast.success('Perfil atualizado', 'As alterações foram salvas com sucesso');
             onSave({ ...profile, name, notes: JSON.stringify(notesList), tags: tags.join(', ') });
         } catch (err) {
-            console.error('Error saving profile:', err);
+            toast.error('Erro ao salvar perfil', String(err));
         } finally {
             setSaving(false);
         }
@@ -747,6 +766,42 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({ profile, tagTem
                                         <RotateCw size={15} /> Regenerar Fingerprint
                                     </button>
                                 )}
+
+                                <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                        <Download size={16} style={{ color: '#38bdf8' }} />
+                                        <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>
+                                            Extração Completa de Perfil & Navegador
+                                        </h4>
+                                    </div>
+                                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>
+                                        Extraia e exporte todos os dados deste perfil (fingerprint, cookies, histórico, favoritos, proxies e armazenamento do navegador) em um pacote portátil <code style={{ color: '#38bdf8' }}>.axeprofile</code>.
+                                    </p>
+                                    <button
+                                        onClick={handleExportFullProfileData}
+                                        disabled={isExtracting}
+                                        className={styles.actionBtnPrimary}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 16px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justify: 'center',
+                                            gap: 8,
+                                            fontSize: 12,
+                                            fontWeight: 600,
+                                            background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: 8,
+                                            cursor: 'pointer',
+                                            transition: 'opacity 0.2s',
+                                        }}
+                                    >
+                                        {isExtracting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                                        {isExtracting ? 'Extraindo Dados Completo...' : 'Extrair Todos os Dados do Perfil e Navegador (.axeprofile)'}
+                                    </button>
+                                </div>
                             </div>
                         )}
 

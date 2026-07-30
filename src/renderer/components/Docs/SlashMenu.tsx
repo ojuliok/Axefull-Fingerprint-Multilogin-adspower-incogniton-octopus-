@@ -136,7 +136,10 @@ export const SLASH_COMMANDS: SlashMenuItem[] = [
         category: 'Bases de Dados Embutidas',
         shortcut: '/tabela',
         icon: <Table className="w-4 h-4 text-amber-400" />,
-        command: (editor: any) => editor.chain().focus().insertContent('<p>[[DATABASE:table]]</p>').run(),
+        command: (editor: any) => editor.chain().focus().insertContent({
+            type: 'databaseBlock',
+            attrs: { viewType: 'table', dbId: `db-${Date.now()}` },
+        }).run(),
     },
     {
         id: 'kanban',
@@ -145,7 +148,10 @@ export const SLASH_COMMANDS: SlashMenuItem[] = [
         category: 'Bases de Dados Embutidas',
         shortcut: '/kanban',
         icon: <Kanban className="w-4 h-4 text-purple-400" />,
-        command: (editor: any) => editor.chain().focus().insertContent('<p>[[DATABASE:kanban]]</p>').run(),
+        command: (editor: any) => editor.chain().focus().insertContent({
+            type: 'databaseBlock',
+            attrs: { viewType: 'kanban', dbId: `db-${Date.now()}` },
+        }).run(),
     },
     {
         id: 'lista',
@@ -154,7 +160,10 @@ export const SLASH_COMMANDS: SlashMenuItem[] = [
         category: 'Bases de Dados Embutidas',
         shortcut: '/lista',
         icon: <LayoutList className="w-4 h-4 text-sky-400" />,
-        command: (editor: any) => editor.chain().focus().insertContent('<p>[[DATABASE:list]]</p>').run(),
+        command: (editor: any) => editor.chain().focus().insertContent({
+            type: 'databaseBlock',
+            attrs: { viewType: 'list', dbId: `db-${Date.now()}` },
+        }).run(),
     },
 
     // 📐 Layout & Estrutura
@@ -174,7 +183,49 @@ export const SLASH_COMMANDS: SlashMenuItem[] = [
         category: 'Layout & Estrutura',
         shortcut: '/2cols',
         icon: <Columns className="w-4 h-4 text-teal-400" />,
-        command: (editor: any) => editor.chain().focus().insertContent('<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0;"><div style="padding: 12px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;"><p>Coluna 1</p></div><div style="padding: 12px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;"><p>Coluna 2</p></div></div>').run(),
+        command: (editor: any) => editor.chain().focus().insertContent({
+            type: 'columnBlock',
+            attrs: { columns: 2 },
+            content: [
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 1' }] }] },
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 2' }] }] },
+            ],
+        }).run(),
+    },
+    {
+        id: '3cols',
+        title: '3 Colunas',
+        description: 'Dividir o conteúdo em 3 colunas paralelas.',
+        category: 'Layout & Estrutura',
+        shortcut: '/3cols',
+        icon: <Columns className="w-4 h-4 text-teal-400" />,
+        command: (editor: any) => editor.chain().focus().insertContent({
+            type: 'columnBlock',
+            attrs: { columns: 3 },
+            content: [
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 1' }] }] },
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 2' }] }] },
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 3' }] }] },
+            ],
+        }).run(),
+    },
+    {
+        id: '4cols',
+        title: '4 Colunas',
+        description: 'Dividir o conteúdo em 4 colunas paralelas.',
+        category: 'Layout & Estrutura',
+        shortcut: '/4cols',
+        icon: <Columns className="w-4 h-4 text-teal-400" />,
+        command: (editor: any) => editor.chain().focus().insertContent({
+            type: 'columnBlock',
+            attrs: { columns: 4 },
+            content: [
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 1' }] }] },
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 2' }] }] },
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 3' }] }] },
+                { type: 'columnNode', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Coluna 4' }] }] },
+            ],
+        }).run(),
     },
 ];
 

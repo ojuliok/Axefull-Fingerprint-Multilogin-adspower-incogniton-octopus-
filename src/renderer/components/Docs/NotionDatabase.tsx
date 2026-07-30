@@ -4,13 +4,18 @@ import {
     CheckCircle2, Clock, AlertCircle, User, Tag, ChevronDown, Filter, Hash,
     CheckSquare, Link, Percent, ArrowLeft, ArrowRight, EyeOff, Copy, Type as TypeIcon,
     Database, Key, Shield, ArrowUpDown, Download, Upload, FileSpreadsheet,
-    SlidersHorizontal, Maximize2, Minimize2, Settings
+    SlidersHorizontal, Maximize2, Minimize2, Settings, ArrowLeft as ArrowLeftIcon
 } from 'lucide-react';
 import { PostgresDataType, PostgresColumnSchema, PostgresRowData, ViewSettingsConfig } from '../../../shared/postgres-types';
 import { SupabaseColumnModal } from './SupabaseColumnModal';
 import { NotionPropertyMenu } from './NotionPropertyMenu';
 import { NotionAddViewMenu, ViewTypeOption } from './NotionAddViewMenu';
 import { NotionViewSettingsModal } from './NotionViewSettingsModal';
+import { RowDetailModal } from './RowDetailModal';
+import { DatabaseTableView } from './views/DatabaseTableView';
+import { DatabaseBoardView } from './views/DatabaseBoardView';
+import { DatabaseGalleryView } from './views/DatabaseGalleryView';
+import { DatabaseListView } from './views/DatabaseListView';
 
 export interface DatabaseView {
     id: string;
@@ -82,6 +87,9 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
     const [columns, setColumns] = useState<PostgresColumnSchema[]>(DEFAULT_SUPABASE_COLUMNS);
     const [rows, setRows] = useState<PostgresRowData[]>(DEFAULT_SUPABASE_ROWS);
 
+    // Row Side-Peek Detail Modal State
+    const [activeDetailRow, setActiveDetailRow] = useState<PostgresRowData | null>(null);
+
     // Column Context Menu State
     const [columnMenuState, setColumnMenuState] = useState<{
         isOpen: boolean;
@@ -119,23 +127,29 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
     const activeView = views.find(v => v.id === activeViewId) || views[0];
 
     const handleSelectNewViewType = (viewTypeId: ViewTypeOption['id'], label: string) => {
+        let viewIcon = <Table className="w-3.5 h-3.5 text-emerald-400" />;
+        if (viewTypeId === 'board') viewIcon = <Kanban className="w-3.5 h-3.5 text-purple-400" />;
+        if (viewTypeId === 'list') viewIcon = <LayoutList className="w-3.5 h-3.5 text-sky-400" />;
+        if (viewTypeId === 'gallery') viewIcon = <LayoutList className="w-3.5 h-3.5 text-amber-400" />;
+
         const newView: DatabaseView = {
             id: `v-${Date.now()}`,
             name: label,
             type: viewTypeId,
-            icon: viewTypeId === 'table' ? <Table className="w-3.5 h-3.5 text-emerald-400" /> : <Kanban className="w-3.5 h-3.5 text-purple-400" />,
+            icon: viewIcon,
         };
         setViews(prev => [...prev, newView]);
         setActiveViewId(newView.id);
-        setViewConfig(prev => ({ ...prev, layout: viewTypeId }));
+        setViewConfig(prev => ({ ...prev, layout: viewTypeId as any }));
         setAddViewMenuState({ isOpen: false, position: null });
     };
 
     const addRow = () => {
         const newRow: PostgresRowData = {
             id: Date.now().toString(),
-            col_id: rows.length + 100,
+            col_id: rows.length + 101,
             col_created_at: new Date().toISOString(),
+            col_nomewpp: 'Novo registro',
         };
         setRows(prev => [...prev, newRow]);
     };
@@ -162,7 +176,7 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         setPropertyMenuState({
             isOpen: true,
-            position: { x: rect.left - 240, y: rect.bottom + 6 },
+            position: { x: Math.max(10, rect.left - 240), y: rect.bottom + 6 },
             column: newCol,
         });
     };
@@ -200,7 +214,7 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         setViewSettingsState({
             isOpen: true,
-            position: { x: rect.left - 240, y: rect.bottom + 6 },
+            position: { x: Math.max(10, rect.left - 240), y: rect.bottom + 6 },
         });
     };
 
@@ -248,14 +262,26 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
         setColumns(prev => prev.map(c => ({ ...c, hidden: true })));
     };
 
-    const visibleColumns = columns.filter(c => !c.hidden);
-
     const containerStyle = isFullPage
-        ? "fixed inset-0 z-50 p-8 bg-[#0b0c10] overflow-y-auto font-sans select-none animate-in fade-in"
+        ? "fixed inset-0 z-50 p-8 bg-[#0b0c10] overflow-y-auto font-sans select-none animate-in fade-in duration-150 flex flex-col"
         : "relative my-6 border-[5px] border-[#27272a] hover:border-emerald-500/40 rounded-2xl bg-[#141417] shadow-2xl font-sans select-none animate-in fade-in duration-200 group/db";
 
     return (
         <div className={containerStyle}>
+            {/* Full Page Navigation Header Bar with Back/Minimize Button */}
+            {isFullPage && (
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 text-xs">
+                    <button
+                        onClick={() => setIsFullPage(false)}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-emerald-500/20 text-zinc-200 hover:text-emerald-300 font-bold border border-white/10 transition-all cursor-pointer"
+                    >
+                        <ArrowLeftIcon className="w-4 h-4" />
+                        <span>Voltar ao Documento</span>
+                    </button>
+                    <div className="font-mono text-zinc-400 text-xs">Modo Página Inteira (Full Page)</div>
+                </div>
+            )}
+
             {/* Top Hover Action Bar for Adding Text Above & Below */}
             {!isFullPage && (
                 <div className="absolute -top-9 right-2 z-30 flex items-center gap-1.5 opacity-0 group-hover/db:opacity-100 transition-all duration-150 bg-[#18181b] border border-white/10 px-2 py-1 rounded-xl shadow-xl">
@@ -319,7 +345,7 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
                         className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/10 cursor-pointer transition-colors"
                         title={isFullPage ? "Sair da Tela Cheia" : "Abrir Página Inteira"}
                     >
-                        {isFullPage ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                        {isFullPage ? <Minimize2 className="w-3.5 h-3.5 text-amber-400" /> : <Maximize2 className="w-3.5 h-3.5" />}
                     </button>
 
                     <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 border border-white/10 cursor-pointer">
@@ -399,96 +425,132 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
                 </button>
             </div>
 
-            {/* TABLE VIEW */}
+            {/* DEDICATED VIEW RENDERERS */}
             {viewConfig.layout === 'table' && (
-                <div className="overflow-x-auto">
-                    <table className={`w-full text-left text-xs border-collapse font-sans ${viewConfig.showVerticalLines ? 'divide-x divide-white/10' : ''}`}>
-                        <thead>
-                            <tr className="border-b border-white/10 bg-white/[0.02] text-zinc-400 uppercase text-[10px] tracking-wider font-semibold">
-                                {visibleColumns.map((col) => (
-                                    <th
-                                        key={col.id}
-                                        onContextMenu={(e) => handleColumnContextMenu(e, col.id)}
-                                        className={`py-2.5 px-4 hover:bg-white/5 transition-colors cursor-pointer ${viewConfig.showVerticalLines ? 'border-r border-white/10' : ''}`}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {col.isPrimaryKey && <Key className="w-3 h-3 text-amber-400 shrink-0" />}
-                                            <span className="font-bold text-zinc-200 lowercase font-mono">{col.name}</span>
+                <DatabaseTableView
+                    columns={columns}
+                    rows={rows}
+                    config={viewConfig}
+                    onUpdateRowValue={updateRowValue}
+                    onDeleteRow={deleteRow}
+                    onAddRow={addRow}
+                    onQuickAddProperty={handleQuickAddProperty}
+                    onOpenPropertyTypeMenu={handleOpenPropertyTypeMenu}
+                    onColumnContextMenu={handleColumnContextMenu}
+                    onRowClick={(row) => setActiveDetailRow(row)}
+                />
+            )}
 
-                                            <button
-                                                type="button"
-                                                onClick={(e) => handleOpenPropertyTypeMenu(e, col)}
-                                                className="text-[10px] font-mono text-zinc-400 hover:text-emerald-300 bg-white/5 hover:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-white/10 lowercase transition-colors cursor-pointer"
-                                            >
-                                                {col.type}
-                                            </button>
-                                        </div>
-                                    </th>
-                                ))}
+            {viewConfig.layout === 'board' && (
+                <DatabaseBoardView
+                    columns={columns}
+                    rows={rows}
+                    config={viewConfig}
+                    onRowClick={(row) => setActiveDetailRow(row)}
+                    onAddRow={addRow}
+                />
+            )}
 
-                                {/* Quick + Button Column Header */}
-                                <th className="py-2.5 px-3 w-10 text-center">
-                                    <button
-                                        type="button"
-                                        onClick={handleQuickAddProperty}
-                                        className="p-1 text-zinc-400 hover:text-emerald-400 hover:bg-white/10 rounded-md transition-colors cursor-pointer"
-                                        title="Adicionar Nova Propriedade (+)"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                    </button>
-                                </th>
+            {viewConfig.layout === 'gallery' && (
+                <DatabaseGalleryView
+                    columns={columns}
+                    rows={rows}
+                    config={viewConfig}
+                    onRowClick={(row) => setActiveDetailRow(row)}
+                    onAddRow={addRow}
+                />
+            )}
 
-                                <th className="py-2.5 px-4 text-right">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5 text-zinc-300">
-                            {rows.slice(0, viewConfig.loadLimit).map((row) => (
-                                <tr key={row.id} className="hover:bg-white/[0.02] transition-colors group font-mono">
-                                    {visibleColumns.map((col) => (
-                                        <td key={col.id} className={`py-2 px-4 ${viewConfig.showVerticalLines ? 'border-r border-white/10' : ''}`}>
-                                            <input
-                                                type="text"
-                                                value={row[col.id] !== undefined ? (typeof row[col.id] === 'object' ? JSON.stringify(row[col.id]) : row[col.id]) : ''}
-                                                onChange={(e) => updateRowValue(row.id, col.id, e.target.value)}
-                                                className={`w-full bg-transparent focus:outline-none text-zinc-200 text-xs font-mono ${viewConfig.wrapAllContent ? 'whitespace-normal' : 'truncate'}`}
-                                            />
-                                        </td>
-                                    ))}
-                                    <td className="py-2 px-3"></td>
-                                    <td className="py-2 px-4 text-right">
-                                        <button
-                                            onClick={() => deleteRow(row.id)}
-                                            className="p-1 text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {viewConfig.layout === 'list' && (
+                <DatabaseListView
+                    columns={columns}
+                    rows={rows}
+                    config={viewConfig}
+                    onRowClick={(row) => setActiveDetailRow(row)}
+                    onAddRow={addRow}
+                />
+            )}
+
+            {/* Fallback for other view types */}
+            {viewConfig.layout !== 'table' && viewConfig.layout !== 'board' && viewConfig.layout !== 'gallery' && viewConfig.layout !== 'list' && (
+                <DatabaseListView
+                    columns={columns}
+                    rows={rows}
+                    config={viewConfig}
+                    onRowClick={(row) => setActiveDetailRow(row)}
+                    onAddRow={addRow}
+                />
+            )}
+
+            {/* Column Context Menu Popover */}
+            {columnMenuState.isOpen && columnMenuState.position && (
+                <div
+                    style={{ top: `${columnMenuState.position.y}px`, left: `${columnMenuState.position.x}px` }}
+                    className="fixed z-50 w-48 bg-[#18181b] border border-white/10 rounded-xl shadow-2xl p-1 text-xs text-zinc-200 animate-in fade-in"
+                >
                     <button
-                        onClick={() => addRow()}
-                        className="w-full py-2.5 border-t border-white/5 hover:bg-white/[0.02] text-zinc-400 hover:text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                        onClick={() => {
+                            const col = columns.find(c => c.id === columnMenuState.columnId);
+                            setEditingColumn(col);
+                            setShowColumnModal(true);
+                            setColumnMenuState({ isOpen: false, position: null, columnId: null });
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
                     >
-                        <Plus className="w-3.5 h-3.5" /> Insert row
+                        <Edit3 className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Editar Coluna</span>
+                    </button>
+                    <button
+                        onClick={() => handleInsertColumnAt('left')}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                    >
+                        <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Inserir à esquerda</span>
+                    </button>
+                    <button
+                        onClick={() => handleInsertColumnAt('right')}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                    >
+                        <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Inserir à direita</span>
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (columnMenuState.columnId) handleToggleColumnVisibility(columnMenuState.columnId);
+                            setColumnMenuState({ isOpen: false, position: null, columnId: null });
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                    >
+                        <EyeOff className="w-3.5 h-3.5 text-zinc-400" />
+                        <span>Ocultar coluna</span>
+                    </button>
+                    <div className="my-1 border-t border-white/10" />
+                    <button
+                        onClick={handleDeleteColumn}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Excluir coluna</span>
                     </button>
                 </div>
             )}
 
-            {/* OTHER VIEWS (BOARD, LIST, GALLERY, etc.) */}
-            {viewConfig.layout !== 'table' && (
-                <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4 bg-black/20 font-mono">
-                    {rows.slice(0, viewConfig.loadLimit).map((item) => (
-                        <div key={item.id} className="p-4 bg-[#18181b] border border-white/10 rounded-2xl shadow-lg flex flex-col gap-2">
-                            <div className="text-xs font-bold text-emerald-400">ID #{item.col_id || item.id}</div>
-                            <div className="text-xs text-zinc-200 truncate">{item.col_phone || item.col_nomewpp || 'Registro'}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* Row Detail Side-Peek Modal */}
+            <RowDetailModal
+                isOpen={Boolean(activeDetailRow)}
+                row={activeDetailRow}
+                columns={columns}
+                onClose={() => setActiveDetailRow(null)}
+                onUpdateRow={(rowId, updatedRow) => {
+                    setRows(prev => prev.map(r => r.id === rowId ? updatedRow : r));
+                    setActiveDetailRow(updatedRow);
+                }}
+                onAddProperty={(newCol) => {
+                    setColumns(prev => [...prev, newCol]);
+                }}
+            />
 
-            {/* Notion Add View Dropdown Menu (Matching Image 5) */}
+            {/* Notion Add View Dropdown Menu */}
             <NotionAddViewMenu
                 isOpen={addViewMenuState.isOpen}
                 position={addViewMenuState.position}
@@ -496,7 +558,7 @@ export const NotionDatabase: React.FC<NotionDatabaseProps> = ({
                 onSelectViewType={handleSelectNewViewType}
             />
 
-            {/* Notion View Settings Modal (Matching Images 2, 3, 4) */}
+            {/* Notion View Settings Modal */}
             <NotionViewSettingsModal
                 isOpen={viewSettingsState.isOpen}
                 position={viewSettingsState.position}

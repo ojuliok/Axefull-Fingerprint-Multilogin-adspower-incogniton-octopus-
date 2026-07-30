@@ -16,7 +16,7 @@
   min-height: 40px;
   font-size: 15px;
   line-height: 1.7;
-  padding-left: 54px !important; /* Safe clearance for :: grip handle */
+  padding-left: 28px !important; /* One tab clearance for :: grip handle */
 }
 
 .tiptap:focus {
@@ -218,4 +218,44 @@
 .overflow-x-auto::-webkit-scrollbar-thumb:hover,
 .db-table-scroll::-webkit-scrollbar-thumb:hover {
   background: #60a5fa !important;
+}
+
+/* Database Node Wrapper — inside Tiptap canvas */
+.database-node-wrapper {
+  display: block;
+  margin: 8px 0;
+  user-select: none;
+}
+
+.database-node-wrapper[contenteditable="false"] {
+  cursor: default;
+}
+
+/* Column Block Wrapper — inside Tiptap canvas */
+.column-block-wrapper {
+  display: block;
+  margin: 8px 0;
+}
+
+.column-block-content {
+  display: contents;
+}
+
+/* Each direct block child of a columnBlock renders as a column cell */
+.tiptap [data-type="columnBlock"] > * {
+  padding: 12px 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  min-height: 60px;
+  transition: border-color 0.15s;
+}
+
+.tiptap [data-type="columnBlock"] > *:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.tiptap [data-type="columnBlock"] > *:focus-within {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.03);
 }

@@ -343,6 +343,42 @@ export function importProfiles(exportData: {
                 insert('proxies', proxy as unknown as Record<string, unknown>);
             }
 
+            // Restore cookies if present in JSON export
+            if (source.cookies && Array.isArray(source.cookies) && source.cookies.length > 0) {
+                try {
+                    const dataManager = require('./data-manager');
+                    const netscapeLines = [
+                        '# Netscape HTTP Cookie File',
+                        ...source.cookies.map((c: any) => [
+                            c.domain,
+                            c.domain?.startsWith('.') ? 'TRUE' : 'FALSE',
+                            c.path || '/',
+                            c.secure ? 'TRUE' : 'FALSE',
+                            c.expires > 0 ? Math.floor(c.expires / 1000) : 0,
+                            c.name,
+                            c.value
+                        ].join('\t'))
+                    ].join('\n');
+                    dataManager.importCookiesNetscape(newId, netscapeLines);
+                } catch (cErr) {
+                    console.error(`[ProfileManager] Could not restore cookies for ${newId}:`, cErr);
+                }
+            }
+
+            // Restore bookmarks if present in JSON export
+            if (source.bookmarks && Array.isArray(source.bookmarks) && source.bookmarks.length > 0) {
+                try {
+                    const dataManager = require('./data-manager');
+                    for (const b of source.bookmarks) {
+                        if (b.url && b.name) {
+                            dataManager.addBookmark(newId, b.name, b.url);
+                        }
+                    }
+                } catch (bErr) {
+                    console.error(`[ProfileManager] Could not restore bookmarks for ${newId}:`, bErr);
+                }
+            }
+
             created.push({ ...profile, fingerprint, proxy });
         } catch (err) {
             console.error(`[ProfileManager] Failed to import profile "${source.name}":`, err);

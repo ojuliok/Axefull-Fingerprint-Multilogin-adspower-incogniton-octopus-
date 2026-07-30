@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronUp, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network, Eraser } from 'lucide-react';
+import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronUp, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network, Eraser, GripVertical } from 'lucide-react';
 import CreateProfileModal from '../features/Profiles/ProfileEditor/CreateProfileModal';
 import PropertiesModal from '../features/Profiles/ProfileEditor/PropertiesModal';
 import ProfileDetailModal from '../features/Profiles/ProfileDetail/ProfileDetailModal';
@@ -14,6 +14,7 @@ import { Profile, Folder } from '../types';
 import {
     getOsLabel,
     STATUS_CONFIG,
+    getStatusMap,
     SOCIAL_TAG_COLORS,
     getTagIconElement,
     DEFAULT_TAG_TEMPLATES,
@@ -206,10 +207,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
     const [editingNotes, setEditingNotes] = useState('');
     const [activeNotesEdit, setActiveNotesEdit] = useState<{ profileId: string; tempValue: string } | null>(null);
     const [folderCellPicker, setFolderCellPicker] = useState<{ profileId: string; x: number; y: number } | null>(null);
+    const [statusMap, setStatusMap] = useState(() => getStatusMap());
     const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
         const defaults = {
-            name: 220,
-            status: 110,
+            name: 340,
+            status: 120,
             notes: 150,
             folder: 120,
             tags: 130,
@@ -226,7 +228,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
     const [avatarPicker, setAvatarPicker] = useState<{ profileId: string; x: number; y: number } | null>(null);
     const [viewingNote, setViewingNote] = useState<{ profileName: string; notes: string } | null>(null);
     const [groupBy, setGroupBy] = useState<'none' | 'status' | 'folder'>('none');
+    const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+    const [showStatusFilterMenu, setShowStatusFilterMenu] = useState(false);
     const [defaultDetailTab, setDefaultDetailTab] = useState<'general' | 'fingerprint' | 'proxy' | 'cookies' | 'history' | 'bookmarks' | 'clear'>('general');
+
+    const [profileCustomOrder, setProfileCustomOrder] = useState<string[]>(() => {
+        try {
+            const saved = localStorage.getItem('axe_profile_custom_order');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
+
+    const [noteModalState, setNoteModalState] = useState<{
+        isOpen: boolean;
+        profileId: string;
+        profileName: string;
+        content: string;
+    } | null>(null);
 
     // Drag handle for floating trigger
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -649,10 +669,42 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                 await loadProfiles();
                 toast.success(`${data.count} perfil(s) importado(s) com sucesso!`);
             } else if ((result.error as string) !== 'cancelled') {
-                toast.error('Erro ao importar', result.error as string);
+                const zipResult = await window.api.profiles.importZip();
+                if (zipResult.success && zipResult.profile) {
+                    await loadProfiles();
+                    toast.success(`Pacote de perfil "${(zipResult.profile as any).name}" importado com sucesso!`);
+                } else if (zipResult.error && zipResult.error !== 'cancelled') {
+                    toast.error('Erro ao importar', zipResult.error as string);
+                }
             }
         } catch (error) {
             toast.error('Erro ao importar', String(error));
+        } finally {
+            setBulkProgress(null);
+        }
+    };
+
+    const handleExportSelectedOrAll = async () => {
+        const targetIds = selectedProfileIds.length > 0
+            ? selectedProfileIds
+            : profiles.filter(p => p.category !== 'trash').map(p => p.id);
+
+        if (targetIds.length === 0) {
+            toast.error('Nenhum perfil disponível para exportação');
+            return;
+        }
+
+        setBulkProgress(`Exportando ${targetIds.length} perfil(s)...`);
+        try {
+            const result = await window.api.profiles.export(targetIds);
+            if (result.success && result.data) {
+                const data = result.data as { path: string; count: number };
+                toast.success('Exportação Concluída', `${data.count} perfil(s) exportado(s) com dados completos (fingerprint, cookies, histórico, favoritos) em: ${data.path}`);
+            } else if (result.error && result.error !== 'cancelled') {
+                toast.error('Erro ao exportar', result.error as string);
+            }
+        } catch (error) {
+            toast.error('Erro ao exportar perfis', String(error));
         } finally {
             setBulkProgress(null);
         }
@@ -804,22 +856,36 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
         }
     };
 
-    const renderNotesPreview = (notes: string | null): string => {
+    const cleanNotesText = (notes: string | null | undefined): string => {
         if (!notes) return '';
-        const trimmed = notes.trim();
-        if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+        let text = String(notes).trim();
+
+        // 1. Strip HTML tags like <p>, </p>, <div>, etc.
+        text = text.replace(/<[^>]*>/g, '').trim();
+
+        // 2. Unescape HTML entities
+        text = text
+            .replace(/&quot;/g, '"')
+            .replace(/&apos;/g, "'")
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&');
+
+        // 3. Parse embedded JSON string if present
+        if (text.startsWith('[') || text.startsWith('{')) {
             try {
-                const parsed = JSON.parse(trimmed);
+                const parsed = JSON.parse(text);
                 if (Array.isArray(parsed)) {
                     return parsed
                         .map((block: any) => {
                             if (typeof block === 'object' && block !== null) {
-                                return block.title || block.content || block.text || '';
+                                return block.content || block.title || block.text || '';
                             }
                             return String(block);
                         })
                         .filter(Boolean)
-                        .join(' - ');
+                        .join(' - ')
+                        .trim();
                 }
                 if (parsed.type === 'doc' && Array.isArray(parsed.content)) {
                     const extractText = (node: any): string => {
@@ -831,11 +897,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                     };
                     return parsed.content.map(extractText).join(' ').trim();
                 }
+                if (typeof parsed === 'object' && parsed !== null) {
+                    if (parsed.content) return String(parsed.content).trim();
+                    if (parsed.text) return String(parsed.text).trim();
+                }
             } catch {
-                // fallback
+                // Ignore parse error, use stripped text
             }
         }
-        return notes;
+
+        return text;
+    };
+
+    const renderNotesPreview = (notes: string | null): string => {
+        return cleanNotesText(notes);
     };
 
     const saveInlineNotes = async () => {
@@ -990,9 +1065,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
         const matchesCategory = selectedCategory === 'all' || selectedCategory === 'trash' || profile.category === selectedCategory;
         const matchesFolder = !selectedFolder || profile.folder_id === selectedFolder;
         const matchesTag = !selectedTag || (profile.tags && profile.tags.split(',').map(t => t.trim().toLowerCase()).includes(selectedTag.toLowerCase()));
+        const matchesStatus = !selectedStatus || (profile.status ?? 'ready') === selectedStatus;
         
-        return matchesSearch && matchesCategory && matchesFolder && matchesTag;
+        return matchesSearch && matchesCategory && matchesFolder && matchesTag && matchesStatus;
     });
+
+    const sortedFilteredProfiles = React.useMemo(() => {
+        if (profileCustomOrder.length === 0) return filteredProfiles;
+        const orderMap = new Map(profileCustomOrder.map((id, index) => [id, index]));
+        return [...filteredProfiles].sort((a, b) => {
+            const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : 999999;
+            const orderB = orderMap.has(b.id) ? orderMap.get(b.id)! : 999999;
+            return orderA - orderB;
+        });
+    }, [filteredProfiles, profileCustomOrder]);
+
+    const handleDropReorderProfile = (draggedId: string, targetId: string) => {
+        if (!draggedId || !targetId || draggedId === targetId) return;
+        const allIds = profiles.map(p => p.id);
+        const currentOrder = profileCustomOrder.length > 0 ? [...profileCustomOrder] : [...allIds];
+
+        allIds.forEach(id => {
+            if (!currentOrder.includes(id)) currentOrder.push(id);
+        });
+
+        const fromIdx = currentOrder.indexOf(draggedId);
+        const toIdx = currentOrder.indexOf(targetId);
+
+        if (fromIdx !== -1 && toIdx !== -1) {
+            currentOrder.splice(fromIdx, 1);
+            currentOrder.splice(toIdx, 0, draggedId);
+            setProfileCustomOrder(currentOrder);
+            localStorage.setItem('axe_profile_custom_order', JSON.stringify(currentOrder));
+            toast.success('Ordem dos perfis reordenada!');
+        }
+    };
+
+    const handleSaveNoteModal = async (profileId: string, content: string) => {
+        const cleaned = cleanNotesText(content);
+        await handleUpdateProfile(profileId, { notes: cleaned });
+        toast.success('Nota salva com sucesso!');
+        setNoteModalState(null);
+    };
 
     return (
         <div className="h-full flex flex-col bg-[#09090b] overflow-hidden">
@@ -1398,8 +1512,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 <div className={styles.megaDivider} />
 
                                 {/* Core Actions */}
-                                <button className={styles.megaBtn} onClick={handleImportProfiles} title="Importar perfis">
+                                <button className={styles.megaBtn} onClick={handleImportProfiles} title="Importar perfis (JSON ou .axeprofile)">
                                     <Upload size={14} /> <span className={styles.btnText}>Importar</span>
+                                </button>
+                                <button className={styles.megaBtn} onClick={handleExportSelectedOrAll} title="Exportar perfil selecionado ou todos os perfis com dados completos (JSON)">
+                                    <Download size={14} /> <span className={styles.btnText}>Exportar</span>
                                 </button>
                                 <button className={styles.megaBtn} onClick={() => setShowTemplatesModal(true)} title="Templates">
                                     <Layers size={14} /> <span className={styles.btnText}>Templates</span>
@@ -1416,10 +1533,72 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
 
                                 <div className={styles.megaDivider} />
 
-                                {/* Tools */}
-                                <button className={styles.megaBtn} title="Filtro">
-                                    <Filter size={14} /> <span className={styles.btnText}>Filtro</span>
-                                </button>
+                                {/* Status Filter Menu Dropdown */}
+                                <div style={{ position: 'relative' }}>
+                                    <button 
+                                        className={`${styles.megaBtn} ${selectedStatus ? styles.megaBtnActive : ''}`} 
+                                        onClick={(e) => { e.stopPropagation(); setShowStatusFilterMenu(!showStatusFilterMenu); }} 
+                                        title="Filtrar por Status do Perfil"
+                                    >
+                                        <Activity size={14} /> 
+                                        <span className={styles.btnText}>
+                                            {selectedStatus ? (statusMap[selectedStatus]?.label || selectedStatus) : 'Status'}
+                                        </span>
+                                        {selectedStatus && (
+                                            <span className="w-2 h-2 rounded-full ml-1 shrink-0" style={{ background: statusMap[selectedStatus]?.dot || '#38bdf8' }} />
+                                        )}
+                                    </button>
+
+                                    {showStatusFilterMenu && (
+                                        <>
+                                            <div className="fixed inset-0 z-40" onClick={() => setShowStatusFilterMenu(false)} />
+                                            <div className="absolute top-full left-0 mt-2 z-50 w-56 bg-[#18181b] border border-white/15 rounded-[5px] shadow-2xl p-1.5 space-y-0.5 text-xs font-sans">
+                                                <div className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-white/10 mb-1 flex items-center justify-between">
+                                                    <span>Filtrar por Status</span>
+                                                    {selectedStatus && (
+                                                        <button 
+                                                            onClick={() => setSelectedStatus(null)}
+                                                            className="text-[10px] text-emerald-400 hover:underline cursor-pointer"
+                                                        >
+                                                            Limpar
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <button
+                                                    className={`w-full text-left px-2.5 py-1.5 rounded-[5px] flex items-center justify-between font-semibold transition-colors cursor-pointer ${
+                                                        !selectedStatus ? 'bg-white/10 text-white' : 'text-zinc-300 hover:bg-white/5'
+                                                    }`}
+                                                    onClick={() => { setSelectedStatus(null); setShowStatusFilterMenu(false); }}
+                                                >
+                                                    <span>Todos os Status</span>
+                                                    <span className="text-[10px] text-zinc-500 font-mono">
+                                                        ({profiles.filter(p => p.category !== 'trash').length})
+                                                    </span>
+                                                </button>
+
+                                                {Object.entries(statusMap).map(([key, cfg]) => {
+                                                    const count = profiles.filter(p => p.category !== 'trash' && (p.status ?? 'ready') === key).length;
+                                                    return (
+                                                        <button
+                                                            key={key}
+                                                            className={`w-full text-left px-2.5 py-1.5 rounded-[5px] flex items-center justify-between font-semibold transition-colors cursor-pointer ${
+                                                                selectedStatus === key ? 'bg-white/10 text-white' : 'text-zinc-300 hover:bg-white/5'
+                                                            }`}
+                                                            onClick={() => { setSelectedStatus(key); setShowStatusFilterMenu(false); }}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: cfg.dot }} />
+                                                                <span>{cfg.label}</span>
+                                                            </div>
+                                                            <span className="text-[10px] text-zinc-500 font-mono">({count})</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                                 <button className={`${styles.megaBtn} ${showFoldersGridWindow ? styles.megaBtnActive : ''}`} onClick={() => setShowFoldersGridWindow(true)} title="Pastas e Grupos">
                                     <FolderIcon size={14} /> <span className={styles.btnText}>Pastas</span>
                                 </button>
@@ -1658,9 +1837,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 {visibleColumns.actions && <div className={styles.mondayHeaderCell}>Ações</div>}
                             </div>
                             
-                            {filteredProfiles.map((profile: Profile) => {
-                                const statusCfg = STATUS_CONFIG[profile.status ?? 'ready'] ?? STATUS_CONFIG.ready;
+                            {sortedFilteredProfiles.map((profile: Profile) => {
+                                const statusCfg = statusMap[profile.status ?? 'ready'] ?? statusMap.ready;
                                 const isSelected = selectedProfileIds.includes(profile.id);
+                                const isStarting = profile.status === 'running' && !profile.is_active;
+
                                 return (
                                     <div 
                                         key={profile.id} 
@@ -1668,11 +1849,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                         style={{ gridTemplateColumns: getGridTemplateColumns() }}
                                         draggable
                                         onDragStart={(e: React.DragEvent) => handleDragStart(e, profile.id)}
+                                        onDragOver={handleDragOver}
+                                        onDrop={(e: React.DragEvent) => {
+                                            e.preventDefault();
+                                            const draggedId = e.dataTransfer.getData('profileId');
+                                            if (draggedId) handleDropReorderProfile(draggedId, profile.id);
+                                        }}
                                         onContextMenu={(e: React.MouseEvent) => handleProfileContextMenu(e, profile.id)}
                                         onClick={() => handleCardClick(profile)}>
                                         
-                                        {/* Checkbox */}
-                                        <div className={`${styles.mondayCell} ${styles.mondayCellCheckbox}`}>
+                                        {/* Checkbox & Reorder Grip */}
+                                        <div className={`${styles.mondayCell} ${styles.mondayCellCheckbox}`} style={{ gap: '4px', paddingLeft: '4px' }}>
+                                            <div className="text-zinc-600 hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5 shrink-0" title="Arrastar para reordenar perfil">
+                                                <GripVertical size={13} />
+                                            </div>
                                             <div className={`${styles.checkbox} ${isSelected ? styles.checkboxChecked : ''}`} onClick={(e) => { e.stopPropagation(); toggleSelection(profile.id); }}>
                                                 {isSelected && <div className={styles.checkboxInner} />}
                                             </div>
@@ -1687,14 +1877,70 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                             </div>
                                         )}
 
-                                        {/* Name & Avatar */}
-                                        <div className={styles.mondayCell} style={{ gap: '10px' }}>
+                                        {/* Name & Avatar + Standardized Icon-Only Action Buttons (Play, Gear/Settings, Notes) */}
+                                        <div className={styles.mondayCell} style={{ gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
                                             {renderProfileAvatar(profile)}
-                                            <span className={styles.mondayProfileName} onClick={(e) => { e.stopPropagation(); setDetailProfile(profile); }}>{profile.name}</span>
-                                            {profile.is_active && <span className="flex w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" title="Online" />}
-                                            <button className={styles.expandBtn} onClick={(e) => { e.stopPropagation(); openDetailPanel(profile.id); }} title="Expandir">
-                                                <Maximize2 size={12} />
-                                            </button>
+
+                                            <span 
+                                                className={`${styles.mondayProfileName} flex-1 min-w-0 font-medium text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis`} 
+                                                onClick={(e) => { e.stopPropagation(); setDetailProfile(profile); }}
+                                                title={profile.name}
+                                            >
+                                                {profile.name}
+                                            </span>
+
+                                            {profile.is_active && <span className="flex w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] shrink-0" title="Online" />}
+
+                                            {/* Standardized Icon-Only Action Buttons */}
+                                            <div className="flex items-center gap-1 shrink-0 ml-auto">
+                                                {/* 1. Play / Parar Button */}
+                                                <button
+                                                    disabled={isStarting}
+                                                    className={`p-1.5 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                                                        isStarting
+                                                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                                            : profile.is_active
+                                                            ? 'bg-red-500 hover:bg-red-600 text-white shadow-md active:scale-95'
+                                                            : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-md active:scale-95'
+                                                    }`}
+                                                    title={isStarting ? 'Iniciando...' : profile.is_active ? 'Parar Navegador' : 'Iniciar Navegador'}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id);
+                                                    }}
+                                                >
+                                                    {isStarting ? <RefreshCw size={15} className="animate-spin" /> : profile.is_active ? <StopCircle size={15} /> : <Play size={15} fill="currentColor" />}
+                                                </button>
+
+                                                {/* 2. Configurações (Engrenagem / Gear Icon) */}
+                                                <button
+                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer shrink-0"
+                                                    title="Abrir Configurações do Perfil"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setDetailProfile(profile);
+                                                    }}
+                                                >
+                                                    <Settings size={15} />
+                                                </button>
+
+                                                {/* 3. Notas (FileText / Notes Icon) */}
+                                                <button
+                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer shrink-0"
+                                                    title="Abrir Notas do Perfil"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setNoteModalState({
+                                                            isOpen: true,
+                                                            profileId: profile.id,
+                                                            profileName: profile.name,
+                                                            content: cleanNotesText(profile.notes),
+                                                        });
+                                                    }}
+                                                >
+                                                    <FileText size={15} />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         {/* Status */}
@@ -1715,36 +1961,35 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                                 className={styles.mondayCell} 
                                                 onClick={(e) => { 
                                                     e.stopPropagation(); 
-                                                    setActiveNotesEdit({ profileId: profile.id, tempValue: profile.notes || '' }); 
+                                                    setNoteModalState({
+                                                        isOpen: true,
+                                                        profileId: profile.id,
+                                                        profileName: profile.name,
+                                                        content: cleanNotesText(profile.notes),
+                                                    });
                                                 }}
                                             >
-                                                {activeNotesEdit?.profileId === profile.id ? (
-                                                    <input
-                                                        type="text"
-                                                        className={styles.inlineNotesInput}
-                                                        value={activeNotesEdit.tempValue}
-                                                        onChange={(e) => setActiveNotesEdit({ ...activeNotesEdit, tempValue: e.target.value })}
-                                                        onBlur={saveInlineNotes}
-                                                        onKeyDown={handleInlineNotesKeyDown}
-                                                        autoFocus
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    />
-                                                ) : profile.notes ? (
+                                                {profile.notes ? (
                                                     <div className={styles.notesPreviewContainer} style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: '8px' }}>
                                                         <span className={styles.notesPreview} style={{ flex: 1 }} title={renderNotesPreview(profile.notes)}>{renderNotesPreview(profile.notes)}</span>
                                                         <button 
                                                             className={styles.notesExpandBtn} 
                                                             onClick={(e) => { 
                                                                 e.stopPropagation(); 
-                                                                setViewingNote({ profileName: profile.name, notes: profile.notes || '' }); 
+                                                                setNoteModalState({
+                                                                    isOpen: true,
+                                                                    profileId: profile.id,
+                                                                    profileName: profile.name,
+                                                                    content: cleanNotesText(profile.notes),
+                                                                });
                                                             }}
-                                                            title="Expandir nota"
+                                                            title="Abrir editor de notas"
                                                         >
                                                             <Maximize2 size={11} />
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <span className={styles.notesEmpty}>Adicionar nota...</span>
+                                                    <span className={styles.notesEmpty}>+ Adicionar nota</span>
                                                 )}
                                             </div>
                                         )}
@@ -2110,6 +2355,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                     position={{ x: statusPicker.x, y: statusPicker.y }}
                     onSelect={(id, status) => handleUpdateProfile(id, { status })}
                     onClose={() => setStatusPicker(null)}
+                    onStatusMapUpdated={() => setStatusMap(getStatusMap())}
                 />
             )}
 
@@ -2503,6 +2749,53 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                     className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:hover:bg-violet-600 text-white font-semibold rounded-lg text-xs transition-colors flex items-center gap-1"
                                 >
                                     <Plus size={12} /> Criar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Note Editor Modal (Retangular 5px) */}
+            {noteModalState && noteModalState.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in" onClick={() => setNoteModalState(null)}>
+                    <div className="w-full max-w-lg bg-[#18181b] border border-white/10 rounded-[5px] shadow-2xl overflow-hidden font-sans text-zinc-200 animate-in zoom-in-95 p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                            <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-emerald-400" />
+                                <h3 className="font-bold text-sm text-zinc-100">Notas do Perfil</h3>
+                                <span className="text-xs text-zinc-400 font-mono">({noteModalState.profileName})</span>
+                            </div>
+                            <button onClick={() => setNoteModalState(null)} className="text-zinc-500 hover:text-zinc-200 p-1 rounded-[5px]">
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        <div>
+                            <textarea
+                                value={noteModalState.content}
+                                onChange={(e) => setNoteModalState({ ...noteModalState, content: e.target.value })}
+                                placeholder="Escreva suas anotações para este perfil aqui..."
+                                rows={8}
+                                className="w-full bg-white/5 border border-white/10 rounded-[5px] p-3 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/40 resize-none font-mono leading-relaxed"
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs pt-1 border-t border-white/5">
+                            <span className="text-zinc-500 font-mono">{noteModalState.content.length} caracteres</span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setNoteModalState(null)}
+                                    className="px-3.5 py-1.5 rounded-[5px] bg-white/5 hover:bg-white/10 text-zinc-300 font-semibold transition-colors cursor-pointer"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={() => handleSaveNoteModal(noteModalState.profileId, noteModalState.content)}
+                                    className="px-4 py-1.5 rounded-[5px] bg-emerald-500 hover:bg-emerald-400 text-black font-bold shadow transition-all active:scale-95 cursor-pointer"
+                                >
+                                    Salvar Nota
                                 </button>
                             </div>
                         </div>

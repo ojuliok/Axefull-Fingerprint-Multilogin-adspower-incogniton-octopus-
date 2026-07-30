@@ -89,6 +89,12 @@ export const NotionBlockMenu: React.FC<NotionBlockMenuProps> = ({
     const [activeSubmenu, setActiveSubmenu] = useState<'none' | 'turnInto' | 'color'>('none');
 
     useEffect(() => {
+        if (searchQuery.trim() !== '') {
+            setActiveSubmenu('turnInto');
+        }
+    }, [searchQuery]);
+
+    useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
                 onClose();
@@ -240,7 +246,11 @@ export const NotionBlockMenu: React.FC<NotionBlockMenuProps> = ({
                         Transformar Bloco em:
                     </div>
                     {turnIntoCategories.map(cat => {
-                        const itemsInCat = TURN_INTO_OPTIONS.filter(o => o.category === cat);
+                        const itemsInCat = TURN_INTO_OPTIONS.filter(o => 
+                            o.category === cat && 
+                            (searchQuery.trim() === '' || o.label.toLowerCase().includes(searchQuery.toLowerCase()))
+                        );
+                        if (itemsInCat.length === 0) return null;
                         return (
                             <div key={cat} className="mb-1">
                                 <div className="px-3 py-1 text-[9px] font-bold text-zinc-500 uppercase tracking-wider bg-white/[0.01]">
