@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronUp, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network, Eraser, GripVertical } from 'lucide-react';
+import { Search, Plus, Grid, List, Shield, MoreVertical, Edit, Trash2, Globe, Tag, Star, Fingerprint, Folder as FolderIcon, Filter, LayoutGrid, ChevronDown, ChevronUp, ChevronRight, PanelLeftClose, PanelLeftOpen, Settings, Database, Copy, RefreshCw, Download, Square, Play, StopCircle, Upload, RotateCcw, AlertTriangle, Zap, Users, Activity, Monitor, Clock, Layers, Bookmark, Code, Package, Cpu, Palette, LucideIcon, CheckSquare, Eye, EyeOff, Columns, ArrowUpDown, X, Maximize2, Home, MessageSquare, FileText, Bold, Italic, Underline, Strikethrough, ListOrdered, Link2, Puzzle, Network, Eraser, GripVertical, Image as ImageIcon } from 'lucide-react';
 import CreateProfileModal from '../features/Profiles/ProfileEditor/CreateProfileModal';
 import PropertiesModal from '../features/Profiles/ProfileEditor/PropertiesModal';
 import ProfileDetailModal from '../features/Profiles/ProfileDetail/ProfileDetailModal';
@@ -15,6 +15,7 @@ import {
     getOsLabel,
     STATUS_CONFIG,
     getStatusMap,
+    renderStatusIcon,
     SOCIAL_TAG_COLORS,
     getTagIconElement,
     DEFAULT_TAG_TEMPLATES,
@@ -247,6 +248,37 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
         profileName: string;
         content: string;
     } | null>(null);
+
+    const [profileCovers, setProfileCovers] = useState<Record<string, string>>(() => {
+        try {
+            const saved = localStorage.getItem('axe_profile_covers');
+            return saved ? JSON.parse(saved) : {};
+        } catch {
+            return {};
+        }
+    });
+    const [activeCoverPicker, setActiveCoverPicker] = useState<string | null>(null);
+    const [customCoverUrl, setCustomCoverUrl] = useState<string>('');
+
+    const COVER_PRESETS = [
+        { name: 'Midnight Purple', bg: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%)' },
+        { name: 'Emerald Wave', bg: 'linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%)' },
+        { name: 'Sunset Flare', bg: 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #ef4444 100%)' },
+        { name: 'Ocean Blue', bg: 'linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #7c3aed 100%)' },
+        { name: 'Cyberpunk Neon', bg: 'linear-gradient(135deg, #831843 0%, #be185d 50%, #f43f5e 100%)' },
+        { name: 'Deep Slate', bg: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)' },
+    ];
+
+    const handleSetProfileCover = (profileId: string, coverValue: string) => {
+        setProfileCovers(prev => {
+            const updated = { ...prev, [profileId]: coverValue };
+            localStorage.setItem('axe_profile_covers', JSON.stringify(updated));
+            return updated;
+        });
+        toast.success('Capa do perfil atualizada!');
+        setActiveCoverPicker(null);
+        setCustomCoverUrl('');
+    };
 
     // Drag handle for floating trigger
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -1785,7 +1817,227 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                 </button>
                             )}
                         </div>
+                    ) : viewMode === 'grid' ? (
+                        /* ── Horizontal Grid Gallery (Cards Horizontais com Capa & Notas) ── */
+                        <div className="flex-1 flex flex-col overflow-hidden bg-[#09090b]">
+                            <div className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent p-6 flex items-start gap-6">
+                                {sortedFilteredProfiles.map((profile: Profile) => {
+                                    const statusCfg = statusMap[profile.status ?? 'ready'] ?? statusMap.ready;
+                                    const isSelected = selectedProfileIds.includes(profile.id);
+                                    const isStarting = profile.status === 'running' && !profile.is_active;
+                                    const coverBg = profileCovers[profile.id] || COVER_PRESETS[0].bg;
+                                    const isCoverImage = coverBg.startsWith('http') || coverBg.startsWith('data:') || coverBg.startsWith('file:');
+
+                                    return (
+                                        <div
+                                            key={profile.id}
+                                            className={`w-72 min-w-[280px] max-w-[280px] bg-[#141417] border rounded-[5px] overflow-hidden shadow-2xl transition-all duration-200 group flex flex-col justify-between relative shrink-0 ${
+                                                isSelected ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-white/10 hover:border-white/20'
+                                            }`}
+                                        >
+                                            {/* Capa (Cover Image Header) */}
+                                            <div
+                                                className="h-32 w-full relative p-3 flex flex-col justify-between transition-all bg-cover bg-center"
+                                                style={isCoverImage ? { backgroundImage: `url(${coverBg})` } : { background: coverBg }}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-t from-[#141417] via-transparent to-black/40" />
+
+                                                <div className="relative z-10 flex items-center justify-between">
+                                                    {/* Checkbox */}
+                                                    <div
+                                                        className={`${styles.checkbox} ${isSelected ? styles.checkboxChecked : ''}`}
+                                                        onClick={(e) => { e.stopPropagation(); toggleSelection(profile.id); }}
+                                                    >
+                                                        {isSelected && <div className={styles.checkboxInner} />}
+                                                    </div>
+
+                                                    {/* Status Badge (Fonte Ubuntu - Sem Fundo / Background Transparente) */}
+                                                    <span
+                                                        className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md backdrop-blur-md flex items-center gap-1.5 transition-transform hover:scale-105"
+                                                        style={{
+                                                            background: 'rgba(0,0,0,0.5)',
+                                                            border: `1px solid ${statusCfg.dot}70`,
+                                                            color: statusCfg.dot,
+                                                            fontFamily: "'Ubuntu', sans-serif",
+                                                        }}
+                                                    >
+                                                        {renderStatusIcon(statusCfg.icon, statusCfg.dot, 11)}
+                                                        {statusCfg.label}
+                                                    </span>
+                                                </div>
+
+                                                {/* Alterar Capa Trigger Button */}
+                                                <div className="relative z-10 flex justify-end">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setActiveCoverPicker(activeCoverPicker === profile.id ? null : profile.id);
+                                                        }}
+                                                        className="px-2.5 py-1 rounded-[5px] bg-black/60 hover:bg-black/80 text-white text-[11px] font-semibold backdrop-blur-md border border-white/20 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow-lg"
+                                                        title="Inserir / Alterar Capa do Perfil"
+                                                    >
+                                                        <Palette size={12} /> Capa
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Popover Escolher Capa */}
+                                            {activeCoverPicker === profile.id && (
+                                                <div className="absolute top-12 right-3 z-50 w-64 bg-[#18181b] border border-white/20 rounded-[5px] shadow-2xl p-3 space-y-3 font-sans text-xs animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+                                                    <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+                                                        <span className="font-bold text-zinc-200">Escolher Capa</span>
+                                                        <button onClick={() => setActiveCoverPicker(null)} className="text-zinc-500 hover:text-zinc-200 p-0.5"><X size={14} /></button>
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="text-[10px] text-zinc-400 mb-1.5 font-semibold">Gradientes Prontos</p>
+                                                        <div className="grid grid-cols-3 gap-1.5">
+                                                            {COVER_PRESETS.map((preset) => (
+                                                                <button
+                                                                    key={preset.name}
+                                                                    onClick={() => handleSetProfileCover(profile.id, preset.bg)}
+                                                                    className="h-8 rounded-[4px] border border-white/20 hover:scale-105 transition-transform cursor-pointer"
+                                                                    style={{ background: preset.bg }}
+                                                                    title={preset.name}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="text-[10px] text-zinc-400 mb-1.5 font-semibold">URL da Imagem</p>
+                                                        <div className="flex items-center gap-1">
+                                                            <input
+                                                                type="text"
+                                                                value={customCoverUrl}
+                                                                onChange={(e) => setCustomCoverUrl(e.target.value)}
+                                                                placeholder="https://exemplo.com/imagem.jpg"
+                                                                className="flex-1 bg-white/5 border border-white/10 rounded-[4px] px-2 py-1 text-[11px] text-zinc-200 focus:outline-none focus:border-violet-500"
+                                                            />
+                                                            <button
+                                                                disabled={!customCoverUrl.trim()}
+                                                                onClick={() => handleSetProfileCover(profile.id, customCoverUrl.trim())}
+                                                                className="px-2.5 py-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-[4px] text-[11px] font-bold cursor-pointer"
+                                                            >
+                                                                OK
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Card Body */}
+                                            <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        {renderProfileAvatar(profile)}
+                                                        <h3
+                                                            className="font-bold text-sm text-zinc-100 truncate flex-1 cursor-pointer hover:underline"
+                                                            onClick={() => setDetailProfile(profile)}
+                                                            title={profile.name}
+                                                        >
+                                                            {profile.name}
+                                                        </h3>
+                                                    </div>
+
+                                                    {/* Folder & Tags */}
+                                                    <div className="flex flex-wrap gap-1.5 mb-3">
+                                                        {getFolderName(profile.folder_id) && (
+                                                            <span className="px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 text-violet-300 rounded-[5px] text-[10px] font-medium flex items-center gap-1">
+                                                                <FolderIcon size={10} /> {getFolderName(profile.folder_id)}
+                                                            </span>
+                                                        )}
+                                                        {profile.tags && profile.tags.split(',').slice(0, 2).map(t => (
+                                                            <span key={t} className="px-2 py-0.5 bg-white/5 border border-white/10 text-zinc-400 rounded-[5px] text-[10px]">
+                                                                {t.trim()}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Bloco de Abertura de Notas */}
+                                                    <div
+                                                        onClick={() => setNoteModalState({
+                                                            isOpen: true,
+                                                            profileId: profile.id,
+                                                            profileName: profile.name,
+                                                            content: cleanNotesText(profile.notes),
+                                                        })}
+                                                        className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[5px] cursor-pointer transition-colors group/note"
+                                                    >
+                                                        <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-1">
+                                                            <span className="flex items-center gap-1 font-semibold text-emerald-400"><FileText size={12} /> Notas</span>
+                                                            <Maximize2 size={10} className="group-hover/note:text-white" />
+                                                        </div>
+                                                        <p className="text-xs text-zinc-300 line-clamp-2 italic leading-relaxed">
+                                                            {cleanNotesText(profile.notes) || 'Sem anotações... Clique para adicionar'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Bar de Ações Padronizadas 5px */}
+                                                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <button
+                                                            disabled={isStarting}
+                                                            className={`p-2 rounded-[5px] flex items-center justify-center transition-all cursor-pointer ${
+                                                                isStarting
+                                                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                                                    : profile.is_active
+                                                                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-md active:scale-95'
+                                                                    : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-md active:scale-95'
+                                                            }`}
+                                                            title={isStarting ? 'Iniciando...' : profile.is_active ? 'Parar Navegador' : 'Iniciar Navegador'}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id);
+                                                            }}
+                                                        >
+                                                            {isStarting ? <RefreshCw size={15} className="animate-spin" /> : profile.is_active ? <StopCircle size={15} /> : <Play size={15} fill="currentColor" />}
+                                                        </button>
+
+                                                        <button
+                                                            className="p-2 rounded-[5px] bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
+                                                            title="Configurações do Perfil"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setDetailProfile(profile);
+                                                            }}
+                                                        >
+                                                            <Settings size={15} />
+                                                        </button>
+
+                                                        <button
+                                                            className="p-2 rounded-[5px] bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
+                                                            title="Abrir Notas"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setNoteModalState({
+                                                                    isOpen: true,
+                                                                    profileId: profile.id,
+                                                                    profileName: profile.name,
+                                                                    content: cleanNotesText(profile.notes),
+                                                                });
+                                                            }}
+                                                        >
+                                                            <FileText size={15} />
+                                                        </button>
+                                                    </div>
+
+                                                    <button
+                                                        className="p-2 rounded-[5px] bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/10 transition-colors cursor-pointer"
+                                                        onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === profile.id ? null : profile.id); }}
+                                                    >
+                                                        <MoreVertical size={15} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     ) : (
+                        /* ── Lista de Tabela Limpa (Table List View) ── */
                         <div className={styles.mondayTableContainer}>
                             <div className={styles.mondayHeaderRow} style={{ gridTemplateColumns: getGridTemplateColumns() }}>
                                 <div className={styles.mondayHeaderCell}>
@@ -1877,7 +2129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                             </div>
                                         )}
 
-                                        {/* Name & Avatar + Standardized Icon-Only Action Buttons (Play, Gear/Settings, Notes) */}
+                                        {/* Name & Avatar */}
                                         <div className={styles.mondayCell} style={{ gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
                                             {renderProfileAvatar(profile)}
 
@@ -1890,67 +2142,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                             </span>
 
                                             {profile.is_active && <span className="flex w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] shrink-0" title="Online" />}
-
-                                            {/* Standardized Icon-Only Action Buttons */}
-                                            <div className="flex items-center gap-1 shrink-0 ml-auto">
-                                                {/* 1. Play / Parar Button */}
-                                                <button
-                                                    disabled={isStarting}
-                                                    className={`p-1.5 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-                                                        isStarting
-                                                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                                            : profile.is_active
-                                                            ? 'bg-red-500 hover:bg-red-600 text-white shadow-md active:scale-95'
-                                                            : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-md active:scale-95'
-                                                    }`}
-                                                    title={isStarting ? 'Iniciando...' : profile.is_active ? 'Parar Navegador' : 'Iniciar Navegador'}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id);
-                                                    }}
-                                                >
-                                                    {isStarting ? <RefreshCw size={15} className="animate-spin" /> : profile.is_active ? <StopCircle size={15} /> : <Play size={15} fill="currentColor" />}
-                                                </button>
-
-                                                {/* 2. Configurações (Engrenagem / Gear Icon) */}
-                                                <button
-                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer shrink-0"
-                                                    title="Abrir Configurações do Perfil"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setDetailProfile(profile);
-                                                    }}
-                                                >
-                                                    <Settings size={15} />
-                                                </button>
-
-                                                {/* 3. Notas (FileText / Notes Icon) */}
-                                                <button
-                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer shrink-0"
-                                                    title="Abrir Notas do Perfil"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setNoteModalState({
-                                                            isOpen: true,
-                                                            profileId: profile.id,
-                                                            profileName: profile.name,
-                                                            content: cleanNotesText(profile.notes),
-                                                        });
-                                                    }}
-                                                >
-                                                    <FileText size={15} />
-                                                </button>
-                                            </div>
                                         </div>
 
-                                        {/* Status */}
+                                        {/* Status (Fonte Ubuntu - Sem Fundo / Background Transparente) */}
                                         {visibleColumns.status && (
-                                            <div className={styles.mondayCell} style={{ padding: '6px 8px' }}>
+                                            <div className={styles.mondayCell} style={{ padding: '4px 6px', justifyContent: 'center' }}>
                                                 <div 
-                                                    className={styles.statusCell}
-                                                    style={{ background: statusCfg.dot, color: '#fff', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', borderRadius: '4px', textShadow: '0 1px 2px rgba(0,0,0,0.25)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', height: '28px', width: '100%' }}
+                                                    className="w-full h-7 px-3 rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-white/5 border border-white/10 shadow-sm"
+                                                    style={{ 
+                                                        background: 'transparent',
+                                                        borderColor: `${statusCfg.dot}50`,
+                                                    }}
                                                     onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setStatusPicker({ profileId: profile.id, x: r.left, y: r.bottom + 6 }); }}>
-                                                    <span className={styles.statusLabel}>{statusCfg.label}</span>
+                                                    {renderStatusIcon(statusCfg.icon, statusCfg.dot, 12)}
+                                                    <span 
+                                                        className="text-[11px] font-bold uppercase tracking-wider truncate" 
+                                                        style={{ fontFamily: "'Ubuntu', sans-serif", color: statusCfg.dot, textShadow: `0 0 6px ${statusCfg.dot}30` }}
+                                                    >
+                                                        {statusCfg.label}
+                                                    </span>
                                                 </div>
                                             </div>
                                         )}
@@ -2012,7 +2222,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                         {/* Tags */}
                                         {visibleColumns.tags && (
                                             <div className={styles.mondayCell} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '8px 12px' }}>
-                                                {/* Tags */}
                                                 <div className={styles.tagListContainer} onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setTagPicker({ profileId: profile.id, x: r.left, y: r.bottom + 4 }); }} title="Adicionar / Remover tags">
                                                     {profile.tags ? (
                                                         <div className="flex flex-wrap gap-1">
@@ -2037,7 +2246,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                         {/* OS */}
                                         {visibleColumns.os && (
                                             <div className={styles.mondayCell} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '8px 12px' }}>
-                                                {/* OS and Browser */}
                                                 <div className="flex flex-wrap gap-1">
                                                     {getOsLabel(profile.fingerprint?.platform) && (
                                                         <span className={styles.osBadge} onClick={(e) => { e.stopPropagation(); setDefaultDetailTab('fingerprint'); setDetailProfile(profile); }} title="Especificações da Fingerprint (S.O.)">
@@ -2064,42 +2272,66 @@ const Dashboard: React.FC<DashboardProps> = ({ onOpenExtensions, onOpenProxies }
                                             </div>
                                         )}
 
-                                        {/* Actions */}
+                                        {/* Actions Col - Standardized 5px Buttons */}
                                         {visibleColumns.actions && (
-                                            <div className={`${styles.mondayCell} ${styles.mondayCellActions}`} style={{ gap: '8px', justifyContent: 'flex-end' }}>
-                                                {(() => {
-                                                    const isStarting = profile.status === 'running' && !profile.is_active;
-                                                    return (
-                                                        <button
-                                                            disabled={isStarting}
-                                                            className={`${styles.actionBtn} ${
-                                                                isStarting
-                                                                ? styles.actionBtnStarting
-                                                                : profile.is_active
-                                                                ? styles.actionBtnStop
-                                                                : styles.actionBtnPlay
-                                                            }`}
-                                                            title={isStarting ? 'Iniciando...' : profile.is_active ? 'Parar' : 'Iniciar'}
-                                                            onClick={(e) => { e.stopPropagation(); profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id); }}>
-                                                            {isStarting ? <RefreshCw size={14} className="animate-spin" /> : profile.is_active ? <StopCircle size={14} /> : <Play size={14} />}
-                                                        </button>
-                                                    );
-                                                })()}
-                                                
+                                            <div className={`${styles.mondayCell} ${styles.mondayCellActions}`} style={{ gap: '6px', justifyContent: 'flex-end' }}>
+                                                {/* Play / Stop Button */}
                                                 <button
-                                                    className={styles.actionBtn}
+                                                    disabled={isStarting}
+                                                    className={`p-1.5 rounded-[5px] flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                                                        isStarting
+                                                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                                            : profile.is_active
+                                                            ? 'bg-red-500 hover:bg-red-600 text-white shadow-md active:scale-95'
+                                                            : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-md active:scale-95'
+                                                    }`}
+                                                    title={isStarting ? 'Iniciando...' : profile.is_active ? 'Parar Navegador' : 'Iniciar Navegador'}
+                                                    onClick={(e) => { e.stopPropagation(); profile.is_active ? handleCloseProfile(profile.id) : handleLaunchProfile(profile.id); }}
+                                                >
+                                                    {isStarting ? <RefreshCw size={14} className="animate-spin" /> : profile.is_active ? <StopCircle size={14} /> : <Play size={14} fill="currentColor" />}
+                                                </button>
+
+                                                {/* Configurações Button */}
+                                                <button
+                                                    className="p-1.5 rounded-[5px] bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer shrink-0"
+                                                    title="Configurações do Perfil"
+                                                    onClick={(e) => { e.stopPropagation(); setDetailProfile(profile); }}
+                                                >
+                                                    <Settings size={14} />
+                                                </button>
+
+                                                {/* Notas Button */}
+                                                <button
+                                                    className="p-1.5 rounded-[5px] bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors cursor-pointer shrink-0"
+                                                    title="Abrir Notas do Perfil"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setNoteModalState({
+                                                            isOpen: true,
+                                                            profileId: profile.id,
+                                                            profileName: profile.name,
+                                                            content: cleanNotesText(profile.notes),
+                                                        });
+                                                    }}
+                                                >
+                                                    <FileText size={14} />
+                                                </button>
+                                                
+                                                {/* More Options */}
+                                                <button
+                                                    className="p-1.5 rounded-[5px] bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/10 transition-colors cursor-pointer shrink-0"
                                                     onClick={(e: React.MouseEvent) => { e.stopPropagation(); setOpenMenu(openMenu === profile.id ? null : profile.id); }}>
-                                                    <MoreVertical size={16} />
+                                                    <MoreVertical size={14} />
                                                 </button>
 
                                                 {openMenu === profile.id && (
                                                     <div className={styles.dropdown} onClick={(e: React.MouseEvent) => e.stopPropagation()} style={{ right: '0', top: '100%' }}>
                                                         <button onClick={() => { setDetailProfile(profile); setOpenMenu(null); }}>
-                                                            <Edit size={16} /> Editar Perfil
+                                                            <Edit size={14} /> Editar Perfil
                                                         </button>
                                                         <div className="h-px bg-white/10 my-1"></div>
                                                         <button className={styles.dangerItem} onClick={() => { handleDeleteProfile(profile.id); setOpenMenu(null); }}>
-                                                            <Trash2 size={16} /> Excluir
+                                                            <Trash2 size={14} /> Excluir
                                                         </button>
                                                     </div>
                                                 )}

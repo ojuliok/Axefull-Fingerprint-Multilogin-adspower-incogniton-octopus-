@@ -1,5 +1,5 @@
 import React from 'react';
-import { Folder as FolderIcon, Globe, Shield, Star, Tag, Database, Zap, Users, Layers, Monitor, Bookmark, Code, Package, Cpu, LucideIcon } from 'lucide-react';
+import { Folder as FolderIcon, Globe, Shield, Star, Tag, Database, Zap, Users, Layers, Monitor, Bookmark, Code, Package, Cpu, LucideIcon, Lock, Check, AlertTriangle, Flame } from 'lucide-react';
 
 export const getOsLabel = (platform?: string): string | null => {
     if (!platform) return null;
@@ -9,18 +9,25 @@ export const getOsLabel = (platform?: string): string | null => {
     return null;
 };
 
-export const STATUS_CONFIG: Record<string, { label: string; cls: string; dot: string }> = {
-    ready:   { label: 'Pronto',   cls: 'text-theme-text-muted bg-slate-500/10 border-slate-500/20',   dot: '#64748b' },
-    new:     { label: 'Novo',     cls: 'text-sky-400 bg-sky-500/10 border-sky-500/20',         dot: '#38bdf8' },
-    farming: { label: 'Farming',  cls: 'text-blue-400 bg-blue-500/10 border-blue-500/20',      dot: '#60a5fa' },
-    warming: { label: 'Warming',  cls: 'text-teal-400 bg-teal-500/10 border-teal-500/20',      dot: '#2dd4bf' },
-    warning: { label: 'Atenção',  cls: 'text-amber-400 bg-amber-500/10 border-amber-500/20',   dot: '#f59e0b' },
-    banned:  { label: 'Banido',   cls: 'text-red-400 bg-red-500/10 border-red-500/20',         dot: '#f87171' },
-    verified:{ label: 'Verificado',cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', dot: '#34d399' },
-    waiting: { label: 'Aguardando',cls: 'text-violet-400 bg-violet-500/10 border-violet-500/20',dot: '#a78bfa' },
+export interface StatusDefinition {
+    label: string;
+    cls: string;
+    dot: string;
+    icon?: 'none' | 'pulse' | 'lock' | 'check' | 'alert' | 'flame' | 'zap' | 'star' | 'shield';
+}
+
+export const STATUS_CONFIG: Record<string, StatusDefinition> = {
+    ready:   { label: 'Pronto',   cls: 'text-theme-text-muted bg-slate-500/10 border-slate-500/20',   dot: '#64748b', icon: 'none' },
+    new:     { label: 'Novo',     cls: 'text-sky-400 bg-sky-500/10 border-sky-500/20',         dot: '#38bdf8', icon: 'none' },
+    farming: { label: 'Farming',  cls: 'text-blue-400 bg-blue-500/10 border-blue-500/20',      dot: '#60a5fa', icon: 'none' },
+    warming: { label: 'Warming',  cls: 'text-teal-400 bg-teal-500/10 border-teal-500/20',      dot: '#2dd4bf', icon: 'none' },
+    warning: { label: 'Atenção',  cls: 'text-amber-400 bg-amber-500/10 border-amber-500/20',   dot: '#f59e0b', icon: 'none' },
+    banned:  { label: 'Banido',   cls: 'text-red-400 bg-red-500/10 border-red-500/20',         dot: '#f87171', icon: 'none' },
+    verified:{ label: 'Verificado',cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', dot: '#34d399', icon: 'none' },
+    waiting: { label: 'Aguardando',cls: 'text-violet-400 bg-violet-500/10 border-violet-500/20',dot: '#a78bfa', icon: 'none' },
 };
 
-export const getStatusMap = (): Record<string, { label: string; cls: string; dot: string }> => {
+export const getStatusMap = (): Record<string, StatusDefinition> => {
     try {
         const saved = localStorage.getItem('axe_custom_status_config');
         if (saved) {
@@ -33,12 +40,41 @@ export const getStatusMap = (): Record<string, { label: string; cls: string; dot
     return STATUS_CONFIG;
 };
 
-export const saveCustomStatusConfig = (updatedMap: Record<string, { label: string; cls: string; dot: string }>) => {
+export const saveCustomStatusConfig = (updatedMap: Record<string, StatusDefinition>) => {
     try {
         localStorage.setItem('axe_custom_status_config', JSON.stringify(updatedMap));
     } catch (e) {
         console.error('Error saving custom status config', e);
     }
+};
+
+export const renderStatusIcon = (iconType: string | undefined, dotColor: string, size: number = 12) => {
+    if (!iconType || iconType === 'none') return null;
+    if (iconType === 'pulse') {
+        return <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}` }} />;
+    }
+    if (iconType === 'lock') {
+        return <Lock size={size} style={{ color: dotColor }} className="shrink-0" />;
+    }
+    if (iconType === 'check') {
+        return <Check size={size} style={{ color: dotColor }} className="shrink-0" />;
+    }
+    if (iconType === 'alert') {
+        return <AlertTriangle size={size} style={{ color: dotColor }} className="shrink-0" />;
+    }
+    if (iconType === 'flame') {
+        return <Flame size={size} style={{ color: dotColor }} className="shrink-0" />;
+    }
+    if (iconType === 'zap') {
+        return <Zap size={size} style={{ color: dotColor }} className="shrink-0" />;
+    }
+    if (iconType === 'star') {
+        return <Star size={size} style={{ color: dotColor }} className="shrink-0" />;
+    }
+    if (iconType === 'shield') {
+        return <Shield size={size} style={{ color: dotColor }} className="shrink-0" />;
+    }
+    return null;
 };
 
 export const SOCIAL_TAG_COLORS: Record<string, { color: string; bg: string; border: string; bgActive: string; borderActive: string }> = {

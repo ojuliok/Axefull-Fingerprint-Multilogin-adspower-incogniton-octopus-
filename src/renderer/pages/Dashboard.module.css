@@ -1971,24 +1971,37 @@
 }
 
 .mondayCell:last-child,
-.mondayHeaderCell:last-child {
+.mondayCellActions {
   position: sticky;
   right: 0;
-  background: inherit;
-  z-index: 4;
-  box-shadow: -8px 0 12px -6px rgba(0, 0, 0, 0.4);
+  background: #141419 !important;
+  z-index: 20;
+  box-shadow: -8px 0 16px rgba(0, 0, 0, 0.7);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mondayRow:hover .mondayCell:last-child,
+.mondayRow:hover .mondayCellActions {
+  background: #1a1a24 !important;
+}
+
+.mondayRowActive .mondayCell:last-child,
+.mondayRowActive .mondayCellActions {
+  background: #1e1c2e !important;
 }
 
 .mondayCell:last-child {
   border-right: none;
   overflow: visible;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
 }
 
 .mondayHeaderCell:last-child {
-  background: var(--bg-primary);
-  z-index: 6; /* stay above row sticky cells */
+  position: sticky;
+  right: 0;
+  background: #09090b !important;
+  z-index: 25;
+  box-shadow: -8px 0 16px rgba(0, 0, 0, 0.7);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mondayCellCheckbox {

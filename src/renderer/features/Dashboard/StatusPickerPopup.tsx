@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { STATUS_CONFIG, getStatusMap, saveCustomStatusConfig } from '../../utils/constants';
+import { STATUS_CONFIG, getStatusMap, saveCustomStatusConfig, renderStatusIcon, StatusDefinition } from '../../utils/constants';
 import styles from '../../pages/Dashboard.module.css';
-import { Plus, Check, Palette, RotateCcw, Trash2, Edit3, Layers, X } from 'lucide-react';
+import { Plus, Check, Palette, RotateCcw, Trash2, Edit3, Layers, X, Lock, AlertTriangle, Flame, Zap, Star, Shield } from 'lucide-react';
 
 interface StatusPickerPopupProps {
     profileId: string;
@@ -27,35 +27,49 @@ const COLOR_PRESETS = [
     '#14b8a6', // Teal
 ];
 
+type StatusIconType = 'none' | 'pulse' | 'lock' | 'check' | 'alert' | 'flame' | 'zap' | 'star' | 'shield';
+
+const ICON_OPTIONS: { id: StatusIconType; label: string; iconNode: React.ReactNode }[] = [
+    { id: 'none', label: 'Sem Ícone', iconNode: <span className="text-[10px] font-mono text-zinc-400">Ø</span> },
+    { id: 'pulse', label: 'Pulsante', iconNode: <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> },
+    { id: 'lock', label: 'Cadeado', iconNode: <Lock size={12} className="text-amber-400" /> },
+    { id: 'check', label: 'Verificado', iconNode: <Check size={12} className="text-emerald-400" /> },
+    { id: 'alert', label: 'Alerta', iconNode: <AlertTriangle size={12} className="text-red-400" /> },
+    { id: 'flame', label: 'Aquecimento', iconNode: <Flame size={12} className="text-orange-400" /> },
+    { id: 'zap', label: 'Raio', iconNode: <Zap size={12} className="text-yellow-400" /> },
+    { id: 'star', label: 'Estrela', iconNode: <Star size={12} className="text-amber-300" /> },
+    { id: 'shield', label: 'Escudo', iconNode: <Shield size={12} className="text-sky-400" /> },
+];
+
 const STATUS_TEMPLATES = [
     {
         name: 'Gestão Social Media',
         statuses: {
-            ready:     { label: 'PRONTO', cls: 'text-slate-400 bg-slate-500/10', dot: '#64748b' },
-            new:       { label: 'NOVO', cls: 'text-sky-400 bg-sky-500/10', dot: '#38bdf8' },
-            farming:   { label: 'AQUECIMENTO', cls: 'text-blue-400 bg-blue-500/10', dot: '#60a5fa' },
-            warning:   { label: 'SOLICITOU 2FA', cls: 'text-amber-400 bg-amber-500/10', dot: '#f59e0b' },
-            banned:    { label: 'BLOQUEADO', cls: 'text-red-400 bg-red-500/10', dot: '#f87171' },
-            verified:  { label: 'ANÚNCIOS ATIVOS', cls: 'text-emerald-400 bg-emerald-500/10', dot: '#34d399' },
+            ready:     { label: 'PRONTO', cls: '', dot: '#64748b', icon: 'none' as StatusIconType },
+            new:       { label: 'NOVO', cls: '', dot: '#38bdf8', icon: 'none' as StatusIconType },
+            farming:   { label: 'AQUECIMENTO', cls: '', dot: '#60a5fa', icon: 'flame' as StatusIconType },
+            warning:   { label: 'SOLICITOU 2FA', cls: '', dot: '#f59e0b', icon: 'lock' as StatusIconType },
+            banned:    { label: 'BLOQUEADO', cls: '', dot: '#f87171', icon: 'alert' as StatusIconType },
+            verified:  { label: 'ANÚNCIOS ATIVOS', cls: '', dot: '#34d399', icon: 'check' as StatusIconType },
         }
     },
     {
         name: 'Afiliados & E-Commerce',
         statuses: {
-            maturado:  { label: 'MATURADO', cls: 'text-emerald-400 bg-emerald-500/10', dot: '#10b981' },
-            analise:   { label: 'EM ANÁLISE', cls: 'text-amber-400 bg-amber-500/10', dot: '#f59e0b' },
-            suspenso:  { label: 'SUSPENSO', cls: 'text-red-400 bg-red-500/10', dot: '#f87171' },
-            aprovado:  { label: 'APROVADO', cls: 'text-sky-400 bg-sky-500/10', dot: '#06b6d4' },
-            revisao:   { label: 'REVISÃO', cls: 'text-violet-400 bg-violet-500/10', dot: '#a78bfa' },
+            maturado:  { label: 'MATURADO', cls: '', dot: '#10b981', icon: 'check' as StatusIconType },
+            analise:   { label: 'EM ANÁLISE', cls: '', dot: '#f59e0b', icon: 'none' as StatusIconType },
+            suspenso:  { label: 'SUSPENSO', cls: '', dot: '#f87171', icon: 'alert' as StatusIconType },
+            aprovado:  { label: 'APROVADO', cls: '', dot: '#06b6d4', icon: 'check' as StatusIconType },
+            revisao:   { label: 'REVISÃO', cls: '', dot: '#a78bfa', icon: 'none' as StatusIconType },
         }
     },
     {
         name: 'Crypto & Web3',
         statuses: {
-            kyc:       { label: 'KYC APROVADO', cls: 'text-emerald-400 bg-emerald-500/10', dot: '#34d399' },
-            wallet:    { label: 'CARTEIRA CONECTADA', cls: 'text-indigo-400 bg-indigo-500/10', dot: '#6366f1' },
-            pendente:  { label: 'PENDENTE', cls: 'text-amber-400 bg-amber-500/10', dot: '#f59e0b' },
-            inativo:   { label: 'INATIVO', cls: 'text-slate-400 bg-slate-500/10', dot: '#64748b' },
+            kyc:       { label: 'KYC APROVADO', cls: '', dot: '#34d399', icon: 'shield' as StatusIconType },
+            wallet:    { label: 'CARTEIRA CONECTADA', cls: '', dot: '#6366f1', icon: 'zap' as StatusIconType },
+            pendente:  { label: 'PENDENTE', cls: '', dot: '#f59e0b', icon: 'none' as StatusIconType },
+            inativo:   { label: 'INATIVO', cls: '', dot: '#64748b', icon: 'none' as StatusIconType },
         }
     }
 ];
@@ -70,8 +84,9 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
     const [editKey, setEditKey] = useState<string | null>(null);
     const [labelInput, setLabelInput] = useState('');
     const [colorInput, setColorInput] = useState('#38bdf8');
+    const [selectedIcon, setSelectedIcon] = useState<StatusIconType>('none');
 
-    const persistStatusMap = (updated: Record<string, { label: string; cls: string; dot: string }>) => {
+    const persistStatusMap = (updated: Record<string, StatusDefinition>) => {
         saveCustomStatusConfig(updated);
         setStatusMap(updated);
         onStatusMapUpdated?.();
@@ -86,6 +101,7 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
                 label: labelInput.trim().toUpperCase(),
                 cls: `text-white bg-opacity-20`,
                 dot: colorInput,
+                icon: selectedIcon,
             }
         };
         persistStatusMap(updated);
@@ -101,11 +117,12 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
         persistStatusMap(updated);
     };
 
-    const handleStartEdit = (e: React.MouseEvent, key: string, currentLabel: string, currentDot: string) => {
+    const handleStartEdit = (e: React.MouseEvent, key: string, cfg: StatusDefinition) => {
         e.stopPropagation();
         setEditKey(key);
-        setLabelInput(currentLabel);
-        setColorInput(currentDot);
+        setLabelInput(cfg.label);
+        setColorInput(cfg.dot);
+        setSelectedIcon(cfg.icon || 'none');
         setViewMode('edit');
     };
 
@@ -116,7 +133,7 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
         setViewMode('list');
     };
 
-    const handleApplyTemplate = (templateStatuses: Record<string, { label: string; cls: string; dot: string }>) => {
+    const handleApplyTemplate = (templateStatuses: Record<string, StatusDefinition>) => {
         persistStatusMap(templateStatuses);
         setViewMode('list');
     };
@@ -129,8 +146,8 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
                 style={{ 
                     left: position.x, 
                     top: position.y, 
-                    width: '260px',
-                    maxHeight: '440px',
+                    width: '270px',
+                    maxHeight: '460px',
                     overflowY: 'auto',
                     zIndex: 499,
                     background: '#18181b',
@@ -164,6 +181,7 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
                                 setEditKey(null);
                                 setLabelInput('');
                                 setColorInput('#38bdf8');
+                                setSelectedIcon('none');
                                 setViewMode(viewMode === 'create' ? 'list' : 'create');
                             }} 
                             className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-0.5 p-1 hover:bg-white/10 rounded-[5px] transition-colors"
@@ -190,7 +208,8 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
                                 <span className="font-bold text-emerald-400">{tmpl.name}</span>
                                 <div className="flex flex-wrap gap-1">
                                     {Object.values(tmpl.statuses).map(st => (
-                                        <span key={st.label} className="text-[9px] px-1.5 py-0.5 rounded-[3px] font-mono text-white" style={{ background: st.dot }}>
+                                        <span key={st.label} className="text-[9px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-bold" style={{ borderColor: `${st.dot}60`, color: st.dot, fontFamily: "'Ubuntu', sans-serif" }}>
+                                            {renderStatusIcon(st.icon, st.dot, 10)}
                                             {st.label}
                                         </span>
                                     ))}
@@ -202,22 +221,29 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
 
                 {/* Create / Edit View */}
                 {(viewMode === 'create' || viewMode === 'edit') && (
-                    <div className="p-2 space-y-3 bg-white/5 rounded-[5px] border border-white/10 my-1 animate-in fade-in">
+                    <div className="p-2.5 space-y-3 bg-white/5 rounded-[5px] border border-white/10 my-1 animate-in fade-in">
                         <div className="flex items-center justify-between">
                             <p className="text-[11px] font-bold text-zinc-200">{viewMode === 'edit' ? 'Editar Status' : 'Novo Status'}</p>
                             <button onClick={() => setViewMode('list')} className="text-zinc-400 hover:text-white p-0.5"><X size={13} /></button>
                         </div>
-                        <input
-                            type="text"
-                            value={labelInput}
-                            onChange={(e) => setLabelInput(e.target.value)}
-                            placeholder="Nome (ex: CONTA AQUECIDA)..."
-                            className="w-full bg-black/40 border border-white/10 rounded-[5px] px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-emerald-500"
-                            autoFocus
-                        />
 
+                        {/* Label Input */}
                         <div>
-                            <p className="text-[10px] text-zinc-400 font-medium mb-1.5 flex items-center gap-1">
+                            <p className="text-[10px] text-zinc-400 font-semibold mb-1">Nome do Status</p>
+                            <input
+                                type="text"
+                                value={labelInput}
+                                onChange={(e) => setLabelInput(e.target.value)}
+                                placeholder="Nome (ex: INSTAGRAM ATIVO)..."
+                                className="w-full bg-black/40 border border-white/10 rounded-[5px] px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-emerald-500 font-semibold"
+                                style={{ fontFamily: "'Ubuntu', sans-serif" }}
+                                autoFocus
+                            />
+                        </div>
+
+                        {/* Color Picker */}
+                        <div>
+                            <p className="text-[10px] text-zinc-400 font-semibold mb-1.5 flex items-center gap-1">
                                 <Palette size={10} /> Cor da Etiqueta
                             </p>
                             <div className="flex flex-wrap gap-1.5">
@@ -236,6 +262,31 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
                             </div>
                         </div>
 
+                        {/* Icon Picker (Inserir ou Remover Ícone) */}
+                        <div>
+                            <p className="text-[10px] text-zinc-400 font-semibold mb-1.5 flex items-center gap-1">
+                                Ícone (Opcional - Nativamente sem ícone)
+                            </p>
+                            <div className="grid grid-cols-3 gap-1">
+                                {ICON_OPTIONS.map((opt) => (
+                                    <button
+                                        key={opt.id}
+                                        type="button"
+                                        onClick={() => setSelectedIcon(opt.id)}
+                                        className={`px-2 py-1 rounded-[4px] border text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                                            selectedIcon === opt.id 
+                                                ? 'bg-white/15 border-white text-white shadow' 
+                                                : 'bg-black/20 border-white/5 text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
+                                        }`}
+                                    >
+                                        {opt.iconNode}
+                                        <span className="truncate">{opt.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Save Button */}
                         <button
                             disabled={!labelInput.trim()}
                             onClick={handleSaveStatus}
@@ -248,41 +299,55 @@ export const StatusPickerPopup: React.FC<StatusPickerPopupProps> = ({
 
                 {/* List View */}
                 {viewMode === 'list' && (
-                    <div className="space-y-0.5">
-                        {Object.entries(statusMap).map(([key, cfg]) => (
-                            <div
-                                key={key}
-                                className={`w-full group px-2 py-1.5 rounded-[5px] flex items-center justify-between text-xs font-semibold transition-colors cursor-pointer ${
-                                    currentStatus === key ? 'bg-white/10 text-white' : 'text-zinc-300 hover:bg-white/5 hover:text-white'
-                                }`}
-                                onClick={() => { onSelect(profileId, key); onClose(); }}
-                            >
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ background: cfg.dot }} />
-                                    <span className="truncate">{cfg.label}</span>
-                                </div>
+                    <div className="space-y-1">
+                        {Object.entries(statusMap).map(([key, cfg]) => {
+                            const isSelected = currentStatus === key;
+                            return (
+                                <div
+                                    key={key}
+                                    className={`w-full group px-2.5 py-1.5 rounded-full flex items-center justify-between text-xs font-bold transition-all cursor-pointer ${
+                                        isSelected 
+                                            ? 'bg-white/10 ring-1 ring-white/30 text-white shadow-lg' 
+                                            : 'hover:bg-white/5 text-zinc-300 hover:text-white'
+                                    }`}
+                                    style={{
+                                        background: 'transparent',
+                                        border: isSelected ? `1px solid ${cfg.dot}60` : '1px solid transparent',
+                                    }}
+                                    onClick={() => { onSelect(profileId, key); onClose(); }}
+                                >
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        {renderStatusIcon(cfg.icon, cfg.dot, 12)}
+                                        <span 
+                                            className="truncate uppercase text-[11px] tracking-wide font-bold" 
+                                            style={{ fontFamily: "'Ubuntu', sans-serif", color: cfg.dot }}
+                                        >
+                                            {cfg.label}
+                                        </span>
+                                    </div>
 
-                                <div className="flex items-center gap-1">
-                                    {currentStatus === key && <Check size={13} className="text-emerald-400 shrink-0 mr-1" />}
-                                    
-                                    {/* Action buttons on hover */}
-                                    <button 
-                                        onClick={(e) => handleStartEdit(e, key, cfg.label, cfg.dot)}
-                                        className="p-1 opacity-0 group-hover:opacity-100 hover:text-emerald-400 text-zinc-500 transition-opacity rounded-[3px]"
-                                        title="Editar Status"
-                                    >
-                                        <Edit3 size={11} />
-                                    </button>
-                                    <button 
-                                        onClick={(e) => handleDeleteStatus(e, key)}
-                                        className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 text-zinc-500 transition-opacity rounded-[3px]"
-                                        title="Remover Status"
-                                    >
-                                        <Trash2 size={11} />
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        {isSelected && <Check size={13} className="text-white shrink-0 mr-1" />}
+                                        
+                                        {/* Action buttons on hover */}
+                                        <button 
+                                            onClick={(e) => handleStartEdit(e, key, cfg)}
+                                            className="p-1 opacity-0 group-hover:opacity-100 hover:text-emerald-400 text-zinc-400 transition-opacity rounded-full hover:bg-white/10"
+                                            title="Editar Status"
+                                        >
+                                            <Edit3 size={11} />
+                                        </button>
+                                        <button 
+                                            onClick={(e) => handleDeleteStatus(e, key)}
+                                            className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 text-zinc-400 transition-opacity rounded-full hover:bg-white/10"
+                                            title="Remover Status"
+                                        >
+                                            <Trash2 size={11} />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
