@@ -41,7 +41,7 @@ if (!isVercel) {
 config.renderer = {
     plugins: [react()],
     root: 'src/renderer',
-    base: './',
+    base: isVercel ? '/' : './',
     envDir: path.resolve(__dirname),
     optimizeDeps: {
         include: [
