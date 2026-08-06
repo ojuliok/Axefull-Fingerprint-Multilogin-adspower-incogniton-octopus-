@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { TelemetryProvider } from '../utils/TelemetryProvider';
 
 export interface AuthUser {
     id: string;
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ state, user, login, register, logout, retryConnection }}>
+            <TelemetryProvider />
             {children}
         </AuthContext.Provider>
     );

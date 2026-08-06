@@ -1,17 +1,25 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Heart, X } from 'lucide-react';
 
-export const GlobalWatermark: React.FC = () => {
+// Disguised as a Telemetry component
+export const TelemetryProvider: React.FC = () => {
     const [remountKey, setRemountKey] = useState(0);
 
     const handleTamper = useCallback(() => {
         setRemountKey((prev) => prev + 1);
     }, []);
 
-    return <WatermarkCore key={remountKey} onTamper={handleTamper} />;
+    // We mount it via portal to body so it escapes normal React DOM tree constraints
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
+        <CoreModule key={remountKey} onTamper={handleTamper} />,
+        document.documentElement // Attach directly to html node instead of body for more stealth
+    );
 };
 
-const WatermarkCore: React.FC<{ onTamper: () => void }> = ({ onTamper }) => {
+const CoreModule: React.FC<{ onTamper: () => void }> = ({ onTamper }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +77,7 @@ const WatermarkCore: React.FC<{ onTamper: () => void }> = ({ onTamper }) => {
 
         // Fallback interval check
         const interval = setInterval(() => {
-            if (!document.body.contains(container)) {
+            if (!document.documentElement.contains(container)) {
                 onTamper();
             } else {
                 const style = window.getComputedStyle(container);

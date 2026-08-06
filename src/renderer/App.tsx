@@ -9,7 +9,6 @@ import { WorkspaceProvider } from './context/WorkspaceContext';
 import { TabProvider } from './context/TabContext';
 
 import { LayoutManager } from './components/Layout/LayoutManager';
-import { GlobalWatermark } from './components/GlobalWatermark';
 import { isWebMode } from './utils/env';
 
 // Lazy Load Pages to optimize initial loading
@@ -92,7 +91,6 @@ const App: React.FC = () => {
                                                 {/* Standalone Window Routes */}
                                                 <Route path="/notes-widget" element={<NotesWidgetWindow />} />
                                             </Routes>
-                                            <GlobalWatermark />
                                         </Suspense>
                                     </HashRouter>
                                 </TabProvider>
