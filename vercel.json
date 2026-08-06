@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run build:renderer",
+  "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "dist/renderer",
   "rewrites": [
     {
